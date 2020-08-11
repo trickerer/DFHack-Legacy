@@ -60,17 +60,17 @@ if(UNIX)
 endif()
 
 if(WIN32)
-    if((NOT MSVC) OR (MSVC_VERSION LESS 1900) OR (MSVC_VERSION GREATER 1919))
-        message(SEND_ERROR "MSVC 2015 or 2017 is required")
+    if((NOT MSVC) OR (MSVC_VERSION LESS 1500) OR (MSVC_VERSION GREATER 1919))
+        message(SEND_ERROR "MSVC 2008 or 2017 is required")
     endif()
 endif()
 
 # Ask for C++11 standard from compilers
-set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD 11)
 # Require the standard support from compilers.
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Use only standard c++ to keep code portable
-set(CMAKE_CXX_EXTENSIONS OFF)
+# set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(MSVC)
     # disable C4819 code-page warning
