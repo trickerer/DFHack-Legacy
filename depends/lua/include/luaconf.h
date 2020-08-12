@@ -647,7 +647,7 @@
 
 #if !defined(LUA_USE_C89) && defined(__STDC_VERSION__) && \
     __STDC_VERSION__ >= 199901L
-#include <stdint.h>
+#include "common.h"
 #if defined(INTPTR_MAX)  /* even in C99 this type is optional */
 #undef LUA_KCONTEXT
 #define LUA_KCONTEXT	intptr_t

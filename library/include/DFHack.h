@@ -44,7 +44,7 @@ distribution.
 #endif
 
 // C99 integer types (used everywhere)
-#include <stdint.h>
+#include "common.h"
 
 // DFHack core classes and types
 #include "Error.h"

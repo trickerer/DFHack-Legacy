@@ -31,7 +31,7 @@ distribution.
 #include <stack>
 #include <map>
 #include <memory>
-#include <stdint.h>
+#include "common.h"
 #include "Console.h"
 #include "modules/Graphic.h"
 

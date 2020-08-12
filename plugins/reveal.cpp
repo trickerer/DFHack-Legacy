@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include "common.h"
 #include <iostream>
 #include <map>
 #include <vector>

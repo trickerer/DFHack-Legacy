@@ -25,7 +25,7 @@
 
 #pragma once
 #include "SDL_keysym.h"
-#include <stdint.h>
+#include "common.h"
 
 namespace SDL
 {

@@ -30,7 +30,7 @@ distribution.
 #ifndef CL_MOD_GRAPHIC
 #define CL_MOD_GRAPHIC
 
-#include <stdint.h>
+#include "common.h"
 #include "Export.h"
 #include "Module.h"
 #include <vector>

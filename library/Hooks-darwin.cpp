@@ -25,7 +25,7 @@ distribution.
 
 #include <stdio.h>
 #include <dlfcn.h>
-#include <stdint.h>
+#include "common.h"
 #include <stdlib.h>
 #include <string.h>
 #include <sys/shm.h>

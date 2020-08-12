@@ -22,7 +22,7 @@ must not be misrepresented as being the original software.
 distribution.
 */
 #include <stdio.h>
-#include <stdint.h>
+#include "common.h"
 #include <stdlib.h>
 #include <string.h>
 #include <vector>

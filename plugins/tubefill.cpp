@@ -1,6 +1,6 @@
 // Adamantine tube filler. Replaces mined out tiles but leaves hollow tubes alone (to prevent problems)
 
-#include <stdint.h>
+#include "common.h"
 #include <iostream>
 #include <map>
 #include <cinttypes>

@@ -31,7 +31,7 @@ distribution.
 #include "Pragma.h"
 #include "Export.h"
 #include <string>
-#include <stdint.h>
+#include "common.h"
 
 #include "modules/Graphic.h"
 

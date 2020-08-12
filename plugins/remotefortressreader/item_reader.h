@@ -1,7 +1,7 @@
 #ifndef ITEM_READER_H
 #define ITEM_READER_H
 
-#include <stdint.h>
+#include "common.h"
 #include "RemoteClient.h"
 #include "RemoteFortressReader.pb.h"
 

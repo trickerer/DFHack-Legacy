@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <istream>
 #include <string>
-#include <stdint.h>
+#include "common.h"
 
 #include "Console.h"
 #include "RemoteClient.h"

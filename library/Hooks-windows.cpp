@@ -25,7 +25,7 @@ distribution.
 #define DFhackCExport extern "C" __declspec(dllexport)
 
 #include <windows.h>
-#include <stdint.h>
+#include "common.h"
 #include <mutex>
 #include <vector>
 #include <string>

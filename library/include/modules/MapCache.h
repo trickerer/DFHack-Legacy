@@ -28,7 +28,7 @@ distribution.
 
 #include "modules/Maps.h"
 #include "TileTypes.h"
-#include <stdint.h>
+#include "common.h"
 #include <cstring>
 #include "df/map_block.h"
 #include "df/map_block_column.h"
