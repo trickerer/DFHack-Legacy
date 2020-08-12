@@ -26,19 +26,21 @@ distribution.
 #include "Pragma.h"
 #include "Export.h"
 #include "ColorText.h"
-#include <atomic>
+//#include <atomic>
 #include <deque>
 #include <fstream>
 #include <assert.h>
 #include <iostream>
 #include <string>
-namespace tthread
-{
-    class mutex;
-    class recursive_mutex;
-    class condition_variable;
-    class thread;
-}
+#include "tinythread.h"
+//namespace tthread
+//{
+//    class mutex;
+//    class recursive_mutex;
+//    class condition_variable;
+//    class thread;
+//    struct atomic;
+//}
 namespace  DFHack
 {
     class CommandHistory
@@ -72,7 +74,7 @@ namespace  DFHack
             if(outfile.bad())
                 return false;
             //fprintf(stderr,"Save: Iterating...\n");
-            for(auto iter = history.begin();iter < history.end(); iter++)
+            for(std::deque <std::string>::const_iterator iter = history.begin();iter < history.end(); iter++)
             {
                 //fprintf(stderr,"Save: Dumping %s\n",(*iter).c_str());
                 outfile << *iter << std::endl;
@@ -155,9 +157,12 @@ namespace  DFHack
         //void beep (void);
         //! \defgroup lineedit_return_values Possible errors from lineedit
         //! \{
-        static constexpr int FAILURE = -1;
-        static constexpr int SHUTDOWN = -2;
-        static constexpr int RETRY = -3;
+        //static constexpr int FAILURE = -1;
+        //static constexpr int SHUTDOWN = -2;
+        //static constexpr int RETRY = -3;
+        static int FAILURE;
+        static int SHUTDOWN;
+        static int RETRY;
         //! \}
         /// A simple line edit (raw mode)
         int lineedit(const std::string& prompt, std::string& output, CommandHistory & history );
@@ -170,6 +175,6 @@ namespace  DFHack
     private:
         Private * d;
         tthread::recursive_mutex * wlock;
-        std::atomic<bool> inited;
+        tthread::atomic<bool> inited;
     };
 }
