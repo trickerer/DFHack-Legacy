@@ -592,10 +592,10 @@ bool DFHack::isStoneInorganic(int material)
     return true;
 }
 
-std::unique_ptr<Module> DFHack::createMaterials()
-{
-    return dts::make_unique<Materials>();
-}
+//std::unique_ptr<Module> DFHack::createMaterials()
+//{
+//    return dts::make_unique<Materials>();
+//}
 
 Materials::Materials()
 {

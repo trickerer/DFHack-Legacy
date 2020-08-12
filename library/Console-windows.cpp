@@ -64,6 +64,18 @@ using namespace tthread;
 // FIXME: maybe make configurable with an ini option?
 #define MAX_CONSOLE_LINES 999
 
+/*
+static constexpr int FAILURE = -1;
+static constexpr int SHUTDOWN = -2;
+static constexpr int RETRY = -3;
+*/
+#define _FAILURE    -1
+#define _SHUTDOWN   -2
+#define _RETRY      -3
+static int DFHack::Console::FAILURE = _FAILURE;
+static int DFHack::Console::SHUTDOWN = _SHUTDOWN;
+static int DFHack::Console::RETRY = _RETRY;
+
 namespace DFHack
 {
     class Private

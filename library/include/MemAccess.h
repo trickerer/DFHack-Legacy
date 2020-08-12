@@ -248,7 +248,7 @@ namespace DFHack
             void getMemRanges(std::vector<t_memrange> & ranges );
 
             /// get the symbol table extension of this process
-            std::shared_ptr<DFHack::VersionInfo> getDescriptor()
+            VersionInfo* getDescriptor() const
             {
                 return my_descriptor;
             };
@@ -298,8 +298,8 @@ namespace DFHack
             uint32_t getPE() { return my_pe; }
             std::string getMD5() { return my_md5; }
 
+        static VersionInfo* my_descriptor;
     private:
-        std::shared_ptr<VersionInfo> my_descriptor;
         PlatformSpecific *d;
         bool identified;
         uint32_t my_pid;

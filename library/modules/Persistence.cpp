@@ -39,6 +39,9 @@ using namespace DFHack;
 static std::vector<std::shared_ptr<Persistence::LegacyData>> legacy_data;
 static std::multimap<std::string, size_t> index_cache;
 
+static DFHack::Persistence::LegacyData* data = NULL;
+static const int NumInts = 7;
+
 struct Persistence::LegacyData
 {
     const std::string key;

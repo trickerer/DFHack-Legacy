@@ -41,11 +41,11 @@ using namespace std;
 #include "df/ui.h"
 using namespace DFHack;
 
-std::unique_ptr<Module> DFHack::createNotes()
-{
-    return dts::make_unique<Notes>();
-}
-
+//std::unique_ptr<Module> DFHack::createNotes()
+//{
+//    return dts::make_unique<Notes>();
+//}
+//
 // FIXME: not even a wrapper now
 Notes::Notes()
 {

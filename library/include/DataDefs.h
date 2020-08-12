@@ -41,6 +41,8 @@ distribution.
 
 typedef struct lua_State lua_State;
 
+typedef std::map<int64_t, size_t> ValueIndexMap;
+
 /*
  * Definitions of DFHack namespace structs used by generated headers.
  */
@@ -205,9 +207,9 @@ namespace DFHack
     class DFHACK_EXPORT enum_identity : public compound_identity {
     public:
         struct ComplexData {
-            std::map<int64_t, size_t> value_index_map;
+            ValueIndexMap value_index_map;
             std::vector<int64_t> index_value_map;
-            ComplexData(std::initializer_list<int64_t> values);
+            //ComplexData(std::initializer_list<int64_t> values);
             size_t size() const {
                 return index_value_map.size();
             }
@@ -573,107 +575,154 @@ namespace DFHack {
      * Return the next item in the enum, wrapping to the first one at the end if 'wrap' is true (otherwise an invalid item).
      */
     template<class T>
-    inline typename std::enable_if<
-        !df::enum_traits<T>::is_complex,
-        typename df::enum_traits<T>::enum_type
-    >::type next_enum_item(T v, bool wrap = true)
+    T next_enum_item(T v, bool wrap = true)
     {
         typedef df::enum_traits<T> traits;
-        typedef typename traits::base_type base_type;
-        base_type iv = base_type(v);
-        if (iv < traits::last_item_value)
+        if (traits::is_complex)
         {
-            return T(iv + 1);
-        }
-        else
-        {
-            if (wrap)
-                return traits::first_item;
+            const ValueIndexMap::const_iterator& it = complex.value_index_map.find(v);
+            if (it != traits::complex.value_index_map.end())
+            {
+                if (!wrap && it->second + 1 == traits::complex.size())
+                {
+                    return T(traits::last_item_value + 1);
+                }
+                size_t next_index = (it->second + 1) % traits::complex.size();
+                return T(traits::complex.index_value_map[next_index]);
+            }
             else
                 return T(traits::last_item_value + 1);
         }
+        else
+        {
+            traits::base_type iv = traits::base_type(v);
+            if (iv < traits::last_item_value)
+            {
+                return T(iv + 1);
+            }
+            else
+            {
+                if (wrap)
+                    return traits::first_item;
+                else
+                    return T(traits::last_item_value + 1);
+            }
+        }
     }
 
-    template<class T>
-    inline typename std::enable_if<
-        df::enum_traits<T>::is_complex,
-        typename df::enum_traits<T>::enum_type
-    >::type next_enum_item(T v, bool wrap = true)
-    {
-        typedef df::enum_traits<T> traits;
-        const auto &complex = traits::complex;
-        const auto it = complex.value_index_map.find(v);
-        if (it != complex.value_index_map.end())
-        {
-            if (!wrap && it->second + 1 == complex.size())
-            {
-                return T(traits::last_item_value + 1);
-            }
-            size_t next_index = (it->second + 1) % complex.size();
-            return T(complex.index_value_map[next_index]);
-        }
-        else
-            return T(traits::last_item_value + 1);
-    }
+    //template<class T>
+    //inline typename std::enable_if<!df::enum_traits<T>::is_complex, typename df::enum_traits<T>::enum_type>::
+    //    type next_enum_item(T v, bool wrap = true)
+    //{
+    //    typedef df::enum_traits<T> traits;
+    //    typedef typename traits::base_type base_type;
+    //    base_type iv = base_type(v);
+    //    if (iv < traits::last_item_value)
+    //    {
+    //        return T(iv + 1);
+    //    }
+    //    else
+    //    {
+    //        if (wrap)
+    //            return traits::first_item;
+    //        else
+    //            return T(traits::last_item_value + 1);
+    //    }
+    //}
+
+    //template<class T>
+    //inline typename std::enable_if<df::enum_traits<T>::is_complex, typename df::enum_traits<T>::enum_type>::
+    //    type next_enum_item(T v, bool wrap = true)
+    //{
+    //    typedef df::enum_traits<T> traits;
+    //    const auto &complex = traits::complex;
+    //    const auto it = complex.value_index_map.find(v);
+    //    if (it != complex.value_index_map.end())
+    //    {
+    //        if (!wrap && it->second + 1 == complex.size())
+    //        {
+    //            return T(traits::last_item_value + 1);
+    //        }
+    //        size_t next_index = (it->second + 1) % complex.size();
+    //        return T(complex.index_value_map[next_index]);
+    //    }
+    //    else
+    //        return T(traits::last_item_value + 1);
+    //}
 
     /**
      * Check if the value is valid for its enum type.
      */
     template<class T>
-    inline typename std::enable_if<
-        !df::enum_traits<T>::is_complex,
-        bool
-    >::type is_valid_enum_item(T v)
+    bool is_valid_enum_item(T v)
     {
-        return df::enum_traits<T>::is_valid(v);
+        return !df::enum_traits<T>::is_complex ?
+            df::enum_traits<T>::is_valid(v) :
+            df::enum_traits<T>::complex.value_index_map.find(v) != df::enum_traits<T>::complex.value_index_map.end();
     }
 
-    template<class T>
-    inline typename std::enable_if<
-        df::enum_traits<T>::is_complex,
-        bool
-    >::type is_valid_enum_item(T v)
-    {
-        const auto &complex = df::enum_traits<T>::complex;
-        return complex.value_index_map.find(v) != complex.value_index_map.end();
-    }
+    //template<class T>
+    //inline typename std::enable_if<!df::enum_traits<T>::is_complex, bool>::type is_valid_enum_item(T v)
+    //{
+    //    return df::enum_traits<T>::is_valid(v);
+    //}
+
+    //template<class T>
+    //inline typename std::enable_if<df::enum_traits<T>::is_complex, bool>::type is_valid_enum_item(T v)
+    //{
+    //    const auto &complex = df::enum_traits<T>::complex;
+    //    return complex.value_index_map.find(v) != complex.value_index_map.end();
+    //}
 
     /**
      * Return the enum item key string pointer, or NULL if none.
      */
     template<class T>
-    inline typename std::enable_if<
-        !df::enum_traits<T>::is_complex,
-        const char *
-    >::type enum_item_raw_key(T val) {
+    const char* enum_item_raw_key(T val)
+    {
         typedef df::enum_traits<T> traits;
-        return traits::is_valid(val) ? traits::key_table[(short)val - traits::first_item_value] : NULL;
+
+        if (!traits::is_complex)
+            return traits::is_valid(val) ? traits::key_table[(short)val - traits::first_item_value] : NULL;
+        else
+        {
+            const ValueIndexMap &value_index_map = traits::complex.value_index_map;
+            const ValueIndexMap::const_iterator& it = value_index_map.find(val);
+            return (it != value_index_map.end()) ? traits::key_table[it->second] : NULL
+        }
     }
 
-    template<class T>
-    inline typename std::enable_if<
-        df::enum_traits<T>::is_complex,
-        const char *
-    >::type enum_item_raw_key(T val) {
-        typedef df::enum_traits<T> traits;
-        const auto &value_index_map = traits::complex.value_index_map;
-        auto it = value_index_map.find(val);
-        if (it != value_index_map.end())
-            return traits::key_table[it->second];
-        else
-            return NULL;
-    }
+    //template<class T>
+    //inline typename std::enable_if<!df::enum_traits<T>::is_complex, const char *>::type enum_item_raw_key(T val)
+    //{
+    //    typedef df::enum_traits<T> traits;
+    //    return traits::is_valid(val) ? traits::key_table[(short)val - traits::first_item_value] : NULL;
+    //}
+
+    //template<class T>
+    //inline typename std::enable_if<df::enum_traits<T>::is_complex, const char *>::type enum_item_raw_key(T val)
+    //{
+    //    typedef df::enum_traits<T> traits;
+    //    const auto &value_index_map = traits::complex.value_index_map;
+    //    auto it = value_index_map.find(val);
+    //    if (it != value_index_map.end())
+    //        return traits::key_table[it->second];
+    //    else
+    //        return NULL;
+    //}
 
     /**
      * Return the enum item key string pointer, or "?" if none.
      */
     template<class T>
-    inline const char *enum_item_key_str(T val) {
+    inline const char *enum_item_key_str(T val)
+    {
         return ifnull(enum_item_raw_key(val), "?");
     }
 
     template<class BaseType>
-    std::string format_key(const char *keyname, BaseType val) {
+    std::string format_key(const char *keyname, BaseType val)
+    {
         if (keyname) return std::string(keyname);
         std::stringstream ss; ss << "?" << val << "?"; return ss.str();
     }
@@ -682,7 +731,8 @@ namespace DFHack {
      * Return the enum item key string, or ?123? (using the numeric value) if unknown.
      */
     template<class T>
-    inline std::string enum_item_key(T val) {
+    inline std::string enum_item_key(T val)
+    {
         typedef typename df::enum_traits<T>::base_type base_type;
         return format_key<base_type>(enum_item_raw_key(val), base_type(val));
     }
@@ -693,7 +743,8 @@ namespace DFHack {
      * Find an enum item by key string. Returns success code.
      */
     template<class T>
-    inline bool find_enum_item(T *var, const std::string &name) {
+    inline bool find_enum_item(T *var, const std::string &name)
+    {
         typedef df::enum_traits<T> traits;
         int size = traits::last_item_value-traits::first_item_value+1;
         int idx = findEnumItem(name, size, traits::key_table);
@@ -715,7 +766,8 @@ namespace DFHack {
      * Find a bitfield item by key string. Returns success code.
      */
     template<class T>
-    inline bool find_bitfield_field(unsigned *idx, const std::string &name, const T* = NULL) {
+    inline bool find_bitfield_field(unsigned *idx, const std::string &name, const T* = NULL)
+    {
         typedef df::bitfield_traits<T> traits;
         return findBitfieldField(&idx, name, traits::bit_count, traits::bits);
     }
@@ -753,7 +805,8 @@ namespace DFHack {
      * Represent bitfield bits as strings in a vector.
      */
     template<class T>
-    inline void bitfield_to_string(std::vector<std::string> *pvec, const T &val) {
+    inline void bitfield_to_string(std::vector<std::string> *pvec, const T &val)
+    {
         typedef df::bitfield_traits<T> traits;
         bitfieldToString(pvec, &val.whole, traits::bit_count, traits::bits);
     }
@@ -762,7 +815,8 @@ namespace DFHack {
      * Represent bitfield bits as a string, using sep as join separator.
      */
     template<class T>
-    inline std::string bitfield_to_string(const T &val, const std::string &sep = " ") {
+    inline std::string bitfield_to_string(const T &val, const std::string &sep = " ")
+    {
         std::vector<std::string> tmp;
         bitfield_to_string<T>(&tmp, val);
         return join_strings(sep, tmp);
@@ -776,7 +830,8 @@ namespace DFHack {
      * Find a flag array item by key string. Returns success code.
      */
     template<class T>
-    inline bool find_flagarray_field(unsigned *idx, const std::string &name, const BitArray<T>*) {
+    inline bool find_flagarray_field(unsigned *idx, const std::string &name, const BitArray<T>*)
+    {
         T tmp;
         if (!find_enum_item(&tmp, name) || tmp < 0) return false;
         *idx = unsigned(tmp);
@@ -814,7 +869,8 @@ namespace DFHack {
      * Represent flag array bits as strings in a vector.
      */
     template<class T>
-    inline void flagarray_to_string(std::vector<std::string> *pvec, const BitArray<T> &val) {
+    inline void flagarray_to_string(std::vector<std::string> *pvec, const BitArray<T> &val)
+    {
         typedef df::enum_traits<T> traits;
         int size = traits::last_item_value-traits::first_item_value+1;
         flagarrayToString(pvec, val.bits, val.size,
@@ -825,7 +881,8 @@ namespace DFHack {
      * Represent flag array bits as a string, using sep as join separator.
      */
     template<class T>
-    inline std::string flagarray_to_string(const BitArray<T> &val, const std::string &sep = " ") {
+    inline std::string flagarray_to_string(const BitArray<T> &val, const std::string &sep = " ")
+    {
         std::vector<std::string> tmp;
         flagarray_to_string<T>(&tmp, val);
         return join_strings(sep, tmp);

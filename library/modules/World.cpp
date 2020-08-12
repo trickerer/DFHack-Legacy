@@ -24,7 +24,7 @@ distribution.
 
 
 #include "Internal.h"
-#include <array>
+//#include <array>
 #include <string>
 #include <vector>
 #include <map>
@@ -56,6 +56,8 @@ using namespace DFHack;
 using namespace df::enums;
 
 using df::global::world;
+
+static DFHack::Process::my_descriptor = NULL;
 
 bool World::ReadPauseState()
 {

@@ -51,10 +51,10 @@ namespace DFHack
 
     class DFHACK_EXPORT PersistentDataItem {
         size_t index;
-        std::shared_ptr<Persistence::LegacyData> data;
+        static DFHack::Persistence::LegacyData* data;
 
     public:
-        static const int NumInts = 7;
+        static const int NumInts;
 
         bool isValid() const;
         size_t get_index() const
@@ -118,8 +118,17 @@ namespace DFHack
         static const size_t int7_size = 1;
         uint8_t get_uint7(size_t off) const
         {
-            auto p = pdata<int7_size>(off);
+            const uint8* p = pdata<int7_size>(off);
             return p[0] >> 1;
+            /*
+            template<size_t N>
+            const uint8_t (&pdata(size_t off) const)[N]
+            {
+                CHECK_INVALID_ARGUMENT(check_data(off, N));
+                typedef const uint8_t array[N];
+                return *(array *)(val().data() + off);
+            }
+            */
         }
         int8_t get_int7(size_t off) const
         {
@@ -127,7 +136,7 @@ namespace DFHack
         }
         void set_uint7(size_t off, uint8_t val)
         {
-            auto p = pdata<int7_size>(off);
+            uint8* p = pdata<int7_size>(off);
             p[0] = uint8_t((val << 1) | 1);
         }
         void set_int7(size_t off, int8_t val)
@@ -138,7 +147,7 @@ namespace DFHack
         static const size_t int28_size = 4;
         uint32_t get_uint28(size_t off) const
         {
-            auto p = pdata<int28_size>(off);
+            const uint8* p = pdata<int28_size>(off);
             return (p[0]>>1) | ((p[1]&~1U)<<6) | ((p[2]&~1U)<<13) | ((p[3]&~1U)<<20);
         }
         int32_t get_int28(size_t off) const
@@ -147,7 +156,7 @@ namespace DFHack
         }
         void set_uint28(size_t off, uint32_t val)
         {
-            auto p = pdata<int28_size>(off);
+            uint8* p = pdata<int28_size>(off);
             p[0] = uint8_t((val<<1) | 1);
             p[1] = uint8_t((val>>6) | 1);
             p[2] = uint8_t((val>>13) | 1);
@@ -158,9 +167,13 @@ namespace DFHack
             set_uint28(off, val);
         }
 
-        PersistentDataItem() : index(0), data(nullptr) {}
-        PersistentDataItem(size_t index, const std::shared_ptr<Persistence::LegacyData> &data)
-            : index(index), data(data) {}
+        PersistentDataItem() : index(0) {
+            data = NULL;
+        }
+        PersistentDataItem(size_t index, DFHack::Persistence::LegacyData* dat)
+            : index(index) {
+                data = dat;
+        }
     };
     namespace Persistence
     {
@@ -179,7 +192,7 @@ namespace DFHack
         // If "added" is not null and there is no such item, a new item is returned and
         // the bool value is set to true. If "added" is not null and an item is found or
         // no new item can be created, the bool value is set to false.
-        DFHACK_EXPORT PersistentDataItem getByKey(const std::string &key, bool *added = nullptr);
+        DFHACK_EXPORT PersistentDataItem getByKey(const std::string &key, bool *added = NULL);
         // Returns an existing PersistentDataItem with the specified index.
         // If there is no world loaded or the index is empty, returns an invalid item.
         DFHACK_EXPORT PersistentDataItem getByIndex(size_t index);

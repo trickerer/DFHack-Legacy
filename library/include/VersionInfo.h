@@ -86,9 +86,9 @@ namespace DFHack
             int64_t rebase = newx - old;
             base = new_base;
             rebase_delta += rebase;
-            for (auto iter = Addresses.begin(); iter != Addresses.end(); ++iter)
+            for (std::map <std::string, uintptr_t>::iterator iter = Addresses.begin(); iter != Addresses.end(); ++iter)
                 iter->second += rebase;
-            for (auto iter = VTables.begin(); iter != VTables.end(); ++iter)
+            for (std::map <std::string, uintptr_t>::iterator iter = VTables.begin(); iter != VTables.end(); ++iter)
                 iter->second += rebase;
         };
 
@@ -132,10 +132,10 @@ namespace DFHack
 
         uintptr_t getAddress (const std::string& key) const
         {
-            auto i = Addresses.find(key);
+            std::map <std::string, uintptr_t>::const_iterator i = Addresses.find(key);
             if(i == Addresses.end())
                 return 0;
-            return (*i).second;
+            return i->second;
         }
 
         void setVTable (const std::string& key, const uintptr_t value)
@@ -144,14 +144,14 @@ namespace DFHack
         };
         void *getVTable (const std::string& key) const
         {
-            auto i = VTables.find(key);
+            std::map <std::string, uintptr_t>::const_iterator i = VTables.find(key);
             if(i == VTables.end())
                 return 0;
             return (void*)i->second;
         }
         bool getVTableName (const void *vtable, std::string &out) const
         {
-            for (auto i = VTables.begin(); i != VTables.end(); ++i)
+            for (std::map <std::string, uintptr_t>::const_iterator i = VTables.begin(); i != VTables.end(); ++i)
             {
                 if ((void*)i->second == vtable)
                 {

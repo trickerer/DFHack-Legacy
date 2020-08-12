@@ -42,10 +42,10 @@ using namespace std;
 
 using namespace DFHack;
 
-std::unique_ptr<Module> DFHack::createGraphic()
-{
-    return dts::make_unique<Graphic>();
-}
+//std::unique_ptr<Module> DFHack::createGraphic()
+//{
+//    return dts::make_unique<Graphic>();
+//}
 
 bool Graphic::Register(DFTileSurface* (*func)(int,int))
 {

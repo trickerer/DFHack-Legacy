@@ -35,10 +35,10 @@ distribution.
 #include "Console.h"
 #include "modules/Graphic.h"
 
-#include <atomic>
-#include <condition_variable>
-#include <mutex>
-#include <thread>
+//#include <atomic>
+//#include <condition_variable>
+//#include <mutex>
+//#include <thread>
 
 #include "RemoteClient.h"
 

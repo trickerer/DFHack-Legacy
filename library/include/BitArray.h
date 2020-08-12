@@ -263,12 +263,12 @@ namespace DFHack
             {
                 if (item)
                 {
-                    CHECK_INVALID_ARGUMENT(item->dfhack_get_list_link() == nullptr);
+                    CHECK_INVALID_ARGUMENT(item->dfhack_get_list_link() == NULL);
                     item->dfhack_set_list_link(cur);
                 }
                 if (cur->item)
                 {
-                    cur->item->dfhack_set_list_link(nullptr);
+                    cur->item->dfhack_set_list_link(NULL);
                 }
                 cur->item = item;
 
@@ -284,13 +284,13 @@ namespace DFHack
             friend class const_iterator;
             iterator(L *root, L *cur) : root(root), cur(cur) {}
         public:
-            using difference_type = void;
-            using value_type = I *;
-            using pointer = I **;
-            using reference = proxy;
-            using iterator_category = std::bidirectional_iterator_tag;
+            //using difference_type = void;
+            //using value_type = I *;
+            //using pointer = I **;
+            //using reference = proxy;
+            //using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator() : root(nullptr), cur(nullptr) {}
+            iterator() : root(NULL), cur(NULL) {}
             iterator(const iterator & other) : root(other.root), cur(other.cur) {}
 
             iterator & operator++()
@@ -373,11 +373,11 @@ namespace DFHack
             iterator iter;
             friend struct DfLinkedList<L, I>;
         public:
-            using difference_type = void;
-            using value_type = I *;
-            using pointer = I *const *;
-            using reference = I *const &;
-            using iterator_category = std::bidirectional_iterator_tag;
+            //using difference_type = void;
+            //using value_type = I *;
+            //using pointer = I *const *;
+            //using reference = I *const &;
+            //using iterator_category = std::bidirectional_iterator_tag;
 
             const_iterator(const iterator & iter) : iter(iter) {}
             const_iterator(const const_iterator & other) : iter(other.iter) {}
@@ -423,14 +423,14 @@ namespace DFHack
             }
         };
 
-        using value_type = I *;
-        using reference_type = proxy;
-        using difference_type = void;
-        using size_type = size_t;
+        //using value_type = I *;
+        //using reference_type = proxy;
+        //using difference_type = void;
+        //using size_type = size_t;
 
         bool empty() const
         {
-            return static_cast<const L *>(this)->next == nullptr;
+            return static_cast<const L *>(this)->next == NULL;
         }
         size_t size() const
         {
@@ -454,7 +454,7 @@ namespace DFHack
         }
         iterator end()
         {
-            return iterator(static_cast<L *>(this), nullptr);
+            return iterator(static_cast<L *>(this), NULL);
         }
         const_iterator end() const
         {
@@ -489,7 +489,7 @@ namespace DFHack
             }
 
             proxy p(link);
-            p = nullptr;
+            p = NULL;
 
             delete link;
 
@@ -526,7 +526,7 @@ namespace DFHack
             {
                 root->next = newlink;
             }
-            newlink->item = nullptr;
+            newlink->item = NULL;
             proxy p(newlink);
             p = item;
             return iterator(root, newlink);
@@ -547,7 +547,7 @@ namespace DFHack
             {
                 next->prev = newlink;
             }
-            newlink->item = nullptr;
+            newlink->item = NULL;
             proxy p(newlink);
             p= item;
             return iterator(root, newlink);
@@ -556,13 +556,13 @@ namespace DFHack
         {
             auto root = static_cast<L *>(this);
             auto link = new L();
-            link->prev = nullptr;
+            link->prev = NULL;
             if (root->next)
             {
                 root->next->prev = link;
                 link->next = root->next;
             }
-            link->item = nullptr;
+            link->item = NULL;
             proxy p(link);
             p = item;
             root->next = link;

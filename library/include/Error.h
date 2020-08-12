@@ -58,11 +58,11 @@ namespace DFHack
         All(const std::string &full)
             :full(full)
         {}
-        virtual const char *what() const noexcept
+        virtual const char *what() const
         {
             return full.c_str();
         }
-        virtual ~All() noexcept {}
+        virtual ~All() {}
     };
 #ifdef _MSC_VER
 #pragma pop
