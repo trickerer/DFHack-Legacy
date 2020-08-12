@@ -308,12 +308,12 @@ namespace df
             return true;
         }
         virtual bool erase(void *ptr, int size) {
-            auto &ct = *(container*)ptr;
+            container &ct = *(container*)ptr;
             ct.erase(ct.begin()+size);
             return true;
         }
         virtual bool insert(void *ptr, int idx, void *item) {
-            auto &ct = *(container*)ptr;
+            container &ct = *(container*)ptr;
             ct.insert(ct.begin()+idx, item);
             return true;
         }

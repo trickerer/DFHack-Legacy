@@ -49,7 +49,7 @@ Windows::df_window::df_window(int x, int y, unsigned int width, unsigned int hei
 };
 Windows::df_window::~df_window()
 {
-    for(auto iter = children.begin();iter != children.end();iter++)
+    for(std::vector<df_window*>::iterator iter = children.begin();iter != children.end();iter++)
     {
         delete *iter;
     }
@@ -102,7 +102,7 @@ Windows::painter * Windows::top_level_window::lock()
 
 void Windows::top_level_window::paint ()
 {
-    for(auto iter = children.begin();iter != children.end();iter++)
+    for(std::vector<df_window*>::iterator iter = children.begin();iter != children.end();iter++)
     {
         (*iter)->paint();
     }

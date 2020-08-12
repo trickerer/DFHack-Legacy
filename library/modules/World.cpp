@@ -57,7 +57,7 @@ using namespace df::enums;
 
 using df::global::world;
 
-static DFHack::Process::my_descriptor = NULL;
+/*static */VersionInfo* DFHack::Process::my_descriptor = NULL;
 
 bool World::ReadPauseState()
 {
@@ -79,7 +79,7 @@ uint32_t World::ReadCurrentTick()
 {
     // prevent this from returning anything less than 0,
     // to avoid day/month calculations with 0xffffffff
-    return std::max(0, DF_GLOBAL_VALUE(cur_year_tick, 0));
+    return std::max<int32>(0, DF_GLOBAL_VALUE(cur_year_tick, 0));
 }
 
 bool World::ReadGameMode(t_gamemodes& rd)
@@ -218,12 +218,12 @@ void World::GetPersistentData(std::vector<PersistentDataItem> *vec, const std::s
     else if (prefix)
     {
         std::string min = key;
-        if (min.back() != '/')
+        if (min[min.size() - 1] != '/')
         {
             min.push_back('/');
         }
         std::string max = min;
-        ++max.back();
+        ++max[max.size() - 1];
 
         Persistence::getAllByKeyRange(*vec, min, max);
     }
@@ -249,10 +249,11 @@ df::tile_bitmask *World::getPersistentTilemask(const PersistentDataItem &item, d
 
     for (size_t i = 0; i < block->block_events.size(); i++)
     {
-        auto ev = block->block_events[i];
+        df::block_square_event* ev = block->block_events[i];
         if (ev->getType() != block_square_event_type::world_construction)
             continue;
-        auto wcsev = strict_virtual_cast<df::block_square_event_world_constructionst>(ev);
+        df::block_square_event_world_constructionst* wcsev =
+            strict_virtual_cast<df::block_square_event_world_constructionst>(ev);
         if (!wcsev || wcsev->construction_id != id)
             continue;
         return &wcsev->tile_bitmask;
@@ -261,7 +262,7 @@ df::tile_bitmask *World::getPersistentTilemask(const PersistentDataItem &item, d
     if (!create)
         return NULL;
 
-    auto ev = df::allocate<df::block_square_event_world_constructionst>();
+    df::block_square_event_world_constructionst* ev = df::allocate<df::block_square_event_world_constructionst>();
     if (!ev)
         return NULL;
 
@@ -283,10 +284,11 @@ bool World::deletePersistentTilemask(const PersistentDataItem &item, df::map_blo
     bool found = false;
     for (int i = block->block_events.size()-1; i >= 0; i--)
     {
-        auto ev = block->block_events[i];
+        df::block_square_event* ev = block->block_events[i];
         if (ev->getType() != block_square_event_type::world_construction)
             continue;
-        auto wcsev = strict_virtual_cast<df::block_square_event_world_constructionst>(ev);
+        df::block_square_event_world_constructionst* wcsev =
+            strict_virtual_cast<df::block_square_event_world_constructionst>(ev);
         if (!wcsev || wcsev->construction_id != id)
             continue;
 

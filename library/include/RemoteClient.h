@@ -33,6 +33,8 @@ class CSimpleSocket;
 
 #include "CoreProtocol.pb.h"
 
+#define DEFAULT_PORT 5000
+
 namespace  DFHack
 {
     using dfproto::EmptyMessage;
@@ -233,7 +235,7 @@ namespace  DFHack
         RemoteClient(color_ostream *default_output = NULL);
         ~RemoteClient();
 
-        static constexpr int DEFAULT_PORT = 5000;
+        //static constexpr int DEFAULT_PORT = 5000;
         static int GetDefaultPort();
 
         color_ostream &default_output() { return *p_default_output; };

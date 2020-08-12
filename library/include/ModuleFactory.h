@@ -32,8 +32,8 @@ distribution.
 namespace DFHack
 {
     class Module;
-    //std::unique_ptr<Module> createMaterials();
-    //std::unique_ptr<Module> createNotes();
-    //std::unique_ptr<Module> createGraphic();
+    Module* createMaterials();
+    Module* createNotes();
+    Module* createGraphic();
 }
 #endif

@@ -435,8 +435,10 @@ namespace DFHack
         size_t size() const
         {
             size_t n = 0;
-            for (value_type const & i : *this)
+            for (DFHack::DfLinkedList<L, I>::const_iterator i = this->begin(); i != this->end(); ++i)
                 n++;
+            //for (value_type const & i : *this)
+            //    n++;
             return n;
         }
 
@@ -467,12 +469,12 @@ namespace DFHack
 
         iterator erase(const_iterator pos)
         {
-            auto root = static_cast<L *>(this);
+            L* root = static_cast<L *>(this);
             CHECK_INVALID_ARGUMENT(pos.iter.root == root);
             CHECK_NULL_POINTER(pos.iter.cur);
 
-            auto link = pos.iter.cur;
-            auto next = link->next;
+            L* link = pos.iter.cur;
+            L* next = link->next;
 
             if (link->prev)
             {
@@ -497,10 +499,10 @@ namespace DFHack
         }
         iterator insert(const_iterator pos, I *const & item)
         {
-            auto root = static_cast<L *>(this);
+            L* root = static_cast<L *>(this);
             CHECK_INVALID_ARGUMENT(pos.iter.root == root);
 
-            auto link = pos.iter.cur;
+            L* link = pos.iter.cur;
             if (!link || !link->prev)
             {
                 if (!link && root->next)
@@ -514,7 +516,7 @@ namespace DFHack
                 return begin();
             }
 
-            auto newlink = new L();
+            L* newlink = new L();
             newlink->prev = link->prev;
             newlink->next = link;
             link->prev = newlink;
@@ -533,13 +535,13 @@ namespace DFHack
         }
         iterator insert_after(const_iterator pos, I *const & item)
         {
-            auto root = static_cast<L *>(this);
+            L* root = static_cast<L *>(this);
             CHECK_INVALID_ARGUMENT(pos.iter.root == root);
             CHECK_NULL_POINTER(pos.iter.cur);
 
-            auto link = pos.iter.cur;
-            auto next = link->next;
-            auto newlink = new L();
+            L* link = pos.iter.cur;
+            L* next = link->next;
+            L* newlink = new L();
             newlink->prev = link;
             newlink->next = next;
             link->next = newlink;
@@ -554,8 +556,8 @@ namespace DFHack
         }
         void push_front(I *const & item)
         {
-            auto root = static_cast<L *>(this);
-            auto link = new L();
+            L* root = static_cast<L *>(this);
+            L* link = new L();
             link->prev = NULL;
             if (root->next)
             {
@@ -576,7 +578,7 @@ namespace DFHack
         {
             CHECK_INVALID_ARGUMENT(size_t(other_id) < sizeof(T) / sizeof(std::vector<I *>));
 
-            auto vectors = reinterpret_cast<std::vector<I *> *>(this);
+            std::vector<I*> * vectors = reinterpret_cast<std::vector<I*> *>(this);
             return vectors[other_id];
         }
     };

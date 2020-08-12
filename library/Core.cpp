@@ -80,9 +80,9 @@ using namespace DFHack;
 #include <iomanip>
 #include <stdlib.h>
 #include <fstream>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+//#include <thread>
+//#include <mutex>
+//#include <condition_variable>
 #include "md5wrapper.h"
 
 #include "SDL_events.h"
@@ -547,7 +547,7 @@ void Core::getScriptPaths(std::vector<std::string> *dest)
 {
     lock_guard<mutex> lock(script_path_mutex);
     dest->clear();
-    string df_path = this->p->getPath();
+    string df_path = proc->getPath();
     for (auto it = script_paths[0].begin(); it != script_paths[0].end(); ++it)
         dest->push_back(*it);
     if (df::global::world && isWorldLoaded()) {
@@ -1528,7 +1528,7 @@ Core::~Core()
 }
 
 Core::Core() :
-    d(dts::make_unique<Private>()),
+    //d(dts::make_unique<Private>()),
     script_path_mutex{},
     HotkeyMutex{},
     HotkeyCond{},
@@ -1540,10 +1540,11 @@ Core::Core() :
     ownerThread{},
     toolCount{0}
 {
+    d = Private();
     // init the console. This must be always the first step!
-    plug_mgr = 0;
+    plug_mgr = NULL;
     errorstate = false;
-    vinfo = 0;
+    vinfo = NULL;
     memset(&(s_mods), 0, sizeof(s_mods));
 
     // set up hotkey capture
@@ -1590,9 +1591,9 @@ void Core::fatal (std::string output)
 std::string Core::getHackPath()
 {
 #ifdef LINUX_BUILD
-    return p->getPath() + "/hack/";
+    return proc->getPath() + "/hack/";
 #else
-    return p->getPath() + "\\hack\\";
+    return proc->getPath() + "\\hack\\";
 #endif
 }
 
@@ -1626,7 +1627,7 @@ bool Core::Init()
     #else
         const char * path = "hack\\symbols.xml";
     #endif
-    auto local_vif = dts::make_unique<DFHack::VersionInfoFactory>();
+    DFHack::VersionInfoFactory* local_vif = VersionInfoFactory();
     cerr << "Identifying DF version.\n";
     try
     {
@@ -1641,12 +1642,12 @@ bool Core::Init()
         fatal(out.str());
         return false;
     }
-    vif = std::move(local_vif);
-    auto local_p = dts::make_unique<DFHack::Process>(*vif);
+    //vif = std::move(local_vif);
+    DFHack::Process* local_p = dts::make_unique<DFHack::Process>(*local_vif);
     local_p->ValidateDescriptionOS();
-    vinfo = local_p->getDescriptor();
+    DFHack::VersionInfo* local_vinfo = local_p->getDescriptor();
 
-    if(!vinfo || !local_p->isIdentified())
+    if(!local_vinfo || !local_p->isIdentified())
     {
         if (!Version::git_xml_match())
         {
@@ -1679,8 +1680,9 @@ bool Core::Init()
         errorstate = true;
         return false;
     }
-    cerr << "Version: " << vinfo->getVersion() << endl;
-    p = std::move(local_p);
+    cerr << "Version: " << local_vinfo->getVersion() << endl;
+    proc = local_p;
+    vinfo = local_vinfo;
 
     // Init global object pointers
     df::global::InitGlobals();
@@ -1938,10 +1940,10 @@ void Core::printerr(const char *format, ...)
     va_end(args);
 }
 
-void Core::RegisterData( void *p, std::string key )
+void Core::RegisterData( void *data, std::string key )
 {
     std::lock_guard<std::mutex> lock(misc_data_mutex);
-    misc_data_map[key] = p;
+    misc_data_map[key] = data;
 }
 
 void *Core::GetData( std::string key )
@@ -1951,8 +1953,8 @@ void *Core::GetData( std::string key )
 
     if ( it != misc_data_map.end() )
     {
-        void *p=it->second;
-        return p;
+        void *data=it->second;
+        return data;
     }
     else
     {
@@ -1962,7 +1964,7 @@ void *Core::GetData( std::string key )
 
 bool Core::isSuspended(void)
 {
-    return ownerThread.load() == std::this_thread::get_id();
+    return ownerThread.load() == tthread::this_thread::get_id();
 }
 
 int Core::TileUpdate()
@@ -2779,8 +2781,8 @@ ClassNameCheck &ClassNameCheck::operator= (const ClassNameCheck &b)
     name = b.name; vptr = b.vptr; return *this;
 }
 
-bool ClassNameCheck::operator() (Process *p, void * ptr) const {
-    if (vptr == 0 && p->readClassName(ptr) == name)
+bool ClassNameCheck::operator() (Process *pr, void * ptr) const {
+    if (vptr == 0 && pr->readClassName(ptr) == name)
     {
         vptr = ptr;
         known_vptrs[name] = ptr;
@@ -2890,9 +2892,9 @@ TYPE * Core::get##TYPE() \
     if(errorstate) return NULL;\
     if(!s_mods.p##TYPE)\
     {\
-        std::unique_ptr<Module> mod = create##TYPE();\
+        Module* mod = create##TYPE();\
         s_mods.p##TYPE = (TYPE *) mod.get();\
-        allModules.push_back(std::move(mod));\
+        allModules.push_back(mod);\
     }\
     return s_mods.p##TYPE;\
 }

@@ -433,7 +433,7 @@ ServerMainImpl::ServerMainImpl(std::promise<bool> promise, int port) :
 
     // rewrite/normalize config file
     configJson["allow_remote"] = allow_remote;
-    configJson["port"] = configJson.get("port", RemoteClient::DEFAULT_PORT);
+    configJson["port"] = configJson.get("port", DEFAULT_PORT);
 
     std::ofstream outFile(filename, std::ios_base::trunc);
 

@@ -114,9 +114,9 @@ namespace Windows
         }
         void printStr(std::string & str, bool wrap = false)
         {
-            for ( auto iter = str.begin(); iter != str.end(); iter++)
+            for (std::string::const_iterator iter = str.begin(); iter != str.end(); iter++)
             {
-                auto elem = *iter;
+                char elem = *iter;
                 if(cursor_y >= (int)height)
                     break;
                 if(wrap)

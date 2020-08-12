@@ -39,6 +39,7 @@ distribution.
 //#include <condition_variable>
 //#include <mutex>
 //#include <thread>
+#include "tinythread.h"
 
 #include "RemoteClient.h"
 
@@ -156,7 +157,7 @@ namespace DFHack
         std::string getHotkeyCmd( bool &keep_going );
 
         /// adds a named pointer (for later or between plugins)
-        void RegisterData(void *p,std::string key);
+        void RegisterData(void *data, std::string key);
         /// returns a named pointer.
         void *GetData(std::string key);
 
@@ -191,8 +192,8 @@ namespace DFHack
 
         DFHack::Console &getConsole() { return con; }
 
-        std::unique_ptr<DFHack::Process> p;
-        std::shared_ptr<DFHack::VersionInfo> vinfo;
+        DFHack::Process* proc;
+        DFHack::VersionInfo* vinfo;
         DFHack::Windows::df_window * screen_window;
 
         static void print(const char *format, ...) Wformat(printf,1,2);
@@ -209,7 +210,7 @@ namespace DFHack
         ~Core();
 
         struct Private;
-        std::unique_ptr<Private> d;
+        Private* d;
 
         bool Init();
         int Update (void);
@@ -237,7 +238,7 @@ namespace DFHack
         struct Cond;
 
         // FIXME: shouldn't be kept around like this
-        std::unique_ptr<DFHack::VersionInfoFactory> vif;
+        //std::unique_ptr<DFHack::VersionInfoFactory> vif;
         // Module storage
         struct
         {
@@ -245,11 +246,11 @@ namespace DFHack
             Notes * pNotes;
             Graphic * pGraphic;
         } s_mods;
-        std::vector<std::unique_ptr<Module>> allModules;
+        std::vector<Module*> allModules;
         DFHack::PluginManager * plug_mgr;
 
         std::vector<std::string> script_paths[2];
-        std::mutex script_path_mutex;
+        tthread::mutex script_path_mutex;
 
         // hotkey-related stuff
         struct KeyBinding {
@@ -269,11 +270,11 @@ namespace DFHack
             SHUTDOWN,
         };
         hotkey_set_t hotkey_set;
-        std::mutex HotkeyMutex;
-        std::condition_variable HotkeyCond;
+        tthread::mutex HotkeyMutex;
+        tthread::condition_variable HotkeyCond;
 
         std::map<std::string, std::vector<std::string>> aliases;
-        std::recursive_mutex alias_mutex;
+        tthread::recursive_mutex alias_mutex;
 
         bool SelectHotkey(int key, int modifiers);
 
@@ -285,11 +286,11 @@ namespace DFHack
         df::viewscreen *top_viewscreen;
         bool last_pause_state;
         // Very important!
-        std::atomic<bool> started;
+        tthread::atomic<bool> started;
         // Additional state change scripts
         std::vector<StateChangeScript> state_change_scripts;
 
-        std::mutex misc_data_mutex;
+        tthread::mutex misc_data_mutex;
         std::map<std::string,void*> misc_data_map;
 
         /*!
@@ -298,10 +299,10 @@ namespace DFHack
          * \sa DFHack::CoreSuspender
          * \{
          */
-        std::recursive_mutex CoreSuspendMutex;
-        std::condition_variable_any CoreWakeup;
-        std::atomic<std::thread::id> ownerThread;
-        std::atomic<size_t> toolCount;
+        tthread::recursive_mutex CoreSuspendMutex;
+        tthread::condition_variable CoreWakeup;
+        tthread::atomic<tthread::thread::id> ownerThread;
+        tthread::atomic<size_t> toolCount;
         //! \}
 
         friend class CoreService;
@@ -312,41 +313,42 @@ namespace DFHack
         friend struct CoreSuspendReleaseMain;
     };
 
-    class CoreSuspenderBase  : protected std::unique_lock<std::recursive_mutex> {
+    typedef tthread::defer_lock_guard<tthread::recursive_mutex> lock_type;
+    class CoreSuspenderBase  : protected lock_type {
     protected:
-        using parent_t = std::unique_lock<std::recursive_mutex>;
-        std::thread::id tid;
+        //using parent_t = std::unique_lock<std::recursive_mutex>;
+        //#define parent_t_csb lock_type
+        tthread::thread::id tid;
 
-        CoreSuspenderBase(std::defer_lock_t d) : CoreSuspenderBase{&Core::getInstance(), d} {}
+        //CoreSuspenderBase(std::defer_lock_t d) : CoreSuspenderBase{&Core::getInstance(), d} {}
 
-        CoreSuspenderBase(Core* core, std::defer_lock_t) :
+        explicit CoreSuspenderBase(Core* core) :
             /* Lock the core */
-            parent_t{core->CoreSuspendMutex,std::defer_lock},
+            lock_type(core->CoreSuspendMutex),
             /* Mark this thread to be the core owner */
-            tid{}
+            tid()
         {}
     public:
         void lock()
         {
-            auto& core = Core::getInstance();
-            parent_t::lock();
-            tid = core.ownerThread.exchange(std::this_thread::get_id(),
-                    std::memory_order_acquire);
+            Core& core = Core::getInstance();
+            lock_type::lock();
+            tid = core.ownerThread.exchange(tthread::this_thread::get_id(), tthread::memory_order_acquire);
         }
 
         void unlock()
         {
-            auto& core = Core::getInstance();
+            Core& core = Core::getInstance();
             /* Restore core owner to previous value */
-            core.ownerThread.store(tid, std::memory_order_release);
-            if (tid == std::thread::id{})
+            core.ownerThread.store(tid, tthread::memory_order_release);
+            if (tid == tthread::thread::id())
                 Lua::Core::Reset(core.getConsole(), "suspend");
-            parent_t::unlock();
+            lock_type::unlock();
         }
 
-        bool owns_lock() const noexcept
+        bool owns_lock() const
         {
-            return parent_t::owns_lock();
+            return lock_type::is_locked();
         }
 
         ~CoreSuspenderBase() {
@@ -380,38 +382,36 @@ namespace DFHack
      *   Core::CoreSuspenderMutex.
      */
     class CoreSuspender : public CoreSuspenderBase {
-        using parent_t = CoreSuspenderBase;
     public:
-        CoreSuspender() : CoreSuspender{&Core::getInstance()} { }
-        CoreSuspender(std::defer_lock_t d) : CoreSuspender{&Core::getInstance(),d} { }
-        CoreSuspender(bool) : CoreSuspender{&Core::getInstance()} { }
-        CoreSuspender(Core* core, bool) : CoreSuspender{core} { }
-        CoreSuspender(Core* core) :
-            CoreSuspenderBase{core, std::defer_lock}
-        {
-            lock();
-        }
-        CoreSuspender(Core* core, std::defer_lock_t) :
-            CoreSuspenderBase{core, std::defer_lock}
-        {}
+        //CoreSuspender() : CoreSuspender(&Core::getInstance()) { }
+        //CoreSuspender(std::defer_lock_t d) : CoreSuspender{&Core::getInstance(),d} { }
+        //CoreSuspender(bool) : CoreSuspender() { }
+        //CoreSuspender(Core* core) : CoreSuspenderBase(core) { lock(); }
+        //CoreSuspender(Core* core, bool) : CoreSuspender(core) { }
+        //CoreSuspender(Core* core, std::defer_lock_t) : CoreSuspenderBase{core, std::defer_lock} {}
+
+        CoreSuspender() : CoreSuspenderBase(&Core::getInstance()) {lock(); }
+        CoreSuspender(bool) : CoreSuspenderBase(&Core::getInstance()) {lock(); }
+        CoreSuspender(Core* core) : CoreSuspenderBase(core) { lock(); }
+        CoreSuspender(Core* core, bool) : CoreSuspenderBase(core) {lock(); }
 
         void lock()
         {
-            auto& core = Core::getInstance();
-            core.toolCount.fetch_add(1, std::memory_order_relaxed);
-            parent_t::lock();
+            Core& core = Core::getInstance();
+            core.toolCount.fetch_add(1, tthread::memory_order_relaxed);
+            CoreSuspenderBase::lock();
         }
 
         void unlock()
         {
-            auto& core = Core::getInstance();
-            parent_t::unlock();
+            Core& core = Core::getInstance();
+            CoreSuspenderBase::unlock();
             /* Notify core to continue when all queued tools have completed
              * 0 = None wants to own the core
              * 1+ = There are tools waiting core access
              * fetch_add returns old value before subtraction
              */
-            if (core.toolCount.fetch_add(-1, std::memory_order_relaxed) == 1)
+            if (core.toolCount.fetch_add(-1, tthread::memory_order_relaxed) == 1)
                 core.CoreWakeup.notify_one();
         }
 
@@ -441,5 +441,5 @@ namespace DFHack
         ~CoreSuspendClaimMain();
     };
 
-    using CoreSuspendClaimer = CoreSuspender;
+    //using CoreSuspendClaimer = CoreSuspender;
 }
