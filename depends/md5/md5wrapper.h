@@ -22,7 +22,7 @@
 
 //basic includes
 #include <string>
-#include <stdint.h>
+#include "common.h"
 
 class md5wrapper
 {

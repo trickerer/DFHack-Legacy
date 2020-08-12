@@ -21,7 +21,7 @@
 #undef HIGHFIRST
 #endif
 
-#include <stdint.h>
+#include "common.h"
 
 struct MD5Context
 {

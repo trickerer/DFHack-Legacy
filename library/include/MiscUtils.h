@@ -27,7 +27,7 @@ distribution.
 #include <iostream>
 #include <iomanip>
 #include <climits>
-#include <stdint.h>
+#include "common.h"
 #include <vector>
 #include <sstream>
 #include <cstdio>

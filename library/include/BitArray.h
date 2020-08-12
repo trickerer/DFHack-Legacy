@@ -26,7 +26,7 @@ distribution.
 #include "Pragma.h"
 #include "Export.h"
 #include "Error.h"
-#include <stdint.h>
+#include "common.h"
 #include <string.h>
 #include <stdlib.h>
 #include <sstream>

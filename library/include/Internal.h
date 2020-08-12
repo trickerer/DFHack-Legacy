@@ -38,4 +38,4 @@ distribution.
 #include "Pragma.h"
 
 // C99 integer types
-#include <stdint.h>
+#include "common.h"

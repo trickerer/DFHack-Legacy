@@ -1,0 +1,6 @@
+project(dfhack-common)
+add_library(dfhack-common STATIC EXCLUDE_FROM_ALL common.h common.cpp)
+ide_folder(dfhack-common "Depends")
+if(UNIX)
+    set_target_properties(dfhack-common PROPERTIES COMPILE_FLAGS "-Wno-strict-aliasing")
+endif()
