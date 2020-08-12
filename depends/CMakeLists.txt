@@ -16,4 +16,7 @@ add_subdirectory(jsoncpp-sub EXCLUDE_FROM_ALL)
 option(CLSOCKET_SHARED "Build clsocket lib as shared." OFF)
 option(CLSOCKET_DEP_ONLY "Build for use inside other CMake projects as dependency." ON)
 add_subdirectory(clsocket)
+
+add_subdirectory(common)
+
 ide_folder(clsocket "Depends")
