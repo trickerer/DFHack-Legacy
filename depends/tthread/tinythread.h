@@ -378,6 +378,44 @@ class lock_guard {
     mutex_type * mMutex;
 };
 
+template <class T>
+class defer_lock_guard {
+  public:
+    typedef T mutex_type;
+
+    /// The constructor locks the mutex.
+    explicit defer_lock_guard(mutex_type &aMutex)
+    {
+      mMutex = &aMutex;
+      _locked = false;
+    }
+
+    void lock()
+    {
+      mMutex->try_lock();
+    }
+
+    void unlock()
+    {
+      mMutex->try_lock();
+      mMutex->unlock();
+    }
+    /// The destructor unlocks the mutex.
+    ~defer_lock_guard()
+    {
+      unlock();
+    }
+
+    bool is_locked() const
+    {
+        return _locked;
+    }
+
+  private:
+    mutex_type * mMutex;
+    bool _locked;
+};
+
 /// Condition variable class.
 /// This is a signalling object for synchronizing the execution flow for
 /// several threads. Example usage:
@@ -734,6 +772,18 @@ struct atomic {
 #endif
     }
 
+    inline T exchange(T arg, memory_order order = memory_order_seq_cst)
+    {
+#ifdef _TTHREAD_HAS_ATOMIC_BUILTINS_
+      return __sync_exchange(&mValue, arg);
+#else
+      lock_guard<mutex> guard(mLock);
+      T result = mValue;
+      mValue = arg;
+      return result;
+#endif
+    }
+
     /// Atomically replaces the current value.
     /// Equivalent to store(desired).
     /// @param desired The new value.
@@ -905,9 +955,18 @@ class thread::id {
 
     id(unsigned long int aId) : mId(aId) {};
 
-    id(const id& aId) : mId(aId.mId) {};
+    //id(id& aId) : mId(aId.mId) {};
+    //id(const id& aId) : mId(aId.mId) {};
+    //id(volatile id& aId) : mId(aId.mId) {};
+    id(const volatile id& aId) : mId(aId.mId) {};
 
-    inline id & operator=(const id &aId)
+    //inline id & operator=(const id &aId)
+    //{
+    //  mId = aId.mId;
+    //  return *this;
+    //}
+
+    volatile inline id & operator=(const id &aId) volatile
     {
       mId = aId.mId;
       return *this;
