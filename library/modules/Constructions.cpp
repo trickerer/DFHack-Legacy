@@ -70,7 +70,7 @@ df::construction * Constructions::getConstruction(const int32_t index)
 
 df::construction * Constructions::findAtTile(df::coord pos)
 {
-    for (auto it = world->constructions.begin(); it != world->constructions.end(); ++it) {
+    for (std::vector<df::construction*>::const_iterator it = world->constructions.begin(); it != world->constructions.end(); ++it) {
         if ((*it)->pos == pos)
             return *it;
     }
@@ -97,14 +97,14 @@ bool Constructions::copyConstruction(const int32_t index, t_construction &out)
 bool Constructions::designateNew(df::coord pos, df::construction_type type,
                                  df::item_type item, int mat_index)
 {
-    auto ttype = Maps::getTileType(pos);
+    df::tiletype* ttype = Maps::getTileType(pos);
     if (!ttype || tileMaterial(*ttype) == tiletype_material::CONSTRUCTION)
         return false;
 
-    auto current = Buildings::findAtTile(pos);
+    df::building* current = Buildings::findAtTile(pos);
     if (current)
     {
-        auto cons = strict_virtual_cast<df::building_constructionst>(current);
+        df::building_constructionst* cons = strict_virtual_cast<df::building_constructionst>(current);
         if (!cons)
             return false;
 
@@ -112,11 +112,11 @@ bool Constructions::designateNew(df::coord pos, df::construction_type type,
         return true;
     }
 
-    auto newinst = Buildings::allocInstance(pos, building_type::Construction);
+    df::building* newinst = Buildings::allocInstance(pos, building_type::Construction);
     if (!newinst)
         return false;
 
-    auto newcons = strict_virtual_cast<df::building_constructionst>(newinst);
+    df::building_constructionst* newcons = strict_virtual_cast<df::building_constructionst>(newinst);
     newcons->type = type;
 
     df::job_item *filter = new df::job_item();
@@ -145,9 +145,9 @@ bool Constructions::designateRemove(df::coord pos, bool *immediate)
     if (immediate)
         *immediate = false;
 
-    if (auto current = Buildings::findAtTile(pos))
+    if (df::building* current = Buildings::findAtTile(pos))
     {
-        auto cons = strict_virtual_cast<df::building_constructionst>(current);
+        df::building_constructionst* cons = strict_virtual_cast<df::building_constructionst>(current);
         if (!cons)
             return false;
 
@@ -160,15 +160,15 @@ bool Constructions::designateRemove(df::coord pos, bool *immediate)
         return true;
     }
 
-    auto block = Maps::getTileBlock(pos);
+    df::map_block* block = Maps::getTileBlock(pos);
     if (!block)
         return false;
 
-    auto ttype = block->tiletype[pos.x&15][pos.y&15];
+    df::enums::tiletype::tiletype ttype = block->tiletype[pos.x&15][pos.y&15];
 
     if (tileMaterial(ttype) == tiletype_material::CONSTRUCTION)
     {
-        auto &dsgn = block->designation[pos.x&15][pos.y&15];
+        df::tile_designation &dsgn = block->designation[pos.x&15][pos.y&15];
         dsgn.bits.dig = tile_dig_designation::Default;
         block->flags.bits.designated = true;
         if (process_dig)
