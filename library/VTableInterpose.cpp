@@ -115,12 +115,12 @@ static uint32_t *follow_jmp(void *ptr)
 
 bool DFHack::is_vmethod_pointer_(void *pptr)
 {
-    auto pobj = (MSVC_MPTR*)pptr;
+    MSVC_MPTR* pobj = (MSVC_MPTR*)pptr;
     if (!pobj->method) return false;
 
     // MSVC implements pointers to vmethods via thunks.
     // This expects that they all follow a very specific pattern.
-    auto pval = follow_jmp(pobj->method);
+    uint32* pval = follow_jmp(pobj->method);
     switch (pval[0]) {
     case 0x20FF018BU: // mov eax, [ecx]; jmp [eax]
     case 0x60FF018BU: // mov eax, [ecx]; jmp [eax+0x??]
@@ -133,10 +133,10 @@ bool DFHack::is_vmethod_pointer_(void *pptr)
 
 int DFHack::vmethod_pointer_to_idx_(void *pptr)
 {
-    auto pobj = (MSVC_MPTR*)pptr;
+    MSVC_MPTR* pobj = (MSVC_MPTR*)pptr;
     if (!pobj->method || pobj->this_shift != 0) return -1;
 
-    auto pval = follow_jmp(pobj->method);
+    uint32* pval = follow_jmp(pobj->method);
     switch (pval[0]) {
     case 0x20FF018BU: // mov eax, [ecx]; jmp [eax]
         return 0;
@@ -152,13 +152,13 @@ int DFHack::vmethod_pointer_to_idx_(void *pptr)
 void* DFHack::method_pointer_to_addr_(void *pptr)
 {
     if (is_vmethod_pointer_(pptr)) return NULL;
-    auto pobj = (MSVC_MPTR*)pptr;
+    MSVC_MPTR* pobj = (MSVC_MPTR*)pptr;
     return pobj->method;
 }
 
 void DFHack::addr_to_method_pointer_(void *pptr, void *addr)
 {
-    auto pobj = (MSVC_MPTR*)pptr;
+    MSVC_MPTR* pobj = (MSVC_MPTR*)pptr;
     pobj->method = addr;
     pobj->this_shift = 0;
 }
@@ -324,7 +324,7 @@ VMethodInterposeLinkBase::~VMethodInterposeLinkBase()
 
 VMethodInterposeLinkBase *VMethodInterposeLinkBase::get_first_interpose(virtual_identity *id)
 {
-    auto item = id->interpose_list[vmethod_idx];
+    DFHack::VMethodInterposeLinkBase* item = id->interpose_list[vmethod_idx];
     if (!item)
         return NULL;
 
@@ -338,13 +338,13 @@ VMethodInterposeLinkBase *VMethodInterposeLinkBase::get_first_interpose(virtual_
 
 bool VMethodInterposeLinkBase::find_child_hosts(virtual_identity *cur, void *vmptr)
 {
-    auto &children = cur->getChildren();
+    const std::vector<DFHack::struct_identity*> &children = cur->getChildren();
     bool found = false;
 
     for (size_t i = 0; i < children.size(); i++)
     {
-        auto child = static_cast<virtual_identity*>(children[i]);
-        auto base = get_first_interpose(child);
+        virtual_identity* child = static_cast<virtual_identity*>(children[i]);
+        DFHack::VMethodInterposeLinkBase* base = get_first_interpose(child);
 
         if (base)
         {
@@ -396,7 +396,7 @@ void VMethodInterposeLinkBase::on_host_delete(virtual_identity *from)
                from->interpose_list[vmethod_idx] == this);
 
         // Find and restore the original vmethod ptr
-        auto last = this;
+        VMethodInterposeLinkBase* last = this;
         while (last->prev) last = last->prev;
 
         MemoryPatcher patcher;
@@ -500,9 +500,9 @@ bool VMethodInterposeLinkBase::apply(bool enable)
             old_link->child_next.insert(this);
 
             // Subtract our own children from the parent's sets
-            for (auto it = child_next.begin(); it != child_next.end(); ++it)
+            for (std::set<VMethodInterposeLinkBase*>::const_iterator it = child_next.begin(); it != child_next.end(); ++it)
                 old_link->child_next.erase(*it);
-            for (auto it = child_hosts.begin(); it != child_hosts.end(); ++it)
+            for (std::set<virtual_identity*>::const_iterator it = child_hosts.begin(); it != child_hosts.end(); ++it)
                 old_link->child_hosts.erase(*it);
         }
     }
@@ -510,18 +510,18 @@ bool VMethodInterposeLinkBase::apply(bool enable)
     assert (!next_link || (child_next.empty() && child_hosts.empty()));
 
     // Chain subclass hooks
-    for (auto it = child_next.begin(); it != child_next.end(); ++it)
+    for (std::set<VMethodInterposeLinkBase*>::const_iterator it = child_next.begin(); it != child_next.end(); ++it)
     {
-        auto nlink = *it;
+        VMethodInterposeLinkBase* nlink = *it;
         assert(nlink->saved_chain == old_ptr && nlink->prev == old_link);
         nlink->set_chain(interpose_method);
         nlink->prev = this;
     }
 
     // Chain passive subclass hosts
-    for (auto it = child_hosts.begin(); it != child_hosts.end(); ++it)
+    for (std::set<virtual_identity*>::const_iterator it = child_hosts.begin(); it != child_hosts.end(); ++it)
     {
-        auto nhost = *it;
+        virtual_identity* nhost = *it;
         assert(nhost->interpose_list[vmethod_idx] == old_link);
         nhost->set_vmethod_ptr(patcher, vmethod_idx, interpose_method);
         nhost->interpose_list[vmethod_idx] = this;
@@ -566,9 +566,9 @@ void VMethodInterposeLinkBase::remove()
         host->interpose_list[vmethod_idx] = prev;
         host->set_vmethod_ptr(patcher, vmethod_idx, saved_chain);
 
-        for (auto it = child_next.begin(); it != child_next.end(); ++it)
+        for (std::set<VMethodInterposeLinkBase*>::const_iterator it = child_next.begin(); it != child_next.end(); ++it)
         {
-            auto nlink = *it;
+            VMethodInterposeLinkBase* nlink = *it;
             assert(nlink->saved_chain == interpose_method && nlink->prev == this);
             nlink->set_chain(saved_chain);
             nlink->prev = prev;
@@ -576,9 +576,9 @@ void VMethodInterposeLinkBase::remove()
                 prev->child_next.insert(nlink);
         }
 
-        for (auto it = child_hosts.begin(); it != child_hosts.end(); ++it)
+        for (std::set<virtual_identity*>::const_iterator it = child_hosts.begin(); it != child_hosts.end(); ++it)
         {
-            auto nhost = *it;
+            virtual_identity* nhost = *it;
             assert(nhost->interpose_list[vmethod_idx] == this);
             nhost->interpose_list[vmethod_idx] = prev;
             nhost->set_vmethod_ptr(patcher, vmethod_idx, saved_chain);
