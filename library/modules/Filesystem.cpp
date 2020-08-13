@@ -222,7 +222,7 @@ static int listdir_recursive_impl (std::string prefix, std::string path,
     int err = Filesystem::listdir(prefixed_path, curdir_files);
     if (err)
         return err;
-    for (auto file = curdir_files.begin(); file != curdir_files.end(); ++file)
+    for (std::vector<std::string>::const_iterator file = curdir_files.begin(); file != curdir_files.end(); ++file)
     {
         if (*file == "." || *file == "..")
             continue;

@@ -63,7 +63,8 @@ SOFTWARE.
 #endif
 
 #include <cstdio>
-#include <cstdint>
+//#include <cstdint>
+#include "common.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
