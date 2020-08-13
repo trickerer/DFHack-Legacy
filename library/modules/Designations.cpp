@@ -21,7 +21,7 @@ using df::global::world;
 static df::map_block *getPlantBlock(const df::plant *plant)
 {
     if (!world)
-        return nullptr;
+        return NULL;
     return Maps::getTileBlock(Designations::getPlantDesignationTile(plant));
 }
 
@@ -66,7 +66,7 @@ bool Designations::isPlantMarked(const df::plant *plant)
     if (block->designation[des_pos.x % 16][des_pos.y % 16].bits.dig == tile_dig_designation::Default)
         return true;
 
-    for (auto *link = world->jobs.list.next; link; link = link->next)
+    for (df::job_list_link* link = world->jobs.list.next; link; link = link->next)
     {
         df::job *job = link->item;
         if (!job)
@@ -128,10 +128,10 @@ bool Designations::unmarkPlant(const df::plant *plant)
         block->designation[des_pos.x % 16][des_pos.y % 16].bits.dig = tile_dig_designation::No;
         block->flags.bits.designated = true;
 
-        auto *link = world->jobs.list.next;
+        df::job_list_link* link = world->jobs.list.next;
         while (link)
         {
-            auto *next = link->next;
+            df::job_list_link* next = link->next;
             df::job *job = link->item;
 
             if (job &&
