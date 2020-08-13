@@ -30,7 +30,8 @@ distribution.
 #include <iostream>
 #include <map>
 #include <string>
-#include <unordered_map>
+//#include <unordered_map>
+#include <hash_map>
 #include <vector>
 using namespace std;
 
@@ -95,13 +96,33 @@ using df::global::building_next_id;
 using df::global::process_jobs;
 using df::building_def;
 
-struct CoordHash {
-    size_t operator()(const df::coord pos) const {
+//struct CoordHash {
+//    size_t operator()(const df::coord pos) const {
+//        return pos.x*65537 + pos.y*17 + pos.z;
+//    }
+//};
+
+struct CoordHash
+{
+    size_t operator()(const df::coord pos) const
+    {
         return pos.x*65537 + pos.y*17 + pos.z;
     }
+	bool operator()(const df::coord& pos1, const df::coord& pos2) const
+	{
+	    return pos1 == pos2;
+	}
+	enum
+	{
+	    bucket_size = 4,
+	    min_buckets = 8
+    };
 };
 
-static unordered_map<df::coord, int32_t, CoordHash> locationToBuilding;
+#define UNORDERED_MAP stdext::hash_map
+
+typedef UNORDERED_MAP<df::coord, int32_t, CoordHash> LocationToBuildingMap;
+static LocationToBuildingMap locationToBuilding;
 
 static uint8_t *getExtentTile(df::building_extents &extent, df::coord2d tile)
 {
@@ -159,7 +180,7 @@ void buildings_onUpdate(color_ostream &out)
             if (!item)
                 continue;
             // Convert Reagent to Hauled, while decrementing quantity
-            item->quantity = std::max(0, item->quantity-1);
+            item->quantity = std::max<int32>(0, item->quantity-1);
             iref->role = df::job_item_ref::Hauled;
             iref->job_item_idx = -1;
         }
@@ -192,11 +213,11 @@ bool Buildings::Read (const uint32_t index, t_building & building)
 
 bool Buildings::ReadCustomWorkshopTypes(map <uint32_t, string> & btypes)
 {
-    vector <building_def *> & bld_def = world->raws.buildings.all;
+    vector<building_def*> & bld_def = world->raws.buildings.all;
     uint32_t size = bld_def.size();
     btypes.clear();
 
-    for (auto iter = bld_def.begin(); iter != bld_def.end();iter++)
+    for (vector<building_def*>::const_iterator iter = bld_def.begin(); iter != bld_def.end();iter++)
     {
         building_def * temp = *iter;
         btypes[temp->id] = temp->code;
@@ -229,12 +250,12 @@ bool Buildings::setOwner(df::building *bld, df::unit *unit)
 
     if (bld->owner)
     {
-        auto &blist = bld->owner->owned_buildings;
+        std::vector<df::building*> &blist = bld->owner->owned_buildings;
         vector_erase_at(blist, linear_index(blist, bld));
 
-        if (auto spouse = df::unit::find(bld->owner->relationship_ids[df::unit_relationship_type::Spouse]))
+        if (df::unit* spouse = df::unit::find(bld->owner->relationship_ids[df::unit_relationship_type::Spouse]))
         {
-            auto &blist = spouse->owned_buildings;
+            std::vector<df::building*> &blist = spouse->owned_buildings;
             vector_erase_at(blist, linear_index(blist, bld));
         }
     }
@@ -246,9 +267,9 @@ bool Buildings::setOwner(df::building *bld, df::unit *unit)
         bld->owner_id = unit->id;
         unit->owned_buildings.push_back(bld);
 
-        if (auto spouse = df::unit::find(unit->relationship_ids[df::unit_relationship_type::Spouse]))
+        if (df::unit* spouse = df::unit::find(unit->relationship_ids[df::unit_relationship_type::Spouse]))
         {
-            auto &blist = spouse->owned_buildings;
+            std::vector<df::building*> &blist = spouse->owned_buildings;
             if (bld->canUseSpouseRoom() && linear_index(blist, bld) < 0)
                 blist.push_back(bld);
         }
@@ -263,15 +284,15 @@ bool Buildings::setOwner(df::building *bld, df::unit *unit)
 
 df::building *Buildings::findAtTile(df::coord pos)
 {
-    auto occ = Maps::getTileOccupancy(pos);
+    df::tile_occupancy* occ = Maps::getTileOccupancy(pos);
     if (!occ || !occ->bits.building)
         return NULL;
 
     // Try cache lookup in case it works:
-    auto cached = locationToBuilding.find(pos);
+    LocationToBuildingMap::const_iterator cached = locationToBuilding.find(pos);
     if (cached != locationToBuilding.end())
     {
-        auto building = df::building::find(cached->second);
+        df::building* building = df::building::find(cached->second);
 
         if (building && building->z == pos.z &&
             building->isSettingOccupancy() &&
@@ -282,10 +303,10 @@ df::building *Buildings::findAtTile(df::coord pos)
     }
 
     // The authentic method, i.e. how the game generally does this:
-    auto &vec = df::building::get_vector();
+    std::vector<df::building*> &vec = df::building::get_vector();
     for (size_t i = 0; i < vec.size(); i++)
     {
-        auto bld = vec[i];
+        df::building* bld = vec[i];
 
         if (pos.z != bld->z ||
             pos.x < bld->x1 || pos.x > bld->x2 ||
@@ -297,7 +318,7 @@ df::building *Buildings::findAtTile(df::coord pos)
 
         if (bld->room.extents && bld->isExtentShaped())
         {
-            auto etile = getExtentTile(bld->room, pos);
+            uint8* etile = getExtentTile(bld->room, pos);
             if (!etile || !*etile)
                 continue;
         }
@@ -312,11 +333,11 @@ bool Buildings::findCivzonesAt(std::vector<df::building_civzonest*> *pvec, df::c
 {
     pvec->clear();
 
-    auto &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
+    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
 
     for (size_t i = 0; i < vec.size(); i++)
     {
-        auto bld = strict_virtual_cast<df::building_civzonest>(vec[i]);
+        df::building_civzonest* bld = strict_virtual_cast<df::building_civzonest>(vec[i]);
 
         if (!bld || bld->z != pos.z || !containsTile(bld, pos))
             continue;
@@ -337,7 +358,7 @@ df::building *Buildings::allocInstance(df::coord pos, df::building_type type, in
     if (!classname)
         return NULL;
 
-    auto id = virtual_identity::find(classname);
+    virtual_identity* id = virtual_identity::find(classname);
     if (!id)
         return NULL;
 
@@ -502,7 +523,7 @@ bool Buildings::getCorrectSize(df::coord2d &size, df::coord2d &center,
                 break;
 
             case Custom:
-                if (auto def = df::building_def::find(custom))
+                if (df::building_def* def = df::building_def::find(custom))
                 {
                     size = df::coord2d(def->dim_x, def->dim_y);
                     center = df::coord2d(def->workloc_x, def->workloc_y);
@@ -524,7 +545,7 @@ bool Buildings::getCorrectSize(df::coord2d &size, df::coord2d &center,
         switch ((df::furnace_type)subtype)
         {
             case Custom:
-                if (auto def = df::building_def::find(custom))
+                if (df::building_def* def = df::building_def::find(custom))
                 {
                     size = df::coord2d(def->dim_x, def->dim_y);
                     center = df::coord2d(def->workloc_x, def->workloc_y);
@@ -608,7 +629,7 @@ bool Buildings::checkFreeTiles(df::coord pos, df::coord2d size,
                 allowed = false;
             else
             {
-                auto tile = block->tiletype[btile.x][btile.y];
+                df::tiletype tile = block->tiletype[btile.x][btile.y];
                 if (!HighPassable(tile))
                     allowed = false;
             }
@@ -655,7 +676,7 @@ std::pair<df::coord,df::coord2d> Buildings::getSize(df::building *bld)
 
 static bool checkBuildingTiles(df::building *bld, bool can_change)
 {
-    auto psize = Buildings::getSize(bld);
+    std::pair<df::coord,df::coord2d> psize = Buildings::getSize(bld);
 
     return Buildings::checkFreeTiles(psize.first, psize.second, &bld->room,
                                      can_change && bld->isExtentShaped(),
@@ -725,7 +746,7 @@ bool Buildings::hasSupport(df::coord pos, df::coord2d size)
 
 static int computeMaterialAmount(df::building *bld)
 {
-    auto size = Buildings::getSize(bld).second;
+    df::coord2d size = Buildings::getSize(bld).second;
     int cnt = size.x * size.y;
 
     if (bld->room.extents && bld->isExtentShaped())
@@ -756,7 +777,7 @@ bool Buildings::setSize(df::building *bld, df::coord2d size, int direction)
     bld->centerx = bld->x1 + center.x;
     bld->centery = bld->y1 + center.y;
 
-    auto type = bld->getType();
+    df::building_type type = bld->getType();
 
     using namespace df::enums::building_type;
 
@@ -764,32 +785,32 @@ bool Buildings::setSize(df::building *bld, df::coord2d size, int direction)
     {
     case WaterWheel:
         {
-            auto obj = (df::building_water_wheelst*)bld;
+            df::building_water_wheelst* obj = (df::building_water_wheelst*)bld;
             obj->is_vertical = !!direction;
             break;
         }
     case AxleHorizontal:
         {
-            auto obj = (df::building_axle_horizontalst*)bld;
+            df::building_axle_horizontalst* obj = (df::building_axle_horizontalst*)bld;
             obj->is_vertical = !!direction;
             break;
         }
     case ScrewPump:
         {
-            auto obj = (df::building_screw_pumpst*)bld;
+            df::building_screw_pumpst* obj = (df::building_screw_pumpst*)bld;
             obj->direction = (df::screw_pump_direction)direction;
             break;
         }
     case Rollers:
         {
-            auto obj = (df::building_rollersst*)bld;
+            df::building_rollersst* obj = (df::building_rollersst*)bld;
             obj->direction = (df::screw_pump_direction)direction;
             break;
         }
     case Bridge:
         {
-            auto obj = (df::building_bridgest*)bld;
-            auto psize = getSize(bld);
+            df::building_bridgest* obj = (df::building_bridgest*)bld;
+            std::pair<df::coord,df::coord2d> psize = getSize(bld);
             obj->gate_flags.bits.has_support = hasSupport(psize.first, psize.second);
             obj->direction = (df::building_bridgest::T_direction)direction;
             break;
@@ -831,7 +852,7 @@ static void markBuildingTiles(df::building *bld, bool remove)
             df::map_block *block = Maps::getTileBlock(tile);
             df::coord2d btile = df::coord2d(tile) & 15;
 
-            auto &des = block->designation[btile.x][btile.y];
+            df::tile_designation &des = block->designation[btile.x][btile.y];
 
             des.bits.pile = stockpile;
             if (!remove)
@@ -841,7 +862,7 @@ static void markBuildingTiles(df::building *bld, bool remove)
                 bld->updateOccupancy(tx, ty);
             else
             {
-                auto &occ = block->occupancy[btile.x][btile.y];
+                df::tile_occupancy &occ = block->occupancy[btile.x][btile.y];
 
                 if (remove)
                     occ.bits.building = tile_building_occ::None;
@@ -854,13 +875,13 @@ static void markBuildingTiles(df::building *bld, bool remove)
 
 static void linkRooms(df::building *bld)
 {
-    auto &vec = world->buildings.other[buildings_other_id::IN_PLAY];
+    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::IN_PLAY];
 
     bool changed = false;
 
     for (size_t i = 0; i < vec.size(); i++)
     {
-        auto room = vec[i];
+        df::building* room = vec[i];
         if (!room->is_room || room->z != bld->z)
             continue;
 
@@ -883,7 +904,7 @@ static void unlinkRooms(df::building *bld)
 {
     for (size_t i = 0; i < bld->parents.size(); i++)
     {
-        auto parent = bld->parents[i];
+        df::building* parent = bld->parents[i];
         int idx = linear_index(parent->children, bld);
         vector_erase_at(parent->children, idx);
     }
@@ -908,14 +929,14 @@ static void linkBuilding(df::building *bld)
 
 static void createDesign(df::building *bld, bool rough)
 {
-    auto job = bld->jobs[0];
+    df::job* job = bld->jobs[0];
 
     job->mat_type = bld->mat_type;
     job->mat_index = bld->mat_index;
 
     if (bld->needsDesign())
     {
-        auto act = (df::building_actual*)bld;
+        df::building_actual* act = (df::building_actual*)bld;
         act->design = new df::building_design();
 
         act->design->flags.bits.rough = rough;
@@ -924,14 +945,14 @@ static void createDesign(df::building *bld, bool rough)
 
 static int getMaxStockpileId()
 {
-    auto &vec = world->buildings.other[buildings_other_id::STOCKPILE];
+    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::STOCKPILE];
     int max_id = 0;
 
     for (size_t i = 0; i < vec.size(); i++)
     {
-        auto bld = strict_virtual_cast<df::building_stockpilest>(vec[i]);
+        df::building_stockpilest* bld = strict_virtual_cast<df::building_stockpilest>(vec[i]);
         if (bld)
-            max_id = std::max(max_id, bld->stockpile_number);
+            max_id = std::max<int32>(max_id, bld->stockpile_number);
     }
 
     return max_id;
@@ -939,14 +960,14 @@ static int getMaxStockpileId()
 
 static int getMaxCivzoneId()
 {
-    auto &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
+    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
     int max_id = 0;
 
     for (size_t i = 0; i < vec.size(); i++)
     {
-        auto bld = strict_virtual_cast<df::building_civzonest>(vec[i]);
+        df::building_civzonest* bld = strict_virtual_cast<df::building_civzonest>(vec[i]);
         if (bld)
-            max_id = std::max(max_id, bld->zone_num);
+            max_id = std::max<int32>(max_id, bld->zone_num);
     }
 
     return max_id;
@@ -964,12 +985,12 @@ bool Buildings::constructAbstract(df::building *bld)
     switch (bld->getType())
     {
         case building_type::Stockpile:
-            if (auto stock = strict_virtual_cast<df::building_stockpilest>(bld))
+            if (df::building_stockpilest* stock = strict_virtual_cast<df::building_stockpilest>(bld))
                 stock->stockpile_number = getMaxStockpileId() + 1;
             break;
 
         case building_type::Civzone:
-            if (auto zone = strict_virtual_cast<df::building_civzonest>(bld))
+            if (df::building_civzonest* zone = strict_virtual_cast<df::building_civzonest>(bld))
                 zone->zone_num = getMaxCivzoneId() + 1;
             break;
 
@@ -993,7 +1014,7 @@ static bool linkForConstruct(df::job* &job, df::building *bld)
     if (!checkBuildingTiles(bld, false))
         return false;
 
-    auto ref = df::allocate<df::general_ref_building_holderst>();
+    df::general_ref_building_holderst* ref = df::allocate<df::general_ref_building_holderst>();
     if (!ref)
     {
         Core::printerr("Could not allocate general_ref_building_holderst\n");
@@ -1160,7 +1181,7 @@ bool Buildings::deconstruct(df::building *bld)
 
     for (int i = ui_look_list->items.size()-1; i >= 0; i--)
     {
-        auto item = ui_look_list->items[i];
+        df::ui_look_list::T_items* item = ui_look_list->items[i];
         if (item->type == df::ui_look_list::T_items::Building &&
             item->data.Building == bld)
         {
@@ -1178,8 +1199,10 @@ bool Buildings::deconstruct(df::building *bld)
 bool Buildings::markedForRemoval(df::building *bld)
 {
     CHECK_NULL_POINTER(bld);
-    for (df::job *job : bld->jobs)
+    //for (df::job *job : bld->jobs)
+    for (std::vector<df::job*>::const_iterator it = bld->jobs.begin(); it != bld->jobs.end(); ++it)
     {
+        df::job *job = *it;
         if (job && job->job_type == df::job_type::DestroyBuilding)
         {
             return true;
@@ -1188,8 +1211,8 @@ bool Buildings::markedForRemoval(df::building *bld)
     return false;
 }
 
-static unordered_map<int32_t, df::coord> corner1;
-static unordered_map<int32_t, df::coord> corner2;
+static UNORDERED_MAP<int32_t, df::coord> corner1;
+static UNORDERED_MAP<int32_t, df::coord> corner2;
 
 void Buildings::clearBuildings(color_ostream& out) {
     corner1.clear();
@@ -1200,7 +1223,7 @@ void Buildings::clearBuildings(color_ostream& out) {
 void Buildings::updateBuildings(color_ostream& out, void* ptr)
 {
     int32_t id = (int32_t)(intptr_t)ptr;
-    auto building = df::building::find(id);
+    df::building* building = df::building::find(id);
 
     if (building)
     {
@@ -1236,7 +1259,7 @@ void Buildings::updateBuildings(color_ostream& out, void* ptr)
             for ( int32_t y = p1.y; y <= p2.y; y++ ) {
                 df::coord pt(x,y,p1.z);
 
-                auto cur = locationToBuilding.find(pt);
+                LocationToBuildingMap::const_iterator cur = locationToBuilding.find(pt);
                 if (cur != locationToBuilding.end() && cur->second == id)
                     locationToBuilding.erase(cur);
             }
@@ -1247,44 +1270,93 @@ void Buildings::updateBuildings(color_ostream& out, void* ptr)
     }
 }
 
-static std::map<df::building_type, std::vector<std::string>> room_quality_names = {
-    {df::building_type::Bed, {
-        "Meager Quarters",
-        "Modest Quarters",
-        "Quarters",
-        "Decent Quarters",
-        "Fine Quarters",
-        "Great Bedroom",
-        "Grand Bedroom",
-        "Royal Bedroom"}},
-    {df::building_type::Table, {
-        "Meager Dining Room",
-        "Modest Dining Room",
-        "Dining Room",
-        "Decent Dining Room",
-        "Fine Dining Room",
-        "Great Dining Room",
-        "Grand Dining Room",
-        "Royal Dining Room"}},
-    {df::building_type::Chair, {
-        "Meager Office",
-        "Modest Office",
-        "Office",
-        "Decent Office",
-        "Splendid Office",
-        "Throne Room",
-        "Opulent Throne Room",
-        "Royal Throne Room"}},
-    {df::building_type::Coffin, {
-        "Grave",
-        "Servant's Burial Chamber",
-        "Burial Chamber",
-        "Tomb",
-        "Fine Tomb",
-        "Mausoleum",
-        "Grand Mausoleum",
-        "Royal Mausoleum"}}
+//static std::map<df::building_type, std::vector<std::string>> room_quality_names = {
+//    {df::building_type::Bed, {
+//        "Meager Quarters",
+//        "Modest Quarters",
+//        "Quarters",
+//        "Decent Quarters",
+//        "Fine Quarters",
+//        "Great Bedroom",
+//        "Grand Bedroom",
+//        "Royal Bedroom"}},
+//    {df::building_type::Table, {
+//        "Meager Dining Room",
+//        "Modest Dining Room",
+//        "Dining Room",
+//        "Decent Dining Room",
+//        "Fine Dining Room",
+//        "Great Dining Room",
+//        "Grand Dining Room",
+//        "Royal Dining Room"}},
+//    {df::building_type::Chair, {
+//        "Meager Office",
+//        "Modest Office",
+//        "Office",
+//        "Decent Office",
+//        "Splendid Office",
+//        "Throne Room",
+//        "Opulent Throne Room",
+//        "Royal Throne Room"}},
+//    {df::building_type::Coffin, {
+//        "Grave",
+//        "Servant's Burial Chamber",
+//        "Burial Chamber",
+//        "Tomb",
+//        "Fine Tomb",
+//        "Mausoleum",
+//        "Grand Mausoleum",
+//        "Royal Mausoleum"}}
+//};
+
+//What an ugly thing without C+11
+//... and event with it
+static std::string sv1[8] = {
+    "Meager Quarters",
+    "Modest Quarters",
+    "Quarters",
+    "Decent Quarters",
+    "Fine Quarters",
+    "Great Bedroom",
+    "Grand Bedroom",
+    "Royal Bedroom"};
+static std::string sv2[8] = {
+    "Meager Dining Room",
+    "Modest Dining Room",
+    "Dining Room",
+    "Decent Dining Room",
+    "Fine Dining Room",
+    "Great Dining Room",
+    "Grand Dining Room",
+    "Royal Dining Room"};
+static std::string sv3[8] = {
+    "Meager Office",
+    "Modest Office",
+    "Office",
+    "Decent Office",
+    "Splendid Office",
+    "Throne Room",
+    "Opulent Throne Room",
+    "Royal Throne Room"};
+static std::string sv4[8] = {
+    "Grave",
+    "Servant's Burial Chamber",
+    "Burial Chamber",
+    "Tomb",
+    "Fine Tomb",
+    "Mausoleum",
+    "Grand Mausoleum",
+    "Royal Mausoleum"};
+
+typedef std::pair<df::building_type, std::vector<std::string> > rq_pair;
+static std::pair<df::building_type, std::vector<std::string> > vv1[4] = {
+    rq_pair(df::building_type::Bed, std::vector<std::string>(sv1, sv1 + sizeof(sv1) / sizeof(sv1[0]))),
+    rq_pair(df::building_type::Table, std::vector<std::string>(sv2, sv2 + sizeof(sv2) / sizeof(sv2[0]))),
+    rq_pair(df::building_type::Chair, std::vector<std::string>(sv3, sv3 + sizeof(sv3) / sizeof(sv3[0]))),
+    rq_pair(df::building_type::Coffin, std::vector<std::string>(sv4, sv4 + sizeof(sv4) / sizeof(sv4[0])))
 };
+
+static std::map<df::building_type, std::vector<std::string> > room_quality_names(vv1, vv1 + sizeof(vv1) / sizeof(vv1[0]));
 
 std::string Buildings::getRoomDescription(df::building *building, df::unit *unit)
 {
@@ -1294,13 +1366,13 @@ std::string Buildings::getRoomDescription(df::building *building, df::unit *unit
     if (!building->is_room)
         return "";
 
-    auto btype = building->getType();
+    df::building_type btype = building->getType();
     if (room_quality_names.find(btype) == room_quality_names.end())
         return "";
 
     int32_t value = building->getRoomValue(unit);
-    auto level = ENUM_FIRST_ITEM(dfhack_room_quality_level);
-    for (auto i_level = level; is_valid_enum_item_simple(i_level); i_level = next_enum_item(i_level, false))
+    df::dfhack_room_quality_level level = ENUM_FIRST_ITEM(dfhack_room_quality_level);
+    for (df::dfhack_room_quality_level i_level = level; is_valid_enum_item_simple(i_level); i_level = next_enum_item_simple(i_level, false))
     {
         if (value >= ENUM_ATTR(dfhack_room_quality_level, min_value, i_level))
         {
@@ -1372,7 +1444,7 @@ df::building* Buildings::findPenPitAt(df::coord coord)
 {
     vector<df::building_civzonest*> zones;
     Buildings::findCivzonesAt(&zones, coord);
-    for (auto zone = zones.begin(); zone != zones.end(); ++zone)
+    for (vector<df::building_civzonest*>::const_iterator zone = zones.begin(); zone != zones.end(); ++zone)
     {
         if (isPenPasture(*zone) || isPitPond(*zone))
             return (*zone);
@@ -1420,7 +1492,7 @@ StockpileIterator& StockpileIterator::operator++() {
 
         // Ignore empty bins, barrels, and wheelbarrows assigned here.
         if (item->isAssignedToThisStockpile(stockpile->id)) {
-            auto ref = Items::getGeneralRef(item, df::general_ref_type::CONTAINS_ITEM);
+            df::general_ref* ref = Items::getGeneralRef(item, df::general_ref_type::CONTAINS_ITEM);
             if (!ref) continue;
         }
 
@@ -1439,14 +1511,16 @@ bool Buildings::getCageOccupants(df::building_cagest *cage, vector<df::unit*> &u
     if (cage->contained_items.empty())
         return false;
 
-    auto *cage_item = virtual_cast<df::item_cagest>(cage->contained_items[0]->item);
+    df::item_cagest* cage_item = virtual_cast<df::item_cagest>(cage->contained_items[0]->item);
     if (!cage_item)
         return false;
 
     units.clear();
-    for (df::general_ref *gref : cage_item->general_refs)
+    //for (df::general_ref *gref : cage_item->general_refs)
+    for (std::vector<df::general_ref*>::const_iterator it = cage_item->general_refs.begin(); it != cage_item->general_refs.end(); ++it)
     {
-        auto ref = virtual_cast<df::general_ref_contains_unitst>(gref);
+        df::general_ref *gref = *it;
+        df::general_ref_contains_unitst* ref = virtual_cast<df::general_ref_contains_unitst>(gref);
         if (ref)
         {
             df::unit *unit = df::unit::find(ref->unit_id);
