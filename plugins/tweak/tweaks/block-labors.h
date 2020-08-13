@@ -22,7 +22,7 @@ struct block_labors_hook : df::viewscreen_dwarfmodest {
 
     inline bool forbidden_labor (df::unit *unit, df::unit_labor labor)
     {
-        return is_valid_enum_item(labor) && unit && !Units::isValidLabor(unit, labor);
+        return is_valid_enum_item_simple(labor) && unit && !Units::isValidLabor(unit, labor);
     }
 
     inline bool all_labors_enabled (df::unit *unit, df::unit_labor_category cat)

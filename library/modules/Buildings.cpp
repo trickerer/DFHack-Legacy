@@ -1300,7 +1300,7 @@ std::string Buildings::getRoomDescription(df::building *building, df::unit *unit
 
     int32_t value = building->getRoomValue(unit);
     auto level = ENUM_FIRST_ITEM(dfhack_room_quality_level);
-    for (auto i_level = level; is_valid_enum_item(i_level); i_level = next_enum_item(i_level, false))
+    for (auto i_level = level; is_valid_enum_item_simple(i_level); i_level = next_enum_item(i_level, false))
     {
         if (value >= ENUM_ATTR(dfhack_room_quality_level, min_value, i_level))
         {

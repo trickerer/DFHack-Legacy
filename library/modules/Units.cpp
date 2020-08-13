@@ -109,8 +109,10 @@ bool Units::getUnitsInBox (std::vector<df::unit*> &units,
     if (z1 > z2) swap(z1, z2);
 
     units.clear();
-    for (df::unit *u : world->units.all)
+    //for (df::unit *u : world->units.all)
+    for (std::vector<df::unit*>::iterator it = world->units.all.begin(); it != world->units.all.end(); ++it)
     {
+        df::unit *u = *it;
         if (u->pos.x >= x1 && u->pos.x <= x2)
         {
             if (u->pos.y >= y1 && u->pos.y <= y2)
@@ -136,7 +138,7 @@ df::coord Units::getPosition(df::unit *unit)
 
     if (unit->flags1.bits.caged)
     {
-        auto cage = getContainer(unit);
+        df::item* cage = getContainer(unit);
         if (cage)
             return Items::getPosition(cage);
     }
@@ -200,7 +202,7 @@ void Units::setNickname(df::unit *unit, std::string nick)
     {
         Translation::setNickname(&figure->name, nick);
 
-        if (auto identity = getFigureIdentity(figure))
+        if (df::identity* identity = getFigureIdentity(figure))
         {
             df::historical_figure *id_hfig = NULL;
 
@@ -233,7 +235,7 @@ df::language_name *Units::getVisibleName(df::unit *unit)
     CHECK_NULL_POINTER(unit);
 
     // as of 0.44.11, identity names take precedence over associated histfig names
-    if (auto identity = getIdentity(unit))
+    if (df::identity* identity = getIdentity(unit))
         return &identity->name;
 
     return &unit->name;
@@ -259,7 +261,7 @@ bool Units::isHidingCurse(df::unit *unit)
 {
     if (!unit->job.hunt_target)
     {
-        auto identity = Units::getIdentity(unit);
+        df::identity* identity = Units::getIdentity(unit);
         if (identity && identity->type == df::identity_type::HidingCurse)
             return true;
     }
@@ -269,50 +271,50 @@ bool Units::isHidingCurse(df::unit *unit)
 
 int Units::getPhysicalAttrValue(df::unit *unit, df::physical_attribute_type attr)
 {
-    auto &aobj = unit->body.physical_attrs[attr];
-    int value = std::max(0, aobj.value - aobj.soft_demotion);
+    df::unit_attribute &aobj = unit->body.physical_attrs[attr];
+    int value = std::max<int>(0, aobj.value - aobj.soft_demotion);
 
-    if (auto mod = unit->curse.attr_change)
+    if (df::curse_attr_change* mod = unit->curse.attr_change)
     {
         int mvalue = (value * mod->phys_att_perc[attr] / 100) + mod->phys_att_add[attr];
 
         if (isHidingCurse(unit))
-            value = std::min(value, mvalue);
+            value = std::min<int>(value, mvalue);
         else
             value = mvalue;
     }
 
-    return std::max(0, value);
+    return std::max<int>(0, value);
 }
 
 int Units::getMentalAttrValue(df::unit *unit, df::mental_attribute_type attr)
 {
-    auto soul = unit->status.current_soul;
+    df::unit_soul* soul = unit->status.current_soul;
     if (!soul) return 0;
 
-    auto &aobj = soul->mental_attrs[attr];
-    int value = std::max(0, aobj.value - aobj.soft_demotion);
+    df::unit_attribute &aobj = soul->mental_attrs[attr];
+    int value = std::max<int>(0, aobj.value - aobj.soft_demotion);
 
-    if (auto mod = unit->curse.attr_change)
+    if (df::curse_attr_change* mod = unit->curse.attr_change)
     {
         int mvalue = (value * mod->ment_att_perc[attr] / 100) + mod->ment_att_add[attr];
 
         if (isHidingCurse(unit))
-            value = std::min(value, mvalue);
+            value = std::min<int>(value, mvalue);
         else
             value = mvalue;
     }
 
-    return std::max(0, value);
+    return std::max<int>(0, value);
 }
 
 bool Units::casteFlagSet(int race, int caste, df::caste_raw_flags flag)
 {
-    auto creature = df::creature_raw::find(race);
+    df::creature_raw* creature = df::creature_raw::find(race);
     if (!creature)
         return false;
 
-    auto craw = vector_get(creature->caste, caste);
+    df::caste_raw* craw = vector_get(creature->caste, caste);
     if (!craw)
         return false;
 
@@ -375,14 +377,14 @@ df::unit_misc_trait *Units::getMiscTrait(df::unit *unit, df::misc_trait_type typ
 {
     CHECK_NULL_POINTER(unit);
 
-    auto &vec = unit->status.misc_traits;
+    std::vector<df::unit_misc_trait*> &vec = unit->status.misc_traits;
     for (size_t i = 0; i < vec.size(); i++)
         if (vec[i]->id == type)
             return vec[i];
 
     if (create)
     {
-        auto obj = new df::unit_misc_trait();
+        df::unit_misc_trait* obj = new df::unit_misc_trait();
         obj->id = type;
         vec.push_back(obj);
         return obj;
@@ -487,11 +489,11 @@ bool Units::isHunter(df::unit* unit)
 bool Units::isAvailableForAdoption(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
-    auto refs = unit->specific_refs;
+    std::vector<df::specific_ref*> &refs = unit->specific_refs;
     for(size_t i=0; i<refs.size(); i++)
     {
-        auto ref = refs[i];
-        auto reftype = ref->type;
+        df::specific_ref* ref = refs[i];
+        df::specific_ref_type reftype = ref->type;
         if( reftype == df::specific_ref_type::PETINFO_PET )
         {
             //df::pet_info* pet = ref->pet;
@@ -514,12 +516,12 @@ bool Units::isOwnCiv(df::unit* unit)
 bool Units::isOwnGroup(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
-    auto histfig = df::historical_figure::find(unit->hist_figure_id);
+    df::historical_figure const* histfig = df::historical_figure::find(unit->hist_figure_id);
     if (!histfig)
         return false;
     for (size_t i = 0; i < histfig->entity_links.size(); i++)
     {
-        auto link = histfig->entity_links[i];
+        df::histfig_entity_link* link = histfig->entity_links[i];
         if (link->entity_id == ui->group_id && link->getType() == df::histfig_entity_link_type::MEMBER)
             return true;
     }
@@ -556,9 +558,13 @@ string Units::getRaceName(df::unit* unit)
 
 void df_unit_get_physical_description(df::unit* unit, string* out_str)
 {
-    static auto* const fn =
-        reinterpret_cast<void(THISCALL *)(df::unit*, string*)>(
-            Core::getInstance().vinfo->getAddress("unit_get_physical_description"));
+    static void(THISCALL * const fn)(df::unit*, string*) =
+        reinterpret_cast<void(THISCALL *)(df::unit*, string*)>
+        (Core::getInstance().vinfo->getAddress("unit_get_physical_description"));
+
+    //static auto* const fn = reinterpret_cast<void(THISCALL *)(df::unit*, string*)>(
+    //    Core::getInstance().vinfo->getAddress("unit_get_physical_description"));
+
     if (fn)
         fn(unit, out_str);
     else
@@ -712,7 +718,7 @@ double Units::getAge(df::unit *unit, bool true_age)
     double cur_time = *cur_year + *cur_year_tick / year_ticks;
 
     if (!true_age) {
-        if (auto identity = getIdentity(unit)) {
+        if (df::identity* identity = getIdentity(unit)) {
             if (identity->birth_year != -1) {
                 birth_time = identity->birth_year + identity->birth_second / year_ticks;
             }
@@ -726,13 +732,13 @@ int Units::getKillCount(df::unit *unit)
 {
     CHECK_NULL_POINTER(unit);
 
-    auto histfig = df::historical_figure::find(unit->hist_figure_id);
+    df::historical_figure* histfig = df::historical_figure::find(unit->hist_figure_id);
     int count = 0;
     if (histfig && histfig->info->kills)
     {
-        auto kills = histfig->info->kills;
+        df::historical_kills* kills = histfig->info->kills;
         count += std::accumulate(kills->killed_count.begin(), kills->killed_count.end(), 0);
-        for (auto it = kills->events.begin(); it != kills->events.end(); ++it)
+        for (std::vector<int32_t>::iterator it = kills->events.begin(); it != kills->events.end(); ++it)
         {
             if (virtual_cast<df::history_event_hist_figure_diedst>(df::history_event::find(*it)))
                 ++count;
@@ -769,14 +775,14 @@ int Units::getNominalSkill(df::unit *unit, df::job_skill skill_id, bool use_rust
 
     // Retrieve skill from unit soul:
 
-    auto skill = binsearch_in_vector(unit->status.current_soul->skills, &df::unit_skill::id, skill_id);
+    df::unit_skill* skill = binsearch_in_vector(unit->status.current_soul->skills, &df::unit_skill::id, skill_id);
 
     if (skill)
     {
         int rating = int(skill->rating);
         if (use_rust)
             rating -= skill->rusty;
-        return std::max(0, rating);
+        return std::max<int>(0, rating);
     }
 
     return 0;
@@ -789,7 +795,7 @@ int Units::getExperience(df::unit *unit, df::job_skill skill_id, bool total)
     if (!unit->status.current_soul)
         return 0;
 
-    auto skill = binsearch_in_vector(unit->status.current_soul->skills, &df::unit_skill::id, skill_id);
+    df::unit_skill* skill = binsearch_in_vector(unit->status.current_soul->skills, &df::unit_skill::id, skill_id);
     if (!skill)
         return 0;
 
@@ -851,7 +857,7 @@ int Units::getEffectiveSkill(df::unit *unit, df::job_skill skill_id)
     {
         using namespace df::enums::misc_trait_type;
 
-        if (auto trait = getMiscTrait(unit, TimeSinceSuckedBlood))
+        if (df::unit_misc_trait* trait = getMiscTrait(unit, TimeSinceSuckedBlood))
         {
             adjust_skill_rating(
                 rating, is_adventure, trait->value,
@@ -883,7 +889,7 @@ int Units::getEffectiveSkill(df::unit *unit, df::job_skill skill_id)
 bool Units::isValidLabor(df::unit *unit, df::unit_labor labor)
 {
     CHECK_NULL_POINTER(unit);
-    if (!is_valid_enum_item(labor))
+    if (!is_valid_enum_item_simple(labor))
         return false;
     if (labor == df::unit_labor::NONE)
         return false;
@@ -912,19 +918,19 @@ inline void adjust_speed_rating(int &rating, bool is_adventure, int value, int d
 static int calcInventoryWeight(df::unit *unit)
 {
     int armor_skill = Units::getEffectiveSkill(unit, job_skill::ARMOR);
-    int armor_mul = 15 - std::min(15, armor_skill);
+    int armor_mul = 15 - std::min<int>(15, armor_skill);
 
     int inv_weight = 0, inv_weight_fraction = 0;
 
     for (size_t i = 0; i < unit->inventory.size(); i++)
     {
-        auto item = unit->inventory[i]->item;
+        df::item* item = unit->inventory[i]->item;
         if (!item->flags.bits.weight_computed)
             continue;
 
         int wval = item->weight;
         int wfval = item->weight_fraction;
-        auto mode = unit->inventory[i]->mode;
+        int16 mode = unit->inventory[i]->mode;
 
         if ((mode == df::unit_inventory_item::Worn ||
              mode == df::unit_inventory_item::WrappedAround) &&
@@ -954,11 +960,11 @@ int Units::computeMovementSpeed(df::unit *unit)
 
     // Base speed
 
-    auto creature = df::creature_raw::find(unit->race);
+    df::creature_raw* creature = df::creature_raw::find(unit->race);
     if (!creature)
         return 0;
 
-    auto craw = vector_get(creature->caste, unit->caste);
+    df::caste_raw* craw = vector_get(creature->caste, unit->caste);
     if (!craw)
         return 0;
 
@@ -980,7 +986,7 @@ int Units::computeMovementSpeed(df::unit *unit)
 
     // Swimming
 
-    auto cur_liquid = unit->status2.liquid_type.bits.liquid_type;
+    uint32 cur_liquid = unit->status2.liquid_type.bits.liquid_type;
     bool in_magma = (cur_liquid == tile_liquid::Magma);
 
     if (unit->flags2.bits.swimming)
@@ -995,7 +1001,7 @@ int Units::computeMovementSpeed(df::unit *unit)
 
             // Originally a switch:
             if (skill > 1)
-                speed = speed * std::max(6, 21-skill) / 20;
+                speed = speed * std::max<int>(6, 21-skill) / 20;
         }
     }
     else
@@ -1050,7 +1056,7 @@ int Units::computeMovementSpeed(df::unit *unit)
     {
         using namespace df::enums::misc_trait_type;
 
-        if (auto trait = Units::getMiscTrait(unit, TimeSinceSuckedBlood))
+        if (df::unit_misc_trait* trait = Units::getMiscTrait(unit, TimeSinceSuckedBlood))
         {
             adjust_speed_rating(
                 speed, is_adventure, trait->value,
@@ -1083,31 +1089,31 @@ int Units::computeMovementSpeed(df::unit *unit)
     else if (unit->flags3.bits.on_crutch)
     {
         int skill = Units::getEffectiveSkill(unit, job_skill::CRUTCH_WALK);
-        speed += 2000 - 100*std::min(20, skill);
+        speed += 2000 - 100*std::min<int>(20, skill);
     }
 
     if (unit->flags1.bits.hidden_in_ambush && !Units::isMischievous(unit))
     {
         int skill = Units::getEffectiveSkill(unit, job_skill::SNEAK);
-        speed += 2000 - 100*std::min(20, skill);
+        speed += 2000 - 100*std::min<int>(20, skill);
     }
 
-    if (unsigned(unit->counters2.paralysis-1) <= 98)
+    if (uint32(std::max<int32>(unit->counters2.paralysis-1,0)) <= 98)
         speed += unit->counters2.paralysis*10;
-    if (unsigned(unit->counters.webbed-1) <= 8)
+    if (uint32(std::max<int32>(unit->counters.webbed-1,0)) <= 8)
         speed += unit->counters.webbed*100;
 
     // Muscle and fat weight vs expected size
 
-    auto &s_info = unit->body.size_info;
-    speed = std::max(speed*3/4, std::min(speed*3/2, int(int64_t(speed)*s_info.size_cur/s_info.size_base)));
+    df::body_size_info &s_info = unit->body.size_info;
+    speed = std::max<int>(speed*3/4, std::min<int>(speed*3/2, int(int64_t(speed)*s_info.size_cur/s_info.size_base)));
 
     // Attributes
 
     int strength_attr = Units::getPhysicalAttrValue(unit, STRENGTH);
     int agility_attr = Units::getPhysicalAttrValue(unit, AGILITY);
 
-    int total_attr = std::max(200, std::min(3800, strength_attr + agility_attr));
+    int total_attr = std::max<int>(200, std::min<int>(3800, strength_attr + agility_attr));
     speed = ((total_attr-200)*(speed/2) + (3800-total_attr)*(speed*3/2))/3600;
 
     // Stance
@@ -1130,13 +1136,13 @@ int Units::computeMovementSpeed(df::unit *unit)
     // Inventory encumberance
 
     int total_weight = calcInventoryWeight(unit);
-    int free_weight = std::max(1, s_info.size_cur/10 + strength_attr*3);
+    int free_weight = std::max<int>(1, s_info.size_cur/10 + strength_attr*3);
 
     if (free_weight < total_weight)
     {
         int delta = (total_weight - free_weight)/10 + 1;
         if (!is_adventure)
-            delta = std::min(5000, delta);
+            delta = std::min<int>(5000, delta);
         speed += delta;
     }
 
@@ -1144,17 +1150,17 @@ int Units::computeMovementSpeed(df::unit *unit)
 
     if (is_adventure)
     {
-        auto player = vector_get(world->units.active, 0);
+        df::unit* player = vector_get(world->units.active, 0);
         if (player && player->id == unit->relationship_ids[df::unit_relationship_type::GroupLeader])
-            speed = std::min(speed, computeMovementSpeed(player));
+            speed = std::min<int>(speed, computeMovementSpeed(player));
     }
 
-    return std::min(10000, std::max(0, speed));
+    return std::min<int>(10000, std::max<int>(0, speed));
 }
 
 static bool entityRawFlagSet(int civ_id, df::entity_raw_flags flag)
 {
-    auto entity = df::historical_entity::find(civ_id);
+    df::historical_entity* entity = df::historical_entity::find(civ_id);
 
     return entity && entity->entity_raw && entity->entity_raw->flags.is_set(flag);
 }
@@ -1215,14 +1221,14 @@ bool Units::getNoblePositions(std::vector<NoblePosition> *pvec, df::unit *unit)
 
     pvec->clear();
 
-    auto histfig = df::historical_figure::find(unit->hist_figure_id);
+    df::historical_figure* histfig = df::historical_figure::find(unit->hist_figure_id);
     if (!histfig)
         return false;
 
     for (size_t i = 0; i < histfig->entity_links.size(); i++)
     {
-        auto link = histfig->entity_links[i];
-        auto epos = strict_virtual_cast<df::histfig_entity_link_positionst>(link);
+        df::histfig_entity_link* link = histfig->entity_links[i];
+        df::histfig_entity_link_positionst* epos = strict_virtual_cast<df::histfig_entity_link_positionst>(link);
         if (!epos)
             continue;
 
@@ -1287,16 +1293,16 @@ std::string Units::getCasteProfessionName(int race, int casteid, df::profession 
 {
     std::string prof, race_prefix;
 
-    if (pid < (df::profession)0 || !is_valid_enum_item(pid))
+    if (pid < (df::profession)0 || !is_valid_enum_item_simple(pid))
         return "";
     int16_t current_race = df::global::ui->race_id;
     if (df::global::gamemode && *df::global::gamemode == df::game_mode::ADVENTURE)
         current_race = world->units.active[0]->race;
     bool use_race_prefix = (race >= 0 && race != current_race);
 
-    if (auto creature = df::creature_raw::find(race))
+    if (df::creature_raw* creature = df::creature_raw::find(race))
     {
-        if (auto caste = vector_get(creature->caste, casteid))
+        if (df::caste_raw* caste = vector_get(creature->caste, casteid))
         {
             race_prefix = caste->caste_name[0];
 
@@ -1383,10 +1389,10 @@ std::string Units::getCasteProfessionName(int race, int casteid, df::profession 
             break;
 
         default:
-            if (auto caption = ENUM_ATTR(profession, caption, pid))
+            if (const char* caption = ENUM_ATTR(profession, caption, pid))
                 prof = caption;
             else
-                prof = ENUM_KEY_STR(profession, pid);
+                prof = ENUM_KEY_STR_SIMPLE(profession, pid);
         }
     }
 
@@ -1418,16 +1424,16 @@ int8_t Units::getProfessionColor(df::unit *unit, bool ignore_noble)
 int8_t Units::getCasteProfessionColor(int race, int casteid, df::profession pid)
 {
     // make sure it's an actual profession
-    if (pid < 0 || !is_valid_enum_item(pid))
+    if (pid < 0 || !is_valid_enum_item_simple(pid))
         return 3;
 
     // If it's not a Peasant, it's hardcoded
     if (pid != profession::STANDARD)
         return ENUM_ATTR(profession, color, pid);
 
-    if (auto creature = df::creature_raw::find(race))
+    if (df::creature_raw* creature = df::creature_raw::find(race))
     {
-        if (auto caste = vector_get(creature->caste, casteid))
+        if (df::caste_raw* caste = vector_get(creature->caste, casteid))
         {
             if (caste->flags.is_set(caste_raw_flags::HAS_COLOR))
                 return caste->caste_color[0] + caste->caste_color[2] * 8;
@@ -1461,11 +1467,11 @@ std::string Units::getGoalName(df::unit *unit, size_t goalIndex)
 
     std::string goal_name = achieved_goal ? ENUM_ATTR(goal_type, achieved_short_name, goal) : ENUM_ATTR(goal_type, short_name, goal);
     if (goal == df::goal_type::START_A_FAMILY) {
-        std::string parent = ENUM_KEY_STR(histfig_relationship_type, histfig_relationship_type::Parent);
+        std::string parent = ENUM_KEY_STR_SIMPLE(histfig_relationship_type, histfig_relationship_type::Parent);
         size_t start_pos = goal_name.find(parent);
         if (start_pos != std::string::npos) {
             df::histfig_relationship_type parent_type = isFemale(unit) ? histfig_relationship_type::Mother : histfig_relationship_type::Father;
-            goal_name.replace(start_pos, parent.length(), ENUM_KEY_STR(histfig_relationship_type, parent_type));
+            goal_name.replace(start_pos, parent.length(), ENUM_KEY_STR_SIMPLE(histfig_relationship_type, parent_type));
         }
     }
     return goal_name;
@@ -1497,7 +1503,7 @@ df::activity_entry *Units::getMainSocialActivity(df::unit *unit)
 {
     CHECK_NULL_POINTER(unit);
     if (unit->social_activities.empty())
-        return nullptr;
+        return NULL;
 
     return df::activity_entry::find(unit->social_activities[unit->social_activities.size() - 1]);
 }
@@ -1507,7 +1513,7 @@ df::activity_event *Units::getMainSocialEvent(df::unit *unit)
     CHECK_NULL_POINTER(unit);
     df::activity_entry *entry = getMainSocialActivity(unit);
     if (!entry || entry->events.empty())
-        return nullptr;
+        return NULL;
     return entry->events[entry->events.size() - 1];
 }
 
@@ -1641,11 +1647,11 @@ bool Units::isKilled(df::unit *unit)
 bool Units::isGelded(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
-    auto wounds = unit->body.wounds;
-    for(auto wound = wounds.begin(); wound != wounds.end(); ++wound)
+    std::vector<df::unit_wound*> const& wounds = unit->body.wounds;
+    for(std::vector<df::unit_wound*>::const_iterator wound = wounds.begin(); wound != wounds.end(); ++wound)
     {
-        auto parts = (*wound)->parts;
-        for (auto part = parts.begin(); part != parts.end(); ++part)
+        std::vector<df::unit_wound::T_parts*> const& parts = (*wound)->parts;
+        for (std::vector<df::unit_wound::T_parts*>::const_iterator part = parts.begin(); part != parts.end(); ++part)
         {
             if ((*part)->flags2.bits.gelded)
                 return true;
@@ -1676,7 +1682,9 @@ bool Units::isDomesticated(df::unit* unit)
 }
 
 // 50000 and up is level 0, 25000 and up is level 1, etc.
-const vector<int32_t> Units::stress_cutoffs {50000, 25000, 10000, -10000, -25000, -50000, -100000};
+//const vector<int32_t> Units::stress_cutoffs {50000, 25000, 10000, -10000, -25000, -50000, -100000};
+int32_t cutoffs[7] = {50000, 25000, 10000, -10000, -25000, -50000, -100000};
+const vector<int32_t> Units::stress_cutoffs( cutoffs, cutoffs + sizeof(cutoffs) / sizeof(cutoffs[0]) );
 
 int Units::getStressCategory(df::unit *unit)
 {

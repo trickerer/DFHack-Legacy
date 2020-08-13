@@ -654,12 +654,22 @@ namespace DFHack {
      * Check if the value is valid for its enum type.
      */
     template<class T>
+    bool is_valid_enum_item_simple(T v)
+    {
+        return df::enum_traits<T>::is_valid(v);
+    }
+
+    template<class T>
     bool is_valid_enum_item(T v)
     {
-        return !df::enum_traits<T>::is_complex ?
-            df::enum_traits<T>::is_valid(v) :
-            df::enum_traits<T>::complex.value_index_map.find(v) != df::enum_traits<T>::complex.value_index_map.end();
+        return df::enum_traits<T>::complex.value_index_map.find(v) != df::enum_traits<T>::complex.value_index_map.end();
     }
+
+    //template<class T>
+    //bool is_valid_enum_item(T v)
+    //{
+    //    return !df::enum_traits<T>::is_complex ? is_valid_enum_item_simple(v) : is_valid_enum_item_complex(v);
+    //}
 
     //template<class T>
     //inline typename std::enable_if<!df::enum_traits<T>::is_complex, bool>::type is_valid_enum_item(T v)
@@ -678,18 +688,19 @@ namespace DFHack {
      * Return the enum item key string pointer, or NULL if none.
      */
     template<class T>
+    const char* enum_item_raw_key_simple(T val)
+    {
+        typedef df::enum_traits<T> traits;
+        return traits::is_valid(val) ? traits::key_table[(short)val - traits::first_item_value] : NULL;
+    }
+
+    template<class T>
     const char* enum_item_raw_key(T val)
     {
         typedef df::enum_traits<T> traits;
-
-        if (!traits::is_complex)
-            return traits::is_valid(val) ? traits::key_table[(short)val - traits::first_item_value] : NULL;
-        else
-        {
-            const ValueIndexMap &value_index_map = traits::complex.value_index_map;
-            const ValueIndexMap::const_iterator& it = value_index_map.find(val);
-            return (it != value_index_map.end()) ? traits::key_table[it->second] : NULL
-        }
+        const ValueIndexMap &value_index_map = traits::complex.value_index_map;
+        const ValueIndexMap::const_iterator& it = value_index_map.find(val);
+        return (it != value_index_map.end()) ? traits::key_table[it->second] : NULL
     }
 
     //template<class T>
@@ -730,6 +741,13 @@ namespace DFHack {
     /**
      * Return the enum item key string, or ?123? (using the numeric value) if unknown.
      */
+    template<class T>
+    inline std::string enum_item_key_simple(T val)
+    {
+        typedef typename df::enum_traits<T>::base_type base_type;
+        return format_key<base_type>(enum_item_raw_key_simple(val), base_type(val));
+    }
+
     template<class T>
     inline std::string enum_item_key(T val)
     {
@@ -905,6 +923,7 @@ namespace DFHack {
 #define ENUM_ATTR(enum,attr,val) (df::enum_traits<df::enum>::attrs(val).attr)
 #define ENUM_ATTR_STR(enum,attr,val) DFHack::ifnull(ENUM_ATTR(enum,attr,val),"?")
 #define ENUM_KEY_STR(enum,val) (DFHack::enum_item_key<df::enum>(val))
+#define ENUM_KEY_STR_SIMPLE(enum,val) (DFHack::enum_item_key_simple<df::enum>(val))
 #define ENUM_FIRST_ITEM(enum) (df::enum_traits<df::enum>::first_item)
 #define ENUM_LAST_ITEM(enum) (df::enum_traits<df::enum>::last_item)
 
