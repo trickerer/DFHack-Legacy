@@ -188,7 +188,25 @@ static int32_t nextBuilding;
 static set<int32_t> buildings;
 
 //construction
-static UNORDERED_MAP<df::coord*, df::construction> constructions;
+struct CoordHash
+{
+    size_t operator()(const df::coord pos) const
+    {
+        return pos.x*65537 + pos.y*17 + pos.z;
+    }
+	bool operator()(const df::coord& pos1, const df::coord& pos2) const
+	{
+	    return pos1 == pos2;
+	}
+	enum
+	{
+	    bucket_size = 4,
+	    min_buckets = 8
+    };
+};
+
+typedef UNORDERED_MAP<df::coord, df::construction, CoordHash> ConstructionsMap;
+static ConstructionsMap constructions;
 static bool gameLoaded;
 
 //syndrome
@@ -287,7 +305,7 @@ void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event 
                     out.print("EventManager.onLoad null position of construction.\n");
                 continue;
             }
-            constructions[&constr->pos] = *constr;
+            constructions[constr->pos] = *constr;
         }
         for ( size_t a = 0; a < df::global::world->buildings.all.size(); a++ ) {
             df::building* b = df::global::world->buildings.all[a];
@@ -655,7 +673,7 @@ static void manageConstructionEvent(color_ostream& out) {
     //set<df::construction*> constructionsNow(df::global::world->constructions.begin(), df::global::world->constructions.end());
 
     multimap<Plugin*,EventHandler> copy(handlers[EventType::CONSTRUCTION].begin(), handlers[EventType::CONSTRUCTION].end());
-    for (UNORDERED_MAP<df::coord*, df::construction>::iterator a = constructions.begin(); a != constructions.end(); ) {
+    for (ConstructionsMap::iterator a = constructions.begin(); a != constructions.end(); ) {
         df::construction& construction = (*a).second;
         if ( df::construction::find(construction.pos) != NULL ) {
             a++;
@@ -673,8 +691,8 @@ static void manageConstructionEvent(color_ostream& out) {
     //for ( auto a = constructionsNow.begin(); a != constructionsNow.end(); a++ ) {
     for (std::vector<df::construction*>::const_iterator a = df::global::world->constructions.begin(); a != df::global::world->constructions.end(); a++ ) {
         df::construction* construction = *a;
-        bool b = constructions.find(&construction->pos) != constructions.end();
-        constructions[&construction->pos] = *construction;
+        bool b = constructions.find(construction->pos) != constructions.end();
+        constructions[construction->pos] = *construction;
         if ( b )
             continue;
         //construction created
