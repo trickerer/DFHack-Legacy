@@ -575,39 +575,39 @@ namespace DFHack {
      * Return the next item in the enum, wrapping to the first one at the end if 'wrap' is true (otherwise an invalid item).
      */
     template<class T>
-    T next_enum_item(T v, bool wrap = true)
+    T next_enum_item_simple(T v, bool wrap = true)
     {
         typedef df::enum_traits<T> traits;
-        if (traits::is_complex)
+        traits::base_type iv = traits::base_type(v);
+        if (iv < traits::last_item_value)
         {
-            const ValueIndexMap::const_iterator& it = complex.value_index_map.find(v);
-            if (it != traits::complex.value_index_map.end())
-            {
-                if (!wrap && it->second + 1 == traits::complex.size())
-                {
-                    return T(traits::last_item_value + 1);
-                }
-                size_t next_index = (it->second + 1) % traits::complex.size();
-                return T(traits::complex.index_value_map[next_index]);
-            }
-            else
-                return T(traits::last_item_value + 1);
+            return T(iv + 1);
         }
         else
         {
-            traits::base_type iv = traits::base_type(v);
-            if (iv < traits::last_item_value)
-            {
-                return T(iv + 1);
-            }
+            if (wrap)
+                return traits::first_item;
             else
-            {
-                if (wrap)
-                    return traits::first_item;
-                else
-                    return T(traits::last_item_value + 1);
-            }
+                return T(traits::last_item_value + 1);
         }
+    }
+
+    template<class T>
+    T next_enum_item(T v, bool wrap = true)
+    {
+        typedef df::enum_traits<T> traits;
+        const ValueIndexMap::const_iterator& it = complex.value_index_map.find(v);
+        if (it != traits::complex.value_index_map.end())
+        {
+            if (!wrap && it->second + 1 == traits::complex.size())
+            {
+                return T(traits::last_item_value + 1);
+            }
+            size_t next_index = (it->second + 1) % traits::complex.size();
+            return T(traits::complex.index_value_map[next_index]);
+        }
+        else
+            return T(traits::last_item_value + 1);
     }
 
     //template<class T>
@@ -931,6 +931,8 @@ namespace DFHack {
     (DFHack::next_enum_item<df::enum>(val))
 #define FOR_ENUM_ITEMS(enum,iter) \
     for(df::enum iter = ENUM_FIRST_ITEM(enum); DFHack::is_valid_enum_item(iter); iter = DFHack::next_enum_item(iter, false))
+#define FOR_ENUM_ITEMS_SIMPLE(enum,iter) \
+    for(df::enum iter = ENUM_FIRST_ITEM(enum); DFHack::is_valid_enum_item_simple(iter); iter = DFHack::next_enum_item_simple(iter, false))
 
 /*
  * Include mandatory generated headers.

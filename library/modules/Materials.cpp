@@ -221,7 +221,7 @@ bool MaterialInfo::findBuiltin(const std::string &token)
     df::world_raws &raws = world->raws;
     for (int i = 0; i < NUM_BUILTIN; i++)
     {
-        auto obj = raws.mat_table.builtin[i];
+        df::material* obj = raws.mat_table.builtin[i];
         if (obj && obj->id == token)
             return decode(i, -1);
     }
@@ -297,7 +297,7 @@ bool MaterialInfo::findProduct(df::material *material, const std::string &name)
     if (!material || name.empty())
         return decode(-1);
 
-    auto &pids = material->reaction_product.id;
+    std::vector<std::string*> &pids = material->reaction_product.id;
     for (size_t i = 0; i < pids.size(); i++)
         if ((*pids[i]) == name)
             return decode(material->reaction_product.material, i);
@@ -364,7 +364,7 @@ df::craft_material_class MaterialInfo::getCraftClass()
     if (type == 0 && index == -1)
         return craft_material_class::Stone;
 
-    FOR_ENUM_ITEMS(material_flags, i)
+    FOR_ENUM_ITEMS_SIMPLE(material_flags, i)
     {
         df::craft_material_class ccv = ENUM_ATTR(material_flags, type, i);
         if (ccv == craft_material_class::None)
@@ -575,14 +575,14 @@ bool DFHack::parseJobMaterialCategory(df::dfhack_material_category *cat, const s
 
 bool DFHack::isSoilInorganic(int material)
 {
-    auto raw = df::inorganic_raw::find(material);
+    df::inorganic_raw* raw = df::inorganic_raw::find(material);
 
     return raw && raw->flags.is_set(inorganic_flags::SOIL_ANY);
 }
 
 bool DFHack::isStoneInorganic(int material)
 {
-    auto raw = df::inorganic_raw::find(material);
+    df::inorganic_raw* raw = df::inorganic_raw::find(material);
 
     if (!raw ||
         raw->flags.is_set(inorganic_flags::SOIL_ANY) ||
@@ -721,7 +721,7 @@ bool Materials::ReadCreatureTypes (void)
 bool Materials::ReadOthers(void)
 {
     other.clear();
-    FOR_ENUM_ITEMS(builtin_mats, i)
+    FOR_ENUM_ITEMS_SIMPLE(builtin_mats, i)
     {
         t_matglossOther mat;
         mat.id = world->raws.mat_table.builtin[i]->id;
@@ -790,13 +790,13 @@ bool Materials::ReadCreatureTypesEx (void)
 
             // color mod reading
             // Caste + offset > color mod vector
-            auto & colorings = ca->color_modifiers;
+            std::vector<df::color_modifier_raw*> & colorings = ca->color_modifiers;
             size_t sizecolormod = colorings.size();
             caste.ColorModifier.resize(sizecolormod);
             for(size_t k = 0; k < sizecolormod;k++)
             {
                 // color mod [0] -> color list
-                auto & indexes = colorings[k]->pattern_index;
+                std::vector<int32_t> &indexes = colorings[k]->pattern_index;
                 size_t sizecolorlist = indexes.size();
                 caste.ColorModifier[k].colorlist.resize(sizecolorlist);
                 for(size_t l = 0; l < sizecolorlist; l++)
@@ -822,7 +822,7 @@ bool Materials::ReadCreatureTypesEx (void)
             using namespace df::enums::physical_attribute_type;
             for (int32_t k = 0; k < 7; k++)
             {
-                auto & physical = ca->attributes.phys_att_range;
+                int32 (*physical)[7] = ca->attributes.phys_att_range;
                 caste.strength[k] = physical[STRENGTH][k];
                 caste.agility[k] = physical[AGILITY][k];
                 caste.toughness[k] = physical[TOUGHNESS][k];
@@ -830,7 +830,7 @@ bool Materials::ReadCreatureTypesEx (void)
                 caste.recuperation[k] = physical[RECUPERATION][k];
                 caste.disease_resistance[k] = physical[DISEASE_RESISTANCE][k];
 
-                auto & mental = ca->attributes.ment_att_range;
+                int32 (*mental)[7] = ca->attributes.ment_att_range;
                 caste.analytical_ability[k] = mental[ANALYTICAL_ABILITY][k];
                 caste.focus[k] = mental[FOCUS][k];
                 caste.willpower[k] = mental[WILLPOWER][k];
