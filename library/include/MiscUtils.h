@@ -141,7 +141,8 @@ int binsearch_index(const std::vector<FT> &vec, FT key, bool exact = true)
 {
     // Returns the index of the value >= the key
     int min = -1, max = (int)vec.size();
-    const FT *p = vec.data();
+    //const FT *p = vec.data();
+    const FT *p = &(*vec.begin());
     for (;;)
     {
         int mid = (min + max)>>1;

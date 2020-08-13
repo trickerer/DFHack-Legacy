@@ -79,7 +79,7 @@ using df::global::world;
 
 extern bool GetLocalFeature(t_feature &feature, df::coord2d rgn_pos, int32_t index);
 
-constexpr unsigned MapExtras::BiomeInfo::MAX_LAYERS;
+const unsigned MapExtras::BiomeInfo::MAX_LAYERS;
 
 const BiomeInfo MapCache::biome_stub = {
     df::coord2d(),
@@ -93,7 +93,7 @@ const BiomeInfo MapCache::biome_stub = {
 
 MapExtras::Block::Block(MapCache *parent, DFCoord _bcoord) :
     parent(parent),
-    designated_tiles{}
+    designated_tiles()
 {
     dirty_designations = false;
     dirty_tiles = false;
@@ -234,7 +234,7 @@ MapExtras::Block::BasematInfo::BasematInfo()
 bool MapExtras::Block::setFlagAt(df::coord2d p, df::tile_designation::Mask mask, bool set)
 {
     if(!valid) return false;
-    auto &val = index_tile(designation,p);
+    df::tile_designation &val = index_tile(designation, p, df::tile_designation(NULL));
     bool cur = (val.whole & mask) != 0;
     if (cur != set)
     {
@@ -247,7 +247,7 @@ bool MapExtras::Block::setFlagAt(df::coord2d p, df::tile_designation::Mask mask,
 bool MapExtras::Block::setFlagAt(df::coord2d p, df::tile_occupancy::Mask mask, bool set)
 {
     if(!valid) return false;
-    auto &val = index_tile(occupancy,p);
+    df::tile_designation &val = index_tile(designation, p, df::tile_designation(NULL));
     bool cur = (val.whole & mask) != 0;
     if (cur != set)
     {
@@ -283,7 +283,7 @@ static df::block_square_event_designation_priorityst *getPriorityEvent(df::map_b
         if (!write)
             return NULL;
 
-        auto event = df::allocate<df::block_square_event_designation_priorityst>();
+        df::block_square_event_designation_priorityst* event = df::allocate<df::block_square_event_designation_priorityst>();
         block->block_events.push_back((df::block_square_event*)event);
         return event;
     }
@@ -295,7 +295,7 @@ int32_t MapExtras::Block::priorityAt(df::coord2d pos)
     if (!block)
         return false;
 
-    if (auto event = getPriorityEvent(block, false))
+    if (df::block_square_event_designation_priorityst* event = getPriorityEvent(block, false))
         return event->priority[pos.x % 16][pos.y % 16];
 
     return 0;
@@ -306,7 +306,7 @@ bool MapExtras::Block::setPriorityAt(df::coord2d pos, int32_t priority)
     if (!block || priority < 0)
         return false;
 
-    auto event = getPriorityEvent(block, true);
+    df::block_square_event_designation_priorityst*  event = getPriorityEvent(block, true);
     event->priority[pos.x % 16][pos.y % 16] = priority;
     return true;
 }
@@ -322,8 +322,8 @@ bool MapExtras::Block::setVeinMaterialAt(df::coord2d pos, int16_t mat, df::inclu
         init_tiles(true);
 
     pos = pos & 15;
-    auto &cur_mat = basemats->veinmat[pos.x][pos.y];
-    auto &cur_type = basemats->veintype[pos.x][pos.y];
+    int16_t &cur_mat = basemats->veinmat[pos.x][pos.y];
+    uint8_t &cur_type = basemats->veintype[pos.x][pos.y];
 
     if (cur_mat == mat && (mat < 0 || cur_type == type))
         return true;
@@ -365,9 +365,9 @@ bool MapExtras::Block::setStoneAt(df::coord2d pos, df::tiletype tile, int16_t ma
 
     // Check if anything needs to be done
     pos = pos & 15;
-    auto &cur_tile = tiles->base_tiles[pos.x][pos.y];
-    auto &cur_mattype = basemats->mat_type[pos.x][pos.y];
-    auto &cur_matidx = basemats->mat_index[pos.x][pos.y];
+    df::tiletype &cur_tile = tiles->base_tiles[pos.x][pos.y];
+    int16 &cur_mattype = basemats->mat_type[pos.x][pos.y];
+    int16 &cur_matidx = basemats->mat_index[pos.x][pos.y];
 
     if (!force_vein && cur_tile == tile && cur_mattype == 0 && cur_matidx == mat)
         return true;
@@ -416,7 +416,7 @@ bool MapExtras::Block::setSoilAt(df::coord2d pos, df::tiletype tile, bool kill_v
         init_tiles(true);
 
     pos = pos & 15;
-    auto &cur_tile = tiles->base_tiles[pos.x][pos.y];
+    df::tiletype &cur_tile = tiles->base_tiles[pos.x][pos.y];
 
     tile = matchTileMaterial(tile, SOIL);
     if (tile == tiletype::Void)
@@ -566,8 +566,8 @@ void MapExtras::Block::WriteTiles(TileInfo *tiles)
 
         for (int i = block->block_events.size()-1; i >= 0; i--)
         {
-            auto event = block->block_events[i];
-            auto ice = strict_virtual_cast<df::block_square_event_frozen_liquidst>(event);
+            df::block_square_event* event = block->block_events[i];
+            df::block_square_event_frozen_liquidst* ice = strict_virtual_cast<df::block_square_event_frozen_liquidst>(event);
             if (!ice)
                 continue;
 
@@ -619,8 +619,8 @@ void MapExtras::Block::ParseBasemats(TileInfo *tiles, BasematInfo *bmats)
         {
             using namespace df::enums::tiletype_material;
 
-            auto tt = tiles->base_tiles[x][y];
-            auto mat = info.getBaseMaterial(tt, df::coord2d(x,y));
+            df::tiletype tt = tiles->base_tiles[x][y];
+            t_matpair mat = info.getBaseMaterial(tt, df::coord2d(x,y));
 
             bmats->set_base_mat(tiles, df::coord2d(x,y), mat.mat_type, mat.mat_index);
         }
@@ -674,8 +674,8 @@ void MapExtras::Block::WriteVeins(TileInfo *tiles, BasematInfo *bmats)
     // Adjust existing veins
     for (int i = block->block_events.size()-1; i >= 0; i--)
     {
-        auto event = block->block_events[i];
-        auto vein = strict_virtual_cast<df::block_square_event_mineralst>(event);
+        df::block_square_event* event = block->block_events[i];
+        df::block_square_event_mineralst* vein = strict_virtual_cast<df::block_square_event_mineralst>(event);
         if (!vein)
             continue;
 
@@ -704,9 +704,9 @@ void MapExtras::Block::WriteVeins(TileInfo *tiles, BasematInfo *bmats)
     }
 
     // Finally add new vein objects if there are new unmatched
-    for (auto it = added.begin(); it != added.end(); ++it)
+    for (std::map<t_vein_key, df::tile_bitmask>::const_iterator it = added.begin(); it != added.end(); ++it)
     {
-        auto vein = df::allocate<df::block_square_event_mineralst>();
+        df::block_square_event_mineralst* vein = df::allocate<df::block_square_event_mineralst>();
         if (!vein)
             break;
 
@@ -782,7 +782,7 @@ void MapExtras::BlockInfo::prepare(Block *mblock)
 
     for (size_t i = 0; i < column->plants.size(); i++)
     {
-        auto pp = column->plants[i];
+        df::plant* pp = column->plants[i];
         // A plant without tree_info is single tile
         // TODO: verify that x any y lie inside the block.
         if (!pp->tree_info)
@@ -828,7 +828,7 @@ void MapExtras::BlockInfo::prepare(Block *mblock)
 
 BlockInfo::GroundType MapExtras::BlockInfo::getGroundType(int material)
 {
-    auto raw = df::inorganic_raw::find(material);
+    df::inorganic_raw* raw = df::inorganic_raw::find(material);
     if (!raw)
         return G_UNKNOWN;
 
@@ -854,7 +854,7 @@ t_matpair MapExtras::BlockInfo::getBaseMaterial(df::tiletype tt, df::coord2d pos
     case DRIFTWOOD:
     case SOIL:
     {
-        auto &biome = mblock->biomeInfoAt(pos);
+        BiomeInfo const &biome = mblock->biomeInfoAt(pos);
         rv.mat_index = biome.layer_stone[mblock->layerIndexAt(pos)];
 
         if (getGroundType(rv.mat_index) == G_STONE)
@@ -869,7 +869,7 @@ t_matpair MapExtras::BlockInfo::getBaseMaterial(df::tiletype tt, df::coord2d pos
 
     case STONE:
     {
-        auto &biome = mblock->biomeInfoAt(pos);
+        BiomeInfo const &biome = mblock->biomeInfoAt(pos);
         rv.mat_index = biome.layer_stone[mblock->layerIndexAt(pos)];
 
         if (getGroundType(rv.mat_index) == G_SOIL)
@@ -895,9 +895,9 @@ t_matpair MapExtras::BlockInfo::getBaseMaterial(df::tiletype tt, df::coord2d pos
     case TREE:
     case PLANT:
         rv.mat_type = MaterialInfo::PLANT_BASE;
-        if (auto plant = plants[block->map_pos + df::coord(x,y,0)])
+        if (df::plant* plant = plants[block->map_pos + df::coord(x,y,0)])
         {
-            if (auto raw = df::plant_raw::find(plant->material))
+            if (df::plant_raw* raw = df::plant_raw::find(plant->material))
             {
                 rv.mat_type = raw->material_defs.type[plant_material_def::basic_mat];
                 rv.mat_index = raw->material_defs.idx[plant_material_def::basic_mat];
@@ -910,7 +910,7 @@ t_matpair MapExtras::BlockInfo::getBaseMaterial(df::tiletype tt, df::coord2d pos
     case GRASS_DRY:
     case GRASS_DEAD:
         rv.mat_type = MaterialInfo::PLANT_BASE;
-        if (auto raw = df::plant_raw::find(grass[x][y]))
+        if (df::plant_raw* raw = df::plant_raw::find(grass[x][y]))
         {
             rv.mat_type = raw->material_defs.type[plant_material_def::basic_mat];
             rv.mat_index = raw->material_defs.idx[plant_material_def::basic_mat];
@@ -919,7 +919,7 @@ t_matpair MapExtras::BlockInfo::getBaseMaterial(df::tiletype tt, df::coord2d pos
 
     case FEATURE:
     {
-        auto dsgn = block->designation[x][y];
+        df::tile_designation dsgn = block->designation[x][y];
 
         if (dsgn.bits.feature_local && local_feature)
             local_feature->getMaterial(&rv.mat_type, &rv.mat_index);
@@ -1066,7 +1066,7 @@ int MapExtras::Block::biomeIndexAt(df::coord2d p)
     if (!block)
         return -1;
 
-    auto des = index_tile(designation,p);
+    df::tile_designation des = index_tile(designation, p, df::tile_designation(NULL));
     uint8_t idx = des.bits.biome;
     if (idx >= 9)
         return -1;
@@ -1120,7 +1120,7 @@ void MapExtras::Block::init_item_counts()
 
     for (size_t i = 0; i < block->items.size(); i++)
     {
-        auto it = df::item::find(block->items[i]);
+        df::item* it = df::item::find(block->items[i]);
         if (!it || !it->flags.bits.on_ground)
             continue;
 
@@ -1144,12 +1144,12 @@ bool MapExtras::Block::addItemOnGround(df::item *item)
 
     if (inserted)
     {
-        int &count = index_tile(item_counts,item->pos);
+        int &count = index_tile(item_counts, item->pos, int(NULL));
 
         if (count++ == 0)
         {
-            index_tile(occupancy,item->pos).bits.item = true;
-            index_tile(block->occupancy,item->pos).bits.item = true;
+            index_tile(occupancy, item->pos, df::tile_occupancy(NULL)).bits.item = true;
+            index_tile(block->occupancy, item->pos, df::tile_occupancy(NULL)).bits.item = true;
         }
     }
 
@@ -1169,13 +1169,13 @@ bool MapExtras::Block::removeItemOnGround(df::item *item)
 
     vector_erase_at(block->items, idx);
 
-    int &count = index_tile(item_counts,item->pos);
+    int &count = index_tile(item_counts, item->pos, int(NULL));
 
     if (--count == 0)
     {
-        index_tile(occupancy,item->pos).bits.item = false;
+        index_tile(occupancy, item->pos, df::tile_occupancy(NULL)).bits.item = false;
 
-        auto &occ = index_tile(block->occupancy,item->pos);
+        df::tile_occupancy &occ = index_tile(block->occupancy, item->pos, df::tile_occupancy(NULL));
 
         occ.bits.item = false;
 
@@ -1183,7 +1183,7 @@ bool MapExtras::Block::removeItemOnGround(df::item *item)
         // Otherwise the job would be re-suspended without actually checking items.
         if (occ.bits.building == tile_building_occ::Planned)
         {
-            if (auto bld = Buildings::findAtTile(item->pos))
+            if (df::building* bld = Buildings::findAtTile(item->pos))
             {
                 // TODO: maybe recheck other tiles like the game does.
                 bld->flags.bits.site_blocked = false;
@@ -1204,11 +1204,11 @@ MapExtras::MapCache::MapCache()
     validgeo = Maps::ReadGeology(&layer_mats, &geoidx);
     valid = true;
 
-    if (auto data = df::global::world->world_data)
+    if (df::world_data* data = df::global::world->world_data)
     {
         for (size_t i = 0; i < data->region_details.size(); i++)
         {
-            auto info = data->region_details[i];
+            df::world_region_details* info = data->region_details[i];
             region_details[info->pos] = info;
         }
     }
@@ -1237,7 +1237,7 @@ MapExtras::MapCache::MapCache()
         {
             biomes[i].layer_stone[j] = layer_mats[i][j];
 
-            auto raw = df::inorganic_raw::find(layer_mats[i][j]);
+            df::inorganic_raw* raw = df::inorganic_raw::find(layer_mats[i][j]);
             if (!raw)
                 continue;
 
@@ -1255,19 +1255,19 @@ MapExtras::MapCache::MapCache()
 
 bool MapExtras::MapCache::WriteAll()
 {
-    auto world = df::global::world;
+    df::world* world = df::global::world;
     df::job_list_link* job_link = world->jobs.list.next;
-    df::job_list_link* next = nullptr;
+    df::job_list_link* next = NULL;
     for (;job_link;job_link = next) {
         next = job_link->next;
         df::job* job = job_link->item;
         df::coord pos = job->pos;
         df::coord blockpos(pos.x>>4,pos.y>>4,pos.z);
-        auto iter = blocks.find(blockpos);
+        std::map<DFCoord, Block*>::const_iterator iter = blocks.find(blockpos);
         if (iter == blocks.end())
             continue;
         df::coord2d bpos(pos.x - (blockpos.x<<4),pos.y - (blockpos.y<<4));
-        auto block = iter->second;
+        Block* block = iter->second;
         if (!block->designated_tiles.test(bpos.x+bpos.y*16))
             continue;
         bool is_designed = ENUM_ATTR(job_type,is_designation,job->job_type);
@@ -1316,7 +1316,7 @@ void MapExtras::MapCache::discardBlock(Block *block)
 
 void MapExtras::MapCache::resetTags()
 {
-    for (auto it = blocks.begin(); it != blocks.end(); ++it)
+    for (std::map<DFCoord, Block*>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
     {
         delete[] it->second->tags;
         it->second->tags = NULL;
