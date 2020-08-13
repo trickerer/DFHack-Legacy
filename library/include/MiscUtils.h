@@ -316,7 +316,7 @@ inline typename T::mapped_type map_find(
     const T &map, const typename T::key_type &key,
     const typename T::mapped_type &defval = typename T::mapped_type()
 ) {
-    auto it = map.find(key);
+    T::const_iterator it = map.find(key);
     return (it == map.end()) ? defval : it->second;
 }
 
