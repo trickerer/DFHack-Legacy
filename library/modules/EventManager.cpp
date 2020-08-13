@@ -39,10 +39,13 @@
 #include <cstring>
 #include <map>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
+//#include <UNORDERED_MAP>
+//#include <set>
+#include <hash_map>
+#include <set>
 
 using namespace std;
+//using namespace stdext;
 using namespace DFHack;
 using namespace EventManager;
 using namespace df::enums;
@@ -53,11 +56,15 @@ using namespace df::enums;
  *  consider a typedef instead of a struct for EventHandler
  **/
 
-static multimap<int32_t, EventHandler> tickQueue;
+#define UNORDERED_MAP stdext::hash_map
 
-//TODO: consider unordered_map of pairs, or unordered_map of unordered_set, or whatever
-static multimap<Plugin*, EventHandler> handlers[EventType::EVENT_MAX];
-static int32_t eventLastTick[EventType::EVENT_MAX];
+typedef multimap<int32_t, EventHandler> TickQueue;
+static TickQueue tickQueue;
+
+//TODO: consider UNORDERED_MAP of pairs, or UNORDERED_MAP of set, or whatever
+typedef multimap<Plugin*, EventHandler> HandlersMap;
+static HandlersMap handlers[EventType::MAX_EVENTS];
+static int32_t eventLastTick[EventType::MAX_EVENTS];
 
 static const int32_t ticksPerYear = 403200;
 
@@ -65,7 +72,8 @@ void DFHack::EventManager::registerListener(EventType::EventType e, EventHandler
     handlers[e].insert(pair<Plugin*, EventHandler>(plugin, handler));
 }
 
-int32_t DFHack::EventManager::registerTick(EventHandler handler, int32_t when, Plugin* plugin, bool absolute) {
+int32_t DFHack::EventManager::registerTick(EventHandler handler, int32_t when, Plugin* plugin, bool absolute)
+{
     if ( !absolute ) {
         df::world* world = df::global::world;
         if ( world ) {
@@ -81,11 +89,14 @@ int32_t DFHack::EventManager::registerTick(EventHandler handler, int32_t when, P
     return when;
 }
 
-static void removeFromTickQueue(EventHandler getRidOf) {
-    for ( auto j = tickQueue.find(getRidOf.freq); j != tickQueue.end(); ) {
-        if ( (*j).first > getRidOf.freq )
+static void removeFromTickQueue(EventHandler getRidOf)
+{
+    for (TickQueue::const_iterator j = tickQueue.find(getRidOf.freq); j != tickQueue.end();)
+    {
+        if ((*j).first > getRidOf.freq)
             break;
-        if ( (*j).second != getRidOf ) {
+        if ((*j).second != getRidOf)
+        {
             j++;
             continue;
         }
@@ -93,12 +104,15 @@ static void removeFromTickQueue(EventHandler getRidOf) {
     }
 }
 
-void DFHack::EventManager::unregister(EventType::EventType e, EventHandler handler, Plugin* plugin) {
-    for ( auto i = handlers[e].find(plugin); i != handlers[e].end(); ) {
+void DFHack::EventManager::unregister(EventType::EventType e, EventHandler handler, Plugin* plugin)
+{
+    for (HandlersMap::const_iterator i = handlers[e].find(plugin); i != handlers[e].end(); )
+    {
         if ( (*i).first != plugin )
             break;
         EventHandler handle = (*i).second;
-        if ( handle != handler ) {
+        if ( handle != handler )
+        {
             i++;
             continue;
         }
@@ -109,13 +123,15 @@ void DFHack::EventManager::unregister(EventType::EventType e, EventHandler handl
 }
 
 void DFHack::EventManager::unregisterAll(Plugin* plugin) {
-    for ( auto i = handlers[EventType::TICK].find(plugin); i != handlers[EventType::TICK].end(); i++ ) {
+    for (HandlersMap::const_iterator i = handlers[EventType::TICK].find(plugin); i != handlers[EventType::TICK].end(); i++ )
+    {
         if ( (*i).first != plugin )
             break;
 
         removeFromTickQueue((*i).second);
     }
-    for ( size_t a = 0; a < (size_t)EventType::EVENT_MAX; a++ ) {
+    for ( size_t a = 0; a < (size_t)EventType::MAX_EVENTS; a++ )
+    {
         handlers[a].erase(plugin);
     }
     return;
@@ -159,20 +175,20 @@ static const eventManager_t eventManager[] = {
 static int32_t lastJobId = -1;
 
 //job completed
-static unordered_map<int32_t, df::job*> prevJobs;
+static UNORDERED_MAP<int32_t, df::job*> prevJobs;
 
 //unit death
-static unordered_set<int32_t> livingUnits;
+static set<int32_t> livingUnits;
 
 //item creation
 static int32_t nextItem;
 
 //building
 static int32_t nextBuilding;
-static unordered_set<int32_t> buildings;
+static set<int32_t> buildings;
 
 //construction
-static unordered_map<df::coord, df::construction> constructions;
+static UNORDERED_MAP<df::coord*, df::construction> constructions;
 static bool gameLoaded;
 
 //syndrome
@@ -183,7 +199,8 @@ static int32_t nextInvasion;
 
 //equipment change
 //static unordered_map<int32_t, vector<df::unit_inventory_item> > equipmentLog;
-static unordered_map<int32_t, vector<InventoryItem> > equipmentLog;
+typedef UNORDERED_MAP<int32_t, vector<InventoryItem> > EquipmentLog;
+static EquipmentLog equipmentLog;
 
 //report
 static int32_t lastReport;
@@ -209,7 +226,7 @@ void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event 
     }
     if ( event == DFHack::SC_MAP_UNLOADED ) {
         lastJobId = -1;
-        for ( auto i = prevJobs.begin(); i != prevJobs.end(); i++ ) {
+        for (UNORDERED_MAP<int32_t, df::job*>::const_iterator i = prevJobs.begin(); i != prevJobs.end(); i++ ) {
             Job::deleteJobStruct((*i).second, true);
         }
         prevJobs.clear();
@@ -225,7 +242,8 @@ void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event 
         gameLoaded = false;
 
         multimap<Plugin*,EventHandler> copy(handlers[EventType::UNLOAD].begin(), handlers[EventType::UNLOAD].end());
-        for (auto a = copy.begin(); a != copy.end(); a++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator a = copy.begin(); a != copy.end(); a++ )
+        {
             (*a).second.eventHandler(out, NULL);
         }
     } else if ( event == DFHack::SC_MAP_LOADED ) {
@@ -256,7 +274,7 @@ void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event 
         lastJobId = -1 + *df::global::job_next_id;
 
         constructions.clear();
-        for ( auto i = df::global::world->constructions.begin(); i != df::global::world->constructions.end(); i++ ) {
+        for (std::vector<df::construction* >::const_iterator i = df::global::world->constructions.begin(); i != df::global::world->constructions.end(); i++ ) {
             df::construction* constr = *i;
             if ( !constr ) {
                 if ( Once::doOnce("EventManager.onLoad null constr") ) {
@@ -269,7 +287,7 @@ void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event 
                     out.print("EventManager.onLoad null position of construction.\n");
                 continue;
             }
-            constructions[constr->pos] = *constr;
+            constructions[&constr->pos] = *constr;
         }
         for ( size_t a = 0; a < df::global::world->buildings.all.size(); a++ ) {
             df::building* b = df::global::world->buildings.all[a];
@@ -294,7 +312,7 @@ void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event 
         lastReportInteraction = -1;
         reportToRelevantUnitsTime = -1;
         reportToRelevantUnits.clear();
-        for ( size_t a = 0; a < EventType::EVENT_MAX; a++ ) {
+        for ( size_t a = 0; a < EventType::MAX_EVENTS; a++ ) {
             eventLastTick[a] = -1;//-1000000;
         }
         for ( size_t a = 0; a < df::global::world->history.figures.size(); a++ ) {
@@ -318,12 +336,12 @@ void DFHack::EventManager::manageEvents(color_ostream& out) {
 
     int32_t tick = df::global::world->frame_counter;
 
-    for ( size_t a = 0; a < EventType::EVENT_MAX; a++ ) {
+    for ( size_t a = 0; a < EventType::MAX_EVENTS; a++ ) {
         if ( handlers[a].empty() )
             continue;
         int32_t eventFrequency = -100;
         if ( a != EventType::TICK )
-            for ( auto b = handlers[a].begin(); b != handlers[a].end(); b++ ) {
+            for (HandlersMap::const_iterator b = handlers[a].begin(); b != handlers[a].end(); b++ ) {
                 EventHandler bob = (*b).second;
                 if ( bob.freq < eventFrequency || eventFrequency == -100 )
                     eventFrequency = bob.freq;
@@ -341,7 +359,7 @@ void DFHack::EventManager::manageEvents(color_ostream& out) {
 static void manageTickEvent(color_ostream& out) {
     if (!df::global::world)
         return;
-    unordered_set<EventHandler> toRemove;
+    std::set<EventHandler> toRemove;
     int32_t tick = df::global::world->frame_counter;
     while ( !tickQueue.empty() ) {
         if ( tick < (*tickQueue.begin()).first )
@@ -353,7 +371,7 @@ static void manageTickEvent(color_ostream& out) {
     }
     if ( toRemove.empty() )
         return;
-    for ( auto a = handlers[EventType::TICK].begin(); a != handlers[EventType::TICK].end(); ) {
+    for (HandlersMap::const_iterator a = handlers[EventType::TICK].begin(); a != handlers[EventType::TICK].end(); ) {
         EventHandler handle = (*a).second;
         if ( toRemove.find(handle) == toRemove.end() ) {
             a++;
@@ -386,7 +404,7 @@ static void manageJobInitiatedEvent(color_ostream& out) {
             continue;
         if ( link->item->id <= lastJobId )
             continue;
-        for ( auto i = copy.begin(); i != copy.end(); i++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator i = copy.begin(); i != copy.end(); i++ ) {
             (*i).second.eventHandler(out, (void*)link->item);
         }
     }
@@ -479,7 +497,7 @@ static void manageJobCompletedEvent(color_ostream& out) {
     }
 #endif
 
-    for ( auto i = prevJobs.begin(); i != prevJobs.end(); i++ ) {
+    for (UNORDERED_MAP<int32_t, df::job*>::const_iterator i = prevJobs.begin(); i != prevJobs.end(); i++ ) {
         //if it happened within a tick, must have been cancelled by the user or a plugin: not completed
         if ( tick1 <= tick0 )
             continue;
@@ -496,7 +514,7 @@ static void manageJobCompletedEvent(color_ostream& out) {
                 continue;
 
             //still false positive if cancelled at EXACTLY the right time, but experiments show this doesn't happen
-            for ( auto j = copy.begin(); j != copy.end(); j++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator j = copy.begin(); j != copy.end(); j++ ) {
                 (*j).second.eventHandler(out, (void*)&job0);
             }
             continue;
@@ -507,19 +525,19 @@ static void manageJobCompletedEvent(color_ostream& out) {
         if ( job0.flags.bits.repeat || job0.completion_timer != 0 )
             continue;
 
-        for ( auto j = copy.begin(); j != copy.end(); j++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator j = copy.begin(); j != copy.end(); j++ ) {
             (*j).second.eventHandler(out, (void*)&job0);
         }
     }
 
     //erase old jobs, copy over possibly altered jobs
-    for ( auto i = prevJobs.begin(); i != prevJobs.end(); i++ ) {
+    for (UNORDERED_MAP<int32_t, df::job*>::const_iterator i = prevJobs.begin(); i != prevJobs.end(); i++ ) {
         Job::deleteJobStruct((*i).second, true);
     }
     prevJobs.clear();
 
     //create new jobs
-    for ( auto j = nowJobs.begin(); j != nowJobs.end(); j++ ) {
+    for (map<int32_t, df::job*>::const_iterator j = nowJobs.begin(); j != nowJobs.end(); j++ ) {
         /*map<int32_t, df::job*>::iterator i = prevJobs.find((*j).first);
         if ( i != prevJobs.end() ) {
             continue;
@@ -545,7 +563,7 @@ static void manageUnitDeathEvent(color_ostream& out) {
         if ( livingUnits.find(unit->id) == livingUnits.end() )
             continue;
 
-        for ( auto i = copy.begin(); i != copy.end(); i++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator i = copy.begin(); i != copy.end(); i++ ) {
             (*i).second.eventHandler(out, (void*)intptr_t(unit->id));
         }
         livingUnits.erase(unit->id);
@@ -581,7 +599,7 @@ static void manageItemCreationEvent(color_ostream& out) {
         //spider webs don't count
         if ( item->flags.bits.spider_web )
             continue;
-        for ( auto i = copy.begin(); i != copy.end(); i++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator i = copy.begin(); i != copy.end(); i++ ) {
             (*i).second.eventHandler(out, (void*)intptr_t(item->id));
         }
     }
@@ -607,7 +625,7 @@ static void manageBuildingEvent(color_ostream& out) {
             continue;
         }
         buildings.insert(a);
-        for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
             EventHandler bob = (*b).second;
             bob.eventHandler(out, (void*)intptr_t(a));
         }
@@ -615,7 +633,7 @@ static void manageBuildingEvent(color_ostream& out) {
     nextBuilding = *df::global::building_next_id;
 
     //now alert people about destroyed buildings
-    for ( auto a = buildings.begin(); a != buildings.end(); ) {
+    for (set<int32_t>::const_iterator a = buildings.begin(); a != buildings.end(); ) {
         int32_t id = *a;
         int32_t index = df::building::binsearch_index(df::global::world->buildings.all,id);
         if ( index != -1 ) {
@@ -623,7 +641,7 @@ static void manageBuildingEvent(color_ostream& out) {
             continue;
         }
 
-        for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
             EventHandler bob = (*b).second;
             bob.eventHandler(out, (void*)intptr_t(id));
         }
@@ -634,10 +652,10 @@ static void manageBuildingEvent(color_ostream& out) {
 static void manageConstructionEvent(color_ostream& out) {
     if (!df::global::world)
         return;
-    //unordered_set<df::construction*> constructionsNow(df::global::world->constructions.begin(), df::global::world->constructions.end());
+    //set<df::construction*> constructionsNow(df::global::world->constructions.begin(), df::global::world->constructions.end());
 
     multimap<Plugin*,EventHandler> copy(handlers[EventType::CONSTRUCTION].begin(), handlers[EventType::CONSTRUCTION].end());
-    for ( auto a = constructions.begin(); a != constructions.end(); ) {
+    for (UNORDERED_MAP<df::coord*, df::construction>::iterator a = constructions.begin(); a != constructions.end(); ) {
         df::construction& construction = (*a).second;
         if ( df::construction::find(construction.pos) != NULL ) {
             a++;
@@ -645,7 +663,7 @@ static void manageConstructionEvent(color_ostream& out) {
         }
         //construction removed
         //out.print("Removed construction (%d,%d,%d)\n", construction.pos.x,construction.pos.y,construction.pos.z);
-        for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
             EventHandler handle = (*b).second;
             handle.eventHandler(out, (void*)&construction);
         }
@@ -653,15 +671,15 @@ static void manageConstructionEvent(color_ostream& out) {
     }
 
     //for ( auto a = constructionsNow.begin(); a != constructionsNow.end(); a++ ) {
-    for ( auto a = df::global::world->constructions.begin(); a != df::global::world->constructions.end(); a++ ) {
+    for (std::vector<df::construction*>::const_iterator a = df::global::world->constructions.begin(); a != df::global::world->constructions.end(); a++ ) {
         df::construction* construction = *a;
-        bool b = constructions.find(construction->pos) != constructions.end();
-        constructions[construction->pos] = *construction;
+        bool b = constructions.find(&construction->pos) != constructions.end();
+        constructions[&construction->pos] = *construction;
         if ( b )
             continue;
         //construction created
         //out.print("Created construction (%d,%d,%d)\n", construction->pos.x,construction->pos.y,construction->pos.z);
-        for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
             EventHandler handle = (*b).second;
             handle.eventHandler(out, (void*)construction);
         }
@@ -673,7 +691,7 @@ static void manageSyndromeEvent(color_ostream& out) {
         return;
     multimap<Plugin*,EventHandler> copy(handlers[EventType::SYNDROME].begin(), handlers[EventType::SYNDROME].end());
     int32_t highestTime = -1;
-    for ( auto a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
+    for (std::vector<df::unit*>::const_iterator a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
         df::unit* unit = *a;
 /*
         if ( unit->flags1.bits.inactive )
@@ -688,7 +706,7 @@ static void manageSyndromeEvent(color_ostream& out) {
                 continue;
 
             SyndromeData data(unit->id, b);
-            for ( auto c = copy.begin(); c != copy.end(); c++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator c = copy.begin(); c != copy.end(); c++ ) {
                 EventHandler handle = (*c).second;
                 handle.eventHandler(out, (void*)&data);
             }
@@ -706,7 +724,7 @@ static void manageInvasionEvent(color_ostream& out) {
         return;
     nextInvasion = df::global::ui->invasions.next_id;
 
-    for ( auto a = copy.begin(); a != copy.end(); a++ ) {
+    for (multimap<Plugin*,EventHandler>::const_iterator a = copy.begin(); a != copy.end(); a++ ) {
         EventHandler handle = (*a).second;
         handle.eventHandler(out, (void*)intptr_t(nextInvasion-1));
     }
@@ -717,9 +735,9 @@ static void manageEquipmentEvent(color_ostream& out) {
         return;
     multimap<Plugin*,EventHandler> copy(handlers[EventType::INVENTORY_CHANGE].begin(), handlers[EventType::INVENTORY_CHANGE].end());
 
-    unordered_map<int32_t, InventoryItem> itemIdToInventoryItem;
-    unordered_set<int32_t> currentlyEquipped;
-    for ( auto a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
+    UNORDERED_MAP<int32_t, InventoryItem> itemIdToInventoryItem;
+    set<int32_t> currentlyEquipped;
+    for (std::vector<df::unit*>::const_iterator a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
         itemIdToInventoryItem.clear();
         currentlyEquipped.clear();
         df::unit* unit = *a;
@@ -727,7 +745,7 @@ static void manageEquipmentEvent(color_ostream& out) {
             continue;
         */
 
-        auto oldEquipment = equipmentLog.find(unit->id);
+        EquipmentLog::iterator oldEquipment = equipmentLog.find(unit->id);
         bool hadEquipment = oldEquipment != equipmentLog.end();
         vector<InventoryItem>* temp;
         if ( hadEquipment ) {
@@ -737,7 +755,7 @@ static void manageEquipmentEvent(color_ostream& out) {
         }
         //vector<InventoryItem>& v = (*oldEquipment).second;
         vector<InventoryItem>& v = *temp;
-        for ( auto b = v.begin(); b != v.end(); b++ ) {
+        for (vector<InventoryItem>::iterator b = v.begin(); b != v.end(); b++ ) {
             InventoryItem& i = *b;
             itemIdToInventoryItem[i.itemId] = i;
         }
@@ -745,11 +763,11 @@ static void manageEquipmentEvent(color_ostream& out) {
             df::unit_inventory_item* dfitem_new = unit->inventory[b];
             currentlyEquipped.insert(dfitem_new->item->id);
             InventoryItem item_new(dfitem_new->item->id, *dfitem_new);
-            auto c = itemIdToInventoryItem.find(dfitem_new->item->id);
+            UNORDERED_MAP<int32_t, InventoryItem>::const_iterator c = itemIdToInventoryItem.find(dfitem_new->item->id);
             if ( c == itemIdToInventoryItem.end() ) {
                 //new item equipped (probably just picked up)
                 InventoryChangeData data(unit->id, NULL, &item_new);
-                for ( auto h = copy.begin(); h != copy.end(); h++ ) {
+                for (multimap<Plugin*,EventHandler>::const_iterator h = copy.begin(); h != copy.end(); h++ ) {
                     EventHandler handle = (*h).second;
                     handle.eventHandler(out, (void*)&data);
                 }
@@ -764,19 +782,19 @@ static void manageEquipmentEvent(color_ostream& out) {
             //some sort of change in how it's equipped
 
             InventoryChangeData data(unit->id, &item_old, &item_new);
-            for ( auto h = copy.begin(); h != copy.end(); h++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator h = copy.begin(); h != copy.end(); h++ ) {
                 EventHandler handle = (*h).second;
                 handle.eventHandler(out, (void*)&data);
             }
         }
         //check for dropped items
-        for ( auto b = v.begin(); b != v.end(); b++ ) {
+        for (vector<InventoryItem>::const_iterator b = v.begin(); b != v.end(); b++ ) {
             InventoryItem i = *b;
             if ( currentlyEquipped.find(i.itemId) != currentlyEquipped.end() )
                 continue;
             //TODO: delete ptr if invalid
             InventoryChangeData data(unit->id, &i, NULL);
-            for ( auto h = copy.begin(); h != copy.end(); h++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator h = copy.begin(); h != copy.end(); h++ ) {
                 EventHandler handle = (*h).second;
                 handle.eventHandler(out, (void*)&data);
             }
@@ -829,7 +847,7 @@ static void manageReportEvent(color_ostream& out) {
     }
     for ( ; a < reports.size(); a++ ) {
         df::report* report = reports[a];
-        for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
             EventHandler handle = (*b).second;
             handle.eventHandler(out, (void*)intptr_t(report->id));
         }
@@ -873,7 +891,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
         return;
     updateReportToRelevantUnits();
     map<int32_t, map<int32_t, int32_t> > alreadyDone;
-    for ( auto a = strikeReports.begin(); a != strikeReports.end(); a++ ) {
+    for (std::set<int32_t>::const_iterator a = strikeReports.begin(); a != strikeReports.end(); a++ ) {
         int32_t reportId = *a;
         df::report* report = df::report::find(reportId);
         if ( !report )
@@ -908,7 +926,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
             data.wound = wound1->id;
 
             alreadyDone[data.attacker][data.defender] = 1;
-            for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
                 EventHandler handle = (*b).second;
                 handle.eventHandler(out, (void*)&data);
             }
@@ -921,7 +939,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
             data.wound = wound2->id;
 
             alreadyDone[data.attacker][data.defender] = 1;
-            for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
                 EventHandler handle = (*b).second;
                 handle.eventHandler(out, (void*)&data);
             }
@@ -933,7 +951,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
             data.defender = unit1->id;
             data.wound = -1;
             alreadyDone[data.attacker][data.defender] = 1;
-            for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
                 EventHandler handle = (*b).second;
                 handle.eventHandler(out, (void*)&data);
             }
@@ -945,7 +963,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
             data.defender = unit2->id;
             data.wound = -1;
             alreadyDone[data.attacker][data.defender] = 1;
-            for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+            for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
                 EventHandler handle = (*b).second;
                 handle.eventHandler(out, (void*)&data);
             }
@@ -1065,13 +1083,13 @@ static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, 
     } else {
         if ( defenders.size() == 1 ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
-            auto a = std::find(attackers.begin(),attackers.end(),defenders[0]);
+            std::vector<df::unit*>::const_iterator a = std::find(attackers.begin(),attackers.end(),defenders[0]);
             if ( a != attackers.end() )
                 attackers.erase(a);
         }
         if ( attackers.size() == 1 ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
-            auto a = std::find(defenders.begin(),defenders.end(),attackers[0]);
+            std::vector<df::unit*>::const_iterator a = std::find(defenders.begin(),defenders.end(),attackers[0]);
             if ( a != defenders.end() )
                 defenders.erase(a);
         }
@@ -1116,7 +1134,7 @@ static vector<df::unit*> gatherRelevantUnits(color_ostream& out, df::report* r1,
     if ( r1 ) reports.push_back(r1);
     if ( r2 ) reports.push_back(r2);
     vector<df::unit*> result;
-    unordered_set<int32_t> ids;
+    set<int32_t> ids;
 //out.print("%s,%d\n",__FILE__,__LINE__);
     for ( size_t a = 0; a < reports.size(); a++ ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
@@ -1151,7 +1169,7 @@ static void manageInteractionEvent(color_ostream& out) {
     df::report* lastAttackEvent = NULL;
     df::unit* lastAttacker = NULL;
     //df::unit* lastDefender = NULL;
-    unordered_map<int32_t,unordered_set<int32_t> > history;
+    UNORDERED_MAP<int32_t,set<int32_t> > history;
     for ( ; a < reports.size(); a++ ) {
         df::report* report = reports[a];
         lastReportInteraction = report->id;
@@ -1186,13 +1204,13 @@ static void manageInteractionEvent(color_ostream& out) {
         {
 #define HISTORY_ITEM 1
 #if HISTORY_ITEM
-            unordered_set<int32_t>& b = history[data.attacker];
+            set<int32_t>& b = history[data.attacker];
             if ( b.find(data.defender) != b.end() )
                 continue;
             history[data.attacker].insert(data.defender);
             //b.insert(data.defender);
 #else
-            unordered_set<int32_t>& b = history[data.attackReport];
+            set<int32_t>& b = history[data.attackReport];
             if ( b.find(data.defendReport) != b.end() )
                 continue;
             history[data.attackReport].insert(data.defendReport);
@@ -1203,7 +1221,7 @@ static void manageInteractionEvent(color_ostream& out) {
         lastAttacker = df::unit::find(data.attacker);
         //lastDefender = df::unit::find(data.defender);
         //fire event
-        for ( auto b = copy.begin(); b != copy.end(); b++ ) {
+        for (multimap<Plugin*,EventHandler>::const_iterator b = copy.begin(); b != copy.end(); b++ ) {
             EventHandler handle = (*b).second;
             handle.eventHandler(out, (void*)&data);
         }

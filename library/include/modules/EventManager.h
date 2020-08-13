@@ -32,7 +32,7 @@ namespace DFHack {
                 UNIT_ATTACK,
                 UNLOAD,
                 INTERACTION,
-                EVENT_MAX
+                MAX_EVENTS
             };
         }
 
@@ -49,6 +49,9 @@ namespace DFHack {
             }
             bool operator!=(const EventHandler& handle) const {
                 return !( *this == handle);
+            }
+            bool operator<(const EventHandler& handle) const {
+                return this < &handle;
             }
         };
 
@@ -99,28 +102,28 @@ namespace DFHack {
     }
 }
 
-namespace std {
-    template <>
-    struct hash<df::coord> {
-        std::size_t operator()(const df::coord& c) const {
-            size_t r = 17;
-            const size_t m = 65537;
-            r = m*(r+c.x);
-            r = m*(r+c.y);
-            r = m*(r+c.z);
-            return r;
-        }
-    };
-    template <>
-    struct hash<DFHack::EventManager::EventHandler> {
-        std::size_t operator()(const DFHack::EventManager::EventHandler& h) const {
-            size_t r = 17;
-            const size_t m = 65537;
-            r = m*(r+(intptr_t)h.eventHandler);
-            r = m*(r+h.freq);
-            return r;
-        }
-    };
-}
+//namespace std {
+//    template <>
+//    struct hash<df::coord> {
+//        std::size_t operator()(const df::coord& c) const {
+//            size_t r = 17;
+//            const size_t m = 65537;
+//            r = m*(r+c.x);
+//            r = m*(r+c.y);
+//            r = m*(r+c.z);
+//            return r;
+//        }
+//    };
+//    template <>
+//    struct hash<DFHack::EventManager::EventHandler> {
+//        std::size_t operator()(const DFHack::EventManager::EventHandler& h) const {
+//            size_t r = 17;
+//            const size_t m = 65537;
+//            r = m*(r+(intptr_t)h.eventHandler);
+//            r = m*(r+h.freq);
+//            return r;
+//        }
+//    };
+//}
 
 #endif

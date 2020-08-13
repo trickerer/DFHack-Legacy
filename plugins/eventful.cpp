@@ -206,7 +206,7 @@ static void ev_mng_interaction(color_ostream& out, void* ptr) {
     EventManager::InteractionData* data = (EventManager::InteractionData*)ptr;
     onInteraction(out, data->attackVerb, data->defendVerb, data->attacker, data->defender, data->attackReport, data->defendReport);
 }
-std::vector<int> enabledEventManagerEvents(EventManager::EventType::EVENT_MAX,-1);
+std::vector<int> enabledEventManagerEvents(EventManager::EventType::MAX_EVENTS,-1);
 typedef void (*handler_t) (color_ostream&,void*);
 static const handler_t eventHandlers[] = {
  NULL,
@@ -228,7 +228,7 @@ static void enableEvent(int evType,int freq)
 {
     if (freq < 0)
         return;
-    CHECK_INVALID_ARGUMENT(evType >= 0 && evType < EventManager::EventType::EVENT_MAX &&
+    CHECK_INVALID_ARGUMENT(evType >= 0 && evType < EventManager::EventType::MAX_EVENTS &&
                            evType != EventManager::EventType::TICK);
     EventManager::EventHandler::callback_t fun_ptr = eventHandlers[evType];
     EventManager::EventType::EventType typeToEnable=static_cast<EventManager::EventType::EventType>(evType);
