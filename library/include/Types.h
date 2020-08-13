@@ -94,8 +94,8 @@ namespace DFHack
     inline rect2d intersect(rect2d a, rect2d b) {
         df::coord2d g1 = a.first, g2 = a.second;
         df::coord2d c1 = b.first, c2 = b.second;
-        df::coord2d rc1 = df::coord2d(std::max(g1.x, c1.x), std::max(g1.y, c1.y));
-        df::coord2d rc2 = df::coord2d(std::min(g2.x, c2.x), std::min(g2.y, c2.y));
+        df::coord2d rc1 = df::coord2d(std::max<uint16>(g1.x, c1.x), std::max<uint16>(g1.y, c1.y));
+        df::coord2d rc2 = df::coord2d(std::min<uint16>(g2.x, c2.x), std::min<uint16>(g2.y, c2.y));
         return rect2d(rc1, rc2);
     }
 

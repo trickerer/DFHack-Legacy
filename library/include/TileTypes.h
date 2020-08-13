@@ -311,7 +311,7 @@ namespace DFHack
     inline
     df::tiletype findTileType(const df::tiletype_shape tshape, const df::tiletype_material tmat, const df::tiletype_variant tvar, const df::tiletype_special tspecial, const TileDirection tdir)
     {
-        FOR_ENUM_ITEMS(tiletype, tt)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
         {
             if (tshape != tiletype_shape::NONE && tshape != tileShape(tt))
                 continue;

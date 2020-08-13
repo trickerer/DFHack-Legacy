@@ -190,8 +190,8 @@ df::map_block *Maps::ensureTileBlock (int32_t x, int32_t y, int32_t z)
     if (!isValidTilePos(x,y,z))
         return NULL;
 
-    auto column = world->map.block_index[x >> 4][y >> 4];
-    auto &slot = column[z];
+    df::map_block** column = world->map.block_index[x >> 4][y >> 4];
+    df::map_block* &slot = column[z];
     if (slot)
         return slot;
 
@@ -242,7 +242,7 @@ df::tile_occupancy *Maps::getTileOccupancy(int32_t x, int32_t y, int32_t z)
 
 df::region_map_entry *Maps::getRegionBiome(df::coord2d rgn_pos)
 {
-    auto data = world->world_data;
+    df::world_data* data = world->world_data;
     if (!data)
         return NULL;
 
@@ -266,7 +266,7 @@ void Maps::enableBlockUpdates(df::map_block *blk, bool flow, bool temperature)
         blk->flags.bits.update_liquid_twice = true;
     }
 
-    auto z_flags = world->map_extras.z_level_flags;
+    df::z_level_flags* z_flags = world->map_extras.z_level_flags;
     int z_level = blk->map_pos.z;
 
     if (z_flags && z_level >= 0 && z_level < world->map.z_count_block)
@@ -279,31 +279,31 @@ void Maps::enableBlockUpdates(df::map_block *blk, bool flow, bool temperature)
 
 df::flow_info *Maps::spawnFlow(df::coord pos, df::flow_type type, int mat_type, int mat_index, int density)
 {
-    using df::global::flows;
+    //using df::global::flows;
 
-    auto block = getTileBlock(pos);
-    if (!flows || !block)
+    df::map_block* block = getTileBlock(pos);
+    if (!df::global::flows || !block)
         return NULL;
 
-    auto flow = new df::flow_info();
+    df::flow_info* flow = new df::flow_info();
     flow->type = type;
     flow->mat_type = mat_type;
     flow->mat_index = mat_index;
-    flow->density = std::min(100, density);
+    flow->density = std::min<int>(100, density);
     flow->pos = pos;
 
     block->flows.push_back(flow);
-    flows->push_back(flow);
+    df::global::flows->push_back(flow);
     return flow;
 }
 
 df::feature_init *Maps::getGlobalInitFeature(int32_t index)
 {
-    auto data = world->world_data;
+    df::world_data* data = world->world_data;
     if (!data || index < 0)
         return NULL;
 
-    auto rgn = vector_get(data->underground_regions, index);
+    df::world_underground_region* rgn = vector_get(data->underground_regions, index);
     if (!rgn)
         return NULL;
 
@@ -314,7 +314,7 @@ bool Maps::GetGlobalFeature(t_feature &feature, int32_t index)
 {
     feature.type = (df::feature_type)-1;
 
-    auto f = Maps::getGlobalInitFeature(index);
+    df::feature_init* f = Maps::getGlobalInitFeature(index);
     if (!f)
         return false;
 
@@ -327,7 +327,7 @@ bool Maps::GetGlobalFeature(t_feature &feature, int32_t index)
 
 df::feature_init *Maps::getLocalInitFeature(df::coord2d rgn_pos, int32_t index)
 {
-    auto data = world->world_data;
+    df::world_data* data = world->world_data;
     if (!data || index < 0)
         return NULL;
 
@@ -339,7 +339,7 @@ df::feature_init *Maps::getLocalInitFeature(df::coord2d rgn_pos, int32_t index)
     df::coord2d bigregion = rgn_pos / 16;
 
     // bigregion is 16x16 regions. for each bigregion in X dimension:
-    auto fptr = data->feature_map[bigregion.x][bigregion.y].features;
+    df::world_data::T_feature_map::T_features* fptr = data->feature_map[bigregion.x][bigregion.y].features;
     if (!fptr)
         return NULL;
 
@@ -354,7 +354,7 @@ bool GetLocalFeature(t_feature &feature, df::coord2d rgn_pos, int32_t index)
 {
     feature.type = (df::feature_type)-1;
 
-    auto f = Maps::getLocalInitFeature(rgn_pos, index);
+    df::feature_init* f = Maps::getLocalInitFeature(rgn_pos, index);
     if (!f)
         return false;
 
@@ -492,7 +492,7 @@ static df::coord2d biome_offsets[9] = {
 
 inline df::coord2d getBiomeRgnPos(df::coord2d base, int idx)
 {
-    auto r = base + biome_offsets[idx];
+    df::coord2d r = base + biome_offsets[idx];
 
     int world_width = world->world_data->world_width;
     int world_height = world->world_data->world_height;
@@ -505,8 +505,8 @@ df::coord2d Maps::getBlockTileBiomeRgn(df::map_block *block, df::coord2d pos)
     if (!block || !world->world_data)
         return df::coord2d();
 
-    auto des = index_tile(block->designation,pos);
-    unsigned idx = des.bits.biome;
+    df::tile_designation des = index_tile(block->designation, pos, df::tile_designation(NULL));
+    uint32 idx = des.bits.biome;
     if (idx < 9)
     {
         idx = block->region_offset[idx];
@@ -545,7 +545,7 @@ bool Maps::ReadGeology(vector<vector<int16_t> > *layer_mats, vector<df::coord2d>
 
         (*geoidx)[i] = rgn_pos;
 
-        auto biome = getRegionBiome(rgn_pos);
+        df::region_map_entry* biome = getRegionBiome(rgn_pos);
         if (!biome)
             continue;
 
@@ -558,8 +558,8 @@ bool Maps::ReadGeology(vector<vector<int16_t> > *layer_mats, vector<df::coord2d>
         if (!geo_biome)
             continue;
 
-        auto &geolayers = geo_biome->layers;
-        auto &matvec = (*layer_mats)[i];
+        std::vector<df::world_geo_layer*> &geolayers = geo_biome->layers;
+        vector<int16_t> &matvec = (*layer_mats)[i];
 
         /// layer descriptor has a field that determines the type of stone/soil
         matvec.resize(geolayers.size());
@@ -574,14 +574,14 @@ bool Maps::ReadGeology(vector<vector<int16_t> > *layer_mats, vector<df::coord2d>
 
 bool Maps::canWalkBetween(df::coord pos1, df::coord pos2)
 {
-    auto block1 = getTileBlock(pos1);
-    auto block2 = getTileBlock(pos2);
+    df::map_block* block1 = getTileBlock(pos1);
+    df::map_block* block2 = getTileBlock(pos2);
 
     if (!block1 || !block2)
         return false;
 
-    auto tile1 = index_tile(block1->walkable, pos1);
-    auto tile2 = index_tile(block2->walkable, pos2);
+    uint16 tile1 = index_tile(block1->walkable, pos1, uint16(NULL));
+    uint16 tile2 = index_tile(block2->walkable, pos2, uint16(NULL));
 
     return tile1 && tile1 == tile2;
 }
@@ -605,18 +605,17 @@ bool Maps::canStepBetween(df::coord pos1, df::coord pos2)
     df::map_block* block1 = getTileBlock(pos1);
     df::map_block* block2 = getTileBlock(pos2);
 
-    if ( !block1 || !block2 )
+    if (!block1 || !block2)
         return false;
 
-    if ( !index_tile(block1->walkable,pos1) || !index_tile(block2->walkable,pos2) ) {
-        return false;
-    }
-
-    if ( block1->designation[pos1.x&0xF][pos1.y&0xF].bits.flow_size >= 4 ||
-         block2->designation[pos2.x&0xF][pos2.y&0xF].bits.flow_size >= 4 )
+    if (!index_tile(block1->walkable, pos1, uint16(NULL)) || !index_tile(block2->walkable, pos2, uint16(NULL)))
         return false;
 
-    if ( dz == 0 )
+    if (block1->designation[pos1.x&0xF][pos1.y&0xF].bits.flow_size >= 4 ||
+        block2->designation[pos2.x&0xF][pos2.y&0xF].bits.flow_size >= 4 )
+        return false;
+
+    if (dz == 0)
         return true;
 
     df::tiletype* type1 = Maps::getTileType(pos1);
@@ -625,10 +624,13 @@ bool Maps::canStepBetween(df::coord pos1, df::coord pos2)
     df::tiletype_shape shape1 = ENUM_ATTR(tiletype,shape,*type1);
     df::tiletype_shape shape2 = ENUM_ATTR(tiletype,shape,*type2);
 
-    if ( dx == 0 && dy == 0 ) {
+    if (dx == 0 && dy == 0)
+    {
         //check for forbidden hatches and floors and such
-        df::tile_building_occ upOcc = index_tile(block2->occupancy,pos2).bits.building;
-        if ( upOcc == tile_building_occ::Impassable || upOcc == tile_building_occ::Obstacle || upOcc == tile_building_occ::Floored )
+        df::tile_building_occ upOcc = index_tile(block2->occupancy, pos2, df::tile_occupancy(NULL)).bits.building;
+        if (upOcc == tile_building_occ::Impassable ||
+            upOcc == tile_building_occ::Obstacle ||
+            upOcc == tile_building_occ::Floored)
             return false;
 
         if ( shape1 == tiletype_shape::STAIR_UPDOWN && shape2 == shape1 )
@@ -660,7 +662,7 @@ bool Maps::canStepBetween(df::coord pos1, df::coord pos2)
                 return false; //unusable ramp
 
             //there has to be an unforbidden hatch above the ramp
-            if ( index_tile(block2->occupancy,pos2).bits.building != tile_building_occ::Dynamic )
+            if (index_tile(block2->occupancy, pos2, df::tile_occupancy(NULL)).bits.building != tile_building_occ::Dynamic)
                 return false;
             //note that forbidden hatches have Floored occupancy. unforbidden ones have dynamic occupancy
             df::building* building = Buildings::findAtTile(pos2);
@@ -704,7 +706,7 @@ bool Maps::canStepBetween(df::coord pos1, df::coord pos2)
         if ( !blockUp )
             return false;
 
-        df::tile_building_occ occupancy = index_tile(blockUp->occupancy,up).bits.building;
+        df::tile_building_occ occupancy = index_tile(blockUp->occupancy, up, df::tile_occupancy(NULL)).bits.building;
         if ( occupancy == tile_building_occ::Obstacle || occupancy == tile_building_occ::Floored || occupancy == tile_building_occ::Impassable )
             return false;
         return true;

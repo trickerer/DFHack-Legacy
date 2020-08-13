@@ -208,7 +208,7 @@ void clearBuildings(color_ostream& out);
  * The unit argument is passed through to DF and may modify the room's value depending on the unit given.
  */
 
-DFHACK_EXPORT std::string getRoomDescription(df::building *building, df::unit *unit = nullptr);
+DFHACK_EXPORT std::string getRoomDescription(df::building *building, df::unit *unit = NULL);
 
 /**
  * Iterates over the items stored on a stockpile.

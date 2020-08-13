@@ -55,7 +55,7 @@ class Block;
 
 struct BiomeInfo {
     // Determined by the 4-bit index in the designation bitfield
-    static constexpr unsigned MAX_LAYERS = 16;
+    static const unsigned MAX_LAYERS = 16;
 
     df::coord2d pos;
     int default_soil, default_stone, lava_stone;
@@ -129,36 +129,36 @@ public:
     /// Arbitrary tag field for flood fills etc.
     int16_t &tag(df::coord2d p) {
         if (!tags) init_tags();
-        return index_tile(tags, p);
+        return index_tile(tags, p, int16_t(NULL));
     }
 
     /// Base layer tile type (i.e. layer stone, veins, feature stone)
     df::tiletype baseTiletypeAt(df::coord2d p)
     {
         if (!tiles) init_tiles();
-        return index_tile(tiles->base_tiles,p);
+        return index_tile(tiles->base_tiles, p, df::tiletype(NULL));
     }
     /// Base layer material (i.e. layer stone, veins, feature stone)
     t_matpair baseMaterialAt(df::coord2d p)
     {
         if (!basemats) init_tiles(true);
         return t_matpair(
-            index_tile(basemats->mat_type,p),
-            index_tile(basemats->mat_index,p)
+            index_tile(basemats->mat_type, p, int16_t(NULL)),
+            (int32_t)index_tile(basemats->mat_index, p, int16_t(NULL))
         );
     }
     /// Check if the base layer tile is a vein
     bool isVeinAt(df::coord2d p)
     {
         using namespace df::enums::tiletype_material;
-        auto tm = tileMaterial(baseTiletypeAt(p));
+        df::tiletype_material tm = tileMaterial(baseTiletypeAt(p));
         return tm == MINERAL;
     }
     /// Check if the base layer tile is layer stone or soil
     bool isLayerAt(df::coord2d p)
     {
         using namespace df::enums::tiletype_material;
-        auto tm = tileMaterial(baseTiletypeAt(p));
+        df::tiletype_material tm = tileMaterial(baseTiletypeAt(p));
         return tm == STONE || tm == SOIL;
     }
 
@@ -166,13 +166,13 @@ public:
     int16_t veinMaterialAt(df::coord2d p)
     {
         if (!basemats) init_tiles(true);
-        return index_tile(basemats->veinmat,p);
+        return index_tile(basemats->veinmat, p, int16_t(NULL));
     }
     /// Vein type at pos (even if there is no vein tile)
     df::inclusion_type veinTypeAt(df::coord2d p)
     {
         if (!basemats) init_tiles(true);
-        return (df::inclusion_type)index_tile(basemats->veintype,p);
+        return (df::inclusion_type)index_tile(basemats->veintype, p, uint8_t(NULL));
     }
 
     /** Sets the vein material at the specified tile position.
@@ -209,7 +209,7 @@ public:
     {
         if (!tiles) init_tiles();
         if (tiles->con_info)
-            return index_tile(tiles->con_info->tiles,p);
+            return index_tile(tiles->con_info->tiles, p, df::tiletype(NULL));
         return baseTiletypeAt(p);
     }
     /// Static layer material (i.e. base + constructions)
@@ -218,8 +218,8 @@ public:
         if (!basemats) init_tiles(true);
         if (tiles->con_info)
             return t_matpair(
-                index_tile(tiles->con_info->mat_type,p),
-                index_tile(tiles->con_info->mat_index,p)
+                index_tile(tiles->con_info->mat_type, p, int16_t(NULL)),
+                (int32_t)index_tile(tiles->con_info->mat_index, p, int16_t(NULL))
             );
         return baseMaterialAt(p);
     }
@@ -234,38 +234,38 @@ public:
     {
         if (!block) return tiletype::Void;
         if (tiles)
-            return index_tile(tiles->raw_tiles,p);
-        return index_tile(block->tiletype,p);
+            return index_tile(tiles->raw_tiles, p, df::tiletype(NULL));
+        return index_tile(block->tiletype, p, df::tiletype(NULL));
     }
     bool setTiletypeAt(df::coord2d, df::tiletype tt, bool force = false);
 
     uint16_t temperature1At(df::coord2d p)
     {
-        return index_tile(temp1,p);
+        return index_tile(temp1, p, uint16_t(NULL));
     }
     bool setTemp1At(df::coord2d p, uint16_t temp)
     {
         if(!valid) return false;
         dirty_temperatures = true;
-        index_tile(temp1,p) = temp;
+        index_tile(temp1, p, uint16_t(NULL)) = temp;
         return true;
     }
 
     uint16_t temperature2At(df::coord2d p)
     {
-        return index_tile(temp2,p);
+        return index_tile(temp2, p, uint16_t(NULL));
     }
     bool setTemp2At(df::coord2d p, uint16_t temp)
     {
         if(!valid) return false;
         dirty_temperatures = true;
-        index_tile(temp2,p) = temp;
+        index_tile(temp2, p, uint16_t(NULL)) = temp;
         return true;
     }
 
     df::tile_designation DesignationAt(df::coord2d p)
     {
-        return index_tile(designation,p);
+        return index_tile(designation, p, df::tile_designation(NULL));
     }
     bool setDesignationAt(df::coord2d p, df::tile_designation des, int32_t priority = 4000)
     {
@@ -273,7 +273,7 @@ public:
         dirty_designations = true;
         designated_tiles[(p.x&15) + (p.y&15)*16] = true;
         //printf("setting block %d/%d/%d , %d %d\n",x,y,z, p.x, p.y);
-        index_tile(designation,p) = des;
+        index_tile(designation, p, df::tile_designation(NULL)) = des;
         if((des.bits.dig || des.bits.smooth) && block) {
             block->flags.bits.designated = true;
             setPriorityAt(p, priority);
@@ -286,21 +286,21 @@ public:
 
     df::tile_occupancy OccupancyAt(df::coord2d p)
     {
-        return index_tile(occupancy,p);
+        return index_tile(occupancy, p, df::tile_occupancy(NULL));
     }
     bool setOccupancyAt(df::coord2d p, df::tile_occupancy des)
     {
         if(!valid) return false;
         dirty_occupancies = true;
-        index_tile(occupancy,p) = des;
+        index_tile(occupancy, p, df::tile_occupancy(NULL)) = des;
         return true;
     }
 
     bool getFlagAt(df::coord2d p, df::tile_designation::Mask mask) {
-        return (index_tile(designation,p).whole & mask) != 0;
+        return (index_tile(designation, p, df::tile_designation(NULL)).whole & mask) != 0;
     }
     bool getFlagAt(df::coord2d p, df::tile_occupancy::Mask mask) {
-        return (index_tile(occupancy,p).whole & mask) != 0;
+        return (index_tile(occupancy, p, df::tile_occupancy(NULL)).whole & mask) != 0;
     }
     bool setFlagAt(df::coord2d p, df::tile_designation::Mask mask, bool set);
     bool setFlagAt(df::coord2d p, df::tile_occupancy::Mask mask, bool set);
@@ -308,7 +308,7 @@ public:
     int itemCountAt(df::coord2d p)
     {
         if (!item_counts) init_item_counts();
-        return index_tile(item_counts,p);
+        return index_tile(item_counts, p, int(NULL));
     }
 
     t_blockflags BlockFlags()
@@ -321,7 +321,7 @@ public:
 
     int biomeIndexAt(df::coord2d p);
     int layerIndexAt(df::coord2d p) {
-        return index_tile(designation,p).bits.geolayer_index;
+        return index_tile(designation, p, df::tile_designation(NULL)).bits.geolayer_index;
     }
 
     df::coord2d biomeRegionAt(df::coord2d p);
