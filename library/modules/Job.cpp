@@ -196,7 +196,7 @@ void DFHack::Job::printItemDetails(color_ostream &out, df::job_item *item, int i
     if (!item->has_material_reaction_product.empty())
         out << "    reaction product: " << item->has_material_reaction_product << endl;
     if (item->has_tool_use >= (df::tool_uses)0)
-        out << "    tool use: " << ENUM_KEY_STR(tool_uses, item->has_tool_use) << endl;
+        out << "    tool use: " << ENUM_KEY_STR_SIMPLE(tool_uses, item->has_tool_use) << endl;
 }
 
 void DFHack::Job::printJobDetails(color_ostream &out, df::job *job)
@@ -204,7 +204,7 @@ void DFHack::Job::printJobDetails(color_ostream &out, df::job *job)
     CHECK_NULL_POINTER(job);
 
     out.color(job->flags.bits.suspend ? COLOR_DARKGREY : COLOR_GREY);
-    out << "Job " << job->id << ": " << ENUM_KEY_STR(job_type,job->job_type);
+    out << "Job " << job->id << ": " << ENUM_KEY_STR_SIMPLE(job_type,job->job_type);
     if (job->flags.whole)
         out << " (" << bitfield_to_string(job->flags) << ")";
     out << endl;
@@ -260,7 +260,7 @@ df::building *DFHack::Job::getHolder(df::job *job)
 {
     CHECK_NULL_POINTER(job);
 
-    auto ref = getGeneralRef(job, general_ref_type::BUILDING_HOLDER);
+    df::general_ref* ref = getGeneralRef(job, general_ref_type::BUILDING_HOLDER);
 
     return ref ? ref->getBuilding() : NULL;
 }
@@ -269,7 +269,7 @@ df::unit *DFHack::Job::getWorker(df::job *job)
 {
     CHECK_NULL_POINTER(job);
 
-    auto ref = getGeneralRef(job, general_ref_type::UNIT_WORKER);
+    df::general_ref* ref = getGeneralRef(job, general_ref_type::UNIT_WORKER);
 
     return ref ? ref->getUnit() : NULL;
 }
@@ -286,29 +286,29 @@ void DFHack::Job::setJobCooldown(df::building *workshop, df::unit *worker, int c
 
     if (idx < 0)
     {
-        auto obj = new df::building::T_job_claim_suppress;
+        df::building::T_job_claim_suppress* obj = new df::building::T_job_claim_suppress;
         obj->unit = worker;
         obj->timer = cooldown;
         workshop->job_claim_suppress.push_back(obj);
     }
     else
     {
-        auto obj = workshop->job_claim_suppress[idx];
-        obj->timer = std::max(obj->timer, cooldown);
+        df::building::T_job_claim_suppress* obj = workshop->job_claim_suppress[idx];
+        obj->timer = std::max<int>(obj->timer, cooldown);
     }
 }
 
 void DFHack::Job::disconnectJobItem(df::job *job, df::job_item_ref *ref) {
     if (!ref) return;
 
-    auto item = ref->item;
+    df::item* item = ref->item;
     if (!item) return;
 
     //Work backward through the specific refs & remove/delete all specific refs to this job
     int refCount = item->specific_refs.size();
     bool stillHasJobs = false;
     for(int refIndex = refCount-1; refIndex >= 0; refIndex--) {
-        auto ref = item->specific_refs[refIndex];
+        df::specific_ref* ref = item->specific_refs[refIndex];
 
         if (ref->type == df::specific_ref_type::JOB) {
             if (ref->data.job == job) {
@@ -369,15 +369,16 @@ bool DFHack::Job::removeJob(df::job *job) {
     if (job->specific_refs.size() > 0)
         return false;
 
-    for (auto genRefItr = job->general_refs.begin(); genRefItr != job->general_refs.end(); ++genRefItr) {
-        auto ref = *genRefItr;
+    for (std::vector<df::general_ref*>::const_iterator gritr = job->general_refs.begin(); gritr != job->general_refs.end(); ++gritr)
+    {
+        df::general_ref* ref = *gritr;
         if (ref != NULL && (ref->getType() != general_ref_type::BUILDING_HOLDER && ref->getType() != general_ref_type::UNIT_WORKER))
             return false;
     }
 
     //Disconnect, delete, and wipe all general refs
     while (job->general_refs.size() > 0) {
-        auto ref = job->general_refs[0];
+        df::general_ref* ref = job->general_refs[0];
 
         //Our code above should have ensured that this won't return false- if it does, there's not
         //a great way of recovering since we can't properly destroy the job & we can't leave it
@@ -391,7 +392,7 @@ bool DFHack::Job::removeJob(df::job *job) {
 
     //Detach all items from the job
     while (job->items.size() > 0) {
-        auto itemRef = job->items[0];
+        df::job_item_ref* itemRef = job->items[0];
         disconnectJobItem(job, itemRef);
         vector_erase_at(job->items, 0);
         if (itemRef != NULL) delete itemRef;
@@ -402,7 +403,7 @@ bool DFHack::Job::removeJob(df::job *job) {
 
     //Clean up job_items
     while (job->job_items.size() > 0) {
-        auto jobItem = job->job_items[0];
+        df::job_item* jobItem = job->job_items[0];
         vector_erase_at(job->job_items, 0);
         if (jobItem) {
             delete jobItem;
@@ -411,8 +412,8 @@ bool DFHack::Job::removeJob(df::job *job) {
 
     //Remove job from global list
     if (job->list_link) {
-        auto prev = job->list_link->prev;
-        auto next = job->list_link->next;
+        df::job_list_link* prev = job->list_link->prev;
+        df::job_list_link* next = job->list_link->next;
 
         if (prev)
             prev->next = next;
@@ -434,7 +435,7 @@ bool DFHack::Job::removeWorker(df::job *job, int cooldown)
     if (job->flags.bits.special)
         return false;
 
-    auto holder = getHolder(job);
+    df::building* holder = getHolder(job);
     if (!holder || linear_index(holder->jobs,job) < 0)
         return false;
 
@@ -444,7 +445,7 @@ bool DFHack::Job::removeWorker(df::job *job, int cooldown)
         if (ref->getType() != general_ref_type::UNIT_WORKER)
             continue;
 
-        auto worker = ref->getUnit();
+        df::unit* worker = ref->getUnit();
         if (!worker || worker->job.current_job != job)
             return false;
 
@@ -516,7 +517,7 @@ bool DFHack::Job::removePostings(df::job *job, bool remove_all)
     }
     else
     {
-        for (auto it = world->jobs.postings.begin(); it != world->jobs.postings.end(); ++it)
+        for (std::vector<df::job_handler::T_postings*>::const_iterator it = world->jobs.postings.begin(); it != world->jobs.postings.end(); ++it)
         {
             if ((**it).job == job)
             {
@@ -545,7 +546,7 @@ bool DFHack::Job::listNewlyCreated(std::vector<df::job*> *pvec, int *id_var)
 
     *id_var = cur_id;
 
-    pvec->reserve(std::min(20,cur_id - old_id));
+    pvec->reserve(std::min<int>(20,cur_id - old_id));
 
     df::job_list_link *link = world->jobs.list.next;
     for (; link; link = link->next)
@@ -577,12 +578,12 @@ bool DFHack::Job::attachJobItem(df::job *job, df::item *item,
         item->flags.bits.in_job = true;
     }
 
-    auto item_link = new df::specific_ref();
+    df::specific_ref* item_link = new df::specific_ref();
     item_link->type = specific_ref_type::JOB;
     item_link->data.job = job;
     item->specific_refs.push_back(item_link);
 
-    auto job_link = new df::job_item_ref();
+    df::job_item_ref* job_link = new df::job_item_ref();
     job_link->item = item;
     job_link->role = role;
     job_link->job_item_idx = filter_idx;
@@ -626,7 +627,7 @@ std::string Job::getName(df::job *job)
     CHECK_NULL_POINTER(job);
 
     std::string desc;
-    auto button = df::allocate<df::interface_button_building_new_jobst>();
+    df::interface_button_building_new_jobst* button = df::allocate<df::interface_button_building_new_jobst>();
     button->reaction_name = job->reaction_name;
     button->hist_figure_id = job->hist_figure_id;
     button->job_type = job->job_type;
