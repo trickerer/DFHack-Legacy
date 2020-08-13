@@ -287,16 +287,34 @@ namespace DFHack {namespace Lua {
     NUMBER_PUSH(float) NUMBER_PUSH(double)
 #undef NUMBER_PUSH
 #else
+    template<typename T>
+    struct is_fpval { enum { val = false }; };
+    template<>
+    struct is_fpval<float> { enum { val = true }; };
+    template<>
+    struct is_fpval<double> { enum { val = true }; };
+    template<>
+    struct is_fpval<long double> { enum { val = true }; };
+
     template<class T>
-    inline typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value>::type
-    Push(lua_State *state, T value) {
-        lua_pushinteger(state, value);
+    void Push(lua_State *state, T value)
+    {
+        if (is_fpval(value).val == true)
+            lua_pushnumber(state, value);
+        else
+            lua_pushinteger(state, value);
     }
-    template<class T>
-    inline typename std::enable_if<std::is_floating_point<T>::value>::type
-    Push(lua_State *state, T value) {
-        lua_pushnumber(state, lua_Number(value));
-    }
+
+    //template<class T>
+    //inline typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value>::type
+    //Push(lua_State *state, T value) {
+    //    lua_pushinteger(state, value);
+    //}
+    //template<class T>
+    //inline typename std::enable_if<std::is_floating_point<T>::value>::type
+    //Push(lua_State *state, T value) {
+    //    lua_pushnumber(state, lua_Number(value));
+    //}
 #endif
     inline void Push(lua_State *state, bool value) {
         lua_pushboolean(state, value);

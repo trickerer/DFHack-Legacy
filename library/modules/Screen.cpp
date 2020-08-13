@@ -101,12 +101,12 @@ bool Screen::inGraphicsMode()
 
 static bool doSetTile_default(const Pen &pen, int x, int y, bool map)
 {
-    auto dim = Screen::getWindowSize();
+    df::coord2d dim = Screen::getWindowSize();
     if (x < 0 || x >= dim.x || y < 0 || y >= dim.y)
         return false;
 
     int index = ((x * gps->dimy) + y);
-    auto screen = gps->screen + index*4;
+    uint8* screen = gps->screen + index*4;
     screen[0] = uint8_t(pen.ch);
     screen[1] = uint8_t(pen.fg) & 15;
     screen[2] = uint8_t(pen.bg) & 15;
@@ -120,7 +120,8 @@ static bool doSetTile_default(const Pen &pen, int x, int y, bool map)
     return true;
 }
 
-GUI_HOOK_DEFINE(Screen::Hooks::set_tile, doSetTile_default);
+//GUI_HOOK_DEFINE(Screen::Hooks::set_tile, doSetTile_default);
+DFHack::GuiHooks::Hook<bool(const DFHack::Screen::Pen&,int,int,bool)> Screen::Hooks::set_tile(doSetTile_default);
 static bool doSetTile(const Pen &pen, int x, int y, bool map)
 {
     return GUI_HOOK_TOP(Screen::Hooks::set_tile)(pen, x, y, map);
@@ -136,12 +137,12 @@ bool Screen::paintTile(const Pen &pen, int x, int y, bool map)
 
 static Pen doGetTile_default(int x, int y, bool map)
 {
-    auto dim = Screen::getWindowSize();
+    df::coord2d dim = Screen::getWindowSize();
     if (x < 0 || x >= dim.x || y < 0 || y >= dim.y)
         return Pen(0,0,0,-1);
 
     int index = x*dim.y + y;
-    auto screen = gps->screen + index*4;
+    uint8* screen = gps->screen + index*4;
     if (screen[3] & 0x80)
         return Pen(0,0,0,-1);
 
@@ -167,7 +168,8 @@ static Pen doGetTile_default(int x, int y, bool map)
     return pen;
 }
 
-GUI_HOOK_DEFINE(Screen::Hooks::get_tile, doGetTile_default);
+//GUI_HOOK_DEFINE(Screen::Hooks::get_tile, doGetTile_default);
+DFHack::GuiHooks::Hook<DFHack::Screen::Pen(int,int,bool)> Screen::Hooks::get_tile(doGetTile_default);
 static Pen doGetTile(int x, int y, bool map)
 {
     return GUI_HOOK_TOP(Screen::Hooks::get_tile)(x, y, map);
@@ -182,13 +184,13 @@ Pen Screen::readTile(int x, int y, bool map)
 
 bool Screen::paintString(const Pen &pen, int x, int y, const std::string &text, bool map)
 {
-    auto dim = getWindowSize();
+    df::coord2d dim = getWindowSize();
     if (!gps || y < 0 || y >= dim.y) return false;
 
     Pen tmp(pen);
     bool ok = false;
 
-    for (size_t i = -std::min(0,x); i < text.size(); i++)
+    for (size_t i = -std::min<int>(0,x); i < text.size(); i++)
     {
         if (x + i >= size_t(dim.x))
             break;
@@ -204,7 +206,7 @@ bool Screen::paintString(const Pen &pen, int x, int y, const std::string &text, 
 
 bool Screen::fillRect(const Pen &pen, int x1, int y1, int x2, int y2, bool map)
 {
-    auto dim = getWindowSize();
+    df::coord2d dim = getWindowSize();
     if (!gps || !pen.valid()) return false;
 
     if (x1 < 0) x1 = 0;
@@ -226,7 +228,7 @@ bool Screen::drawBorder(const std::string &title)
 {
     if (!gps) return false;
 
-    auto dim = getWindowSize();
+    df::coord2d dim = getWindowSize();
     Pen border('\xDB', 8);
     Pen text(0, 0, 7);
     Pen signature(0, 0, 8);
@@ -251,7 +253,7 @@ bool Screen::clear()
 {
     if (!gps) return false;
 
-    auto dim = getWindowSize();
+    df::coord2d dim = getWindowSize();
     return fillRect(Pen(' ',0,0,false), 0, 0, dim.x-1, dim.y-1);
 }
 
@@ -271,8 +273,8 @@ void Screen::Painter::do_paint_string(const std::string &str, const Pen &pen, bo
     if (gcursor.y < clip.first.y || gcursor.y > clip.second.y)
         return;
 
-    int dx = std::max(0, int(clip.first.x - gcursor.x));
-    int len = std::min((int)str.size(), int(clip.second.x - gcursor.x + 1));
+    int dx = std::max<int>(0, int(clip.first.x - gcursor.x));
+    int len = std::min<int>((int)str.size(), int(clip.second.x - gcursor.x + 1));
 
     if (len > dx)
         paintString(pen, gcursor.x + dx, gcursor.y, str.substr(dx, len-dx), map);
@@ -284,7 +286,7 @@ bool Screen::findGraphicsTile(const std::string &pagename, int x, int y, int *pt
 
     for (size_t i = 0; i < texture->page.size(); i++)
     {
-        auto page = texture->page[i];
+        df::tile_page* page = texture->page[i];
         if (!page->loaded || page->token != pagename) continue;
 
         if (x >= page->page_dim_x || y >= page->page_dim_y)
@@ -301,9 +303,10 @@ bool Screen::findGraphicsTile(const std::string &pagename, int x, int y, int *pt
     return false;
 }
 
-static std::map<df::viewscreen*, Plugin*> plugin_screens;
+typedef std::map<df::viewscreen*, Plugin*> PluginScreens;
+static PluginScreens plugin_screens;
 
-bool Screen::show(std::unique_ptr<df::viewscreen> screen, df::viewscreen *before, Plugin *plugin)
+bool Screen::show(df::viewscreen*& screen, df::viewscreen *before, Plugin *plugin)
 {
     CHECK_NULL_POINTER(screen);
     CHECK_INVALID_ARGUMENT(!screen->parent && !screen->child);
@@ -320,7 +323,7 @@ bool Screen::show(std::unique_ptr<df::viewscreen> screen, df::viewscreen *before
 
     screen->child = parent->child;
     screen->parent = parent;
-    df::viewscreen* s = screen.release();
+    df::viewscreen* s = screen; screen = NULL;
     parent->child = s;
     if (s->child)
         s->child->parent = s;
@@ -338,7 +341,7 @@ void Screen::dismiss(df::viewscreen *screen, bool to_first)
 {
     CHECK_NULL_POINTER(screen);
 
-    auto it = plugin_screens.find(screen);
+    PluginScreens::const_iterator it = plugin_screens.find(screen);
     if (it != plugin_screens.end())
         plugin_screens.erase(it);
 
@@ -368,7 +371,7 @@ bool Screen::hasActiveScreens(Plugin *plugin)
     df::viewscreen *screen = &gview->view;
     while (screen)
     {
-        auto it = plugin_screens.find(screen);
+        PluginScreens::const_iterator it = plugin_screens.find(screen);
         if (it != plugin_screens.end() && it->second == plugin)
             return true;
         screen = screen->child;
@@ -379,7 +382,7 @@ bool Screen::hasActiveScreens(Plugin *plugin)
 namespace DFHack { namespace Screen {
 
 Hide::Hide(df::viewscreen* screen) :
-    screen_{screen}
+    screen_(screen)
 {
     extract(screen_);
 }
@@ -540,7 +543,7 @@ dfhack_viewscreen *dfhack_viewscreen::try_cast(df::viewscreen *screen)
 
 void dfhack_viewscreen::check_resize()
 {
-    auto size = Screen::getWindowSize();
+    df::coord2d size = Screen::getWindowSize();
 
     if (size != last_size)
     {
@@ -621,7 +624,7 @@ bool dfhack_lua_viewscreen::safe_call_lua(int (*pf)(lua_State *), int args, int 
     CoreSuspendClaimer suspend;
     color_ostream_proxy out(Core::getInstance().getConsole());
 
-    auto L = Lua::Core::State;
+    lua_State* L = Lua::Core::State;
     lua_pushcfunction(L, pf);
     if (args > 0) lua_insert(L, -args-1);
     lua_pushlightuserdata(L, this);
@@ -632,7 +635,7 @@ bool dfhack_lua_viewscreen::safe_call_lua(int (*pf)(lua_State *), int args, int 
 
 dfhack_lua_viewscreen *dfhack_lua_viewscreen::get_self(lua_State *L)
 {
-    auto self = (dfhack_lua_viewscreen*)lua_touserdata(L, 1);
+    dfhack_lua_viewscreen* self = (dfhack_lua_viewscreen*)lua_touserdata(L, 1);
     lua_rawgetp(L, LUA_REGISTRYINDEX, self);
     if (!lua_istable(L, -1)) return NULL;
     return self;
@@ -640,7 +643,7 @@ dfhack_lua_viewscreen *dfhack_lua_viewscreen::get_self(lua_State *L)
 
 int dfhack_lua_viewscreen::do_destroy(lua_State *L)
 {
-    auto self = get_self(L);
+    dfhack_lua_viewscreen* self = get_self(L);
     if (!self) return 0;
 
     lua_pushnil(L);
@@ -670,7 +673,7 @@ void dfhack_lua_viewscreen::update_focus(lua_State *L, int idx)
     lua_pop(L, 1);
 
     lua_getfield(L, idx, "focus_path");
-    auto str = lua_tostring(L, -1);
+    const char* str = lua_tostring(L, -1);
     if (!str) str = "";
     focus = str;
     lua_pop(L, 1);
@@ -683,7 +686,7 @@ void dfhack_lua_viewscreen::update_focus(lua_State *L, int idx)
 
 int dfhack_lua_viewscreen::do_render(lua_State *L)
 {
-    auto self = get_self(L);
+    dfhack_lua_viewscreen* self = get_self(L);
     if (!self) return 0;
 
     lua_getfield(L, -1, "onRender");
@@ -703,7 +706,7 @@ int dfhack_lua_viewscreen::do_notify(lua_State *L)
 {
     int args = lua_gettop(L);
 
-    auto self = get_self(L);
+    dfhack_lua_viewscreen* self = get_self(L);
     if (!self) return 0;
 
     lua_pushvalue(L, 2);
@@ -723,10 +726,10 @@ int dfhack_lua_viewscreen::do_notify(lua_State *L)
 
 int dfhack_lua_viewscreen::do_input(lua_State *L)
 {
-    auto self = get_self(L);
+    dfhack_lua_viewscreen* self = get_self(L);
     if (!self) return 0;
 
-    auto keys = (std::set<df::interface_key>*)lua_touserdata(L, 2);
+    std::set<df::interface_key>* keys = (std::set<df::interface_key>*)lua_touserdata(L, 2);
 
     lua_getfield(L, -1, "onInput");
 
@@ -742,11 +745,11 @@ int dfhack_lua_viewscreen::do_input(lua_State *L)
 
     lua_createtable(L, 0, keys->size()+3);
 
-    for (auto it = keys->begin(); it != keys->end(); ++it)
+    for (std::set<df::interface_key>::const_iterator it = keys->begin(); it != keys->end(); ++it)
     {
-        auto key = *it;
+        df::interface_key key = *it;
 
-        if (auto name = enum_item_raw_key(key))
+        if (const char* name = enum_item_raw_key_simple(key))
             lua_pushstring(L, name);
         else
             lua_pushinteger(L, key);
@@ -852,7 +855,7 @@ void dfhack_lua_viewscreen::resize(int w, int h)
 {
     if (Screen::isDismissed(this)) return;
 
-    auto L = Lua::Core::State;
+    lua_State* L = Lua::Core::State;
     lua_pushstring(L, "onResize");
     lua_pushinteger(L, w);
     lua_pushinteger(L, h);
@@ -938,11 +941,11 @@ static const struct_field_info dfhack_viewscreen_fields[] = {
     { FLD_END }
 };
 #undef CUR_STRUCT
-virtual_identity dfhack_viewscreen::_identity(sizeof(dfhack_viewscreen), nullptr, "dfhack_viewscreen", nullptr, &df::viewscreen::_identity, dfhack_viewscreen_fields);
+virtual_identity dfhack_viewscreen::_identity(sizeof(dfhack_viewscreen), NULL, "dfhack_viewscreen", NULL, &df::viewscreen::_identity, dfhack_viewscreen_fields);
 
 #define CUR_STRUCT dfhack_lua_viewscreen
 static const struct_field_info dfhack_lua_viewscreen_fields[] = {
     { FLD_END }
 };
 #undef CUR_STRUCT
-virtual_identity dfhack_lua_viewscreen::_identity(sizeof(dfhack_lua_viewscreen), nullptr, "dfhack_lua_viewscreen", nullptr, &dfhack_viewscreen::_identity, dfhack_lua_viewscreen_fields);
+virtual_identity dfhack_lua_viewscreen::_identity(sizeof(dfhack_lua_viewscreen), NULL, "dfhack_lua_viewscreen", NULL, &dfhack_viewscreen::_identity, dfhack_lua_viewscreen_fields);

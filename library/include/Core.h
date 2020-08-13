@@ -442,4 +442,5 @@ namespace DFHack
     };
 
     //using CoreSuspendClaimer = CoreSuspender;
+    typedef CoreSuspender CoreSuspendClaimer;
 }

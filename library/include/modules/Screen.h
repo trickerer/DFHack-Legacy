@@ -215,9 +215,9 @@ namespace DFHack
         DFHACK_EXPORT bool findGraphicsTile(const std::string &page, int x, int y, int *ptile, int *pgs = NULL);
 
         // Push and remove viewscreens
-        DFHACK_EXPORT bool show(std::unique_ptr<df::viewscreen> screen, df::viewscreen *before = NULL, Plugin *p = NULL);
-        inline bool show(std::unique_ptr<df::viewscreen> screen, Plugin *p)
-            { return show(std::move(screen), NULL, p); }
+        DFHACK_EXPORT bool show(df::viewscreen*& screen, df::viewscreen *before = NULL, Plugin *p = NULL);
+        inline bool show(df::viewscreen*& screen, Plugin *p)
+            { return show(screen, NULL, p); }
         DFHACK_EXPORT void dismiss(df::viewscreen *screen, bool to_first = false);
         DFHACK_EXPORT bool isDismissed(df::viewscreen *screen);
         DFHACK_EXPORT bool hasActiveScreens(Plugin *p);
@@ -342,11 +342,11 @@ namespace DFHack
         virtual std::string getFocusString() = 0;
         virtual void onShow() {};
         virtual void onDismiss() {};
-        virtual df::unit *getSelectedUnit() { return nullptr; }
-        virtual df::item *getSelectedItem() { return nullptr; }
-        virtual df::job *getSelectedJob() { return nullptr; }
-        virtual df::building *getSelectedBuilding() { return nullptr; }
-        virtual df::plant *getSelectedPlant() { return nullptr; }
+        virtual df::unit *getSelectedUnit() { return NULL; }
+        virtual df::item *getSelectedItem() { return NULL; }
+        virtual df::job *getSelectedJob() { return NULL; }
+        virtual df::building *getSelectedBuilding() { return NULL; }
+        virtual df::plant *getSelectedPlant() { return NULL; }
 
         static virtual_identity _identity;
     };
