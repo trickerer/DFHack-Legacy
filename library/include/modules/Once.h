@@ -4,7 +4,7 @@
 
 namespace DFHack {
     namespace Once {
-        DFHACK_EXPORT bool alreadyDone(std::string);
+        DFHACK_EXPORT bool alreadyDone(std::string&);
         DFHACK_EXPORT bool doOnce(std::string);
     }
 }
