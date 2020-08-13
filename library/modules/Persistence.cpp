@@ -36,7 +36,7 @@ distribution.
 
 using namespace DFHack;
 
-static std::vector<std::shared_ptr<Persistence::LegacyData>> legacy_data;
+static std::vector<Persistence::LegacyData*> legacy_data;
 static std::multimap<std::string, size_t> index_cache;
 
 static DFHack::Persistence::LegacyData* data = NULL;
@@ -46,13 +46,14 @@ struct Persistence::LegacyData
 {
     const std::string key;
     std::string str_value;
-    std::array<int, PersistentDataItem::NumInts> int_values;
+    //std::array<int, PersistentDataItem::NumInts> int_values;
+    int int_values[NumInts];
 
     explicit LegacyData(const std::string &key) : key(key)
     {
         for (int i = 0; i < PersistentDataItem::NumInts; i++)
         {
-            int_values.at(i) = -1;
+            int_values[i] = -1;
         }
     }
     explicit LegacyData(Json::Value &json) : key(json["k"].asString())
@@ -60,7 +61,7 @@ struct Persistence::LegacyData
         str_value = json["s"].asString();
         for (int i = 0; i < PersistentDataItem::NumInts; i++)
         {
-            int_values.at(i) = json["i"][i].asInt();
+            int_values[i] = json["i"][i].asInt();
         }
     }
     explicit LegacyData(const df::language_name &name) : key(name.first_name)
@@ -68,7 +69,7 @@ struct Persistence::LegacyData
         str_value = name.nickname;
         for (int i = 0; i < PersistentDataItem::NumInts; i++)
         {
-            int_values.at(i) = name.words[i];
+            int_values[i] = name.words[i];
         }
     }
 
@@ -80,9 +81,9 @@ struct Persistence::LegacyData
         Json::Value ints(Json::arrayValue);
         for (int i = 0; i < PersistentDataItem::NumInts; i++)
         {
-            ints[i] = int_values.at(i);
+            ints[i] = int_values[i];
         }
-        json["i"] = std::move(ints);
+        json["i"] = ints;
 
         return json;
     }
@@ -108,18 +109,18 @@ int &PersistentDataItem::ival(int i)
 {
     CHECK_INVALID_ARGUMENT(isValid());
     CHECK_INVALID_ARGUMENT(i >= 0 && i < NumInts);
-    return data->int_values.at(i);
+    return data->int_values[i];
 }
 int PersistentDataItem::ival(int i) const
 {
     CHECK_INVALID_ARGUMENT(isValid());
     CHECK_INVALID_ARGUMENT(i >= 0 && i < NumInts);
-    return data->int_values.at(i);
+    return data->int_values[i];
 }
 
 bool PersistentDataItem::isValid() const
 {
-    if (data == nullptr)
+    if (data == NULL)
         return false;
 
     CoreSuspender suspend;
@@ -145,7 +146,7 @@ void Persistence::Internal::save()
     Json::Value json(Json::arrayValue);
     for (size_t i = 0; i < legacy_data.size(); i++)
     {
-        if (legacy_data.at(i) != nullptr)
+        if (legacy_data.at(i) != NULL)
         {
             while (json.size() < i)
             {
@@ -156,15 +157,15 @@ void Persistence::Internal::save()
         }
     }
 
-    auto file = writeSaveData("legacy-data");
+    std::ofstream file = writeSaveData("legacy-data");
     file << json;
 }
 
 static void convertHFigs()
 {
-    auto &figs = df::historical_figure::get_vector();
+    std::vector<df::historical_figure*>& figs = df::historical_figure::get_vector();
 
-    auto src = figs.begin();
+    std::vector<df::historical_figure*>::iterator src = figs.begin();
     while (src != figs.end() && (*src)->id > -100)
     {
         ++src;
@@ -175,10 +176,10 @@ static void convertHFigs()
         return;
     }
 
-    auto dst = src;
+    std::vector<df::historical_figure*>::iterator dst = src;
     while (src != figs.end())
     {
-        auto fig = *src;
+        df::historical_figure* fig = *src;
         if (fig->id > -100)
         {
             *dst = *src;
@@ -193,7 +194,7 @@ static void convertHFigs()
                 {
                     legacy_data.resize(index + 1);
                 }
-                legacy_data.at(index) = std::shared_ptr<Persistence::LegacyData>(new Persistence::LegacyData(fig->name));
+                legacy_data.at(index) = new Persistence::LegacyData(fig->name);
             }
             delete fig;
         }
@@ -209,7 +210,7 @@ void Persistence::Internal::load()
 
     clear();
 
-    auto file = readSaveData("legacy-data");
+    std::ifstream file = readSaveData("legacy-data");
     Json::Value json;
     try
     {
@@ -227,7 +228,7 @@ void Persistence::Internal::load()
         {
             if (json[int(i)].isObject())
             {
-                legacy_data.at(i) = std::shared_ptr<LegacyData>(new LegacyData(json[int(i)]));
+                legacy_data.at(i) = new LegacyData(json[int(i)]);
             }
         }
     }
@@ -236,7 +237,7 @@ void Persistence::Internal::load()
 
     for (size_t i = 0; i < legacy_data.size(); i++)
     {
-        if (legacy_data.at(i) == nullptr)
+        if (legacy_data.at(i) == NULL)
         {
             continue;
         }
@@ -253,12 +254,12 @@ PersistentDataItem Persistence::addItem(const std::string &key)
     CoreSuspender suspend;
 
     size_t index = 0;
-    while (index < legacy_data.size() && legacy_data.at(index) != nullptr)
+    while (index < legacy_data.size() && legacy_data.at(index) != NULL)
     {
         index++;
     }
 
-    auto ptr = std::shared_ptr<LegacyData>(new LegacyData(key));
+    LegacyData* ptr = new LegacyData(key);
 
     if (index == legacy_data.size())
     {
@@ -278,11 +279,11 @@ PersistentDataItem Persistence::getByKey(const std::string &key, bool *added)
 {
     CoreSuspender suspend;
 
-    auto it = index_cache.find(key);
+    std::multimap<std::string, size_t>::iterator it = index_cache.find(key);
 
     if (added)
     {
-        *added = it == index_cache.end();
+        *added = (it == index_cache.end());
     }
 
     if (it != index_cache.end())
@@ -302,7 +303,7 @@ PersistentDataItem Persistence::getByIndex(size_t index)
 {
     CoreSuspender suspend;
 
-    if (index < legacy_data.size() && legacy_data.at(index) != nullptr)
+    if (index < legacy_data.size() && legacy_data.at(index) != NULL)
     {
         return PersistentDataItem(index, legacy_data.at(index));
     }
@@ -320,8 +321,10 @@ bool Persistence::deleteItem(const PersistentDataItem &item)
     }
 
     size_t index = item.get_index();
-    auto range = index_cache.equal_range(item.key());
-    for (auto it = range.first; it != range.second; ++it)
+    
+    std::pair<std::multimap<std::string, size_t>::iterator, std::multimap<std::string, size_t>::iterator> range =
+        index_cache.equal_range(item.key());
+    for (std::multimap<std::string, size_t>::iterator it = range.first; it != range.second; ++it)
     {
         if (it->second == index)
         {
@@ -329,7 +332,7 @@ bool Persistence::deleteItem(const PersistentDataItem &item)
             break;
         }
     }
-    legacy_data.at(index) = nullptr;
+    legacy_data.at(index) = NULL;
 
     return true;
 }
@@ -342,7 +345,7 @@ void Persistence::getAll(std::vector<PersistentDataItem> &vec)
 
     for (size_t i = 0; i < legacy_data.size(); i++)
     {
-        if (legacy_data.at(i) != nullptr)
+        if (legacy_data.at(i) != NULL)
         {
             vec.push_back(PersistentDataItem(i, legacy_data.at(i)));
         }
@@ -355,9 +358,9 @@ void Persistence::getAllByKeyRange(std::vector<PersistentDataItem> &vec, const s
 
     CoreSuspender suspend;
 
-    auto begin = index_cache.lower_bound(min);
-    auto end = index_cache.lower_bound(max);
-    for (auto it = begin; it != end; ++it)
+    std::multimap<std::string, size_t>::iterator begin = index_cache.lower_bound(min);
+    std::multimap<std::string, size_t>::iterator end = index_cache.lower_bound(max);
+    for (std::multimap<std::string, size_t>::iterator it = begin; it != end; ++it)
     {
         vec.push_back(PersistentDataItem(it->second, legacy_data.at(it->second)));
     }
@@ -369,8 +372,9 @@ void Persistence::getAllByKey(std::vector<PersistentDataItem> &vec, const std::s
 
     CoreSuspender suspend;
 
-    auto range = index_cache.equal_range(key);
-    for (auto it = range.first; it != range.second; ++it)
+    std::pair<std::multimap<std::string, size_t>::iterator, std::multimap<std::string, size_t>::iterator> range =
+        index_cache.equal_range(key);
+    for (std::multimap<std::string, size_t>::iterator it = range.first; it != range.second; ++it)
     {
         vec.push_back(PersistentDataItem(it->second, legacy_data.at(it->second)));
     }
@@ -378,8 +382,10 @@ void Persistence::getAllByKey(std::vector<PersistentDataItem> &vec, const std::s
 
 static std::string filterSaveFileName(std::string s)
 {
-    for (auto &ch : s)
+    //for (auto &ch : s)
+    for (int i = 0; i < s.size(); ++i)
     {
+        char &ch = s[i];
         if (!isalnum(ch) && ch != '-' && ch != '_')
         {
             ch = '_';
@@ -407,7 +413,7 @@ FSTREAM(std::ifstream) Persistence::readSaveData(const std::string &name)
         return FSTREAM(std::ifstream)();
     }
 
-    return FSTREAM(std::ifstream)(getSaveFilePath(World::ReadWorldFolder(), name));
+    return FSTREAM(std::ifstream)(getSaveFilePath(World::ReadWorldFolder(), name).c_str());
 }
 
 FSTREAM(std::ofstream) Persistence::writeSaveData(const std::string &name)
@@ -418,6 +424,6 @@ FSTREAM(std::ofstream) Persistence::writeSaveData(const std::string &name)
         return FSTREAM(std::ofstream)();
     }
 
-    return FSTREAM(std::ofstream)(getSaveFilePath("current", name));
+    return FSTREAM(std::ofstream)(getSaveFilePath("current", name).c_str());
 }
 #undef FSTREAM

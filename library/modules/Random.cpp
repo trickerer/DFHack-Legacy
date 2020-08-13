@@ -96,7 +96,7 @@ void MersenneRNG::prefill(unsigned step, int twist_cnt)
 
 void MersenneRNG::init()
 {
-    init(Core::getInstance().p->getTickCount(), 20);
+    init(Core::getInstance().proc->getTickCount(), 20);
 }
 
 void MersenneRNG::init(const uint32_t *pseed, unsigned cnt, int twist_cnt)
