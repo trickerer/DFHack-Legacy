@@ -175,7 +175,7 @@ bool ItemTypeInfo::decode(df::item *ptr)
 
 std::string ItemTypeInfo::getToken()
 {
-    std::string rv = ENUM_KEY_STR(item_type, type);
+    std::string rv = ENUM_KEY_STR_SIMPLE(item_type, type);
     if (custom)
         rv += ":" + custom->id;
     else if (subtype != -1)
@@ -203,7 +203,7 @@ ITEMDEF_VECTORS
     if (name)
         return name;
 
-    return toLower(ENUM_KEY_STR(item_type, type));
+    return toLower(ENUM_KEY_STR_SIMPLE(item_type, type));
 }
 
 bool ItemTypeInfo::find(const std::string &token)
@@ -260,13 +260,18 @@ bool Items::isCasteMaterial(df::item_type itype)
 
 bool ItemTypeInfo::matches(df::job_item_vector_id vec_id)
 {
-    auto other_id = ENUM_ATTR(job_item_vector_id, other, vec_id);
+    const df::enums::items_other_id::items_other_id other_id =
+        ENUM_ATTR(job_item_vector_id, other, vec_id);
 
-    auto explicit_item = ENUM_ATTR(items_other_id, item, other_id);
+    const df::enums::item_type::item_type explicit_item =
+        ENUM_ATTR(items_other_id, item, other_id);
+
     if (explicit_item != item_type::NONE && type != explicit_item)
         return false;
 
-    auto generic_item = ENUM_ATTR(items_other_id, generic_item, other_id);
+     const DFHack::enum_list_attr<df::enums::item_type::item_type> generic_item =
+         ENUM_ATTR(items_other_id, generic_item, other_id);
+
     if (generic_item.size > 0)
     {
         for (size_t i = 0; i < generic_item.size; i++)
@@ -535,7 +540,7 @@ df::specific_ref *Items::getSpecificRef(df::item *item, df::specific_ref_type ty
 
 df::unit *Items::getOwner(df::item * item)
 {
-    auto ref = getGeneralRef(item, general_ref_type::UNIT_ITEMOWNER);
+    df::general_ref* ref = getGeneralRef(item, general_ref_type::UNIT_ITEMOWNER);
 
     return ref ? ref->getUnit() : NULL;
 }
@@ -551,7 +556,7 @@ bool Items::setOwner(df::item *item, df::unit *unit)
         if (ref->getType() != general_ref_type::UNIT_ITEMOWNER)
             continue;
 
-        if (auto cur = ref->getUnit())
+        if (df::unit* cur = ref->getUnit())
         {
             if (cur == unit)
                 return true;
@@ -567,7 +572,7 @@ bool Items::setOwner(df::item *item, df::unit *unit)
 
     if (unit)
     {
-        auto ref = df::allocate<df::general_ref_unit_itemownerst>();
+        df::general_ref_unit_itemownerst* ref = df::allocate<df::general_ref_unit_itemownerst>();
         if (!ref)
             return false;
 
@@ -583,7 +588,7 @@ bool Items::setOwner(df::item *item, df::unit *unit)
 
 df::item *Items::getContainer(df::item * item)
 {
-    auto ref = getGeneralRef(item, general_ref_type::CONTAINED_IN_ITEM);
+    df::general_ref* ref = getGeneralRef(item, general_ref_type::CONTAINED_IN_ITEM);
 
     return ref ? ref->getItem() : NULL;
 }
@@ -600,7 +605,7 @@ void Items::getContainedItems(df::item *item, std::vector<df::item*> *items)
         if (ref->getType() != general_ref_type::CONTAINS_ITEM)
             continue;
 
-        auto child = ref->getItem();
+        df::item* child = ref->getItem();
         if (child)
             items->push_back(child);
     }
@@ -608,14 +613,14 @@ void Items::getContainedItems(df::item *item, std::vector<df::item*> *items)
 
 df::building *Items::getHolderBuilding(df::item * item)
 {
-    auto ref = getGeneralRef(item, general_ref_type::BUILDING_HOLDER);
+    df::general_ref* ref = getGeneralRef(item, general_ref_type::BUILDING_HOLDER);
 
     return ref ? ref->getBuilding() : NULL;
 }
 
 df::unit *Items::getHolderUnit(df::item * item)
 {
-    auto ref = getGeneralRef(item, general_ref_type::UNIT_HOLDER);
+    df::general_ref* ref = getGeneralRef(item, general_ref_type::UNIT_HOLDER);
 
     return ref ? ref->getUnit() : NULL;
 }
@@ -638,12 +643,12 @@ df::coord Items::getPosition(df::item *item)
             switch (ref->getType())
             {
             case general_ref_type::CONTAINED_IN_ITEM:
-                if (auto item2 = ref->getItem())
+                if (df::item* item2 = ref->getItem())
                     return getPosition(item2);
                 break;
 
             case general_ref_type::UNIT_HOLDER:
-                if (auto unit = ref->getUnit())
+                if (df::unit* unit = ref->getUnit())
                     return Units::getPosition(unit);
                 break;
 
@@ -696,7 +701,7 @@ std::string Items::getBookTitle(df::item *item)
 
     if (item->getType() == df::item_type::BOOK)
     {
-        auto book = virtual_cast<df::item_bookst>(item);
+        df::item_bookst* book = virtual_cast<df::item_bookst>(item);
 
         if (book->title != "")
         {
@@ -706,7 +711,7 @@ std::string Items::getBookTitle(df::item *item)
         {
             for (size_t i = 0; i < book->improvements.size(); i++)
             {
-                if (auto page = virtual_cast<df::itemimprovement_pagesst>(book->improvements[i]))
+                if (df::itemimprovement_pagesst* page = virtual_cast<df::itemimprovement_pagesst>(book->improvements[i]))
                 {
                     for (size_t k = 0; k < page->contents.size(); k++)
                     {
@@ -717,7 +722,7 @@ std::string Items::getBookTitle(df::item *item)
                         }
                     }
                 }
-                else if (auto writing = virtual_cast<df::itemimprovement_writingst>(book->improvements[i]))
+                else if (df::itemimprovement_writingst* writing = virtual_cast<df::itemimprovement_writingst>(book->improvements[i]))
                 {
                     for (size_t k = 0; k < writing->contents.size(); k++)
                     {
@@ -733,13 +738,13 @@ std::string Items::getBookTitle(df::item *item)
     }
     else if (item->getType() == df::item_type::TOOL)
     {
-        auto book = virtual_cast<df::item_toolst>(item);
+        df::item_toolst* book = virtual_cast<df::item_toolst>(item);
 
         if (book->hasToolUse(df::tool_uses::CONTAIN_WRITING))
         {
             for (size_t i = 0; i < book->improvements.size(); i++)
             {
-                if (auto page = virtual_cast<df::itemimprovement_pagesst>(book->improvements[i]))
+                if (df::itemimprovement_pagesst* page = virtual_cast<df::itemimprovement_pagesst>(book->improvements[i]))
                 {
                     for (size_t k = 0; k < page->contents.size(); k++)
                     {
@@ -750,7 +755,7 @@ std::string Items::getBookTitle(df::item *item)
                         }
                     }
                 }
-                else if (auto writing = virtual_cast<df::itemimprovement_writingst>(book->improvements[i]))
+                else if (df::itemimprovement_writingst* writing = virtual_cast<df::itemimprovement_writingst>(book->improvements[i]))
                 {
                     for (size_t k = 0; k < writing->contents.size(); k++)
                     {
@@ -850,12 +855,12 @@ static bool detachItem(MapExtras::MapCache &mc, df::item *item)
             switch (ref->getType())
             {
             case general_ref_type::CONTAINED_IN_ITEM:
-                if (auto item2 = ref->getItem())
+                if (df::item* item2 = ref->getItem())
                 {
                     // Viewscreens hold general_ref_contains_itemst pointers
-                    for (auto screen = Core::getTopViewscreen(); screen; screen = screen->parent)
+                    for (df::viewscreen* screen = Core::getTopViewscreen(); screen; screen = screen->parent)
                     {
-                        auto vsitem = strict_virtual_cast<df::viewscreen_itemst>(screen);
+                        df::viewscreen_itemst* vsitem = strict_virtual_cast<df::viewscreen_itemst>(screen);
                         if (vsitem && vsitem->item == item2)
                             return false;
                     }
@@ -867,7 +872,7 @@ static bool detachItem(MapExtras::MapCache &mc, df::item *item)
                 break;
 
             case general_ref_type::UNIT_HOLDER:
-                if (auto unit = ref->getUnit())
+                if (df::unit* unit = ref->getUnit())
                 {
                     // Unit view sidebar holds inventory item pointers
                     if (ui->main.mode == ui_sidebar_mode::ViewUnits &&
@@ -946,16 +951,17 @@ bool DFHack::Items::moveToContainer(MapExtras::MapCache &mc, df::item *item, df:
     CHECK_NULL_POINTER(item);
     CHECK_NULL_POINTER(container);
 
-    auto cpos = getPosition(container);
+    df::coord cpos = getPosition(container);
     if (!cpos.isValid())
         return false;
 
-    auto ref1 = df::allocate<df::general_ref_contains_itemst>();
-    auto ref2 = df::allocate<df::general_ref_contained_in_itemst>();
+    df::general_ref_contains_itemst* ref1 = df::allocate<df::general_ref_contains_itemst>();
+    df::general_ref_contained_in_itemst* ref2 = df::allocate<df::general_ref_contained_in_itemst>();
 
     if (!ref1 || !ref2)
     {
-        delete ref1; delete ref2;
+        if (ref1) delete ref1;
+        if (ref2) delete ref2;
         Core::printerr("Could not allocate container refs.\n");
         return false;
     }
@@ -988,7 +994,7 @@ bool DFHack::Items::moveToBuilding(MapExtras::MapCache &mc, df::item *item, df::
     CHECK_NULL_POINTER(building);
     CHECK_INVALID_ARGUMENT(use_mode == 0 || use_mode == 2);
 
-    auto ref = df::allocate<df::general_ref_building_holderst>();
+    df::general_ref_building_holderst* ref = df::allocate<df::general_ref_building_holderst>();
     if(!ref)
     {
         delete ref;
@@ -1011,9 +1017,9 @@ bool DFHack::Items::moveToBuilding(MapExtras::MapCache &mc, df::item *item, df::
     ref->building_id=building->id;
     item->general_refs.push_back(ref);
 
-    auto con=new df::building_actual::T_contained_items;
-    con->item=item;
-    con->use_mode=use_mode;
+    df::building_actual::T_contained_items* con = new df::building_actual::T_contained_items;
+    con->item = item;
+    con->use_mode = use_mode;
     building->contained_items.push_back(con);
 
     return true;
@@ -1026,11 +1032,11 @@ bool DFHack::Items::moveToInventory(
     CHECK_NULL_POINTER(item);
     CHECK_NULL_POINTER(unit);
     CHECK_NULL_POINTER(unit->body.body_plan);
-    CHECK_INVALID_ARGUMENT(is_valid_enum_item(mode));
+    CHECK_INVALID_ARGUMENT(is_valid_enum_item_simple(mode));
     int body_plan_size = unit->body.body_plan->body_parts.size();
     CHECK_INVALID_ARGUMENT(body_part < 0 || body_part <= body_plan_size);
 
-    auto holderReference = df::allocate<df::general_ref_unit_holderst>();
+    df::general_ref_unit_holderst* holderReference = df::allocate<df::general_ref_unit_holderst>();
     if (!holderReference)
     {
         Core::printerr("Could not allocate UNIT_HOLDER reference.\n");
@@ -1045,7 +1051,7 @@ bool DFHack::Items::moveToInventory(
 
     item->flags.bits.in_inventory = true;
 
-    auto newInventoryItem = new df::unit_inventory_item();
+    df::unit_inventory_item* newInventoryItem = new df::unit_inventory_item();
     newInventoryItem->item = item;
     newInventoryItem->mode = mode;
     newInventoryItem->body_part_id = body_part;
@@ -1063,7 +1069,7 @@ bool Items::remove(MapExtras::MapCache &mc, df::item *item, bool no_uncat)
 {
     CHECK_NULL_POINTER(item);
 
-    auto pos = getPosition(item);
+    df::coord pos = getPosition(item);
 
     if (!detachItem(mc, item))
         return false;
@@ -1086,15 +1092,15 @@ df::proj_itemst *Items::makeProjectile(MapExtras::MapCache &mc, df::item *item)
     if (!world || !proj_next_id)
         return NULL;
 
-    auto pos = getPosition(item);
+    df::coord pos = getPosition(item);
     if (!pos.isValid())
         return NULL;
 
-    auto ref = df::allocate<df::general_ref_projectile>();
+    df::general_ref_projectile* ref = df::allocate<df::general_ref_projectile>();
     if (!ref)
         return NULL;
 
-    auto proj = df::allocate<df::proj_itemst>();
+    df::proj_itemst* proj = df::allocate<df::proj_itemst>();
     if (!proj) {
         delete ref;
         return NULL;
@@ -1263,10 +1269,10 @@ int Items::getItemBaseValue(int16_t item_type, int16_t item_subtype, int16_t mat
         value = 2;
         if (size_t(mat_type) < world->raws.creatures.all.size())
         {
-            auto creature = world->raws.creatures.all[mat_type];
+            df::creature_raw* creature = world->raws.creatures.all[mat_type];
             if (size_t(mat_subtype) < creature->caste.size())
             {
-                auto caste = creature->caste[mat_subtype];
+                df::caste_raw* caste = creature->caste[mat_subtype];
                 mat_type = caste->misc.bone_mat;
                 mat_subtype = caste->misc.bone_matidx;
             }
@@ -1277,7 +1283,7 @@ int Items::getItemBaseValue(int16_t item_type, int16_t item_subtype, int16_t mat
         value = 0;
         if (size_t(mat_type) < world->raws.creatures.all.size())
         {
-            auto creature = world->raws.creatures.all[mat_type];
+            df::creature_raw* creature = world->raws.creatures.all[mat_type];
             if (size_t(mat_subtype) < creature->caste.size())
                 value = creature->caste[mat_subtype]->misc.petvalue;
         }
@@ -1289,7 +1295,7 @@ int Items::getItemBaseValue(int16_t item_type, int16_t item_subtype, int16_t mat
     case item_type::PET:
         if (size_t(mat_type) < world->raws.creatures.all.size())
         {
-            auto creature = world->raws.creatures.all[mat_type];
+            df::creature_raw* creature = world->raws.creatures.all[mat_type];
             if (size_t(mat_subtype) < creature->caste.size())
                 return creature->caste[mat_subtype]->misc.petvalue;
         }
@@ -1430,7 +1436,7 @@ int Items::getValue(df::item *item)
     if (item_type == item_type::VERMIN || item_type == item_type::PET)
     {
         int divisor = 1;
-        auto creature = vector_get(world->raws.creatures.all, mat_type);
+        df::creature_raw* creature = vector_get(world->raws.creatures.all, mat_type);
         if (creature && size_t(mat_subtype) < creature->caste.size())
             divisor = creature->caste[mat_subtype]->misc.petvalue_divisor;
         if (divisor > 1)
@@ -1498,8 +1504,11 @@ bool Items::checkMandates(df::item *item)
 {
     CHECK_NULL_POINTER(item);
 
-    for (df::mandate *mandate : world->mandates)
+    //for (df::mandate *mandate : world->mandates)
+    for (std::vector<df::mandate*>::const_iterator it = world->mandates.begin(); it != world->mandates.end(); ++it)
     {
+        df::mandate* mandate = *it;
+
         if (mandate->mode != df::mandate::T_mode::Export)
             continue;
 
@@ -1526,9 +1535,10 @@ bool Items::canTrade(df::item *item)
     if (item->flags.bits.owned || item->flags.bits.artifact || item->flags.bits.spider_web || item->flags.bits.in_job)
         return false;
 
-    for (df::general_ref *ref : item->general_refs)
+    //for (df::general_ref *ref : item->general_refs)
+    for (std::vector<df::general_ref*>::const_iterator it = item->general_refs.begin(); it != item->general_refs.end(); ++it)
     {
-        switch (ref->getType())
+        switch ((*it)->getType())
         {
         case general_ref_type::UNIT_HOLDER:
             return false;
@@ -1541,9 +1551,10 @@ bool Items::canTrade(df::item *item)
         }
     }
 
-    for (df::specific_ref *ref : item->specific_refs)
+    //for (df::specific_ref *ref : item->specific_refs)
+    for (std::vector<df::specific_ref*>::const_iterator it = item->specific_refs.begin(); it != item->specific_refs.end(); ++it)
     {
-        if (ref->type == specific_ref_type::JOB)
+        if ((*it)->type == specific_ref_type::JOB)
         {
             // Ignore any items assigned to a job
             return false;
@@ -1565,9 +1576,10 @@ bool Items::canTradeWithContents(df::item *item)
 
     vector<df::item*> contained_items;
     getContainedItems(item, &contained_items);
-    for (df::item *cit : contained_items)
+    //for (df::item *cit : contained_items)
+    for (vector<df::item*>::const_iterator it = contained_items.begin(); it != contained_items.end(); ++it)
     {
-        if (!canTrade(cit))
+        if (!canTrade(*it))
             return false;
     }
 
@@ -1580,7 +1592,7 @@ bool Items::isRouteVehicle(df::item *item)
     int id = item->getVehicleID();
     if (id < 0) return false;
 
-    auto vehicle = df::vehicle::find(id);
+    df::vehicle* vehicle = df::vehicle::find(id);
     return vehicle && vehicle->route_id >= 0;
 }
 
@@ -1590,6 +1602,6 @@ bool Items::isSquadEquipment(df::item *item)
     if (!ui)
         return false;
 
-    auto &vec = ui->equipment.items_assigned[item->getType()];
+    std::vector<df::item*> &vec = ui->equipment.items_assigned[item->getType()];
     return binsearch_index(vec, &df::item::id, item->id) >= 0;
 }
