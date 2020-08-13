@@ -53,7 +53,7 @@ using df::global::ui;
 
 df::burrow *Burrows::findByName(std::string name)
 {
-    auto &vec = df::burrow::get_vector();
+    std::vector<df::burrow*> &vec = df::burrow::get_vector();
 
     for (size_t i = 0; i < vec.size(); i++)
         if (vec[i]->name == name)
@@ -68,7 +68,7 @@ void Burrows::clearUnits(df::burrow *burrow)
 
     for (size_t i = 0; i < burrow->units.size(); i++)
     {
-        auto unit = df::unit::find(burrow->units[i]);
+        df::unit* unit = df::unit::find(burrow->units[i]);
 
         if (unit)
             erase_from_vector(unit->burrows, burrow->id);
@@ -80,7 +80,7 @@ void Burrows::clearUnits(df::burrow *burrow)
     if (ui && ui->main.mode == ui_sidebar_mode::Burrows &&
         ui->burrows.in_add_units_mode && ui->burrows.sel_id == burrow->id)
     {
-        auto &sel = ui->burrows.sel_units;
+        std::vector<bool> &sel = ui->burrows.sel_units;
 
         for (size_t i = 0; i < sel.size(); i++)
             sel[i] = false;
@@ -136,7 +136,7 @@ void Burrows::listBlocks(std::vector<df::map_block*> *pvec, df::burrow *burrow)
     {
         df::coord pos(burrow->block_x[i], burrow->block_y[i], burrow->block_z[i]);
 
-        auto block = Maps::getBlock(pos - base);
+        df::map_block* block = Maps::getBlock(pos - base);
         if (block)
             pvec->push_back(block);
     }
@@ -146,7 +146,7 @@ static void destroyBurrowMask(df::block_burrow *mask)
 {
     if (!mask) return;
 
-    auto link = mask->link;
+    df::block_burrow_link* link = mask->link;
 
     link->prev->next = link->next;
     if (link->next)
@@ -166,7 +166,7 @@ void Burrows::clearTiles(df::burrow *burrow)
     {
         df::coord pos(burrow->block_x[i], burrow->block_y[i], burrow->block_z[i]);
 
-        auto block = Maps::getBlock(pos - base);
+        df::map_block* block = Maps::getBlock(pos - base);
         if (!block)
             continue;
 
@@ -253,7 +253,7 @@ bool Burrows::isAssignedBlockTile(df::burrow *burrow, df::map_block *block, df::
 
     if (!block) return false;
 
-    auto mask = getBlockMask(burrow, block);
+    df::block_burrow* mask = getBlockMask(burrow, block);
 
     return mask ? mask->getassignment(tile & 15) : false;
 }
@@ -264,7 +264,7 @@ bool Burrows::setAssignedBlockTile(df::burrow *burrow, df::map_block *block, df:
 
     if (!block) return false;
 
-    auto mask = getBlockMask(burrow, block, enable);
+    df::block_burrow* mask = getBlockMask(burrow, block, enable);
 
     if (mask)
     {
@@ -276,4 +276,3 @@ bool Burrows::setAssignedBlockTile(df::burrow *burrow, df::map_block *block, df:
 
     return true;
 }
-
