@@ -26,14 +26,14 @@ distribution.
 
 #include <windows.h>
 #include "common.h"
-#include <mutex>
+//#include <mutex>
 #include <vector>
 #include <string>
 #include "Core.h"
 #include "Hooks.h"
 #include <stdio.h>
 
-#include "tinythread.h"
+#include "tinythread.h" //was included but not used
 #include "modules/Graphic.h"
 
 /*************************************************************************/
@@ -42,7 +42,9 @@ distribution.
 // we don't know which of the SDL functions will be called first... so we
 // just catch the first one and init all our function pointers at that time
 static void InitSDLPointers(void);
-static std::once_flag inited;
+//static std::once_flag inited;
+static bool inited;
+static tthread::mutex init_mutex;
 
 /// wrappers for SDL 1.2 functions used in 40d16
 /***** Condition variables
@@ -824,5 +826,15 @@ void FirstCall()
 
 void InitSDLPointers()
 {
-    std::call_once(inited, [](){ FirstCall(); });
+    if (!inited)
+    {
+        tthread::lock_guard<tthread::mutex> init_lock(init_mutex);
+        if (!inited) // second check in case of concurrency (tradeoff for quick bool check)
+        {
+            inited = true;
+            FirstCall();
+        }
+    }
+
+    //std::call_once(inited, [](){ FirstCall(); });
 }
