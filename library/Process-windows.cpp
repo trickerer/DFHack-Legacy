@@ -95,12 +95,12 @@ Process::Process(const VersionInfoFactory& factory) : identified(false)
         return;
     }
     my_pe = d->pe_header.FileHeader.TimeDateStamp;
-    auto vinfo = factory.getVersionInfoByPETimestamp(my_pe);
+    VersionInfo const* vinfo = factory.getVersionInfoByPETimestamp(my_pe);
     if(vinfo)
     {
         identified = true;
         // give the process a data model and memory layout fixed for the base of first module
-        my_descriptor = std::make_shared<VersionInfo>(*vinfo);
+        my_descriptor = const_cast<VersionInfo*>(vinfo);
         my_descriptor->rebaseTo(getBase());
     }
     else
@@ -229,7 +229,7 @@ void Process::getMemRanges( vector<t_memrange> & ranges )
         // Merge areas with the same properties
         if (!ranges.empty() && LastAllocationBase == MBI.AllocationBase)
         {
-            auto &last = ranges.back();
+            t_memrange &last = ranges.back();
 
             if (last.end == temp.start &&
                 last.valid == temp.valid && last.execute == temp.execute &&
@@ -247,7 +247,7 @@ void Process::getMemRanges( vector<t_memrange> & ranges )
             int vsize = strlen(temp.name);
 
             // Translate NT name to DOS name
-            for (auto it = dosDrives.begin(); it != dosDrives.end(); ++it)
+            for (map <string,string>::const_iterator it = dosDrives.begin(); it != dosDrives.end(); ++it)
             {
                 int ksize = it->first.size();
                 if (strncmp(temp.name, it->first.data(), ksize) != 0)
@@ -314,7 +314,7 @@ int Process::adjustOffset(int offset, bool to_file)
 
     for(int i = 0; i < d->pe_header.FileHeader.NumberOfSections; i++)
     {
-        auto &section = d->sections[i];
+        IMAGE_SECTION_HEADER &section = d->sections[i];
 
         if (to_file)
         {
