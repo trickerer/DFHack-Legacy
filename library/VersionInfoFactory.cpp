@@ -29,6 +29,7 @@ distribution.
 #include <algorithm>
 #include <map>
 #include <iostream>
+#include <stdlib.h>
 using namespace std;
 
 #include "VersionInfoFactory.h"
@@ -39,6 +40,8 @@ using namespace std;
 using namespace DFHack;
 
 #include <tinyxml.h>
+
+#define strtoull _strtoui64
 
 VersionInfoFactory::VersionInfoFactory()
 {
@@ -52,28 +55,32 @@ VersionInfoFactory::~VersionInfoFactory()
 
 void VersionInfoFactory::clear()
 {
+    for (std::vector<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
+        delete *it;
     versions.clear();
     error = false;
 }
 
-std::shared_ptr<const VersionInfo> VersionInfoFactory::getVersionInfoByMD5(string hash) const
+VersionInfo const* VersionInfoFactory::getVersionInfoByMD5(string hash) const
 {
-    for (const auto& version : versions)
+    //for (const auto& version : versions)
+    for (std::vector<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
     {
-        if(version->hasMD5(hash))
-            return version;
+        if((*it)->hasMD5(hash))
+            return (*it);
     }
-    return nullptr;
+    return NULL;
 }
 
-std::shared_ptr<const VersionInfo> VersionInfoFactory::getVersionInfoByPETimestamp(uintptr_t timestamp) const
+VersionInfo const* VersionInfoFactory::getVersionInfoByPETimestamp(uintptr_t timestamp) const
 {
-    for (const auto& version : versions)
+    //for (const auto& version : versions)
+    for (std::vector<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
     {
-        if(version->hasPE(timestamp))
-            return version;
+        if((*it)->hasPE(timestamp))
+            return (*it);
     }
-    return nullptr;
+    return NULL;
 }
 
 void VersionInfoFactory::ParseVersion (TiXmlElement* entry, VersionInfo* mem)
@@ -139,10 +146,10 @@ void VersionInfoFactory::ParseVersion (TiXmlElement* entry, VersionInfo* mem)
                 continue;
             uintptr_t addr;
             if (cstr_value) {
-                if (sizeof(addr) == sizeof(unsigned long))
-                    addr = strtoul(cstr_value, 0, 0);
-                else
+                if (sizeof(addr) == sizeof(int64))
                     addr = strtoull(cstr_value, 0, 0);
+                else
+                    addr = strtoul(cstr_value, 0, 0);
             } else {
                 addr = (uintptr_t)DFHack::LookupPlugin(DFHack::GLOBAL_NAMES, cstr_mangled);
                 if (!addr)
@@ -225,8 +232,8 @@ bool VersionInfoFactory::loadFile(string path_to_xml)
             const char *name = pMemInfo->Attribute("name");
             if(name)
             {
-                auto version = std::make_shared<VersionInfo>();
-                ParseVersion( pMemInfo , version.get() );
+                VersionInfo* version = new VersionInfo();
+                ParseVersion(pMemInfo, version);
                 versions.push_back(version);
             }
         }
