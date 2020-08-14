@@ -168,7 +168,7 @@ static void BuildTypeMetatable(lua_State *state, type_identity *type);
 void LuaWrapper::push_object_ref(lua_State *state, void *ptr)
 {
     // stack: [metatable]
-    auto ref = (DFRefHeader*)lua_newuserdata(state, sizeof(DFRefHeader));
+    DFRefHeader* ref = (DFRefHeader*)lua_newuserdata(state, sizeof(DFRefHeader));
     ref->ptr = ptr;
     ref->field_info = NULL;
 
@@ -181,7 +181,7 @@ DFRefHeader *LuaWrapper::get_object_ref_header(lua_State *state, int val_index)
 {
     assert(!lua_islightuserdata(state, val_index));
 
-    auto ref = (DFRefHeader*)lua_touserdata(state, val_index);
+    DFRefHeader* ref = (DFRefHeader*)lua_touserdata(state, val_index);
     return ref;
 }
 
@@ -262,7 +262,7 @@ bool LuaWrapper::is_type_compatible(lua_State *state, type_identity *type1, int 
     if (!type1 || !type2)
         return false;
 
-    auto t1 = type1->type();
+    identity_type t1 = type1->type();
     if (t1 != type2->type())
         return false;
 
@@ -277,8 +277,8 @@ bool LuaWrapper::is_type_compatible(lua_State *state, type_identity *type1, int 
 
     case IDTYPE_BUFFER:
     {
-        auto b1 = (df::buffer_container_identity*)type1;
-        auto b2 = (df::buffer_container_identity*)type2;
+        df::buffer_container_identity* b1 = (df::buffer_container_identity*)type1;
+        df::buffer_container_identity* b2 = (df::buffer_container_identity*)type2;
         type_identity *item1 = b1->getItemType(), *item2 = b2->getItemType();
         int count1 = b1->getSize(), count2 = b2->getSize();
 
@@ -291,8 +291,8 @@ bool LuaWrapper::is_type_compatible(lua_State *state, type_identity *type1, int 
 
     case IDTYPE_STL_PTR_VECTOR:
     {
-        auto b1 = (df::stl_ptr_vector_identity*)type1;
-        auto b2 = (df::stl_ptr_vector_identity*)type2;
+        df::stl_ptr_vector_identity* b1 = (df::stl_ptr_vector_identity*)type1;
+        df::stl_ptr_vector_identity* b2 = (df::stl_ptr_vector_identity*)type2;
         type_identity *item1 = b1->getItemType(), *item2 = b2->getItemType();
 
         fetch_container_details(state, meta1, &item1, NULL);
@@ -305,8 +305,8 @@ bool LuaWrapper::is_type_compatible(lua_State *state, type_identity *type1, int 
     case IDTYPE_UNION:
     case IDTYPE_CLASS:
     {
-        auto b1 = (struct_identity*)type1;
-        auto b2 = (struct_identity*)type2;
+        struct_identity* b1 = (struct_identity*)type1;
+        struct_identity* b2 = (struct_identity*)type2;
 
         return (!exact_equal && b1->is_subclass(b2));
     }
@@ -320,7 +320,7 @@ static bool is_type_compatible(lua_State *state, type_identity *type1, int meta1
                                int meta2, bool exact_equal)
 {
     lua_rawgetp(state, meta2, &DFHACK_IDENTITY_FIELD_TOKEN);
-    auto type2 = (type_identity*)lua_touserdata(state, -1);
+    type_identity* type2 = (type_identity*)lua_touserdata(state, -1);
     lua_pop(state, 1);
 
     return is_type_compatible(state, type1, meta1, type2, meta2, exact_equal);
@@ -332,7 +332,7 @@ static bool is_type_compatible(lua_State *state, int meta1, int meta2, bool exac
         return true;
 
     lua_rawgetp(state, meta1, &DFHACK_IDENTITY_FIELD_TOKEN);
-    auto type1 = (type_identity*)lua_touserdata(state, -1);
+    type_identity* type1 = (type_identity*)lua_touserdata(state, -1);
     lua_pop(state, 1);
 
     return is_type_compatible(state, type1, meta1, meta2, exact_equal);
@@ -593,7 +593,7 @@ static int meta_sizeof(lua_State *state)
     // Static arrays need special handling
     if (id->type() == IDTYPE_BUFFER)
     {
-        auto buf = (df::buffer_container_identity*)id;
+        df::buffer_container_identity* buf = (df::buffer_container_identity*)id;
         type_identity *item = buf->getItemType();
         int count = buf->getSize();
 
@@ -646,7 +646,7 @@ static int meta_displace(lua_State *state)
         if (!has_step)
             luaL_error(state, "Step is mandatory in _displace of void*");
 
-        auto ptr = (uint8_t*)lua_touserdata(state, 1);
+        uint8_t* ptr = (uint8_t*)lua_touserdata(state, 1);
         lua_pushlightuserdata(state, ptr + index*step);
         return 1;
     }
@@ -662,7 +662,7 @@ static int meta_displace(lua_State *state)
     }
     else
     {
-        auto ptr = (uint8_t*)get_object_ref(state, 1);
+        uint8_t* ptr = (uint8_t*)get_object_ref(state, 1);
         lua_getmetatable(state, 1);
         push_object_ref(state, ptr + index*step);
     }
@@ -885,7 +885,7 @@ static int meta_assign(lua_State *state)
                         {
                             lua_pop(state, 1);
                             if (lua_isnumber(state,-1))
-                                size = std::max(size, lua_tointeger(state,-1)+1);
+                                size = std::max<int>(size, lua_tointeger(state,-1)+1);
                         }
 
                         invoke_resize(state, 1, size);
@@ -1003,8 +1003,8 @@ static int meta_ptr_tostring(lua_State *state)
     uint8_t *ptr = get_object_addr(state, 1, 0, "access");
 
     bool has_length = false;
-    uint64_t length = 0;
-    auto *cid = dynamic_cast<df::container_identity*>(get_object_identity(state, 1, "__tostring()", true, true));
+    int length = 0;
+    df::container_identity* cid = dynamic_cast<df::container_identity*>(get_object_identity(state, 1, "__tostring()", true, true));
 
     if (cid && (cid->type() == IDTYPE_CONTAINER || cid->type() == IDTYPE_STL_PTR_VECTOR))
     {
@@ -1016,7 +1016,7 @@ static int meta_ptr_tostring(lua_State *state)
     const char *cname = lua_tostring(state, -1);
 
     if (has_length)
-        lua_pushstring(state, stl_sprintf("<%s[%" PRIu64 "]: %p>", cname, length, (void*)ptr).c_str());
+        lua_pushstring(state, stl_sprintf("<%s[%i]: %p>", cname, length, (void*)ptr).c_str());
     else
         lua_pushstring(state, stl_sprintf("<%s: %p>", cname, (void*)ptr).c_str());
     return 1;
@@ -1032,13 +1032,13 @@ static int meta_enum_attr_index(lua_State *state)
     if (!lua_isnumber(state, 2))
         luaL_error(state, "Invalid index in enum.attrs[]");
 
-    auto id = (enum_identity*)lua_touserdata(state, lua_upvalueindex(2));
-    auto *complex = id->getComplex();
+    enum_identity* id = (enum_identity*)lua_touserdata(state, lua_upvalueindex(2));
+    const enum_identity::ComplexData* complex = id->getComplex();
 
     int64_t idx = lua_tonumber(state, 2);
     if (complex)
     {
-        auto it = complex->value_index_map.find(idx);
+        ValueIndexMap::const_iterator it = complex->value_index_map.find(idx);
         if (it != complex->value_index_map.end())
             idx = int64_t(it->second);
         else
@@ -1052,7 +1052,7 @@ static int meta_enum_attr_index(lua_State *state)
     }
 
     uint8_t *ptr = (uint8_t*)id->getAttrs();
-    auto atype = id->getAttrType();
+    struct_identity* atype = id->getAttrType();
 
     push_object_internal(state, atype, ptr + unsigned(atype->byte_size()*idx));
     return 1;
@@ -1379,8 +1379,8 @@ static int wtype_next_item(lua_State *state)
 
 static bool complex_enum_next_item_helper(lua_State *L, int64_t &item, bool wrap = false)
 {
-    const auto *complex = (enum_identity::ComplexData*)lua_touserdata(L, lua_upvalueindex(2));
-    auto it = complex->value_index_map.find(item);
+    const enum_identity::ComplexData* complex = (enum_identity::ComplexData*)lua_touserdata(L, lua_upvalueindex(2));
+    ValueIndexMap::const_iterator it = complex->value_index_map.find(item);
     if (it != complex->value_index_map.end())
     {
         size_t index = it->second;
@@ -1453,7 +1453,7 @@ static void FillEnumKeys(lua_State *state, int ix_meta, int ftable, enum_identit
     int base = lua_gettop(state);
     lua_newtable(state);
 
-    auto *complex = eid->getComplex();
+    const enum_identity::ComplexData* complex = eid->getComplex();
 
     // For enums, set mapping between keys and values
     if (complex)
@@ -1545,7 +1545,7 @@ static void FillBitfieldKeys(lua_State *state, int ix_meta, int ftable, bitfield
     int base = lua_gettop(state);
     lua_newtable(state);
 
-    auto bits = eid->getBits();
+    const bitfield_item_info* bits = eid->getBits();
 
     for (int i = 0; i < eid->getNumBits(); i++)
     {
