@@ -62,6 +62,8 @@ using namespace DFHack;
 using namespace tthread;
 
 using dfproto::CoreTextNotification;
+using dfproto::CoreTextFragment;
+using dfproto::CoreBindRequest;
 
 using google::protobuf::MessageLite;
 
@@ -78,7 +80,7 @@ void color_ostream_proxy::decode(CoreTextNotification *data)
 
         for (int i = 0; i < cnt; i++)
         {
-            auto &frag = data->fragments(i);
+            CoreTextFragment const &frag = data->fragments(i);
 
             color_value color = frag.has_color() ? color_value(frag.color()) : COLOR_RESET;
             target->add_text(color, frag.text());
@@ -144,8 +146,11 @@ int RemoteClient::GetDefaultPort()
     }
     else
     {
-        for (const char *filename : {"dfhack-config/remote-server.json", "../dfhack-config/remote-server.json"})
+        //for (const char *filename : {"dfhack-config/remote-server.json", "../dfhack-config/remote-server.json"})
+        static const char* rsPaths[2] = {"dfhack-config/remote-server.json", "../dfhack-config/remote-server.json"};
+        for (int i = 0; i < 2; ++i)
         {
+            const char *filename = rsPaths[i];
             std::ifstream in_file(filename, std::ios_base::in);
             if (in_file)
             {
@@ -244,7 +249,7 @@ bool RemoteClient::bind(color_ostream &out, RemoteFunctionBase *function,
     bind_call.reset();
 
     {
-        auto in = bind_call.in();
+        CoreBindRequest* in = bind_call.in();
 
         in->set_method(name);
         if (!plugin.empty())
