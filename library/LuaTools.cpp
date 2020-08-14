@@ -159,7 +159,7 @@ static int DFHACK_OSTREAM_TOKEN = 0;
 color_ostream *DFHack::Lua::GetOutput(lua_State *L)
 {
     lua_rawgetp(L, LUA_REGISTRYINDEX, &DFHACK_OSTREAM_TOKEN);
-    auto rv = (color_ostream*)lua_touserdata(L, -1);
+    color_ostream* rv = (color_ostream*)lua_touserdata(L, -1);
     lua_pop(L, 1);
     return rv;
 }
@@ -535,7 +535,7 @@ static int dfhack_error(lua_State *L)
 {
     luaL_checkany(L, 1);
     lua_settop(L, 3);
-    int level = std::max(1, luaL_optint(L, 2, 1));
+    int level = std::max<int>(1, luaL_optint(L, 2, 1));
 
     lua_pushvalue(L, 1);
 
@@ -1103,7 +1103,7 @@ namespace {
 
 static bool init_interpreter(color_ostream &out, lua_State *state, void *info)
 {
-    auto args = (InterpreterArgs*)info;
+    InterpreterArgs* args = (InterpreterArgs*)info;
     lua_rawgetp(state, LUA_REGISTRYINDEX, &DFHACK_DFHACK_TOKEN);
     lua_getfield(state, -1, "interpreter");
     lua_remove(state, -2);
@@ -1343,7 +1343,7 @@ namespace {
 
 void DFHack::Lua::Event::New(lua_State *state, Owner *owner)
 {
-    auto obj = (EventObject *)lua_newuserdata(state, sizeof(EventObject));
+    EventObject* obj = (EventObject*)lua_newuserdata(state, sizeof(EventObject));
     obj->item_count = 0;
     obj->owner = owner;
 
@@ -1370,7 +1370,7 @@ static int dfhack_event_new(lua_State *L)
 static int dfhack_event_len(lua_State *L)
 {
     luaL_checktype(L, 1, LUA_TUSERDATA);
-    auto obj = (EventObject *)lua_touserdata(L, 1);
+    EventObject* obj = (EventObject*)lua_touserdata(L, 1);
     lua_pushinteger(L, obj->item_count);
     return 1;
 }
@@ -1378,7 +1378,7 @@ static int dfhack_event_len(lua_State *L)
 static int dfhack_event_tostring(lua_State *L)
 {
     luaL_checktype(L, 1, LUA_TUSERDATA);
-    auto obj = (EventObject *)lua_touserdata(L, 1);
+    EventObject* obj = (EventObject*)lua_touserdata(L, 1);
     lua_pushfstring(L, "<event: %d listeners>", obj->item_count);
     return 1;
 }
@@ -1442,7 +1442,7 @@ static int dfhack_event_newindex(lua_State *L)
 
     if (delta != 0)
     {
-        auto obj = (EventObject *)lua_touserdata(L, 1);
+        EventObject* obj = (EventObject*)lua_touserdata(L, 1);
         obj->item_count += delta;
         if (obj->owner)
             obj->owner->on_count_changed(obj->item_count, delta);
@@ -1505,7 +1505,7 @@ static int dfhack_event_call(lua_State *state)
     luaL_checktype(state, 1, LUA_TUSERDATA);
     luaL_checkstack(state, lua_gettop(state)+2, "stack overflow in event dispatch");
 
-    auto obj = (EventObject *)lua_touserdata(state, 1);
+    EventObject* obj = (EventObject*)lua_touserdata(state, 1);
     if (obj->owner)
         obj->owner->on_invoked(state, lua_gettop(state)-1, false);
 
@@ -1538,7 +1538,7 @@ void DFHack::Lua::Event::Invoke(color_ostream &out, lua_State *state, void *key,
         return;
     }
 
-    auto obj = (EventObject *)lua_touserdata(state, -1);
+    EventObject* obj = (EventObject*)lua_touserdata(state, -1);
     lua_insert(state, base+1);
 
     if (obj->owner)
@@ -1824,7 +1824,7 @@ static void cancel_timers(std::multimap<int,int> &timers)
     Lua::StackUnwinder frame(State);
     lua_rawgetp(State, LUA_REGISTRYINDEX, &DFHACK_TIMEOUTS_TOKEN);
 
-    for (auto it = timers.begin(); it != timers.end(); ++it)
+    for (std::multimap<int,int>::const_iterator it = timers.begin(); it != timers.end(); ++it)
     {
         lua_pushnil(State);
         lua_rawseti(State, frame[1], it->second);

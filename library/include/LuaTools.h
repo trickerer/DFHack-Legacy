@@ -299,7 +299,7 @@ namespace DFHack {namespace Lua {
     template<class T>
     void Push(lua_State *state, T value)
     {
-        if (is_fpval(value).val == true)
+        if (is_fpval<T>::val == true)
             lua_pushnumber(state, value);
         else
             lua_pushinteger(state, value);
