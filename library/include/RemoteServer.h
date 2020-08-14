@@ -243,6 +243,7 @@ namespace  DFHack
     public:
 
         static void Accepted(CActiveSocket* socket);
+        static void cActiveSocketThreadFn(void* socket);
 
         ServerFunctionBase *findFunction(color_ostream &out, const std::string &plugin, const std::string &name);
     };

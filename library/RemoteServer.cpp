@@ -57,7 +57,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 
 #include <memory>
-#include <thread>
+//#include <thread>
 
 #include "json/json.h"
 
@@ -71,12 +71,13 @@ bool readFullBuffer(CSimpleSocket *socket, void *buf, int size);
 bool sendRemoteMessage(CSimpleSocket *socket, int16_t id,
                         const ::google::protobuf::MessageLite *msg, bool size_ready);
 
-std::mutex ServerMain::access_{};
-bool ServerMain::blocked_{};
+tthread::mutex ServerMain::access_ = tthread::mutex();
+bool ServerMain::blocked_ = false;
 
 namespace {
-    struct BlockedException : std::exception {
-        const char* what() const noexcept override
+    struct BlockedException : std::exception
+    {
+        const char* what() const throw()
         {
             return "Core has blocked all connection. This should have been catched.";
         }
@@ -85,13 +86,13 @@ namespace {
 
 namespace DFHack {
 
-    struct BlockGuard {
-        std::lock_guard<std::mutex> lock;
-        BlockGuard() :
-            lock{ServerMain::access_}
+    struct BlockGuard
+    {
+        tthread::lock_guard<tthread::mutex> lock;
+        BlockGuard() : lock(ServerMain::access_)
         {
             if (ServerMain::blocked_)
-                throw BlockedException{};
+                throw BlockedException();
         }
     };
 }
@@ -123,7 +124,7 @@ void RPCService::finalize(ServerConnection *owner, std::vector<ServerFunctionBas
 
     for (size_t i = 0; i < functions.size(); i++)
     {
-        auto fn = functions[i];
+        ServerFunctionBase* fn = functions[i];
 
         fn->id = (int16_t)ftable->size();
         ftable->push_back(fn);
@@ -134,8 +135,10 @@ void RPCService::finalize(ServerConnection *owner, std::vector<ServerFunctionBas
 
 void RPCService::dumpMethods(std::ostream & out) const
 {
-    for (auto fn : functions)
+    //for (auto fn : functions)
+    for (std::vector<ServerFunctionBase*>::const_iterator it = functions.begin(); it != functions.end(); ++it)
     {
+        ServerFunctionBase* fn = *it;
         std::string in_name = fn->p_in_template->GetTypeName();
         size_t last_dot = in_name.rfind('.');
         if (last_dot != std::string::npos)
@@ -165,7 +168,7 @@ ServerConnection::~ServerConnection()
     socket->Close();
     delete socket;
 
-    for (auto it = plugin_services.begin(); it != plugin_services.end(); ++it)
+    for (std::map<std::string, RPCService*>::const_iterator it = plugin_services.begin(); it != plugin_services.end(); ++it)
         delete it->second;
 
     delete core_service;
@@ -218,9 +221,9 @@ void ServerConnection::connection_ostream::flush_proxy()
 
     CoreTextNotification msg;
 
-    for (auto it = buffer.begin(); it != buffer.end(); ++it)
+    for (std::list<fragment_type>::const_iterator it = buffer.begin(); it != buffer.end(); ++it)
     {
-        auto frag = msg.add_fragments();
+        CoreTextFragment* frag = msg.add_fragments();
         frag->set_text(it->second);
         if (it->first >= 0)
             frag->set_color(CoreTextFragment::Color(it->first));
@@ -235,14 +238,20 @@ void ServerConnection::connection_ostream::flush_proxy()
     }
 }
 
+void ServerConnection::cActiveSocketThreadFn(void* socket)
+{
+    try
+    {
+        ServerConnection((CActiveSocket*)socket).threadFn();
+    }
+    catch (BlockedException &)
+    {
+    }
+}
+
 void ServerConnection::Accepted(CActiveSocket* socket)
 {
-    std::thread{[](CActiveSocket* socket) {
-            try {
-                ServerConnection(socket).threadFn();
-            } catch (BlockedException &) {
-            }
-        },  socket}.detach();
+    tthread::thread(&cActiveSocketThreadFn, socket).detach();
 }
 
 void ServerConnection::threadFn()
@@ -300,9 +309,11 @@ void ServerConnection::threadFn()
             break;
         }
 
-        std::unique_ptr<uint8_t[]> buf(new uint8_t[header.size]);
+        //std::unique_ptr<uint8_t[]> buf(new uint8_t[header.size]);
+        uint8* buf = new uint8[header.size];
+        memset(buf, 0, sizeof(uint8)*header.size);
 
-        if (!readFullBuffer(socket, buf.get(), header.size))
+        if (!readFullBuffer(socket, buf, header.size))
         {
             out.printerr("In RPC server: I/O error in receive %d bytes of data.\n", header.size);
             break;
@@ -328,13 +339,14 @@ void ServerConnection::threadFn()
             {
                 stream.printerr("In call to %s: forbidden host: %s\n", fn->name, socket->GetClientAddr());
             }
-            else if (!fn->in()->ParseFromArray(buf.get(), header.size))
+            else if (!fn->in()->ParseFromArray(buf, header.size))
             {
                 stream.printerr("In call to %s: could not decode input args.\n", fn->name);
             }
             else
             {
-                buf.reset();
+                delete[] buf;
+                //buf.reset();
 
                 reply = fn->out();
 
@@ -399,64 +411,64 @@ void ServerConnection::threadFn()
     std::cerr << "Shutting down client connection." << endl;
 }
 
-namespace {
+//namespace {
+//
+//    struct ServerMainImpl : public ServerMain {
+//        CPassiveSocket socket;
+//        static void threadFn(std::promise<bool> promise, int port);
+//        ServerMainImpl(std::promise<bool> promise, int port);
+//        ~ServerMainImpl();
+//    };
+//
+//}
 
-    struct ServerMainImpl : public ServerMain {
-        CPassiveSocket socket;
-        static void threadFn(std::promise<bool> promise, int port);
-        ServerMainImpl(std::promise<bool> promise, int port);
-        ~ServerMainImpl();
-    };
-
-}
-
-ServerMainImpl::ServerMainImpl(std::promise<bool> promise, int port) :
-    socket{}
-{
-    socket.Initialize();
-
-    std::string filename("dfhack-config/remote-server.json");
-
-    Json::Value configJson;
-
-    std::ifstream inFile(filename, std::ios_base::in);
-
-    bool allow_remote = false;
-
-    if (inFile.is_open())
-    {
-        inFile >> configJson;
-        inFile.close();
-
-        allow_remote = configJson.get("allow_remote", "false").asBool();
-    }
-
-    // rewrite/normalize config file
-    configJson["allow_remote"] = allow_remote;
-    configJson["port"] = configJson.get("port", DEFAULT_PORT);
-
-    std::ofstream outFile(filename, std::ios_base::trunc);
-
-    if (outFile.is_open())
-    {
-        outFile << configJson;
-        outFile.close();
-    }
-
-    std::cerr << "Listening on port " << port << (allow_remote ? " (remote enabled)" : "") << std::endl;
-    const char* addr = allow_remote ? NULL : "127.0.0.1";
-    if (!socket.Listen(addr, port)) {
-        promise.set_value(false);
-        return;
-    }
-    promise.set_value(true);
-}
-
-ServerMainImpl::~ServerMainImpl()
-{
-    socket.Close();
-}
-
+//ServerMainImpl::ServerMainImpl(std::promise<bool> promise, int port) :
+//    socket{}
+//{
+//    socket.Initialize();
+//
+//    std::string filename("dfhack-config/remote-server.json");
+//
+//    Json::Value configJson;
+//
+//    std::ifstream inFile(filename, std::ios_base::in);
+//
+//    bool allow_remote = false;
+//
+//    if (inFile.is_open())
+//    {
+//        inFile >> configJson;
+//        inFile.close();
+//
+//        allow_remote = configJson.get("allow_remote", "false").asBool();
+//    }
+//
+//    // rewrite/normalize config file
+//    configJson["allow_remote"] = allow_remote;
+//    configJson["port"] = configJson.get("port", DEFAULT_PORT);
+//
+//    std::ofstream outFile(filename, std::ios_base::trunc);
+//
+//    if (outFile.is_open())
+//    {
+//        outFile << configJson;
+//        outFile.close();
+//    }
+//
+//    std::cerr << "Listening on port " << port << (allow_remote ? " (remote enabled)" : "") << std::endl;
+//    const char* addr = allow_remote ? NULL : "127.0.0.1";
+//    if (!socket.Listen(addr, port)) {
+//        promise.set_value(false);
+//        return;
+//    }
+//    promise.set_value(true);
+//}
+//
+//ServerMainImpl::~ServerMainImpl()
+//{
+//    socket.Close();
+//}
+//
 //std::future<bool> ServerMain::listen(int port)
 //{
 //    std::promise<bool> promise;
@@ -465,28 +477,28 @@ ServerMainImpl::~ServerMainImpl()
 //    return rv;
 //}
 //
-void ServerMainImpl::threadFn(std::promise<bool> promise, int port)
-{
-    ServerMainImpl server{std::move(promise), port};
-
-    CActiveSocket *client = nullptr;
-
-    try {
-        while ((client = server.socket.Accept()) != NULL)
-        {
-            BlockGuard lock;
-            ServerConnection::Accepted(client);
-            client = nullptr;
-        }
-    } catch(BlockedException &) {
-        if (client)
-            client->Close();
-        delete client;
-    }
-}
+//void ServerMainImpl::threadFn(std::promise<bool> promise, int port)
+//{
+//    ServerMainImpl server{std::move(promise), port};
+//
+//    CActiveSocket *client = nullptr;
+//
+//    try {
+//        while ((client = server.socket.Accept()) != NULL)
+//        {
+//            BlockGuard lock;
+//            ServerConnection::Accepted(client);
+//            client = nullptr;
+//        }
+//    } catch(BlockedException &) {
+//        if (client)
+//            client->Close();
+//        delete client;
+//    }
+//}
 
 void ServerMain::block()
 {
-    std::lock_guard<std::mutex> lock{access_};
+    tthread::lock_guard<tthread::mutex> lock(access_);
     blocked_ = true;
 }
