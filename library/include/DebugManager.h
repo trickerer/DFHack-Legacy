@@ -24,10 +24,11 @@
 #pragma once
 
 #include "Export.h"
-#include "Signal.hpp"
+//#include "Signal.hpp"
 
-#include <mutex>
+//#include <mutex>
 #include <vector>
+#include "tinythread.h"
 
 namespace DFHack {
 
@@ -57,23 +58,24 @@ class DebugCategory;
  * The interface is extremely simple but enough to implement persistent filter
  * states and runtime configuration code in a plugin.
  */
-class DFHACK_EXPORT DebugManager : public std::vector<DebugCategory*> {
+class DFHACK_EXPORT DebugManager : public std::vector<DebugCategory*>
+{
 public:
     friend class DebugRegisterBase;
 
     //! access_mutex_ protects all readers and writers to DFHack::DebugManager
-    std::mutex access_mutex_;
+    tthread::mutex access_mutex_;
 
     //! Different signals that all will be routed to
     //! DebugManager::categorySignal
-    enum signalType {
-        CAT_ADD,
-        CAT_REMOVE,
-        CAT_MODIFIED,
-    };
+    //enum signalType {
+    //    CAT_ADD,
+    //    CAT_REMOVE,
+    //    CAT_MODIFIED,
+    //};
 
     //! type to help access signal features like Connection and BlockGuard
-    using categorySignal_t = Signal<void (signalType, DebugCategory&)>;
+    //using categorySignal_t = Signal<void (signalType, DebugCategory&)>;
 
     /*!
      * Signal object where callbacks can be connected. Connecting to a class
@@ -83,24 +85,25 @@ public:
      * Signal is internally serialized allowing multiple threads call it
      * freely.
      */
-    categorySignal_t categorySignal;
+    //categorySignal_t categorySignal;
 
     //! Get the singleton object
-    static DebugManager& getInstance() {
+    static DebugManager& getInstance()
+    {
         static DebugManager instance;
         return instance;
     }
 
     //! Prevent copies
-    DebugManager(const DebugManager&) = delete;
+    DebugManager(const DebugManager&);
     //! Prevent copies
-    DebugManager(DebugManager&&) = delete;
+    //DebugManager(DebugManager&&);
     //! Prevent copies
-    DebugManager& operator=(DebugManager) = delete;
+    DebugManager& operator=(DebugManager);
     //! Prevent copies
-    DebugManager& operator=(DebugManager&&) = delete;
+    //DebugManager& operator=(DebugManager&&);
 protected:
-    DebugManager() = default;
+    DebugManager() {}
 
     //! Helper for automatic category registering and signaling
     void registerCategory(DebugCategory &);

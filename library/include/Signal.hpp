@@ -25,11 +25,13 @@ redistribute it freely, subject to the following restrictions:
 
 #include <climits>
 
-#include <atomic>
+//#include <atomic>
 #include <functional>
 #include <list>
 #include <memory>
-#include <mutex>
+//#include <mutex>
+
+#include "tinythread.h"
 
 #ifdef __SSE__
 #include <xmmintrin.h>
@@ -83,34 +85,33 @@ template<typename Signature, typename tag>
 class CallbackHolderImpl;
 
 template<typename RT, typename... Args>
-struct CallbackHolderBase {
-    using Callback = std::function<RT(Args...)>;
+struct CallbackHolderBase
+{
+    //using Callback = std::function<RT(Args...)>;
+    typedef std::function<RT(Args...)> Callback;
 
-    CallbackHolderBase(const Callback& cb) :
-        cb_{cb},
-        state_{}
-    {}
+    CallbackHolderBase(const Callback& cb) : cb_(cb), state_(0) {}
 
     //! Block the connection
-    void block() noexcept
+    void block()
     {
         state_ += blocked;
     }
 
     //! Unblock the connection
-    void unblock() noexcept
+    void unblock()
     {
         state_ -= blocked;
     }
 
     //! Check if connection is deleted
-    bool erased() const noexcept
+    bool erased() const
     {
         return state_ & deleted;
     }
 
     //! Check if connection is still active (not blocked or erased)
-    operator bool() const noexcept
+    operator bool() const
     {
         return !(state_ & ~inCall);
     }
@@ -118,23 +119,25 @@ struct CallbackHolderBase {
 protected:
     //! Immutable callback object
     const Callback cb_;
-    using state_t = unsigned;
+    //using state_t = unsigned;
+    typedef unsigned state_t;
     //! Single shared state as a bitfield to simplify synchronization
     //! between state changes.
-    std::atomic<state_t> state_;
-    static constexpr state_t deleted = 0x1 << (sizeof(state_t)*CHAR_BIT - 1);
-    static constexpr state_t inCall = deleted >> (sizeof(state_t)*CHAR_BIT/2);
-    static constexpr state_t blocked = 0x1;
-    static constexpr state_t blockedMask = inCall - 1;
-    static constexpr state_t inCallMask = (deleted - 1) ^ blockedMask;
+    tthread::atomic<state_t> state_;
+    static const state_t deleted = 0x1 << (sizeof(state_t)*CHAR_BIT - 1);
+    static const state_t inCall = deleted >> (sizeof(state_t)*CHAR_BIT/2);
+    static const state_t blocked = 0x1;
+    static const state_t blockedMask = inCall - 1;
+    static const state_t inCallMask = (deleted - 1) ^ blockedMask;
 };
 
 template<typename RT, typename... Args>
-class CallbackHolderImpl<RT(Args...), signal_inline_tag> :
-        public CallbackHolderBase<RT, Args...> {
-    using parent_t = CallbackHolderBase<RT, Args...>;
+class CallbackHolderImpl<RT(Args...), signal_inline_tag> : public CallbackHolderBase<RT, Args...>
+{
+    //using parent_t = CallbackHolderBase<RT, Args...>;
+    typedef CallbackHolderBase<RT, Args...> parent_t;
 public:
-    using Callback = typename parent_t::Callback;
+    //using Callback = typename parent_t::Callback;
 private:
     using state_t = typename parent_t::state_t;
     //! Make sure callback pointed object doesn't disappear under us
@@ -145,12 +148,12 @@ private:
         CallGuard(const CallGuard&);
 
         //! Allow implicit conversion to callback for simply syntax
-        const Callback& operator*() const noexcept
+        const Callback& operator*() const
         {
             return holder_->cb_;
         }
 
-        operator bool() const noexcept
+        operator bool() const
         {
             return *holder_;
         }
@@ -188,7 +191,7 @@ public:
      * \todo Maybe use monitor instruction to avoid busy wait and call
      *       std::thread::yield() if wait is longer than expected.
      */
-    void erase() noexcept
+    void erase()
     {
         state_t oldstate;
         state_t newstate;
@@ -217,9 +220,10 @@ spin:
 };
 
 template<typename RT, typename... Args>
-class CallbackHolderImpl<RT(Args...), signal_shared_tag> :
-        public CallbackHolderBase<RT, Args...> {
-    using parent_t = CallbackHolderBase<RT, Args...>;
+class CallbackHolderImpl<RT(Args...), signal_shared_tag> : public CallbackHolderBase<RT, Args...>
+{
+    //using parent_t = CallbackHolderBase<RT, Args...>;
+    typedef CallbackHolderBase<RT, Args...> parent_t;
 public:
     using Callback = typename parent_t::Callback;
 private:
@@ -232,12 +236,12 @@ private:
         CallGuard(const CallGuard&);
 
         //! Allow implicit conversion to callback for simply syntax
-        const Callback& operator*() const noexcept
+        const Callback& operator*() const
         {
             return holder_->cb_;
         }
 
-        operator bool() const noexcept
+        operator bool() const
         {
             // If this is not marked erased then weak_ref->lock succeeded or
             // the slot isn't managed by shared_ptr<ConnectedBase>
@@ -263,22 +267,17 @@ private:
     friend CallGuard;
 public:
     //! Construct the callback state for an automatically synchronized object
-    CallbackHolderImpl(const Callback& cb,
-            std::shared_ptr<ConnectedBase>& ref) :
-        parent_t{cb},
-        weak_ref_{ref}
+    CallbackHolderImpl(const Callback& cb, std::shared_ptr<ConnectedBase>& ref) :
+        parent_t{cb}, weak_ref_{ref}
     {}
 
     //! Construct the callback state for an externally synchronized object
-    CallbackHolderImpl(const Callback& cb) :
-        parent_t{cb},
-        weak_ref_{}
-    {}
+    CallbackHolderImpl(const Callback& cb) : parent_t{cb}, weak_ref_{} {}
 
     /*!
      * erase from destructor can't happen while we are in call because
      */
-    void erase() noexcept
+    void erase()
     {
         parent_t::state_ |= parent_t::deleted;
     }
@@ -409,20 +408,20 @@ public:
 
     Connection connect(const Callback& f)
     {
-        std::lock_guard<std::mutex> lock(access_);
+        tthread::lock_guard<tthread::mutex> lock(access_);
         auto iter = callbacks_.emplace(callbacks_.begin(), f);
         return {iter, parent_t::shared_from_this()};
     }
 
     Connection connect(std::shared_ptr<ConnectedBase> c, const Callback& f)
     {
-        std::lock_guard<std::mutex> lock(access_);
+        tthread::lock_guard<tthread::mutex> lock(access_);
         auto iter = callbacks_.emplace(callbacks_.begin(), f, c);
         return {iter, parent_t::shared_from_this()};
     }
 
     void disconnect(Connection& connection) {
-        std::lock_guard<std::mutex> lock(access_);
+        tthread::lock_guard<tthread::mutex> lock(access_);
         if (recursion_) {
             deleted_ = true;
             connection.iter_->erase();
@@ -435,7 +434,7 @@ public:
     template<typename Combiner>
     void operator()(Combiner &combiner, Args&&... arg)
     {
-        std::unique_lock<std::mutex> lock(access_);
+        tthread::unique_lock<tthread::mutex> lock(access_);
         struct RecursionGuard {
             SignalImpl* signal_;
             std::unique_lock<std::mutex>* lock_;
@@ -512,7 +511,7 @@ private:
     SignalImpl(const SignalImpl&) :
         SignalImpl{}
     {}
-    std::mutex access_;
+    tthread::mutex access_;
     CallbackContainer callbacks_;
     int recursion_;
     bool deleted_;
@@ -767,7 +766,7 @@ public:
      * free access to Signal when using Signal::lock and checking returned
      * shared_ptr.
      */
-    weak_ptr weak_from_this() noexcept
+    weak_ptr weak_from_this()
     {
         return select_t::get(*this);
     }

@@ -25,7 +25,8 @@ redistribute it freely, subject to the following restrictions:
 
 #include "ColorText.h"
 
-#include <atomic>
+//#include <atomic>
+#include "tinythread.h"
 #include "Core.h"
 
 namespace DFHack {
@@ -114,16 +115,20 @@ namespace DFHack {
  * macros. Runtime filtering support is handled by #TRACE, #DEBUG, #INFO, #WARN
  * and #ERR macros.
  */
-class DFHACK_EXPORT DebugCategory final {
+class DFHACK_EXPORT DebugCategory
+{
 public:
     //! type helper to maybe make it easier to convert to std::string_view when
     //! c++17 can be required.
-    using cstring = const char*;
-    using cstring_ref = const char*;
+    //using cstring = const char*;
+    //using cstring_ref = const char*;
+    typedef const char* cstring;
+    typedef const char* cstring_ref;
     /*!
      * Debug level enum for message filtering
      */
-    enum level {
+    enum level : uint32
+    {
         LTRACE = 0,
         LDEBUG = 1,
         LINFO = 2,
@@ -136,20 +141,17 @@ public:
      * \param category the name of category
      * \param defaultLevel optional default filtering level for the category
      */
-    constexpr DebugCategory(cstring_ref plugin,
-            cstring_ref category,
-            level defaultLevel = LWARNING) noexcept :
-        plugin_{plugin},
-        category_{category},
-        allowed_{defaultLevel}
+    explicit DebugCategory(cstring_ref plugin, cstring_ref category, level defaultLevel = LWARNING) :
+        plugin_(plugin), category_(category), allowed_(defaultLevel)
     {}
 
+private:
+    DebugCategory(const DebugCategory&);
+    //DebugCategory(DebugCategory&&);
+    DebugCategory& operator=(DebugCategory);
+    //DebugCategory& operator=(DebugCategory&&);
 
-    DebugCategory(const DebugCategory&) = delete;
-    DebugCategory(DebugCategory&&) = delete;
-    DebugCategory& operator=(DebugCategory) = delete;
-    DebugCategory& operator=(DebugCategory&&) = delete;
-
+public:
     /*!
      * Used by debug macros to check if message should be printed.
      *
@@ -159,19 +161,19 @@ public:
      * \param msgLevel the debug message level the following print belongs to
      * \return boolean with true indicating that message should be printed
      */
-    bool isEnabled(const level msgLevel) const noexcept {
+    bool isEnabled(const level msgLevel) const
+    {
         const uint32_t intLevel = static_cast<uint32_t>(msgLevel);
         // Compile time filtering to allow compiling out debug checks prints
         // from binary.
         return static_cast<uint32_t>(DBG_FILTER) <= intLevel &&
             // Runtime filtering for debug messages
-            static_cast<uint32_t>(allowed_.load(std::memory_order_relaxed)) <= intLevel;
+            static_cast<uint32_t>(allowed_.load(tthread::memory_order_relaxed)) <= intLevel;
     }
 
-    struct DFHACK_EXPORT ostream_proxy_prefix : public color_ostream_proxy {
-        ostream_proxy_prefix(const DebugCategory& cat,
-                color_ostream& target,
-                DebugCategory::level level);
+    struct DFHACK_EXPORT ostream_proxy_prefix : public color_ostream_proxy
+    {
+        ostream_proxy_prefix(const DebugCategory& cat, color_ostream& target, DebugCategory::level level);
         ~ostream_proxy_prefix()
         {
             flush();
@@ -188,10 +190,10 @@ public:
      * \return color_ostream_proxy that can be used to print the message
      * \sa DFHack::Core::getConsole()
      */
-    ostream_proxy_prefix getStream(const level msgLevel) const
-    {
-        return {*this,Core::getInstance().getConsole(),msgLevel};
-    }
+    //ostream_proxy_prefix getStream(const level msgLevel) const
+    //{
+    //    return ostream_proxy_prefix(*this,Core::getInstance().getConsole(),msgLevel);
+    //}
     /*!
      * Add standard message components to existing output stream object to begin
      * a new message line to an shared buffered object.
@@ -200,27 +202,27 @@ public:
      * \param target An output stream object where a debug output is printed
      * \return color_ostream reference that was passed as second parameter
      */
-    ostream_proxy_prefix getStream(const level msgLevel, color_ostream& target) const
-    {
-        return {*this,target,msgLevel};
-    }
+    //ostream_proxy_prefix getStream(const level msgLevel, color_ostream& target) const
+    //{
+    //    return ostream_proxy_prefix(*this,target,msgLevel);
+    //}
 
     /*!
      * \brief Allow management code to set a new filtering level
      * Caller must have locked DebugManager::access_mutex_.
      */
-    void allowed(level value) noexcept;
+    void allowed(level value);
     //! Query current filtering level
-    level allowed() const noexcept;
+    level allowed() const;
     //! Query plugin name
-    cstring_ref plugin() const noexcept;
+    cstring_ref plugin() const;
     //! Query category name
-    cstring_ref category() const noexcept;
+    cstring_ref category() const;
 private:
 
     cstring plugin_;
     cstring category_;
-    std::atomic<level> allowed_;
+    tthread::atomic<uint32> allowed_;
 #if __cplusplus >= 201703L || __cpp_lib_atomic_is_always_lock_free >= 201603
     static_assert(std::atomic<level>::is_always_lock_free,
             "std::atomic<level> should be lock free. You are using a very old CPU or code needs to use std::atomic<int>");
@@ -241,12 +243,11 @@ protected:
  * Register DebugCategory to DebugManager
  */
 template<DebugCategory* category>
-class DebugRegister final : public DebugRegisterBase {
+class DebugRegister : public DebugRegisterBase {
 public:
-    DebugRegister() :
-        DebugRegisterBase{category}
-    {}
-    ~DebugRegister() {
+    DebugRegister() : DebugRegisterBase(category) {}
+    ~DebugRegister()
+    {
         unregister(category);
     }
 };
@@ -268,7 +269,7 @@ public:
  */
 #define DBG_DECLARE(plugin,category, ...)                                   \
     namespace debug { namespace plugin {                                    \
-        DebugCategory DBG_NAME(category){#plugin,#category,__VA_ARGS__};    \
+        DebugCategory DBG_NAME(category)(#plugin,#category,__VA_ARGS__);    \
         DebugRegister<&DBG_NAME(category)> register_ ## category;           \
     } }                                                                     \
     using debug::plugin::DBG_NAME(category)
@@ -282,17 +283,18 @@ public:
  * \param plugin The plugin name that must match DBG_DECLARE
  * \param category The category name that must matnch DBG_DECLARE
  */
-#define DBG_EXTERN(plugin,category)                                         \
-    namespace debug { namespace plugin {                                    \
-        extern DFHack::DebugCategory DBG_NAME(category);                    \
-    } }                                                                     \
-    using debug::plugin::DBG_NAME(category)
+//#define DBG_EXTERN(plugin,category)                                         \
+//    namespace debug { namespace plugin {                                    \
+//        extern DFHack::DebugCategory DBG_NAME(category);                    \
+//    } }                                                                     \
+//    using debug::plugin::DBG_NAME(category)
 
-#define DBG_PRINT(category,pred,level,...)                                  \
-    if pred(!DFHack::DBG_NAME(category).isEnabled(level))                   \
-        ; /* nop fast path when debug category is disabled */               \
-    else /* else to allow macro use in if-else branches */                  \
-        DFHack::DBG_NAME(category).getStream(level, ## __VA_ARGS__)         \
+//#define DBG_PRINT(category,pred,level,...)                                  \
+//    if pred(!DFHack::DBG_NAME(category).isEnabled(level))                   \
+//        ; /* nop fast path when debug category is disabled */               \
+//    else /* else to allow macro use in if-else branches */                  \
+//        DFHack::DBG_NAME(category).getStream(level, ## __VA_ARGS__)         \
+
 /* end of DBG_PRINT */
 
 /*!
@@ -306,8 +308,8 @@ public:
  *                 color_ostream_proxy object
  * \return color_ostream object that can be used for stream output
  */
-#define TRACE(category, ...) DBG_PRINT(category, likely, \
-        DFHack::DebugCategory::LTRACE, ## __VA_ARGS__)
+//#define TRACE(category, ...) DBG_PRINT(category, likely, \
+//        DFHack::DebugCategory::LTRACE, ## __VA_ARGS__)
 
 /*!
  * Open a line for debug level debug output if enabled
@@ -320,8 +322,8 @@ public:
  *                 color_ostream_proxy object
  * \return color_ostream object that can be used for stream output
  */
-#define DEBUG(category, ...) DBG_PRINT(category, likely, \
-        DFHack::DebugCategory::LDEBUG, ## __VA_ARGS__)
+//#define DEBUG(category, ...) DBG_PRINT(category, likely, \
+//        DFHack::DebugCategory::LDEBUG, ## __VA_ARGS__)
 
 /*!
  * Open a line for error level debug output if enabled
@@ -334,8 +336,8 @@ public:
  *                 color_ostream_proxy object
  * \return color_ostream object that can be used for stream output
  */
-#define INFO(category, ...) DBG_PRINT(category, likely, \
-        DFHack::DebugCategory::LINFO, ## __VA_ARGS__)
+//#define INFO(category, ...) DBG_PRINT(category, likely, \
+//        DFHack::DebugCategory::LINFO, ## __VA_ARGS__)
 
 /*!
  * Open a line for warning level debug output if enabled
@@ -349,8 +351,8 @@ public:
  *                 color_ostream_proxy object
  * \return color_ostream object that can be used for stream output
  */
-#define WARN(category, ...) DBG_PRINT(category, unlikely, \
-        DFHack::DebugCategory::LWARNING, ## __VA_ARGS__)
+//#define WARN(category, ...) DBG_PRINT(category, unlikely, \
+//        DFHack::DebugCategory::LWARNING, ## __VA_ARGS__)
 
 /*!
  * Open a line for error level error output if enabled
@@ -363,7 +365,7 @@ public:
  *                 color_ostream_proxy object
  * \return color_ostream object that can be used for stream output
  */
-#define ERR(category, ...) DBG_PRINT(category, unlikely, \
-        DFHack::DebugCategory::LERROR, ## __VA_ARGS__)
+//#define ERR(category, ...) DBG_PRINT(category, unlikely, \
+//        DFHack::DebugCategory::LERROR, ## __VA_ARGS__)
 
 }
