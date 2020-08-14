@@ -457,14 +457,14 @@ ServerMainImpl::~ServerMainImpl()
     socket.Close();
 }
 
-std::future<bool> ServerMain::listen(int port)
-{
-    std::promise<bool> promise;
-    auto rv = promise.get_future();
-    std::thread{&ServerMainImpl::threadFn, std::move(promise), port}.detach();
-    return rv;
-}
-
+//std::future<bool> ServerMain::listen(int port)
+//{
+//    std::promise<bool> promise;
+//    auto rv = promise.get_future();
+//    std::thread{&ServerMainImpl::threadFn, std::move(promise), port}.detach();
+//    return rv;
+//}
+//
 void ServerMainImpl::threadFn(std::promise<bool> promise, int port)
 {
     ServerMainImpl server{std::move(promise), port};

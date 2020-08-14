@@ -28,7 +28,8 @@ distribution.
 #include "RemoteClient.h"
 #include "Core.h"
 
-#include <future>
+//#include <future>
+#include "tinythread.h"
 
 class CPassiveSocket;
 class CActiveSocket;
@@ -247,13 +248,13 @@ namespace  DFHack
     };
 
     class ServerMain {
-        static std::mutex access_;
+        static tthread::mutex access_;
         static bool blocked_;
         friend struct BlockGuard;
 
     public:
 
-        static std::future<bool> listen(int port);
+        //static std::future<bool> listen(int port);
         static void block();
     };
 }
