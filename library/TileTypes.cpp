@@ -55,7 +55,7 @@ static df::tiletype find_match(
     if (mat < 0 || mat >= NUM_MATERIALS)
         return tiletype::Void;
 
-    auto &sh_map = tile_table[mat];
+    T_ShapeMap &sh_map = tile_table[mat];
 
     if (!sh_map.count(shape))
     {
@@ -63,7 +63,7 @@ static df::tiletype find_match(
         {
             fprintf(
                 stderr, "NOTE: No shape %s in %s.\n",
-                enum_item_key(shape).c_str(), enum_item_key(mat).c_str()
+                enum_item_key_simple(shape).c_str(), enum_item_key_simple(mat).c_str()
             );
         }
 
@@ -87,7 +87,7 @@ static df::tiletype find_match(
         };
     }
 
-    auto &sp_map = sh_map[shape];
+    T_SpecialMap &sp_map = sh_map[shape];
 
     if (!sp_map.count(special))
     {
@@ -95,8 +95,8 @@ static df::tiletype find_match(
         {
             fprintf(
                 stderr, "NOTE: No special %s in %s:%s.\n",
-                enum_item_key(special).c_str(), enum_item_key(mat).c_str(),
-                enum_item_key(shape).c_str()
+                enum_item_key_simple(special).c_str(), enum_item_key_simple(mat).c_str(),
+                enum_item_key_simple(shape).c_str()
             );
         }
 
@@ -133,7 +133,7 @@ static df::tiletype find_match(
         }
     }
 
-    auto &dir_map = sp_map[special];
+    T_DirectionMap &dir_map = sp_map[special];
 
     if (!dir_map.count(dir))
     {
@@ -141,8 +141,8 @@ static df::tiletype find_match(
         {
             fprintf(
                 stderr, "NOTE: No direction '%s' in %s:%s:%s.\n",
-                dir.c_str(), enum_item_key(mat).c_str(),
-                enum_item_key(shape).c_str(), enum_item_key(special).c_str()
+                dir.c_str(), enum_item_key_simple(mat).c_str(),
+                enum_item_key_simple(shape).c_str(), enum_item_key_simple(special).c_str()
             );
         }
 
@@ -156,7 +156,7 @@ static df::tiletype find_match(
             dir = dir_map.begin()->first;
     }
 
-    auto &var_map = dir_map[dir];
+    T_VariantMap &var_map = dir_map[dir];
 
     if (!var_map.count(variant))
     {
@@ -164,8 +164,8 @@ static df::tiletype find_match(
         {
             fprintf(
                 stderr, "NOTE: No variant '%s' in %s:%s:%s:%s.\n",
-                enum_item_key(variant).c_str(), enum_item_key(mat).c_str(),
-                enum_item_key(shape).c_str(), enum_item_key(special).c_str(), dir.c_str()
+                enum_item_key_simple(variant).c_str(), enum_item_key_simple(mat).c_str(),
+                enum_item_key_simple(shape).c_str(), enum_item_key_simple(special).c_str(), dir.c_str()
             );
         }
 
@@ -181,9 +181,9 @@ static void init_tables()
     memset(tile_to_mat, 0, sizeof(tile_to_mat));
 
     // Index tile types
-    FOR_ENUM_ITEMS(tiletype, tt)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
     {
-        auto &attrs = df::enum_traits<df::tiletype>::attrs(tt);
+        df::enum_traits<df::tiletype>::attr_entry_type const &attrs = df::enum_traits<df::tiletype>::attrs(tt);
         if (attrs.material < 0)
             continue;
 
@@ -197,9 +197,9 @@ static void init_tables()
     }
 
     // Build mapping of everything to STONE and back
-    FOR_ENUM_ITEMS(tiletype, tt)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
     {
-        auto &attrs = df::enum_traits<df::tiletype>::attrs(tt);
+        df::enum_traits<df::tiletype>::attr_entry_type const &attrs = df::enum_traits<df::tiletype>::attrs(tt);
         if (!isCoreMaterial(attrs.material))
             continue;
 
@@ -215,11 +215,11 @@ static void init_tables()
 
             if (ttm == tiletype::Void)
                 fprintf(stderr, "No match for tile %s in STONE.\n",
-                        enum_item_key(tt).c_str());
+                        enum_item_key_simple(tt).c_str());
         }
         else
         {
-            FOR_ENUM_ITEMS(tiletype_material, mat)
+            FOR_ENUM_ITEMS_SIMPLE(tiletype_material, mat)
             {
                 if (!isCoreMaterial(mat) || mat == attrs.material)
                     continue;
@@ -234,23 +234,23 @@ static void init_tables()
 
                 if (ttm == tiletype::Void)
                     fprintf(stderr, "No match for tile %s in %s.\n",
-                            enum_item_key(tt).c_str(), enum_item_key(mat).c_str());
+                            enum_item_key_simple(tt).c_str(), enum_item_key_simple(mat).c_str());
             }
         }
     }
 
     // Transitive closure via STONE
-    FOR_ENUM_ITEMS(tiletype_material, mat)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype_material, mat)
     {
         if (!isCoreMaterial(mat) || mat == tiletype_material::STONE)
             continue;
 
-        FOR_ENUM_ITEMS(tiletype, tt)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
         {
             if (!tt || tile_to_mat[mat][tt])
                 continue;
 
-            auto stone = tile_to_mat[tiletype_material::STONE][tt];
+            df::tiletype stone = tile_to_mat[tiletype_material::STONE][tt];
             if (stone)
                 tile_to_mat[mat][tt] = tile_to_mat[mat][stone];
         }
@@ -317,7 +317,7 @@ namespace DFHack
         }
 
         // Run through until perfect match found or hit end.
-        FOR_ENUM_ITEMS(tiletype, tt)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
         {
             if (value == (8|4|1))
                 break;
@@ -365,7 +365,7 @@ namespace DFHack
         if (tileVariant(tile) == tiletype_variant::NONE)
             return tile;
         std::vector<df::tiletype> matches;
-        FOR_ENUM_ITEMS(tiletype, tt)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
         {
             if (tileShape(tt) == tileShape(tile) &&
                 tileMaterial(tt) == tileMaterial(tile) &&
