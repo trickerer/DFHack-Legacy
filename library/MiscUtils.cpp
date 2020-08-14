@@ -43,7 +43,7 @@ distribution.
 
 #include <sstream>
 #include <map>
-#include <array>
+//#include <array>
 
 std::string stl_sprintf(const char *fmt, ...) {
     va_list lst;
@@ -57,21 +57,23 @@ std::string stl_vsprintf(const char *fmt, va_list args) {
     /* Allow small (about single line) strings to be printed into stack memory
      * with a call to vsnprintf.
      */
-    std::array<char,128> buf;
+    //std::array<char,128> buf;
+    static const int stl_vsprintf_size = 128;
+    char buf[stl_vsprintf_size];
     va_list args2;
-    va_copy(args2, args);
-    int rsz = vsnprintf(&buf[0], buf.size(), fmt, args2);
+    args2 = args; //va_copy(args2, args);
+    int rsz = vsnprintf(buf, stl_vsprintf_size, fmt, args2);
     va_end(args2);
     if (rsz < 0)
         return std::string(); /* Error occurred */
-    if (static_cast<unsigned>(rsz) < buf.size())
-        return std::string(&buf[0], rsz); /* Whole string fits to a single line buffer */
+    if (static_cast<unsigned>(rsz) < stl_vsprintf_size)
+        return std::string(buf, rsz); /* Whole string fits to a single line buffer */
     std::string rv;
     // Allocate enough memory for the output and null termination
     rv.resize(rsz);
     rsz = vsnprintf(&rv[0], rv.size()+1, fmt, args);
     if (rsz < static_cast<int>(rv.size()))
-      rv.resize(std::max(rsz,0));
+      rv.resize(std::max<size_t>(rsz,0));
     return rv;
 }
 
