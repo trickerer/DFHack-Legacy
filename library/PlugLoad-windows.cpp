@@ -41,7 +41,7 @@ distribution.
  */
 namespace DFHack
 {
-    DFLibrary* GLOBAL_NAMES = (DFLibrary*)GetModuleHandle(nullptr);
+    DFLibrary* GLOBAL_NAMES = (DFLibrary*)GetModuleHandle(NULL);
     DFLibrary * OpenPlugin (const char * filename)
     {
         return (DFLibrary *) LoadLibrary(filename);
