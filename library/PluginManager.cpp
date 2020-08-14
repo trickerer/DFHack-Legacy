@@ -52,7 +52,7 @@ using namespace std;
 
 #include <assert.h>
 
-#define MUTEX_GUARD(lock) auto lock_##__LINE__ = make_mutex_guard(lock);
+#define MUTEX_GUARD(lock) make_mutex_guard(lock);
 template <typename T>
 tthread::lock_guard<T> make_mutex_guard (T *mutex)
 {
@@ -335,7 +335,7 @@ bool Plugin::load(color_ostream &con)
     if (plugin_globals->size())
     {
         std::vector<std::string> missing_globals;
-        for (auto it = plugin_globals->begin(); it != plugin_globals->end(); ++it)
+        for (std::vector<std::string>::const_iterator it = plugin_globals->begin(); it != plugin_globals->end(); ++it)
         {
             if (!Core::getInstance().vinfo->getAddress(it->c_str()))
                 missing_globals.push_back(*it);
@@ -654,29 +654,29 @@ Plugin::plugin_state Plugin::getState() const
 
 void Plugin::index_lua(DFLibrary *lib)
 {
-    if (auto cmdlist = (CommandReg*)LookupPlugin(lib, "plugin_lua_commands"))
+    if (CommandReg* cmdlist = (CommandReg*)LookupPlugin(lib, "plugin_lua_commands"))
     {
         for (; cmdlist->name; ++cmdlist)
         {
-            auto &cmd = lua_commands[cmdlist->name];
+            LuaCommand* &cmd = lua_commands[cmdlist->name];
             if (!cmd) cmd = new LuaCommand(this,cmdlist->name);
             cmd->command = cmdlist->command;
         }
     }
-    if (auto funlist = (FunctionReg*)LookupPlugin(lib, "plugin_lua_functions"))
+    if (FunctionReg* funlist = (FunctionReg*)LookupPlugin(lib, "plugin_lua_functions"))
     {
         for (; funlist->name; ++funlist)
         {
-            auto &cmd = lua_functions[funlist->name];
+            LuaFunction* &cmd = lua_functions[funlist->name];
             if (!cmd) cmd = new LuaFunction(this,funlist->name);
             cmd->identity = funlist->identity;
         }
     }
-    if (auto evlist = (EventReg*)LookupPlugin(lib, "plugin_lua_events"))
+    if (EventReg* evlist = (EventReg*)LookupPlugin(lib, "plugin_lua_events"))
     {
         for (; evlist->name; ++evlist)
         {
-            auto &cmd = lua_events[evlist->name];
+            LuaEvent* &cmd = lua_events[evlist->name];
             if (!cmd) cmd = new LuaEvent(this,evlist->name);
             cmd->handler.identity = evlist->event->get_handler();
             cmd->event = evlist->event;
@@ -692,11 +692,11 @@ void Plugin::index_lua(DFLibrary *lib)
 
 void Plugin::reset_lua()
 {
-    for (auto it = lua_commands.begin(); it != lua_commands.end(); ++it)
+    for (LuaCommandMap::const_iterator it = lua_commands.begin(); it != lua_commands.end(); ++it)
         it->second->command = NULL;
-    for (auto it = lua_functions.begin(); it != lua_functions.end(); ++it)
+    for (LuaFunctionMap::const_iterator it = lua_functions.begin(); it != lua_functions.end(); ++it)
         it->second->identity = NULL;
-    for (auto it = lua_events.begin(); it != lua_events.end(); ++it)
+    for (LuaEventMap::const_iterator it = lua_events.begin(); it != lua_events.end(); ++it)
     {
         it->second->handler.identity = NULL;
         it->second->event = NULL;
@@ -705,7 +705,7 @@ void Plugin::reset_lua()
 
 int Plugin::lua_is_enabled(lua_State *state)
 {
-    auto obj = (Plugin*)lua_touserdata(state, lua_upvalueindex(1));
+    Plugin* obj = (Plugin*)lua_touserdata(state, lua_upvalueindex(1));
 
     RefAutoinc lock(obj->access);
     if (obj->state == PS_LOADED && obj->plugin_is_enabled)
@@ -721,7 +721,7 @@ int Plugin::lua_set_enabled(lua_State *state)
     lua_settop(state, 1);
     bool val = lua_toboolean(state, 1);
 
-    auto obj = (Plugin*)lua_touserdata(state, lua_upvalueindex(1));
+    Plugin* obj = (Plugin*)lua_touserdata(state, lua_upvalueindex(1));
     RefAutoinc lock(obj->access);
 
     color_ostream *out = Lua::GetOutput(state);
@@ -736,7 +736,7 @@ int Plugin::lua_set_enabled(lua_State *state)
 
 int Plugin::lua_cmd_wrapper(lua_State *state)
 {
-    auto cmd = (LuaCommand*)lua_touserdata(state, lua_upvalueindex(1));
+    LuaCommand* cmd = (LuaCommand*)lua_touserdata(state, lua_upvalueindex(1));
 
     RefAutoinc lock(cmd->owner->access);
 
@@ -749,7 +749,7 @@ int Plugin::lua_cmd_wrapper(lua_State *state)
 
 int Plugin::lua_fun_wrapper(lua_State *state)
 {
-    auto cmd = (LuaFunction*)lua_touserdata(state, UPVAL_CONTAINER_ID);
+    LuaFunction* cmd = (LuaFunction*)lua_touserdata(state, UPVAL_CONTAINER_ID);
 
     RefAutoinc lock(cmd->owner->access);
 
@@ -784,14 +784,14 @@ void Plugin::open_lua(lua_State *state, int table)
         lua_setfield(state, table, "setEnabled");
     }
 
-    for (auto it = lua_commands.begin(); it != lua_commands.end(); ++it)
+    for (LuaCommandMap::const_iterator it = lua_commands.begin(); it != lua_commands.end(); ++it)
     {
         lua_pushlightuserdata(state, it->second);
         lua_pushcclosure(state, lua_cmd_wrapper, 1);
         lua_setfield(state, table, it->first.c_str());
     }
 
-    for (auto it = lua_functions.begin(); it != lua_functions.end(); ++it)
+    for (LuaFunctionMap::const_iterator it = lua_functions.begin(); it != lua_functions.end(); ++it)
     {
         push_function(state, it->second);
         lua_setfield(state, table, it->first.c_str());
@@ -799,7 +799,7 @@ void Plugin::open_lua(lua_State *state, int table)
 
     if (Lua::IsCoreContext(state))
     {
-        for (auto it = lua_events.begin(); it != lua_events.end(); ++it)
+        for (LuaEventMap::const_iterator it = lua_events.begin(); it != lua_events.end(); ++it)
         {
             Lua::Event::Make(state, it->second, it->second);
 
@@ -833,7 +833,7 @@ PluginManager::PluginManager(Core * core) : core(core)
 
 PluginManager::~PluginManager()
 {
-    for (auto it = begin(); it != end(); ++it)
+    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         Plugin *p = it->second;
         delete p;
@@ -848,9 +848,10 @@ void PluginManager::init()
     loadAll();
 
     bool any_loaded = false;
-    for (auto p : all_plugins)
+    //for (auto p : all_plugins)
+    for (std::map <std::string, Plugin*>::const_iterator it = all_plugins.begin(); it != all_plugins.end(); ++it)
     {
-        if (p.second->getState() == Plugin::PS_LOADED)
+        if (it->second->getState() == Plugin::PS_LOADED)
         {
             any_loaded = true;
             break;
@@ -890,7 +891,7 @@ vector<string> PluginManager::listPlugins()
     vector<string> results;
     vector<string> files;
     Filesystem::listdir(getPluginPath(), files);
-    for (auto file = files.begin(); file != files.end(); ++file)
+    for (vector<string>::const_iterator file = files.begin(); file != files.end(); ++file)
     {
         if (hasEnding(*file, plugin_suffix))
         {
@@ -903,9 +904,9 @@ vector<string> PluginManager::listPlugins()
 
 void PluginManager::refresh()
 {
-    MUTEX_GUARD(plugin_mutex);
-    auto files = listPlugins();
-    for (auto f = files.begin(); f != files.end(); ++f)
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
+    vector<string> files = listPlugins();
+    for (vector<string>::const_iterator f = files.begin(); f != files.end(); ++f)
     {
         if (!(*this)[*f])
             addPlugin(*f);
@@ -914,7 +915,7 @@ void PluginManager::refresh()
 
 bool PluginManager::load (const string &name)
 {
-    MUTEX_GUARD(plugin_mutex);
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     if (!(*this)[name] && !addPlugin(name))
         return false;
     Plugin *p = (*this)[name];
@@ -928,11 +929,11 @@ bool PluginManager::load (const string &name)
 
 bool PluginManager::loadAll()
 {
-    MUTEX_GUARD(plugin_mutex);
-    auto files = listPlugins();
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
+    std::vector<std::string> files = listPlugins();
     bool ok = true;
     // load all plugins in hack/plugins
-    for (auto f = files.begin(); f != files.end(); ++f)
+    for (std::vector<std::string>::const_iterator f = files.begin(); f != files.end(); ++f)
     {
         if (!load(*f))
             ok = false;
@@ -942,7 +943,7 @@ bool PluginManager::loadAll()
 
 bool PluginManager::unload (const string &name)
 {
-    MUTEX_GUARD(plugin_mutex);
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     if (!(*this)[name])
     {
         Core::printerr("Plugin does not exist: %s\n", name.c_str());
@@ -953,10 +954,10 @@ bool PluginManager::unload (const string &name)
 
 bool PluginManager::unloadAll()
 {
-    MUTEX_GUARD(plugin_mutex);
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     bool ok = true;
     // only try to unload plugins that are in all_plugins
-    for (auto it = begin(); it != end(); ++it)
+    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         if (!unload(it->first))
             ok = false;
@@ -968,7 +969,7 @@ bool PluginManager::reload (const string &name)
 {
     // equivalent to "unload(name); load(name);" if plugin is recognized,
     // "load(name);" otherwise
-    MUTEX_GUARD(plugin_mutex);
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     if (!(*this)[name])
         return load(name);
     if (!unload(name))
@@ -978,7 +979,7 @@ bool PluginManager::reload (const string &name)
 
 bool PluginManager::reloadAll()
 {
-    MUTEX_GUARD(plugin_mutex);
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     bool ok = true;
     if (!unloadAll())
         ok = false;
@@ -1012,13 +1013,13 @@ bool PluginManager::CanInvokeHotkey(const std::string &command, df::viewscreen *
 
 void PluginManager::OnUpdate(color_ostream &out)
 {
-    for (auto it = begin(); it != end(); ++it)
+    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
         it->second->on_update(out);
 }
 
 void PluginManager::OnStateChange(color_ostream &out, state_change_event event)
 {
-    for (auto it = begin(); it != end(); ++it)
+    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
         it->second->on_state_change(out, event);
 }
 
@@ -1057,7 +1058,7 @@ void PluginManager::unregisterCommands( Plugin * p )
 
 void PluginManager::doSaveData(color_ostream &out)
 {
-    for (auto it = begin(); it != end(); ++it)
+    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         command_result cr = it->second->save_data(out);
 
@@ -1068,7 +1069,7 @@ void PluginManager::doSaveData(color_ostream &out)
 
 void PluginManager::doLoadData(color_ostream &out)
 {
-    for (auto it = begin(); it != end(); ++it)
+    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         command_result cr = it->second->load_data(out);
 
@@ -1079,7 +1080,7 @@ void PluginManager::doLoadData(color_ostream &out)
 
 Plugin *PluginManager::operator[] (std::string name)
 {
-    MUTEX_GUARD(plugin_mutex);
+    tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     if (all_plugins.find(name) == all_plugins.end())
     {
         if (Filesystem::isfile(getPluginPath(name)))

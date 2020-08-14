@@ -213,11 +213,13 @@ namespace DFHack
         plugin_state state;
 
         struct LuaCommand;
-        std::map<std::string, LuaCommand*> lua_commands;
+        typedef std::map<std::string, LuaCommand*> LuaCommandMap;
+        LuaCommandMap lua_commands;
         static int lua_cmd_wrapper(lua_State *state);
 
         struct LuaFunction;
-        std::map<std::string, LuaFunction*> lua_functions;
+        typedef std::map<std::string, LuaFunction*> LuaFunctionMap;
+        LuaFunctionMap lua_functions;
         static int lua_fun_wrapper(lua_State *state);
         void push_function(lua_State *state, LuaFunction *fn);
 
@@ -225,7 +227,8 @@ namespace DFHack
         static int lua_set_enabled(lua_State *state);
 
         struct LuaEvent;
-        std::map<std::string, LuaEvent*> lua_events;
+        typedef std::map<std::string, LuaEvent*> LuaEventMap;
+        LuaEventMap lua_events;
 
         void index_lua(DFLibrary *lib);
         void reset_lua();
