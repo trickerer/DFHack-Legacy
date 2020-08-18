@@ -203,7 +203,7 @@ class mutex {
     {
 #if defined(_TTHREAD_WIN32_)
       EnterCriticalSection(&mHandle);
-      while(mAlreadyLocked) Sleep(1000); // Simulate deadlock...
+      while(mAlreadyLocked) Sleep(50); // Simulate deadlock...
       mAlreadyLocked = true;
 #else
       pthread_mutex_lock(&mHandle);
@@ -374,6 +374,11 @@ class lock_guard {
         mMutex->unlock();
     }
 
+    //mutex_type& getMutex() const
+    //{
+    //    return *mMutex;
+    //}
+
   private:
     mutex_type * mMutex;
 };
@@ -410,6 +415,11 @@ class defer_lock_guard {
     {
         return _locked;
     }
+
+    //mutex_type& getMutex() const
+    //{
+    //    return *mMutex;
+    //}
 
   private:
     mutex_type * mMutex;
@@ -959,6 +969,11 @@ class thread::id {
     //id(const id& aId) : mId(aId.mId) {};
     //id(volatile id& aId) : mId(aId.mId) {};
     id(const volatile id& aId) : mId(aId.mId) {};
+
+    unsigned long int get() const
+    {
+        return mId;
+    }
 
     //inline id & operator=(const id &aId)
     //{

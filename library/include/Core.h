@@ -180,7 +180,7 @@ namespace DFHack
         bool IsAlias(const std::string &name);
         bool RunAlias(color_ostream &out, const std::string &name,
             const std::vector<std::string> &parameters, command_result &result);
-        std::map<std::string, std::vector<std::string>> ListAliases();
+        std::map<std::string, std::vector<std::string> > ListAliases();
         std::string GetAliasCommand(const std::string &name, const std::string &default_ = "");
 
         std::string getHackPath();
@@ -209,7 +209,16 @@ namespace DFHack
         Core();
         ~Core();
 
-        struct Private;
+        struct Private
+        {
+            Private::Private() : last_autosave_request(false), was_load_save(false) {}
+
+            tthread::thread iothread;
+            tthread::thread hotkeythread;
+
+            bool last_autosave_request;
+            bool was_load_save;
+        };
         Private* d;
 
         bool Init();
@@ -273,7 +282,7 @@ namespace DFHack
         tthread::mutex HotkeyMutex;
         tthread::condition_variable HotkeyCond;
 
-        std::map<std::string, std::vector<std::string>> aliases;
+        std::map<std::string, std::vector<std::string> > aliases;
         tthread::recursive_mutex alias_mutex;
 
         bool SelectHotkey(int key, int modifiers);
@@ -314,7 +323,7 @@ namespace DFHack
     };
 
     typedef tthread::defer_lock_guard<tthread::recursive_mutex> lock_type;
-    class CoreSuspenderBase  : protected lock_type {
+    class CoreSuspenderBase  : public lock_type {
     protected:
         //using parent_t = std::unique_lock<std::recursive_mutex>;
         //#define parent_t_csb lock_type

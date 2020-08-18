@@ -375,12 +375,12 @@ namespace df
             return true;
         }
         virtual bool erase(void *ptr, int size) {
-            auto &ct = *(T*)ptr;
+            T &ct = *(T*)ptr;
             ct.erase(ct.begin()+size);
             return true;
         }
         virtual bool insert(void *ptr, int idx, void *item) {
-            auto &ct = *(T*)ptr;
+            T &ct = *(T*)ptr;
             ct.insert(ct.begin()+idx, *(typename T::value_type*)item);
             return true;
         }
@@ -413,7 +413,7 @@ namespace df
     protected:
         virtual int item_count(void *ptr, CountMode) { return (int)((T*)ptr)->size(); }
         virtual void *item_pointer(type_identity *item, void *ptr, int idx) {
-            auto iter = (*(T*)ptr).begin();
+            T::iterator iter = (*(T*)ptr).begin();
             for (; idx > 0; idx--) ++iter;
             return (void*)&*iter;
         }

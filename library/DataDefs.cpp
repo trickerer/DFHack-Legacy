@@ -83,7 +83,7 @@ bool type_identity::destroy(void *obj) {
 void *enum_identity::do_allocate() {
     size_t sz = byte_size();
     void *p = malloc(sz);
-    memcpy(p, &first_item_value, std::min(sz, sizeof(int64_t)));
+    memcpy(p, &first_item_value, std::min<size_t>(sz, sizeof(int64_t)));
     return p;
 }
 
@@ -256,7 +256,7 @@ std::map<void*, virtual_identity*> virtual_identity::known;
 virtual_identity::~virtual_identity()
 {
     // Remove interpose entries, so that they don't try accessing this object later
-    for (auto it = interpose_list.begin(); it != interpose_list.end(); ++it)
+    for (std::map<int,VMethodInterposeLinkBase*>::const_iterator it = interpose_list.begin(); it != interpose_list.end(); ++it)
         if (it->second)
             it->second->on_host_delete(this);
     interpose_list.clear();
@@ -275,7 +275,7 @@ void virtual_identity::doInit(Core *core)
 {
     struct_identity::doInit(core);
 
-    auto vtname = getOriginalName();
+    const char* vtname = getOriginalName();
     name_lookup[vtname] = this;
 
     vtable_ptr = core->vinfo->getVTable(vtname);
@@ -285,7 +285,7 @@ void virtual_identity::doInit(Core *core)
 
 virtual_identity *virtual_identity::find(const std::string &name)
 {
-    auto name_it = name_lookup.find(name);
+    std::map<std::string, virtual_identity*>::const_iterator name_it = name_lookup.find(name);
 
     return (name_it != name_lookup.end()) ? name_it->second : NULL;
 }
@@ -313,9 +313,9 @@ virtual_identity *virtual_identity::find(void *vtable)
 
     // If using a reader/writer lock, re-grab as write here, and recheck
     Core &core = Core::getInstance();
-    std::string name = core.p->doReadClassName(vtable);
+    std::string name = core.proc->doReadClassName(vtable);
 
-    auto name_it = name_lookup.find(name);
+    std::map<std::string, virtual_identity*>::const_iterator name_it = name_lookup.find(name);
     if (name_it != name_lookup.end()) {
         virtual_identity *p = name_it->second;
 
@@ -412,11 +412,11 @@ int DFHack::getBitfieldField(const void *p, unsigned idx, unsigned size)
 #undef ACCESS
 }
 
-void DFHack::bitfieldToString(std::vector<std::string> *pvec, const void *p,
-                              unsigned size, const bitfield_item_info *items)
+void DFHack::bitfieldToString(std::vector<std::string> *pvec, const void *p, unsigned size, const bitfield_item_info *items)
 {
-    for (unsigned i = 0; i < size; i++) {
-        int value = getBitfieldField(p, i, std::max(1,items[i].size));
+    for (unsigned i = 0; i < size; i++)
+    {
+        int value = getBitfieldField(p, i, std::max<int>(1,items[i].size));
 
         if (value) {
             std::string name = format_key(items[i].name, i);
@@ -461,15 +461,15 @@ static const struct_field_info *find_union_tag_candidate(const struct_field_info
 {
     if (union_field->extra && union_field->extra->union_tag_field)
     {
-        auto defined_field_name = union_field->extra->union_tag_field;
-        for (auto field = fields; field->mode != struct_field_info::END; field++)
+        const char* defined_field_name = union_field->extra->union_tag_field;
+        for (const struct_field_info* field = fields; field->mode != struct_field_info::END; field++)
         {
             if (!strcmp(field->name, defined_field_name))
             {
                 return field;
             }
         }
-        return nullptr;
+        return NULL;
     }
 
     std::string name(union_field->name);
@@ -478,7 +478,7 @@ static const struct_field_info *find_union_tag_candidate(const struct_field_info
         name.erase(name.length() - 4, 4);
         name += "type";
 
-        for (auto field = fields; field->mode != struct_field_info::END; field++)
+        for (const struct_field_info* field = fields; field->mode != struct_field_info::END; field++)
         {
             if (field->name == name)
             {
@@ -503,7 +503,7 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
     CHECK_NULL_POINTER(fields);
     CHECK_NULL_POINTER(union_field);
 
-    auto tag_candidate = find_union_tag_candidate(fields, union_field);
+    const struct_field_info* tag_candidate = find_union_tag_candidate(fields, union_field);
 
     if (union_field->mode == struct_field_info::SUBSTRUCT &&
             union_field->type &&
@@ -518,7 +518,7 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
             return tag_candidate;
         }
 
-        return nullptr;
+        return NULL;
     }
 
     if (union_field->mode != struct_field_info::CONTAINER ||
@@ -526,16 +526,16 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
             union_field->type->type() != IDTYPE_CONTAINER)
     {
         // not a union field or a vector; bail
-        return nullptr;
+        return NULL;
     }
 
-    auto container_type = static_cast<container_identity *>(union_field->type);
-    if (container_type->getFullName(nullptr) != "vector<void>" ||
+    container_identity* container_type = static_cast<container_identity *>(union_field->type);
+    if (container_type->getFullName(NULL) != "vector<void>" ||
             !container_type->getItemType() ||
             container_type->getItemType()->type() != IDTYPE_UNION)
     {
         // not a vector of unions
-        return nullptr;
+        return NULL;
     }
 
     if (tag_candidate->mode != struct_field_info::CONTAINER ||
@@ -543,18 +543,18 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
             tag_candidate->type->type() != IDTYPE_CONTAINER)
     {
         // candidate is not a vector
-        return nullptr;
+        return NULL;
     }
 
-    auto tag_container_type = static_cast<container_identity *>(tag_candidate->type);
-    if (tag_container_type->getFullName(nullptr) == "vector<void>" &&
+    container_identity* tag_container_type = static_cast<container_identity *>(tag_candidate->type);
+    if (tag_container_type->getFullName(NULL) == "vector<void>" &&
             tag_container_type->getItemType() &&
             tag_container_type->getItemType()->type() == IDTYPE_ENUM)
     {
         return tag_candidate;
     }
 
-    auto union_fields = ((struct_identity*)union_field->type)->getFields();
+    const struct_field_info* union_fields = ((struct_identity*)union_field->type)->getFields();
     if (tag_container_type->getFullName() == "vector<bool>" &&
             union_fields[0].mode != struct_field_info::END &&
             union_fields[1].mode != struct_field_info::END &&
@@ -563,5 +563,5 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
         return tag_candidate;
     }
 
-    return nullptr;
+    return NULL;
 }

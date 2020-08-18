@@ -61,10 +61,10 @@ bool color_ostream::log_errors_to_stderr = false;
 
 void color_ostream::flush_buffer(bool flush)
 {
-    auto buffer = buf();
-    auto str = buffer->str();
+    color_ostream::buffer* buffer = buf();
+    //std::string str = buffer->str();
 
-    if (!str.empty()) {
+    if (!buffer->str().empty()) {
         add_text(cur_color, buffer->str());
         buffer->str(std::string());
     }
@@ -128,14 +128,16 @@ void color_ostream::vprinterr(const char *format, va_list args)
     if (log_errors_to_stderr)
     {
         va_list args1;
-        va_copy(args1, args);
+        //va_copy(args1, args);
+        args1 = args;
         vfprintf(stderr, format, args1);
         va_end(args1);
     }
 
     color(COLOR_LIGHTRED);
     va_list args2;
-    va_copy(args2, args);
+    //va_copy(args2, args);
+    args2 = args;
     vprint(format, args2);
     va_end(args2);
     color(save);
@@ -176,9 +178,9 @@ void buffered_color_ostream::add_text(color_value color, const std::string &text
     }
     else
     {
-        auto &back = buffer.back();
+        buffered_color_ostream::fragment_type &back = buffer.back();
 
-        if (back.first != color || std::max(back.second.size(), text.size()) > 128)
+        if (back.first != color || std::max<size_t>(back.second.size(), text.size()) > 128)
             buffer.push_back(fragment_type(color, text));
         else
             buffer.back().second += text;
@@ -194,7 +196,7 @@ void color_ostream_proxy::flush_proxy()
     {
         target->begin_batch();
 
-        for (auto it = buffer.begin(); it != buffer.end(); ++it)
+        for (std::list<fragment_type>::const_iterator it = buffer.begin(); it != buffer.end(); ++it)
             target->add_text(it->first, it->second);
 
         target->end_batch();

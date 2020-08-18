@@ -72,9 +72,9 @@ static constexpr int RETRY = -3;
 #define _FAILURE    -1
 #define _SHUTDOWN   -2
 #define _RETRY      -3
-static int DFHack::Console::FAILURE = _FAILURE;
-static int DFHack::Console::SHUTDOWN = _SHUTDOWN;
-static int DFHack::Console::RETRY = _RETRY;
+int DFHack::Console::FAILURE = _FAILURE;
+int DFHack::Console::SHUTDOWN = _SHUTDOWN;
+int DFHack::Console::RETRY = _RETRY;
 
 namespace DFHack
 {
