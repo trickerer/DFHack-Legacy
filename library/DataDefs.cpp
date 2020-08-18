@@ -159,12 +159,14 @@ enum_identity::enum_identity(size_t size,
     }
 }
 
-enum_identity::ComplexData::ComplexData(std::initializer_list<int64_t> values)
+enum_identity::ComplexData::ComplexData(std::vector<int64_t> values)
 {
     size_t i = 0;
-    for (int64_t value : values) {
-        value_index_map[value] = i;
-        index_value_map.push_back(value);
+    //for (int64_t value : values)
+    for (std::vector<int64_t>::const_iterator ci = values.begin(); ci != values.end(); ++ci)
+    {
+        value_index_map[*ci] = i;
+        index_value_map.push_back(*ci);
         i++;
     }
 }

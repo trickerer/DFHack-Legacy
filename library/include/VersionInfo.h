@@ -123,7 +123,7 @@ namespace DFHack
         template <typename T>
         bool getAddress (const std::string& key, T & value)
         {
-            auto i = Addresses.find(key);
+            std::map <std::string, uintptr_t>::const_iterator i = Addresses.find(key);
             if(i == Addresses.end())
                 return false;
             value = (T) (*i).second;

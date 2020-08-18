@@ -206,11 +206,13 @@ namespace DFHack
 
     class DFHACK_EXPORT enum_identity : public compound_identity {
     public:
-        struct ComplexData {
+        struct ComplexData
+        {
             ValueIndexMap value_index_map;
             std::vector<int64_t> index_value_map;
-            //ComplexData(std::initializer_list<int64_t> values);
-            size_t size() const {
+            ComplexData(std::vector<int64_t> values);
+            size_t size() const
+            {
                 return index_value_map.size();
             }
         };

@@ -19,7 +19,7 @@ namespace {
 #define _fieldptr(ptr, fn) (ptr) ? _toptr((ptr)->fn) : NULL
 
 #define INIT_GLOBAL_FUNCTION_PREFIX \
-    DFHack::VersionInfo *global_table_ = DFHack::Core::getInstance().vinfo.get(); \
+    DFHack::VersionInfo *global_table_ = DFHack::Core::getInstance().vinfo; \
     void * tmp_;
 
 #define INIT_GLOBAL_FUNCTION_ITEM(type,name) \
