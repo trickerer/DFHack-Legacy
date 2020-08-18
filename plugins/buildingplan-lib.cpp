@@ -30,7 +30,7 @@ bool ItemFilter::matches(const df::dfhack_material_category mask) const
 
 bool ItemFilter::matches(DFHack::MaterialInfo &material) const
 {
-    for (auto it = materials.begin(); it != materials.end(); ++it)
+    for (std::vector<MaterialInfo>::const_iterator it = materials.begin(); it != materials.end(); ++it)
         if (material.matches(*it))
             return true;
     return false;
@@ -44,9 +44,9 @@ bool ItemFilter::matches(df::item *item)
     if (decorated_only && !item->hasImprovements())
         return false;
 
-    auto imattype = item->getActualMaterial();
-    auto imatindex = item->getActualMaterialIndex();
-    auto item_mat = DFHack::MaterialInfo(imattype, imatindex);
+    int16 imattype = item->getActualMaterial();
+    int32 imatindex = item->getActualMaterialIndex();
+    DFHack::MaterialInfo item_mat = DFHack::MaterialInfo(imattype, imatindex);
 
     return (materials.size() == 0) ? matchesMask(item_mat) : matches(item_mat);
 }
@@ -100,7 +100,7 @@ bool ItemFilter::parseSerializedMaterialTokens(std::string str)
     {
         std::vector<std::string> mat_names;
         split_string(&mat_names, tokens[1], ",");
-        for (auto m = mat_names.begin(); m != mat_names.end(); m++)
+        for (std::vector<std::string>::const_iterator m = mat_names.begin(); m != mat_names.end(); m++)
         {
             DFHack::MaterialInfo material;
             if (!material.find(*m) || !material.isValid())
@@ -116,12 +116,12 @@ bool ItemFilter::parseSerializedMaterialTokens(std::string str)
 
 std::string ItemFilter::getMinQuality()
 {
-    return ENUM_KEY_STR(item_quality, min_quality);
+    return ENUM_KEY_STR_SIMPLE(item_quality, min_quality);
 }
 
 std::string ItemFilter::getMaxQuality()
 {
-    return ENUM_KEY_STR(item_quality, max_quality);
+    return ENUM_KEY_STR_SIMPLE(item_quality, max_quality);
 }
 
 bool ItemFilter::isValid()
@@ -199,12 +199,12 @@ void ViewscreenChooseMaterial::feed(set<df::interface_key> *input)
         filter->materials.clear();
 
         // Category masks
-        auto masks = masks_column.getSelectedElems();
-        for (auto it = masks.begin(); it != masks.end(); ++it)
+        std::vector<df::dfhack_material_category> masks = masks_column.getSelectedElems();
+        for (std::vector<df::dfhack_material_category>::const_iterator it = masks.begin(); it != masks.end(); ++it)
             filter->mat_mask.whole |= it->whole;
 
         // Specific materials
-        auto materials = materials_column.getSelectedElems();
+        std::vector<MaterialInfo> materials = materials_column.getSelectedElems();
         transform_(materials, filter->materials, material_info_identity_fn);
 
         Screen::dismiss(this);
@@ -279,9 +279,9 @@ bool ReservedRoom::checkRoomAssignment()
     if (!isValid())
         return false;
 
-    auto np = getOwnersNobleCode();
+    std::vector<Units::NoblePosition> np = getOwnersNobleCode();
     bool correctOwner = false;
-    for (auto iter = np.begin(); iter != np.end(); iter++)
+    for (std::vector<Units::NoblePosition>::iterator iter = np.begin(); iter != np.end(); iter++)
     {
         if (iter->position->code == getCode())
         {
@@ -293,7 +293,7 @@ bool ReservedRoom::checkRoomAssignment()
     if (correctOwner)
         return true;
 
-    for (auto iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
+    for (std::vector<df::unit*>::iterator iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
     {
         df::unit* unit = *iter;
         if (!Units::isCitizen(unit))
@@ -303,7 +303,7 @@ bool ReservedRoom::checkRoomAssignment()
             continue;
 
         np = getUniqueNoblePositions(unit);
-        for (auto iter = np.begin(); iter != np.end(); iter++)
+        for (std::vector<Units::NoblePosition>::iterator iter = np.begin(); iter != np.end(); iter++)
         {
             if (iter->position->code == getCode())
             {
@@ -318,7 +318,7 @@ bool ReservedRoom::checkRoomAssignment()
 
 std::string RoomMonitor::getReservedNobleCode(int32_t buildingId)
 {
-    for (auto iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
+    for (std::vector<ReservedRoom>::iterator iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
     {
         if (buildingId == iter->getId())
             return iter->getCode();
@@ -330,7 +330,7 @@ std::string RoomMonitor::getReservedNobleCode(int32_t buildingId)
 void RoomMonitor::toggleRoomForPosition(int32_t buildingId, std::string noble_code)
 {
     bool found = false;
-    for (auto iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
+    for (std::vector<ReservedRoom>::iterator iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
     {
         if (buildingId != iter->getId())
         {
@@ -361,7 +361,7 @@ void RoomMonitor::toggleRoomForPosition(int32_t buildingId, std::string noble_co
 
 void RoomMonitor::doCycle()
 {
-    for (auto iter = reservedRooms.begin(); iter != reservedRooms.end();)
+    for (std::vector<ReservedRoom>::iterator iter = reservedRooms.begin(); iter != reservedRooms.end();)
     {
         if (iter->checkRoomAssignment())
         {
@@ -381,7 +381,7 @@ void RoomMonitor::reset(color_ostream &out)
     std::vector<PersistentDataItem> items;
     DFHack::World::GetPersistentData(&items, "buildingplan/reservedroom");
 
-    for (auto i = items.begin(); i != items.end(); i++)
+    for (std::vector<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
     {
         ReservedRoom rr(*i, out);
         if (rr.isValid())
@@ -429,16 +429,16 @@ PlannedBuilding::PlannedBuilding(PersistentDataItem &config, color_ostream &out)
 
 bool PlannedBuilding::assignClosestItem(std::vector<df::item *> *items_vector)
 {
-    decltype(items_vector->begin()) closest_item;
+    std::vector<df::item*>::iterator closest_item;
     int32_t closest_distance = -1;
-    for (auto item_iter = items_vector->begin(); item_iter != items_vector->end(); item_iter++)
+    for (std::vector<df::item*>::iterator item_iter = items_vector->begin(); item_iter != items_vector->end(); item_iter++)
     {
-        auto item = *item_iter;
+        df::item* item = *item_iter;
         if (!filter.matches(item))
             continue;
 
-        auto pos = item->pos;
-        auto distance = abs(pos.x - building->centerx) +
+        df::coord pos = item->pos;
+        int32 distance = abs(pos.x - building->centerx) +
             abs(pos.y - building->centery) +
             abs(pos.z - building->z) * 50;
 
@@ -462,7 +462,7 @@ bool PlannedBuilding::assignClosestItem(std::vector<df::item *> *items_vector)
 
 bool PlannedBuilding::assignItem(df::item *item)
 {
-    auto ref = df::allocate<df::general_ref_building_holderst>();
+    df::general_ref_building_holderst* ref = df::allocate<df::general_ref_building_holderst>();
     if (!ref)
     {
         Core::printerr("Could not allocate general_ref_building_holderst\n");
@@ -474,7 +474,7 @@ bool PlannedBuilding::assignItem(df::item *item)
     if (building->jobs.size() != 1)
         return false;
 
-    auto job = building->jobs[0];
+    df::job* job = building->jobs[0];
 
     for_each_(job->job_items, delete_item_fn);
     job->job_items.clear();
@@ -492,7 +492,7 @@ bool PlannedBuilding::assignItem(df::item *item)
 
     if (building->needsDesign())
     {
-        auto act = (df::building_actual *) building;
+        df::building_actual* act = (df::building_actual *) building;
         act->design = new df::building_design();
         act->design->flags.bits.rough = rough;
     }
@@ -518,7 +518,7 @@ void Planner::reset(color_ostream &out)
     std::vector<PersistentDataItem> items;
     DFHack::World::GetPersistentData(&items, "buildingplan/constraints");
 
-    for (auto i = items.begin(); i != items.end(); i++)
+    for (std::vector<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
     {
         PlannedBuilding pb(*i, out);
         if (pb.isValid())
@@ -536,7 +536,7 @@ void Planner::initialize()
     if (planmode_enabled.find(df::building_type::btype) == planmode_enabled.end()) \
         planmode_enabled[df::building_type::btype] = false
 
-    FOR_ENUM_ITEMS(item_type, it)
+    FOR_ENUM_ITEMS_SIMPLE(item_type, it)
         is_relevant_item_type[it] = false;
 
     add_building_type(Armorstand, ARMORSTAND);
@@ -579,15 +579,15 @@ void Planner::doCycle()
     debug("Planned count: " + int_to_string(planned_buildings.size()));
 
     gather_available_items();
-    for (auto building_iter = planned_buildings.begin(); building_iter != planned_buildings.end();)
+    for (std::vector<PlannedBuilding>::iterator building_iter = planned_buildings.begin(); building_iter != planned_buildings.end();)
     {
         if (building_iter->isValid())
         {
             if (show_debugging)
-                debug(std::string("Trying to allocate ") + enum_item_key_str(building_iter->getType()));
+                debug(std::string("Trying to allocate ") + enum_item_key_str_simple(building_iter->getType()));
 
-            auto required_item_type = item_for_building_type[building_iter->getType()];
-            auto items_vector = &available_item_vectors[required_item_type];
+            df::item_type required_item_type = item_for_building_type[building_iter->getType()];
+            std::vector<df::item*> *items_vector = &available_item_vectors[required_item_type];
             if (items_vector->size() == 0 || !building_iter->assignClosestItem(items_vector))
             {
                 debug("Unable to allocate an item");
@@ -606,7 +606,7 @@ bool Planner::allocatePlannedBuilding(df::building_type type)
     if (!DFHack::Gui::getCursorCoords(cursor.x, cursor.y, cursor.z))
         return false;
 
-    auto newinst = Buildings::allocInstance(cursor.get_coord16(), type);
+    df::building* newinst = Buildings::allocInstance(cursor.get_coord16(), type);
     if (!newinst)
         return false;
 
@@ -623,14 +623,14 @@ bool Planner::allocatePlannedBuilding(df::building_type type)
         return false;
     }
 
-    for (auto iter = newinst->jobs.begin(); iter != newinst->jobs.end(); iter++)
+    for (std::vector<df::job*>::iterator iter = newinst->jobs.begin(); iter != newinst->jobs.end(); iter++)
     {
         (*iter)->flags.bits.suspend = true;
     }
 
     if (type == building_type::Door)
     {
-        auto door = virtual_cast<df::building_doorst>(newinst);
+        df::building_doorst* door = virtual_cast<df::building_doorst>(newinst);
         if (door)
             door->door_flags.bits.pet_passable = true;
     }
@@ -642,7 +642,7 @@ bool Planner::allocatePlannedBuilding(df::building_type type)
 
 PlannedBuilding *Planner::getSelectedPlannedBuilding()
 {
-    for (auto building_iter = planned_buildings.begin(); building_iter != planned_buildings.end(); building_iter++)
+    for (std::vector<PlannedBuilding>::iterator building_iter = planned_buildings.begin(); building_iter != planned_buildings.end(); building_iter++)
     {
         if (building_iter->isCurrentlySelectedBuilding())
         {
@@ -650,16 +650,16 @@ PlannedBuilding *Planner::getSelectedPlannedBuilding()
         }
     }
 
-    return nullptr;
+    return NULL;
 }
 
 void Planner::adjustMinQuality(df::building_type type, int amount)
 {
-    auto min_quality = &getDefaultItemFilterForType(type)->min_quality;
+    df::item_quality* min_quality = &getDefaultItemFilterForType(type)->min_quality;
     *min_quality = static_cast<df::item_quality>(*min_quality + amount);
 
     boundsCheckItemQuality(min_quality);
-    auto max_quality = &getDefaultItemFilterForType(type)->max_quality;
+    df::item_quality* max_quality = &getDefaultItemFilterForType(type)->max_quality;
     if (*min_quality > *max_quality)
         (*max_quality) = *min_quality;
 
@@ -667,11 +667,11 @@ void Planner::adjustMinQuality(df::building_type type, int amount)
 
 void Planner::adjustMaxQuality(df::building_type type, int amount)
 {
-    auto max_quality = &getDefaultItemFilterForType(type)->max_quality;
+    df::item_quality* max_quality = &getDefaultItemFilterForType(type)->max_quality;
     *max_quality = static_cast<df::item_quality>(*max_quality + amount);
 
     boundsCheckItemQuality(max_quality);
-    auto min_quality = &getDefaultItemFilterForType(type)->min_quality;
+    df::item_quality* min_quality = &getDefaultItemFilterForType(type)->min_quality;
     if (*max_quality < *min_quality)
         (*min_quality) = *max_quality;
 }

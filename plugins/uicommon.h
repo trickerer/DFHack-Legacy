@@ -220,7 +220,7 @@ static inline string pad_string(string text, const int size, const bool front = 
 
 static inline df::interface_key get_string_key(const std::set<df::interface_key> *input)
 {
-    for (auto it = input->begin(); it != input->end(); ++it)
+    for (std::set<df::interface_key>::const_iterator it = input->begin(); it != input->end(); ++it)
     {
         if (DFHack::Screen::keyToChar(*it) >= 0)
             return *it;
@@ -242,7 +242,7 @@ static inline df::building_stockpilest *get_selected_stockpile()
     if (!Gui::dwarfmode_hotkey(Core::getTopViewscreen()) ||
         df::global::ui->main.mode != ui_sidebar_mode::QueryBuilding)
     {
-        return nullptr;
+        return NULL;
     }
 
     return virtual_cast<df::building_stockpilest>(df::global::world->selected_building);
@@ -253,12 +253,12 @@ static inline bool can_trade()
     if (df::global::ui->caravans.size() == 0)
         return false;
 
-    for (auto it = df::global::ui->caravans.begin(); it != df::global::ui->caravans.end(); it++)
+    for (std::vector<df::caravan_state*>::const_iterator it = df::global::ui->caravans.begin(); it != df::global::ui->caravans.end(); it++)
     {
         typedef df::caravan_state::T_trade_state state;
-        auto caravan = *it;
-        auto trade_state = caravan->trade_state;
-        auto time_remaining = caravan->time_remaining;
+        df::caravan_state* caravan = *it;
+        state trade_state = caravan->trade_state;
+        uint16 time_remaining = caravan->time_remaining;
         if ((trade_state == state::Approaching || trade_state == state::AtDepot) && time_remaining != 0)
             return true;
     }
@@ -300,7 +300,7 @@ static inline bool can_melt(df::item* item)
 
     if (!is_metal_item(item)) return false;
 
-    for (auto g = item->general_refs.begin(); g != item->general_refs.end(); g++)
+    for (std::vector<df::general_ref*>::const_iterator g = item->general_refs.begin(); g != item->general_refs.end(); g++)
     {
         switch ((*g)->getType())
         {
@@ -311,7 +311,7 @@ static inline bool can_melt(df::item* item)
         case general_ref_type::CONTAINED_IN_ITEM:
             {
                 df::item* c = (*g)->getItem();
-                for (auto gg = c->general_refs.begin(); gg != c->general_refs.end(); gg++)
+                for (std::vector<df::general_ref*>::const_iterator gg = c->general_refs.begin(); gg != c->general_refs.end(); gg++)
                 {
                     if ((*gg)->getType() == general_ref_type::UNIT_HOLDER)
                         return false;
@@ -336,13 +336,12 @@ static inline bool can_melt(df::item* item)
 
 class StockpileInfo {
 public:
-    StockpileInfo() : id(0), sp(nullptr), x1(-30000), x2(-30000), y1(-30000), y2(-30000), z(-30000)
+    StockpileInfo() : id(0), sp(NULL), x1(-30000), x2(-30000), y1(-30000), y2(-30000), z(-30000)
     {
     }
 
-    StockpileInfo(df::building_stockpilest *sp_) : StockpileInfo()
+    StockpileInfo(df::building_stockpilest *sp_) : id(0), sp(sp_), x1(-30000), x2(-30000), y1(-30000), y2(-30000), z(-30000)
     {
-        sp = sp_;
         readBuilding();
     }
 
@@ -376,7 +375,7 @@ public:
         if (!id)
             return false;
 
-        auto found = df::building::find(id);
+        df::building* found = df::building::find(id);
         return found && found == sp && found->getType() == building_type::Stockpile;
     }
 
@@ -432,7 +431,7 @@ public:
 
     bool load()
     {
-        auto found = df::building::find(id);
+        df::building* found = df::building::find(id);
         if (!found || found->getType() != building_type::Stockpile)
             return false;
 

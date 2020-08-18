@@ -89,7 +89,7 @@ public:
         if (text_clip_at > 0 && max_item_width > text_clip_at)
             max_item_width = text_clip_at;
 
-        for (auto it = list.begin(); it != list.end(); it++)
+        for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
         {
             it->text = pad_string(it->text, max_item_width, false);
         }
@@ -147,7 +147,7 @@ public:
         if (!search_tokens.empty())
         {
             string item_string = toLower(entry->text);
-            for (auto si = search_tokens.begin(); si != search_tokens.end(); si++)
+            for (vector<string>::const_iterator si = search_tokens.begin(); si != search_tokens.end(); si++)
             {
                 if (!si->empty() && item_string.find(*si) == string::npos &&
                     entry->keywords.find(*si) == string::npos)
@@ -256,7 +256,7 @@ public:
 
         if (auto_select && !multiselect)
         {
-            for (auto it = list.begin(); it != list.end(); it++)
+            for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
             {
                 it->selected = false;
             }
@@ -295,7 +295,7 @@ public:
     vector<T> getSelectedElems(bool only_one = false)
     {
         vector<T> results;
-        for (auto it = list.begin(); it != list.end(); it++)
+        for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
         {
             if ((*it).selected)
             {
@@ -319,9 +319,10 @@ public:
 
     bool hasSelection()
     {
-        for (auto item : list)
+        //for (auto item : list)
+        for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); ++it)
         {
-            if (item.selected)
+            if ((*it).selected)
             {
                 return true;
             }

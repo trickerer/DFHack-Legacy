@@ -728,6 +728,12 @@ namespace DFHack {
      * Return the enum item key string pointer, or "?" if none.
      */
     template<class T>
+    inline const char *enum_item_key_str_simple(T val)
+    {
+        return ifnull(enum_item_raw_key_simple(val), "?");
+    }
+
+    template<class T>
     inline const char *enum_item_key_str(T val)
     {
         return ifnull(enum_item_raw_key(val), "?");

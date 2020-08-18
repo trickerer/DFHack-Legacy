@@ -80,7 +80,7 @@ static inline std::vector<Units::NoblePosition> getUniqueNoblePositions(df::unit
 {
     std::vector<Units::NoblePosition> np;
     Units::getNoblePositions(&np, unit);
-    for (auto iter = np.begin(); iter != np.end(); iter++)
+    for (std::vector<Units::NoblePosition>::const_iterator iter = np.begin(); iter != np.end(); iter++)
     {
         if (iter->position->code == "MILITIA_CAPTAIN")
         {
@@ -166,7 +166,7 @@ private:
 
     void addMaskEntry(df::dfhack_material_category &mask, const std::string &text)
     {
-        auto entry = ListEntry<df::dfhack_material_category>(pad_string(text, MAX_MASK, false), mask);
+        ListEntry<df::dfhack_material_category> entry = ListEntry<df::dfhack_material_category>(pad_string(text, MAX_MASK, false), mask);
         if (filter->matches(mask))
             entry.selected = true;
 
@@ -210,7 +210,7 @@ private:
         df::world_raws &raws = world->raws;
         for (int i = 1; i < DFHack::MaterialInfo::NUM_BUILTIN; i++)
         {
-            auto obj = raws.mat_table.builtin[i];
+            df::material* obj = raws.mat_table.builtin[i];
             if (obj)
             {
                 MaterialInfo material;
@@ -227,7 +227,7 @@ private:
             addMaterialEntry(selected_category, material, material.toString());
         }
 
-        decltype(selected_category) wood_flag;
+        df::dfhack_material_category wood_flag;
         wood_flag.bits.wood = true;
         if (!selected_category.whole || selected_category.bits.wood)
         {
@@ -236,13 +236,13 @@ private:
                 df::plant_raw *p = raws.plants.all[i];
                 for (size_t j = 0; p->material.size() > 1 && j < p->material.size(); j++)
                 {
-                    auto t = p->material[j];
+                    df::material* t = p->material[j];
                     if (p->material[j]->id != "WOOD")
                         continue;
 
                     MaterialInfo material;
                     material.decode(DFHack::MaterialInfo::PLANT_BASE+j, i);
-                    auto name = material.toString();
+                    std::string name = material.toString();
                     ListEntry<MaterialInfo> entry(pad_string(name, MAX_MATERIAL, false), material);
                     if (filter->matches(material))
                         entry.selected = true;
@@ -346,7 +346,7 @@ private:
 
     void addRoom(ReservedRoom &rr)
     {
-        for (auto iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
+        for (std::vector<ReservedRoom>::iterator iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
         {
             if (iter->getId() == rr.getId())
                 return;
@@ -450,7 +450,7 @@ private:
     void gather_available_items()
     {
         debug("Gather available items");
-        for (auto iter = available_item_vectors.begin(); iter != available_item_vectors.end(); iter++)
+        for (map<df::item_type, std::vector<df::item *>>::iterator iter = available_item_vectors.begin(); iter != available_item_vectors.end(); iter++)
         {
             iter->second.clear();
         }
