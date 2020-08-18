@@ -505,7 +505,7 @@ df::coord2d Maps::getBlockTileBiomeRgn(df::map_block *block, df::coord2d pos)
     if (!block || !world->world_data)
         return df::coord2d();
 
-    df::tile_designation des = index_tile(block->designation, pos, df::tile_designation(NULL));
+    df::tile_designation des = index_tile(block->designation, pos, df::tile_designation());
     uint32 idx = des.bits.biome;
     if (idx < 9)
     {
@@ -627,7 +627,7 @@ bool Maps::canStepBetween(df::coord pos1, df::coord pos2)
     if (dx == 0 && dy == 0)
     {
         //check for forbidden hatches and floors and such
-        df::tile_building_occ upOcc = index_tile(block2->occupancy, pos2, df::tile_occupancy(NULL)).bits.building;
+        df::tile_building_occ upOcc = index_tile(block2->occupancy, pos2, df::tile_occupancy()).bits.building;
         if (upOcc == tile_building_occ::Impassable ||
             upOcc == tile_building_occ::Obstacle ||
             upOcc == tile_building_occ::Floored)
@@ -662,7 +662,7 @@ bool Maps::canStepBetween(df::coord pos1, df::coord pos2)
                 return false; //unusable ramp
 
             //there has to be an unforbidden hatch above the ramp
-            if (index_tile(block2->occupancy, pos2, df::tile_occupancy(NULL)).bits.building != tile_building_occ::Dynamic)
+            if (index_tile(block2->occupancy, pos2, df::tile_occupancy()).bits.building != tile_building_occ::Dynamic)
                 return false;
             //note that forbidden hatches have Floored occupancy. unforbidden ones have dynamic occupancy
             df::building* building = Buildings::findAtTile(pos2);
@@ -706,7 +706,7 @@ bool Maps::canStepBetween(df::coord pos1, df::coord pos2)
         if ( !blockUp )
             return false;
 
-        df::tile_building_occ occupancy = index_tile(blockUp->occupancy, up, df::tile_occupancy(NULL)).bits.building;
+        df::tile_building_occ occupancy = index_tile(blockUp->occupancy, up, df::tile_occupancy()).bits.building;
         if ( occupancy == tile_building_occ::Obstacle || occupancy == tile_building_occ::Floored || occupancy == tile_building_occ::Impassable )
             return false;
         return true;

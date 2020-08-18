@@ -234,7 +234,7 @@ MapExtras::Block::BasematInfo::BasematInfo()
 bool MapExtras::Block::setFlagAt(df::coord2d p, df::tile_designation::Mask mask, bool set)
 {
     if(!valid) return false;
-    df::tile_designation &val = index_tile(designation, p, df::tile_designation(NULL));
+    df::tile_designation &val = index_tile(designation, p, df::tile_designation());
     bool cur = (val.whole & mask) != 0;
     if (cur != set)
     {
@@ -247,7 +247,7 @@ bool MapExtras::Block::setFlagAt(df::coord2d p, df::tile_designation::Mask mask,
 bool MapExtras::Block::setFlagAt(df::coord2d p, df::tile_occupancy::Mask mask, bool set)
 {
     if(!valid) return false;
-    df::tile_designation &val = index_tile(designation, p, df::tile_designation(NULL));
+    df::tile_designation &val = index_tile(designation, p, df::tile_designation());
     bool cur = (val.whole & mask) != 0;
     if (cur != set)
     {
@@ -1066,7 +1066,7 @@ int MapExtras::Block::biomeIndexAt(df::coord2d p)
     if (!block)
         return -1;
 
-    df::tile_designation des = index_tile(designation, p, df::tile_designation(NULL));
+    df::tile_designation des = index_tile(designation, p, df::tile_designation());
     uint8_t idx = des.bits.biome;
     if (idx >= 9)
         return -1;
@@ -1148,8 +1148,8 @@ bool MapExtras::Block::addItemOnGround(df::item *item)
 
         if (count++ == 0)
         {
-            index_tile(occupancy, item->pos, df::tile_occupancy(NULL)).bits.item = true;
-            index_tile(block->occupancy, item->pos, df::tile_occupancy(NULL)).bits.item = true;
+            index_tile(occupancy, item->pos, df::tile_occupancy()).bits.item = true;
+            index_tile(block->occupancy, item->pos, df::tile_occupancy()).bits.item = true;
         }
     }
 
@@ -1173,9 +1173,9 @@ bool MapExtras::Block::removeItemOnGround(df::item *item)
 
     if (--count == 0)
     {
-        index_tile(occupancy, item->pos, df::tile_occupancy(NULL)).bits.item = false;
+        index_tile(occupancy, item->pos, df::tile_occupancy()).bits.item = false;
 
-        df::tile_occupancy &occ = index_tile(block->occupancy, item->pos, df::tile_occupancy(NULL));
+        df::tile_occupancy &occ = index_tile(block->occupancy, item->pos, df::tile_occupancy());
 
         occ.bits.item = false;
 

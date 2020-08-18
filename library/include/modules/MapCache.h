@@ -265,7 +265,7 @@ public:
 
     df::tile_designation DesignationAt(df::coord2d p)
     {
-        return index_tile(designation, p, df::tile_designation(NULL));
+        return index_tile(designation, p, df::tile_designation());
     }
     bool setDesignationAt(df::coord2d p, df::tile_designation des, int32_t priority = 4000)
     {
@@ -273,7 +273,7 @@ public:
         dirty_designations = true;
         designated_tiles[(p.x&15) + (p.y&15)*16] = true;
         //printf("setting block %d/%d/%d , %d %d\n",x,y,z, p.x, p.y);
-        index_tile(designation, p, df::tile_designation(NULL)) = des;
+        index_tile(designation, p, df::tile_designation()) = des;
         if((des.bits.dig || des.bits.smooth) && block) {
             block->flags.bits.designated = true;
             setPriorityAt(p, priority);
@@ -286,21 +286,21 @@ public:
 
     df::tile_occupancy OccupancyAt(df::coord2d p)
     {
-        return index_tile(occupancy, p, df::tile_occupancy(NULL));
+        return index_tile(occupancy, p, df::tile_occupancy());
     }
     bool setOccupancyAt(df::coord2d p, df::tile_occupancy des)
     {
         if(!valid) return false;
         dirty_occupancies = true;
-        index_tile(occupancy, p, df::tile_occupancy(NULL)) = des;
+        index_tile(occupancy, p, df::tile_occupancy()) = des;
         return true;
     }
 
     bool getFlagAt(df::coord2d p, df::tile_designation::Mask mask) {
-        return (index_tile(designation, p, df::tile_designation(NULL)).whole & mask) != 0;
+        return (index_tile(designation, p, df::tile_designation()).whole & mask) != 0;
     }
     bool getFlagAt(df::coord2d p, df::tile_occupancy::Mask mask) {
-        return (index_tile(occupancy, p, df::tile_occupancy(NULL)).whole & mask) != 0;
+        return (index_tile(occupancy, p, df::tile_occupancy()).whole & mask) != 0;
     }
     bool setFlagAt(df::coord2d p, df::tile_designation::Mask mask, bool set);
     bool setFlagAt(df::coord2d p, df::tile_occupancy::Mask mask, bool set);
@@ -321,7 +321,7 @@ public:
 
     int biomeIndexAt(df::coord2d p);
     int layerIndexAt(df::coord2d p) {
-        return index_tile(designation, p, df::tile_designation(NULL)).bits.geolayer_index;
+        return index_tile(designation, p, df::tile_designation()).bits.geolayer_index;
     }
 
     df::coord2d biomeRegionAt(df::coord2d p);
