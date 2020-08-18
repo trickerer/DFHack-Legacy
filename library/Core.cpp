@@ -1849,19 +1849,19 @@ bool Core::Init()
     {
         cerr << "Starting IO thread.\n";
         // create IO thread
-        d->iothread = tthread::thread(&fIOthread, (void*)temp);
+        d->iothread = new tthread::thread(&fIOthread, (void*)temp);
         (void)d->iothread;
     }
     else
     {
         std::cerr << "Starting dfhack.init thread.\n";
-        d->iothread = tthread::thread(&fInitthread, (void*)temp);
+        d->iothread = new tthread::thread(&fInitthread, (void*)temp);
         (void)d->iothread;
     }
 
     cerr << "Starting DF input capture thread.\n";
     // set up hotkey capture
-    d->hotkeythread = tthread::thread(&fHKthread, (void*)temp);
+    d->hotkeythread = new tthread::thread(&fHKthread, (void*)temp);
     (void)d->hotkeythread;
     screen_window = new Windows::top_level_window();
     screen_window->addChild(new Windows::dfhack_dummy(5,10));
@@ -2398,12 +2398,12 @@ int Core::Shutdown ( void )
 
     // Make sure the console thread shutdowns before clean up to avoid any
     // unlikely data races.
-    if (d->iothread.joinable())
+    if (d->iothread->joinable())
     {
         con.shutdown();
     }
 
-    if (d->hotkeythread.joinable())
+    if (d->hotkeythread->joinable())
     {
         tthread::lock_guard<tthread::mutex> hot_lock(HotkeyMutex);
         hotkey_set = SHUTDOWN;
@@ -2412,8 +2412,8 @@ int Core::Shutdown ( void )
 
     ServerMain::block();
 
-    d->hotkeythread.join();
-    d->iothread.join();
+    d->hotkeythread->join();
+    d->iothread->join();
 
     CoreSuspendClaimer suspend;
     if(plug_mgr)
@@ -2426,6 +2426,10 @@ int Core::Shutdown ( void )
     memset(&(s_mods), 0, sizeof(s_mods));
     delete d;
     d = NULL;
+    delete d->hotkeythread;
+    delete d->iothread;
+    d->hotkeythread = NULL;
+    d->iothread = NULL;
     return -1;
 }
 

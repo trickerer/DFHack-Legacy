@@ -39,15 +39,15 @@ using namespace DFHack;
 static std::vector<Persistence::LegacyData*> legacy_data;
 static std::multimap<std::string, size_t> index_cache;
 
-static DFHack::Persistence::LegacyData* data = NULL;
-static const int NumInts = 7;
+DFHack::Persistence::LegacyData* DFHack::PersistentDataItem::data = NULL;
+const int DFHack::PersistentDataItem::NumInts = 7;
 
 struct Persistence::LegacyData
 {
     const std::string key;
     std::string str_value;
     //std::array<int, PersistentDataItem::NumInts> int_values;
-    int int_values[NumInts];
+    int int_values[PersistentDataItem::NumInts];
 
     explicit LegacyData(const std::string &key) : key(key)
     {

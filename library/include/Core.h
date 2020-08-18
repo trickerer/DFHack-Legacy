@@ -211,10 +211,10 @@ namespace DFHack
 
         struct Private
         {
-            Private::Private() : last_autosave_request(false), was_load_save(false) {}
+            Private::Private() : last_autosave_request(false), was_load_save(false), iothread(NULL), hotkeythread(NULL) {}
 
-            tthread::thread iothread;
-            tthread::thread hotkeythread;
+            tthread::thread* iothread;
+            tthread::thread* hotkeythread;
 
             bool last_autosave_request;
             bool was_load_save;
