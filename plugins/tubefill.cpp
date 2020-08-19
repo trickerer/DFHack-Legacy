@@ -3,7 +3,7 @@
 #include "common.h"
 #include <iostream>
 #include <map>
-#include <cinttypes>
+//#include <cinttypes>
 #include <vector>
 #include "Core.h"
 #include "Console.h"
@@ -28,7 +28,7 @@ bool isDesignatedHollow(df::coord pos)
 {
     for (size_t i = 0; i < world->deep_vein_hollows.size(); i++)
     {
-        auto *vein = world->deep_vein_hollows[i];
+        df::deep_vein_hollow *vein = world->deep_vein_hollows[i];
         for (size_t j = 0; j < vein->tiles.x.size(); j++)
             if (pos == df::coord(vein->tiles.x[j], vein->tiles.y[j], vein->tiles.z[j]))
                 return true;
@@ -53,7 +53,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 
 command_result tubefill(color_ostream &out, std::vector<std::string> & params)
 {
-    uint64_t count = 0;
+    uint32_t count = 0;
     bool hollow = false;
 
     for(size_t i = 0; i < params.size();i++)
@@ -118,6 +118,6 @@ command_result tubefill(color_ostream &out, std::vector<std::string> & params)
             }
         }
     }
-    out.print("Found and changed %" PRId64 " tiles.\n", count);
+    out.print("Found and changed %d tiles.\n", count);
     return CR_OK;
 }
