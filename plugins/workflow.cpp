@@ -264,7 +264,7 @@ public:
         if (isActuallyResumed())
         {
             resume_time = 0;
-            resume_delay = std::max(DAY_TICKS, resume_delay - ticks);
+            resume_delay = std::max<int>(DAY_TICKS, resume_delay - ticks);
         }
         else if (want_resumed)
         {
@@ -281,7 +281,7 @@ public:
         job->flags.bits.repeat = true;
         set_resumed(false);
 
-        resume_delay = std::min(DAY_TICKS*MONTH_DAYS, 5*resume_delay/3);
+        resume_delay = std::min<int>(DAY_TICKS*MONTH_DAYS, 5*resume_delay/3);
         resume_time = world->frame_counter + resume_delay;
     }
 
@@ -364,8 +364,8 @@ public:
     void setGoalCount(int v) { config.ival(0) = v; }
 
     int goalGap() {
-        int cval = (config.ival(1) <= 0) ? std::min(5,goalCount()/2) : config.ival(1);
-        return std::max(1, std::min(goalCount()-1, cval));
+        int cval = (config.ival(1) <= 0) ? std::min<int>(5,goalCount()/2) : config.ival(1);
+        return std::max<int>(1, std::min<int>(goalCount()-1, cval));
     }
     void setGoalGap(int v) { config.ival(1) = v; }
 
@@ -624,7 +624,7 @@ static bool recover_job(color_ostream &out, ProtectedJob *pj)
     if (!pj->holder)
     {
         out.printerr("Forgetting job %d (%s): holder building lost.\n",
-                        pj->id, ENUM_KEY_STR(job_type, pj->job_copy->job_type).c_str());
+                        pj->id, ENUM_KEY_STR_SIMPLE(job_type, pj->job_copy->job_type).c_str());
         forget_job(out, pj);
         return true;
     }
@@ -633,7 +633,7 @@ static bool recover_job(color_ostream &out, ProtectedJob *pj)
     if (pj->holder->jobs.size() >= 10)
     {
         out.printerr("Forgetting job %d (%s): holder building has too many jobs.\n",
-                        pj->id, ENUM_KEY_STR(job_type, pj->job_copy->job_type).c_str());
+                        pj->id, ENUM_KEY_STR_SIMPLE(job_type, pj->job_copy->job_type).c_str());
         forget_job(out, pj);
         return true;
     }
@@ -656,7 +656,7 @@ static bool recover_job(color_ostream &out, ProtectedJob *pj)
         Job::deleteJobStruct(recovered);
 
         out.printerr("Inconsistency: job %d (%s) already in list.\n",
-                        pj->id, ENUM_KEY_STR(job_type, pj->job_copy->job_type).c_str());
+                        pj->id, ENUM_KEY_STR_SIMPLE(job_type, pj->job_copy->job_type).c_str());
         return true;
     }
 
@@ -830,16 +830,16 @@ static ItemConstraint *get_constraint(color_ostream &out, const std::string &str
 
         for (size_t i = 0; i < qtokens.size(); i++)
         {
-            auto token = toLower(qtokens[i]);
+            std::string token = toLower(qtokens[i]);
 
             if (token == "local")
                 is_local = true;
             else
             {
                 bool found = false;
-                FOR_ENUM_ITEMS(item_quality, qv)
+                FOR_ENUM_ITEMS_SIMPLE(item_quality, qv)
                 {
-                    if (toLower(ENUM_KEY_STR(item_quality, qv)) != token)
+                    if (toLower(ENUM_KEY_STR_SIMPLE(item_quality, qv)) != token)
                         continue;
                     minqual = qv;
                     found = true;
@@ -927,7 +927,7 @@ static bool isCraftItem(df::item_type type)
 {
     using namespace df::enums::job_type;
 
-    auto lst = ENUM_ATTR(job_type, possible_item, MakeCrafts);
+    const enum_list_attr<df::item_type> lst = ENUM_ATTR(job_type, possible_item, MakeCrafts);
     for (size_t i = 0; i < lst.size; i++)
         if (lst.items[i] == type)
             return true;
@@ -1028,7 +1028,7 @@ static void guess_job_material(df::job *job, MaterialInfo &mat, df::dfhack_mater
 
 static int cbEnumJobOutputs(lua_State *L)
 {
-    auto pj = (ProtectedJob*)lua_touserdata(L, lua_upvalueindex(1));
+    ProtectedJob* pj = (ProtectedJob*)lua_touserdata(L, lua_upvalueindex(1));
 
     lua_settop(L, 6);
 
@@ -1056,7 +1056,7 @@ static void map_job_constraints(color_ostream &out)
         constraints[i]->is_active = false;
     }
 
-    auto L = Lua::Core::State;
+    lua_State* L = Lua::Core::State;
     Lua::StackUnwinder frame(L);
 
     bool ok = Lua::PushModulePublic(out, L, "plugins.workflow", "doEnumJobOutputs");
@@ -1150,7 +1150,7 @@ static bool itemInRealJob(df::item *item)
     if (!item->flags.bits.in_job)
         return false;
 
-    auto ref = Items::getSpecificRef(item, specific_ref_type::JOB);
+    df::specific_ref* ref = Items::getSpecificRef(item, specific_ref_type::JOB);
     if (!ref || !ref->data.job)
         return true;
 
@@ -1338,9 +1338,9 @@ static void update_jobs_by_constraints(color_ostream &out)
         for (size_t i = 0; i < pj->constraints.size(); i++)
         {
             if (pj->constraints[i]->request_resume)
-                resume_weight = std::max(resume_weight, pj->constraints[i]->weight);
+                resume_weight = std::max<int>(resume_weight, pj->constraints[i]->weight);
             if (pj->constraints[i]->request_suspend)
-                suspend_weight = std::max(suspend_weight, pj->constraints[i]->weight);
+                suspend_weight = std::max<int>(suspend_weight, pj->constraints[i]->weight);
         }
 
         bool goal = pj->isResumed();
@@ -1376,7 +1376,7 @@ static void update_jobs_by_constraints(color_ostream &out)
         {
             int count = ct->goalCount(), gap = ct->goalGap();
 
-            if (count >= gap*3 && ct->curItemStock() < std::min(gap*2, (count-gap)/2))
+            if (count >= gap*3 && ct->curItemStock() < std::min<int>(gap*2, (count-gap)/2))
             {
                 ct->low_stock_reported = DF_GLOBAL_VALUE(cur_season,-1);
 
@@ -1542,7 +1542,7 @@ static void push_constraint(lua_State *L, ItemConstraint *cv)
 static int listConstraints(lua_State *L)
 {
     lua_settop(L, 2);
-    auto job = Lua::CheckDFObject<df::job>(L, 1);
+    df::job* job = Lua::CheckDFObject<df::job>(L, 1);
     bool with_history = lua_toboolean(L, 2);
 
     lua_pushnil(L);
@@ -1563,7 +1563,7 @@ static int listConstraints(lua_State *L)
 
     lua_newtable(L);
 
-    auto &vec = (pj ? pj->constraints : constraints);
+    std::vector<ItemConstraint*> &vec = (pj ? pj->constraints : constraints);
 
     for (size_t i = 0; i < vec.size(); i++)
     {
@@ -1583,7 +1583,7 @@ static int listConstraints(lua_State *L)
 
 static int findConstraint(lua_State *L)
 {
-    auto token = luaL_checkstring(L, 1);
+    const char* token = luaL_checkstring(L, 1);
 
     color_ostream &out = *Lua::GetOutput(L);
     update_data_structures(out);
@@ -1599,7 +1599,7 @@ static int findConstraint(lua_State *L)
 
 static int setConstraint(lua_State *L)
 {
-    auto token = luaL_checkstring(L, 1);
+    const char* token = luaL_checkstring(L, 1);
     bool by_count = lua_toboolean(L, 2);
     int count = luaL_optint(L, 3, -1);
     int gap = luaL_optint(L, 4, -1);
@@ -1625,7 +1625,7 @@ static int setConstraint(lua_State *L)
 
 static int getCountHistory(lua_State *L)
 {
-    auto token = luaL_checkstring(L, 1);
+    const char* token = luaL_checkstring(L, 1);
 
     color_ostream &out = *Lua::GetOutput(L);
     update_data_structures(out);
@@ -1670,7 +1670,7 @@ static std::string shortJobDescription(df::job *job)
     std::string rv = stl_sprintf("job %d: ", job->id);
 
     if (job->job_type != job_type::CustomReaction)
-        rv += ENUM_KEY_STR(job_type, job->job_type);
+        rv += ENUM_KEY_STR_SIMPLE(job_type, job->job_type);
     else
         rv += job->reaction_name;
 
@@ -1909,7 +1909,7 @@ static command_result workflow_cmd(color_ostream &out, vector <string> & paramet
     {
         for (size_t i = 0; i < constraints.size(); i++)
         {
-            auto cv = constraints[i];
+            ItemConstraint* cv = constraints[i];
             out << "workflow " << (cv->goalByCount() ? "count " : "amount ")
                 << cv->config.val() << " " << cv->goalCount() << " " << cv->goalGap() << endl;
         }
