@@ -46,30 +46,30 @@ struct trackstop_hook : public df::viewscreen_dwarfmodest {
     building_trapst *get_selected_trackstop() {
         if (ui->main.mode != ui_sidebar_mode::QueryBuilding) {
             // Not in a building's 'q' menu.
-            return nullptr;
+            return NULL;
         }
 
         building_trapst *ts = virtual_cast<building_trapst>(world->selected_building);
         if (!ts) {
             // Not a trap type of building.
-            return nullptr;
+            return NULL;
         }
 
         if (ts->trap_type != df::trap_type::TrackStop) {
             // Not a trackstop.
-            return nullptr;
+            return NULL;
         }
 
         if (ts->construction_stage < ts->getMaxBuildStage()) {
             // Not yet fully constructed.
-            return nullptr;
+            return NULL;
         }
 
-        for (auto it = ts->jobs.begin(); it != ts->jobs.end(); it++) {
-            auto job = *it;
+        for (std::vector<df::job*>::const_iterator it = ts->jobs.begin(); it != ts->jobs.end(); it++) {
+            df::job* job = *it;
             if (job->job_type == df::job_type::DestroyBuilding) {
                 // Slated for removal.
-                return nullptr;
+                return NULL;
             }
         }
 
@@ -149,7 +149,7 @@ struct trackstop_hook : public df::viewscreen_dwarfmodest {
 
         building_trapst *ts = get_selected_trackstop();
         if (ts) {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             int left_margin = dims.menu_x1 + 1;
             int x = left_margin;
             int y = dims.y1 + 1;
@@ -202,25 +202,25 @@ struct roller_hook : public df::viewscreen_dwarfmodest {
     building_rollersst *get_selected_roller() {
         if (ui->main.mode != ui_sidebar_mode::QueryBuilding) {
             // Not in a building's 'q' menu.
-            return nullptr;
+            return NULL;
         }
 
         building_rollersst *roller = virtual_cast<building_rollersst>(world->selected_building);
         if (!roller) {
             // Not a roller.
-            return nullptr;
+            return NULL;
         }
 
         if (roller->construction_stage < roller->getMaxBuildStage()) {
             // Not yet fully constructed.
-            return nullptr;
+            return NULL;
         }
 
-        for (auto it = roller->jobs.begin(); it != roller->jobs.end(); it++) {
-            auto job = *it;
+        for (std::vector<df::job*>::const_iterator it = roller->jobs.begin(); it != roller->jobs.end(); it++) {
+            df::job* job = *it;
             if (job->job_type == df::job_type::DestroyBuilding) {
                 // Slated for removal.
-                return nullptr;
+                return NULL;
             }
         }
 
@@ -269,7 +269,7 @@ struct roller_hook : public df::viewscreen_dwarfmodest {
 
         building_rollersst *roller = get_selected_roller();
         if (roller) {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             int left_margin = dims.menu_x1 + 1;
             int x = left_margin;
             int y = dims.y1 + 6;
