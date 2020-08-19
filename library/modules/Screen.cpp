@@ -306,24 +306,34 @@ bool Screen::findGraphicsTile(const std::string &pagename, int x, int y, int *pt
 typedef std::map<df::viewscreen*, Plugin*> PluginScreens;
 static PluginScreens plugin_screens;
 
-bool Screen::show(df::viewscreen*& screen, df::viewscreen *before, Plugin *plugin)
+bool Screen::show(df::viewscreen* screen, df::viewscreen *before, Plugin *plugin, bool selfclean/* = true*/)
 {
     CHECK_NULL_POINTER(screen);
     CHECK_INVALID_ARGUMENT(!screen->parent && !screen->child);
 
-    if (!gps || !gview) return false;
+    if (!gps || !gview)
+    {
+        if (selfclean)
+            delete screen;
+        return false;
+    }
 
     df::viewscreen *parent = &gview->view;
     while (parent && parent->child != before)
         parent = parent->child;
 
-    if (!parent) return false;
+    if (!parent)
+    {
+        if (selfclean)
+            delete screen;
+        return false;
+    }
 
     gps->force_full_display_count += 2;
 
     screen->child = parent->child;
     screen->parent = parent;
-    df::viewscreen* s = screen; screen = NULL;
+    df::viewscreen* s = screen;
     parent->child = s;
     if (s->child)
         s->child->parent = s;

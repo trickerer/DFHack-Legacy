@@ -52,19 +52,19 @@ static string get_quality_name(const df::item_quality quality)
     if (gps->dimx - SIDEBAR_WIDTH < 60)
         return int_to_string(quality);
     else
-        return ENUM_KEY_STR(item_quality, quality);
+        return ENUM_KEY_STR_SIMPLE(item_quality, quality);
 }
 
 static df::item *get_container_of(df::item *item)
 {
-    auto container = Items::getContainer(item);
+    df::item* container = Items::getContainer(item);
     return (container) ? container : item;
 }
 
 static df::item *get_container_of(df::unit *unit)
 {
-    auto ref = Units::getGeneralRef(unit, general_ref_type::CONTAINED_IN_ITEM);
-    return (ref) ? ref->getItem() : nullptr;
+    df::general_ref* ref = Units::getGeneralRef(unit, general_ref_type::CONTAINED_IN_ITEM);
+    return (ref) ? ref->getItem() : NULL;
 }
 
 
@@ -83,9 +83,9 @@ public:
     void prepareTradeVariables()
     {
         reset();
-        for(auto bld_it = world->buildings.all.begin(); bld_it != world->buildings.all.end(); bld_it++)
+        for(std::vector<df::building*>::const_iterator bld_it = world->buildings.all.begin(); bld_it != world->buildings.all.end(); bld_it++)
         {
-            auto bld = *bld_it;
+            df::building* bld = *bld_it;
             if (!isUsableDepot(bld))
                 continue;
 
@@ -98,18 +98,18 @@ public:
 
     bool assignItem(vector<df::item *> &entries)
     {
-        for (auto it = entries.begin(); it != entries.end(); it++)
+        for (vector<df::item*>::const_iterator it = entries.begin(); it != entries.end(); it++)
         {
-            auto item = *it;
+            df::item* item = *it;
             item = get_container_of(item);
             if (!Items::canTradeWithContents(item))
                 return false;
 
-            auto href = df::allocate<df::general_ref_building_holderst>();
+            df::general_ref_building_holderst* href = df::allocate<df::general_ref_building_holderst>();
             if (!href)
                 return false;
 
-            auto job = new df::job();
+            df::job* job = new df::job();
 
             df::coord tpos(depot->centerx, depot->centery, depot->z);
             job->pos = tpos;
@@ -178,17 +178,17 @@ static map<df::item *, bool> items_in_cages;
 
 static df::job *get_item_job(df::item *item)
 {
-    auto ref = Items::getSpecificRef(item, specific_ref_type::JOB);
+    df::specific_ref* ref = Items::getSpecificRef(item, specific_ref_type::JOB);
     if (ref && ref->data.job)
         return ref->data.job;
 
-    return nullptr;
+    return NULL;
 }
 
-static bool is_marked_for_trade(df::item *item, df::item *container = nullptr)
+static bool is_marked_for_trade(df::item *item, df::item *container = NULL)
 {
     item = (container) ? container : get_container_of(item);
-    auto job = get_item_job(item);
+    df::job* job = get_item_job(item);
     if (!job)
         return false;
 
@@ -248,21 +248,21 @@ static string get_keywords(df::item *item)
 
 static string get_item_label(df::item *item, bool trim = false)
 {
-    auto label = Items::getBookTitle(item);
+    std::string label = Items::getBookTitle(item);
     if (label == "")
     {
         label = Items::getDescription(item, 0, false);
     }
     if (trim && item->getType() == item_type::BIN)
     {
-        auto pos = label.find("<#");
+        size_t pos = label.find("<#");
         if (pos != string::npos)
         {
             label = label.substr(0, pos-1);
         }
     }
 
-    auto wear = item->getWear();
+    int16_t wear = item->getWear();
     if (wear > 0)
     {
         string wearX;
@@ -314,7 +314,7 @@ struct item_grouped_entry
     df::item *getFirstItem() const
     {
         if (entries.size() == 0)
-            return nullptr;
+            return NULL;
 
         return entries[0];
     }
@@ -344,7 +344,7 @@ struct item_grouped_entry
 
     void setFlags(const df::item_flags flags, const bool state)
     {
-        for (auto it = entries.begin(); it != entries.end(); it++)
+        for (std::vector<df::item*>::const_iterator it = entries.begin(); it != entries.end(); it++)
         {
             if (state)
                 (*it)->flags.whole |= flags.whole;
@@ -399,17 +399,17 @@ static void find_cages()
 static df::building_cagest *is_in_cage(df::unit *unit)
 {
     find_cages();
-    for (auto it = cages.begin(); it != cages.end(); it++)
+    for (vector<df::building_cagest*>::const_iterator it = cages.begin(); it != cages.end(); it++)
     {
-        auto cage = *it;
+        df::building_cagest* cage = *it;
         for (size_t c = 0; c < cage->assigned_units.size(); c++)
         {
-            if(cage->assigned_units[c] == unit->id)
+            if (cage->assigned_units[c] == unit->id)
                 return cage;
         }
     }
 
-    return nullptr;
+    return NULL;
 }
 
 
@@ -418,7 +418,7 @@ class StockListColumn : public ListColumn<T>
 {
     virtual void display_extras(const T &item_group, int32_t &x, int32_t &y) const
     {
-        auto item = item_group->getFirstItem();
+        df::item* item = item_group->getFirstItem();
         if (item->flags.bits.in_job)
             OutputString(COLOR_LIGHTBLUE, x, y, "J");
         else
@@ -477,10 +477,10 @@ class StockListColumn : public ListColumn<T>
         else
             OutputString(COLOR_LIGHTBLUE, x, y, "  ");
 
-        auto quality = static_cast<df::item_quality>(item->getQuality());
+        df::item_quality quality = static_cast<df::item_quality>(item->getQuality());
         if (quality > item_quality::Ordinary)
         {
-            auto color = COLOR_BROWN;
+            color_value color = COLOR_BROWN;
             switch(quality)
             {
             case item_quality::FinelyCrafted:
@@ -617,7 +617,7 @@ public:
         ++y;
         vector<string> lines;
         split_string(&lines, text, "\n");
-        for (auto line = lines.begin(); line != lines.end(); ++line)
+        for (std::vector<std::string>::const_iterator line = lines.begin(); line != lines.end(); ++line)
             OutputString(COLOR_WHITE, x, y, line->c_str(), true, left_margin);
     }
     std::string getFocusString() { return "stocks_view/search_help"; }
@@ -661,7 +661,7 @@ public:
         items_in_cages.clear();
         cages_populated = false;
 
-        last_selected_item = nullptr;
+        last_selected_item = NULL;
 
         populateItems();
 
@@ -685,7 +685,7 @@ public:
         }
         else if (input->count(interface_key::HELP))
         {
-            Screen::show(dts::make_unique<search_help>(), plugin_self);
+            Screen::show(new search_help(), NULL, plugin_self);
         }
 
         bool key_processed = false;
@@ -814,20 +814,20 @@ public:
         else if (input->count(interface_key::CUSTOM_SHIFT_Z))
         {
             input->clear();
-            auto item_group = items_column.getFirstSelectedElem();
+            item_grouped_entry* item_group = items_column.getFirstSelectedElem();
             if (!item_group)
                 return;
 
             if (is_grouped && !item_group->isSingleItem())
                 return;
 
-            auto item = item_group->getFirstItem();
-            auto pos = getRealPos(item);
+            df::item* item = item_group->getFirstItem();
+            df::coord pos = getRealPos(item);
             if (!isRealPos(pos))
                 return;
 
             Screen::dismiss(this);
-            auto vs = Gui::getCurViewscreen(true);
+            df::viewscreen* vs = Gui::getCurViewscreen(true);
             while (vs && !virtual_cast<df::viewscreen_dwarfmodest>(vs))
             {
                 Screen::dismiss(vs);
@@ -865,8 +865,8 @@ public:
         {
             if (depot_info.canTrade())
             {
-                auto selected = getSelectedItems();
-                for (auto it = selected.begin(); it != selected.end(); it++)
+                std::vector<item_grouped_entry*> selected = getSelectedItems();
+                for (std::vector<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
                 {
                     depot_info.assignItem((*it)->entries);
                 }
@@ -918,7 +918,7 @@ public:
         items_column.display(selected_column == 0);
 
         int32_t y = 1;
-        auto left_margin = gps->dimx - SIDEBAR_WIDTH;
+        int32_t left_margin = gps->dimx - SIDEBAR_WIDTH;
         int32_t x = left_margin - 2;
         Screen::Pen border('\xDB', 8);
         for (; y < gps->dimy - 1; y++)
@@ -978,12 +978,12 @@ public:
     df::item *getSelectedItem() override
     {
         if (is_grouped)
-            return nullptr;
+            return NULL;
         vector<item_grouped_entry*> items = getSelectedItems();
         if (items.size() != 1)
-            return nullptr;
+            return NULL;
         if (items[0]->entries.size() != 1)
-            return nullptr;
+            return NULL;
         return items[0]->entries[0];
     }
 
@@ -1015,13 +1015,13 @@ private:
         {
             if (item->flags.bits.in_job)
             {
-                auto ref = Items::getSpecificRef(item, specific_ref_type::JOB);
+                df::specific_ref* ref = Items::getSpecificRef(item, specific_ref_type::JOB);
                 if (ref && ref->data.job)
                 {
                     if (ref->data.job->job_type == job_type::Eat || ref->data.job->job_type == job_type::Drink)
                         return pos;
 
-                    auto unit = Job::getWorker(ref->data.job);
+                    df::unit* unit = Job::getWorker(ref->data.job);
                     if (unit)
                         return unit->pos;
                 }
@@ -1029,19 +1029,19 @@ private:
             }
             else
             {
-                auto unit = Items::getHolderUnit(item);
+                df::unit* unit = Items::getHolderUnit(item);
                 if (unit)
                 {
                     if (!Units::isCitizen(unit))
                     {
-                        auto cage_item = get_container_of(unit);
+                        df::item* cage_item = get_container_of(unit);
                         if (cage_item)
                         {
                             items_in_cages[item] = true;
                             return cage_item->pos;
                         }
 
-                        auto cage_building = is_in_cage(unit);
+                        df::building_cagest* cage_building = is_in_cage(unit);
                         if (cage_building)
                         {
                             items_in_cages[item] = true;
@@ -1066,11 +1066,11 @@ private:
     void toggleMelt()
     {
         int set_to_melt = -1;
-        auto selected = getSelectedItems();
+        std::vector<item_grouped_entry*> selected = getSelectedItems();
         vector<df::item *> items;
-        for (auto it = selected.begin(); it != selected.end(); it++)
+        for (std::vector<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
         {
-            auto item_group = *it;
+            item_grouped_entry* item_group = *it;
 
             if (set_to_melt == -1)
                 set_to_melt = (item_group->isSetToMelt()) ? 0 : 1;
@@ -1088,10 +1088,10 @@ private:
             items.insert(items.end(), item_group->entries.begin(), item_group->entries.end());
         }
 
-        auto &melting_items = world->items.other[items_other_id::ANY_MELT_DESIGNATED];
-        for (auto it = items.begin(); it != items.end(); it++)
+        std::vector<df::item*> &melting_items = world->items.other[items_other_id::ANY_MELT_DESIGNATED];
+        for (std::vector<df::item*>::const_iterator it = items.begin(); it != items.end(); it++)
         {
-            auto item = *it;
+            df::item* item = *it;
             if (set_to_melt)
             {
                 insert_into_vector(melting_items, &df::item::id, item);
@@ -1099,7 +1099,7 @@ private:
             }
             else
             {
-                for (auto mit = melting_items.begin(); mit != melting_items.end(); mit++)
+                for (std::vector<df::item*>::iterator mit = melting_items.begin(); mit != melting_items.end(); mit++)
                 {
                     if (item != *mit)
                         continue;
@@ -1115,11 +1115,11 @@ private:
     void toggleFlag(const df::item_flags flags)
     {
         int state_to_apply = -1;
-        auto selected = getSelectedItems();
-        for (auto it = selected.begin(); it != selected.end(); it++)
+        std::vector<item_grouped_entry*> selected = getSelectedItems();
+        for (std::vector<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
         {
-            auto grouped_entry = (*it);
-            auto item = grouped_entry->getFirstItem();
+            item_grouped_entry* grouped_entry = (*it);
+            df::item* item = grouped_entry->getFirstItem();
             if (state_to_apply == -1)
                 state_to_apply = (item->flags.whole & flags.whole) ? 0 : 1;
 
@@ -1132,9 +1132,10 @@ private:
         vector<item_grouped_entry *> result;
         if (apply_to_all)
         {
-            for (auto it = items_column.getDisplayList().begin(); it != items_column.getDisplayList().end(); it++)
+            vector<ListEntry<item_grouped_entry*>*>::const_iterator it;
+            for (it = items_column.getDisplayList().begin(); it != items_column.getDisplayList().end(); it++)
             {
-                auto item_group = (*it)->elem;
+                item_grouped_entry* item_group = (*it)->elem;
                 if (!item_group)
                     continue;
                 result.push_back(item_group);
@@ -1142,7 +1143,7 @@ private:
         }
         else
         {
-            auto item_group = items_column.getFirstSelectedElem();
+            item_grouped_entry* item_group = items_column.getFirstSelectedElem();
             if (item_group)
                 result.push_back(item_group);
         }
@@ -1188,7 +1189,7 @@ private:
         std::vector<df::item *> &items = world->items.other[items_other_id::IN_PLAY];
         std::map<string, item_grouped_entry *> grouped_items;
         grouped_items_store.clear();
-        item_grouped_entry *next_selected_group = nullptr;
+        item_grouped_entry *next_selected_group = NULL;
         StockpileInfo spInfo;
         if (sp)
             spInfo = StockpileInfo(sp);
@@ -1200,15 +1201,15 @@ private:
             if (item->flags.whole & bad_flags.whole || item->flags.whole & hide_flags.whole)
                 continue;
 
-            auto container = get_container_of(item);
+            df::item* container = get_container_of(item);
             if (container->flags.whole & bad_flags.whole)
                 continue;
 
-            auto pos = getRealPos(item);
+            df::coord pos = getRealPos(item);
             if (!isRealPos(pos))
                 continue;
 
-            auto designation = Maps::getTileDesignation(pos);
+            df::tile_designation* designation = Maps::getTileDesignation(pos);
             if (!designation)
                 continue;
 
@@ -1232,11 +1233,11 @@ private:
                 continue;
             }
 
-            auto quality = static_cast<df::item_quality>(item->getQuality());
+            df::item_quality quality = static_cast<df::item_quality>(item->getQuality());
             if (quality < min_quality || quality > max_quality)
                 continue;
 
-            auto wear = item->getWear();
+            int32 wear = item->getWear();
             if (wear < min_wear)
                 continue;
 
@@ -1245,7 +1246,7 @@ private:
 
             if (is_grouped)
             {
-                auto hash = getItemHash(item);
+                std::string hash = getItemHash(item);
                 if (grouped_items.find(hash) == grouped_items.end())
                 {
                     grouped_items_store.push_back(item_grouped_entry());
@@ -1262,11 +1263,11 @@ private:
             else
             {
                 grouped_items_store.push_back(item_grouped_entry());
-                auto item_group = &grouped_items_store.back();
+                item_grouped_entry* item_group = &grouped_items_store.back();
                 item_group->entries.push_back(item);
 
-                auto label = get_item_label(item);
-                auto entry = ListEntry<item_grouped_entry *>(label, item_group, item_group->getKeywords());
+                std::string label = get_item_label(item);
+                ListEntry<item_grouped_entry*> entry(label, item_group, item_group->getKeywords());
                 items_column.add(entry);
 
                 if (last_selected_item &&
@@ -1280,14 +1281,15 @@ private:
 
         if (is_grouped)
         {
-            for (auto groups_iter = grouped_items.begin(); groups_iter != grouped_items.end(); groups_iter++)
+            std::map<string, item_grouped_entry*>::const_iterator groups_iter;
+            for (groups_iter = grouped_items.begin(); groups_iter != grouped_items.end(); groups_iter++)
             {
-                auto item_group = groups_iter->second;
+                item_grouped_entry* item_group = groups_iter->second;
                 stringstream label;
                 label << item_group->getLabel(is_grouped);
                 if (!item_group->isSingleItem())
                     label << " (" << item_group->entries.size() << ")";
-                auto entry = ListEntry<item_grouped_entry *>(label.str(), item_group, item_group->getKeywords());
+                ListEntry<item_grouped_entry *> entry(label.str(), item_group, item_group->getKeywords());
                 items_column.add(entry);
             }
         }
@@ -1304,11 +1306,11 @@ private:
 
     string getItemHash(df::item *item)
     {
-        auto label = get_item_label(item, true);
-        auto quality = static_cast<df::item_quality>(item->getQuality());
-        auto quality_enum = static_cast<df::item_quality>(quality);
-        auto quality_string = ENUM_KEY_STR(item_quality, quality_enum);
-        auto hash = label + quality_string + int_to_string(item->flags.whole & checked_flags.whole) + " " +
+        std::string label = get_item_label(item, true);
+        df::item_quality quality = static_cast<df::item_quality>(item->getQuality());
+        df::item_quality quality_enum = static_cast<df::item_quality>(quality);
+        std::string quality_string = ENUM_KEY_STR_SIMPLE(item_quality, quality_enum);
+        std::string hash = label + quality_string + int_to_string(item->flags.whole & checked_flags.whole) + " " +
             int_to_string(item->hasImprovements());
 
         return hash;
@@ -1316,8 +1318,8 @@ private:
 
     void preserveLastSelected()
     {
-        last_selected_item = nullptr;
-        auto selected_entry = items_column.getFirstSelectedElem();
+        last_selected_item = NULL;
+        item_grouped_entry* selected_entry = items_column.getFirstSelectedElem();
         if (!selected_entry)
             return;
         last_selected_item = selected_entry->getFirstItem();
@@ -1350,7 +1352,7 @@ struct stocks_hook : public df::viewscreen_storesst
         if (input->count(interface_key::CUSTOM_E))
         {
             Screen::dismiss(this);
-            Screen::show(dts::make_unique<ViewscreenStocks>(), plugin_self);
+            Screen::show(new ViewscreenStocks(), NULL, plugin_self);
             return;
         }
         INTERPOSE_NEXT(feed)(input);
@@ -1359,7 +1361,7 @@ struct stocks_hook : public df::viewscreen_storesst
     DEFINE_VMETHOD_INTERPOSE(void, render, ())
     {
         INTERPOSE_NEXT(render)();
-        auto dim = Screen::getWindowSize();
+        df::coord2d dim = Screen::getWindowSize();
         int x = 40;
         int y = dim.y - 2;
         OutputHotkeyString(x, y, "Enhanced View", "e", false, 0, COLOR_WHITE, COLOR_LIGHTRED);
@@ -1385,7 +1387,7 @@ struct stocks_stockpile_hook : public df::viewscreen_dwarfmodest
 
         if (input->count(interface_key::CUSTOM_I))
         {
-            Screen::show(dts::make_unique<ViewscreenStocks>(sp), plugin_self);
+            Screen::show(new ViewscreenStocks(sp), NULL, plugin_self);
             return true;
         }
 
@@ -1406,7 +1408,7 @@ struct stocks_stockpile_hook : public df::viewscreen_dwarfmodest
         if (!sp)
             return;
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = dims.y2 - 4;
@@ -1459,7 +1461,7 @@ static command_result stocks_cmd(color_ostream &out, vector <string> & parameter
         }
         else if (toLower(parameters[0])[0] == 's')
         {
-            Screen::show(dts::make_unique<ViewscreenStocks>(), plugin_self);
+            Screen::show(new ViewscreenStocks(), NULL, plugin_self);
             return CR_OK;
         }
     }
