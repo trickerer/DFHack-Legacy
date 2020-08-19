@@ -90,7 +90,7 @@ bool BinaryPatch::loadDIF(std::string name)
 {
     entries.clear();
 
-    std::ifstream infile(name);
+    std::ifstream infile(name.c_str());
     if(infile.bad())
     {
         cerr << "Cannot open file: " << name << endl;
@@ -204,7 +204,7 @@ bool load_file(std::vector<patch_byte> *pvec, std::string fname)
     fseek(f, 0, SEEK_END);
     pvec->resize(ftell(f));
     fseek(f, 0, SEEK_SET);
-    size_t cnt = fread(pvec->data(), 1, pvec->size(), f);
+    size_t cnt = fread(&(*pvec->begin()), 1, pvec->size(), f);
     fclose(f);
 
     return cnt == pvec->size();
@@ -219,7 +219,7 @@ bool save_file(const std::vector<patch_byte> &pvec, std::string fname)
         return false;
     }
 
-    size_t cnt = fwrite(pvec.data(), 1, pvec.size(), f);
+    size_t cnt = fwrite(&(*pvec.begin()), 1, pvec.size(), f);
     fclose(f);
 
     return cnt == pvec.size();
@@ -228,7 +228,7 @@ bool save_file(const std::vector<patch_byte> &pvec, std::string fname)
 std::string compute_hash(const std::vector<patch_byte> &pvec)
 {
     md5wrapper md5;
-    return md5.getHashFromBytes(pvec.data(), pvec.size());
+    return md5.getHashFromBytes(&(*pvec.begin()), pvec.size());
 }
 
 int main (int argc, char *argv[])
@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
     if (!patch.loadDIF(argv[3]))
         return 2;
 
-    BinaryPatch::State state = patch.checkState(bindata.data(), bindata.size());
+    BinaryPatch::State state = patch.checkState(&(*bindata.begin()), bindata.size());
     if (state == BinaryPatch::Conflict)
         return 1;
 
@@ -287,7 +287,7 @@ int main (int argc, char *argv[])
             return 0;
         }
 
-        patch.apply(bindata.data(), bindata.size(), true);
+        patch.apply(&(*bindata.begin()), bindata.size(), true);
     }
     else if (cmd == "remove")
     {
@@ -297,7 +297,7 @@ int main (int argc, char *argv[])
             return 0;
         }
 
-        patch.apply(bindata.data(), bindata.size(), false);
+        patch.apply(&(*bindata.begin()), bindata.size(), false);
     }
 
     if (!save_file(bindata, exe_file + ".bak"))
