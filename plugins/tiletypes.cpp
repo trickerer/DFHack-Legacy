@@ -112,36 +112,36 @@ void help( color_ostream & out, std::vector<std::string> &commands, int start, i
     {
         out << "Available shapes:" << std::endl
             << " ANY" << std::endl;
-        FOR_ENUM_ITEMS(tiletype_shape,i)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype_shape,i)
         {
-            out << " " << ENUM_KEY_STR(tiletype_shape,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_shape,i) << std::endl;
         }
     }
     else if (option == "material"|| option == "mat" ||option == "m")
     {
         out << "Available materials:" << std::endl
             << " ANY" << std::endl;
-        FOR_ENUM_ITEMS(tiletype_material,i)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype_material,i)
         {
-            out << " " << ENUM_KEY_STR(tiletype_material,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_material,i) << std::endl;
         }
     }
     else if (option == "special" || option == "sp")
     {
         out << "Available specials:" << std::endl
             << " ANY" << std::endl;
-        FOR_ENUM_ITEMS(tiletype_special,i)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype_special,i)
         {
-            out << " " << ENUM_KEY_STR(tiletype_special,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_special,i) << std::endl;
         }
     }
     else if (option == "variant" || option == "var" || option == "v")
     {
         out << "Available variants:" << std::endl
             << " ANY" << std::endl;
-        FOR_ENUM_ITEMS(tiletype_variant,i)
+        FOR_ENUM_ITEMS_SIMPLE(tiletype_variant,i)
         {
-            out << " " << ENUM_KEY_STR(tiletype_variant,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_variant,i) << std::endl;
         }
     }
     else if (option == "designated" || option == "d")
@@ -186,8 +186,8 @@ void help( color_ostream & out, std::vector<std::string> &commands, int start, i
     {
         out << "Specifies which vein type to use when painting specific stone." << std::endl
             << "The vein type determines stone drop rate. Available types:" << std::endl;
-        FOR_ENUM_ITEMS(inclusion_type,i)
-            out << " " << ENUM_KEY_STR(inclusion_type,i) << std::endl;
+        FOR_ENUM_ITEMS_SIMPLE(inclusion_type,i)
+            out << " " << ENUM_KEY_STR_SIMPLE(inclusion_type,i) << std::endl;
         out << "Vein type other than CLUSTER forces creation of a vein." << std::endl;
     }
 }
@@ -264,7 +264,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
 
     if (paint.special >= 0)
     {
-        stream << ENUM_KEY_STR(tiletype_special,paint.special);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_special,paint.special);
         used = true;
         needSpace = true;
     }
@@ -277,7 +277,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
             needSpace = false;
         }
 
-        stream << ENUM_KEY_STR(tiletype_material,paint.material);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_material,paint.material);
         used = true;
         needSpace = true;
     }
@@ -290,7 +290,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
             needSpace = false;
         }
 
-        stream << ENUM_KEY_STR(tiletype_shape,paint.shape);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_shape,paint.shape);
         used = true;
         needSpace = true;
     }
@@ -303,7 +303,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
             needSpace = false;
         }
 
-        stream << ENUM_KEY_STR(tiletype_variant,paint.variant);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_variant,paint.variant);
         used = true;
         needSpace = true;
     }
@@ -395,7 +395,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
         }
 
         stream << MaterialInfo(0,paint.stone_material).getToken()
-               << " " << ENUM_KEY_STR(inclusion_type, paint.vein_type);
+               << " " << ENUM_KEY_STR_SIMPLE(inclusion_type, paint.vein_type);
         used = true;
         needSpace = true;
     }
@@ -455,9 +455,9 @@ int toint(const std::string &str, int failValue = 0)
 
 bool tryShape(std::string value, TileType &paint)
 {
-    FOR_ENUM_ITEMS(tiletype_shape,i)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype_shape,i)
     {
-        if (value == ENUM_KEY_STR(tiletype_shape,i))
+        if (value == ENUM_KEY_STR_SIMPLE(tiletype_shape,i))
         {
             paint.shape = i;
             return true;
@@ -468,9 +468,9 @@ bool tryShape(std::string value, TileType &paint)
 
 bool tryMaterial(std::string value, TileType &paint)
 {
-    FOR_ENUM_ITEMS(tiletype_material, i)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype_material, i)
     {
-        if (value == ENUM_KEY_STR(tiletype_material,i))
+        if (value == ENUM_KEY_STR_SIMPLE(tiletype_material,i))
         {
             paint.material = i;
             return true;
@@ -481,9 +481,9 @@ bool tryMaterial(std::string value, TileType &paint)
 
 bool trySpecial(std::string value, TileType &paint)
 {
-    FOR_ENUM_ITEMS(tiletype_special, i)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype_special, i)
     {
-        if (value == ENUM_KEY_STR(tiletype_special,i))
+        if (value == ENUM_KEY_STR_SIMPLE(tiletype_special,i))
         {
             paint.special = i;
             return true;
@@ -494,9 +494,9 @@ bool trySpecial(std::string value, TileType &paint)
 
 bool tryVariant(std::string value, TileType &paint)
 {
-    FOR_ENUM_ITEMS(tiletype_variant, i)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype_variant, i)
     {
-        if (value == ENUM_KEY_STR(tiletype_variant,i))
+        if (value == ENUM_KEY_STR_SIMPLE(tiletype_variant,i))
         {
             paint.variant = i;
             return true;
@@ -535,7 +535,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector<std::stri
     }
     else if (option == "shape" || option == "sh" || option == "s")
     {
-        if (is_valid_enum_item((df::tiletype_shape)valInt))
+        if (is_valid_enum_item_simple((df::tiletype_shape)valInt))
         {
             paint.shape = (df::tiletype_shape)valInt;
             found = true;
@@ -553,7 +553,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector<std::stri
         // Setting the material conflicts with stone_material
         paint.stone_material = -1;
 
-        if (is_valid_enum_item((df::tiletype_material)valInt))
+        if (is_valid_enum_item_simple((df::tiletype_material)valInt))
         {
             paint.material = (df::tiletype_material)valInt;
             found = true;
@@ -568,7 +568,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector<std::stri
     }
     else if (option == "special" || option == "sp")
     {
-        if (is_valid_enum_item((df::tiletype_special)valInt))
+        if (is_valid_enum_item_simple((df::tiletype_special)valInt))
         {
             paint.special = (df::tiletype_special)valInt;
             found = true;
@@ -583,7 +583,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector<std::stri
     }
     else if (option == "variant" || option == "var" || option == "v")
     {
-        if (is_valid_enum_item((df::tiletype_variant)valInt))
+        if (is_valid_enum_item_simple((df::tiletype_variant)valInt))
         {
             paint.variant = (df::tiletype_variant)valInt;
             found = true;
