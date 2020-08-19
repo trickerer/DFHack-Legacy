@@ -17,20 +17,20 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
     inline df::building_cagest *get_cage()
     {
         if (*ui_building_in_assign || *ui_building_in_resize)
-            return nullptr;
+            return NULL;
 
         if (ui->main.mode != df::ui_sidebar_mode::QueryBuilding)
-            return nullptr;
+            return NULL;
 
-        auto cage = virtual_cast<df::building_cagest>(Gui::getAnyBuilding(this));
+        df::building_cagest* cage = virtual_cast<df::building_cagest>(Gui::getAnyBuilding(this));
         if (!cage)
-            return nullptr;
+            return NULL;
         if (cage->getBuildStage() < cage->getMaxBuildStage())
-            return nullptr;
+            return NULL;
         if (cage->flags.bits.justice)
-            return nullptr;
+            return NULL;
         if (Buildings::markedForRemoval(cage))
-            return nullptr;
+            return NULL;
 
         return cage;
     }
@@ -40,7 +40,7 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
         using namespace df::enums::interface_key;
         INTERPOSE_NEXT(render)();
 
-        auto cage = get_cage();
+        df::building_cagest* cage = get_cage();
         if (!cage)
             return;
 
@@ -48,7 +48,7 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
         if (!Buildings::getCageOccupants(cage, units))
             return;
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         for (int y = 4, i = (*ui_building_item_cursor/11)*11;
             y <= 14 && size_t(i) < units.size();
             ++y, ++i)
@@ -68,7 +68,7 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
     DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
     {
         using namespace df::enums::interface_key;
-        auto cage = get_cage();
+        df::building_cagest* cage = get_cage();
         if (cage)
         {
             std::vector<df::unit*> units;
@@ -85,8 +85,9 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
                 if (input->count(CUSTOM_SHIFT_B))
                 {
                     bool state = unit ? !unit->flags2.bits.slaughter : true;
-                    for (auto u : units)
-                        u->flags2.bits.slaughter = state;
+                    //for (auto u : units)
+                    for (std::vector<df::unit*>::const_iterator ci = units.begin(); ci != units.end(); ++ci)
+                        (*ci)->flags2.bits.slaughter = state;
                 }
             }
         }

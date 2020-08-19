@@ -33,7 +33,7 @@ struct farm_select_hook : df::viewscreen_dwarfmodest {
             MapExtras::Block * b = mc.BlockAt(cursor / 16);
             if (!b || !b->is_valid())
                 return false;
-            auto &block = *b->getRaw();
+            df::map_block &block = *b->getRaw();
             df::tile_designation &des =
                 block.designation[farm_plot->centerx % 16][farm_plot->centery % 16];
             if ((raws->underground_depth_min == 0 || raws->underground_depth_max == 0) != des.bits.subterranean)
@@ -76,12 +76,12 @@ struct farm_select_hook : df::viewscreen_dwarfmodest {
     DEFINE_VMETHOD_INTERPOSE(void, render, ())
     {
         INTERPOSE_NEXT(render)();
-        auto farm_plot = getFarmPlot();
+        df::building_farmplotst* farm_plot = getFarmPlot();
         if (!farm_plot || !ui->selected_farm_crops.size())
             return;
         if (farm_plot->getBuildStage() != farm_plot->getMaxBuildStage())
             return;
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int x = dims.menu_x1 + 1,
             y = dims.y2 - 5,
             left = x;

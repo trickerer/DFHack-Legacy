@@ -14,8 +14,9 @@ struct stone_status_all_hook : df::viewscreen_layer_stone_restrictionst {
             if (VIRTUAL_CAST_VAR(list, df::layer_object_listst, layer_objects[0]))
             {
                 bool new_state = !*stone_economic[type_tab][list->cursor];
-                for (bool *economic : stone_economic[type_tab])
-                    *economic = new_state;
+                //for (bool *economic : stone_economic[type_tab])
+                for (std::vector<bool*>::iterator it = stone_economic[type_tab].begin(); it != stone_economic[type_tab].end(); ++it)
+                    *(*it) = new_state;
             }
         }
         INTERPOSE_NEXT(feed)(input);

@@ -33,7 +33,7 @@ struct max_wheelbarrow_hook : df::viewscreen_dwarfmodest {
         df::building_stockpilest* stockpile = getStockpile();
         if (stockpile && in_wheelbarrow_entry)
         {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             Screen::paintString(Screen::Pen(' ', COLOR_LIGHTCYAN),
                 dims.menu_x1 + 22, dims.y1 + 6, wheelbarrow_entry + "_  ");
         }
@@ -62,7 +62,7 @@ struct max_wheelbarrow_hook : df::viewscreen_dwarfmodest {
                     input->count(df::interface_key::BUILDJOB_STOCKPILE_WHEELBARROW))
                 {
                     in_wheelbarrow_entry = false;
-                    stockpile->max_wheelbarrows = std::min(wheelbarrow_count(),
+                    stockpile->max_wheelbarrows = std::min<int>(wheelbarrow_count(),
                         Buildings::countExtentTiles(&stockpile->room));
                 }
                 else if (input->count(df::interface_key::STRING_A000) &&
@@ -72,8 +72,10 @@ struct max_wheelbarrow_hook : df::viewscreen_dwarfmodest {
                 }
                 else
                 {
-                    for (df::interface_key key : *input)
+                    //for (df::interface_key key : *input)
+                    for (std::set<df::interface_key>::const_iterator i = input->begin(); i != input->end(); ++i)
                     {
+                        df::interface_key key = *i;
                         if (key >= Screen::charToKey('0') && key <= Screen::charToKey('9') &&
                             wheelbarrow_entry.size() < 3)
                         {

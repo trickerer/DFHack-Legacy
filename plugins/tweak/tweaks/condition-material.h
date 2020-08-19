@@ -22,7 +22,7 @@ struct condition_material_hook : df::viewscreen_workquota_conditionst {
         {
             unregister_screen(scr);
         }
-        auto data = new T_order_mat_data;
+        T_order_mat_data* data = new T_order_mat_data;
         data->list_entries = scr->list_entries;
         data->mat_types    = scr->mat_types;
         data->mat_indices  = scr->mat_indices;
@@ -63,7 +63,7 @@ struct condition_material_hook : df::viewscreen_workquota_conditionst {
             for (size_t i = 1; i < data->list_entries.size(); i++)
             {
                 // cap it at 32767 elements to be safe
-                if (list_entries.size() >= INT16_MAX)
+                if (list_entries.size() >= 32767) //INT16_MAX std::numeric_limits<int16>::max()
                 {
                     break;
                 }
@@ -86,8 +86,10 @@ struct condition_material_hook : df::viewscreen_workquota_conditionst {
         using namespace df::enums::interface_key;
         if (mode == T_mode::Material)
         {
-            for (auto key : *input)
+            //for (auto key : *input)
+            for (std::set<df::interface_key>::const_iterator ci = input->begin(); ci != input->end(); ++ci)
             {
+                df::interface_key key = *ci;
                 if (key == LEAVESCREEN || key == SELECT)
                 {
                     INTERPOSE_NEXT(feed)(input);

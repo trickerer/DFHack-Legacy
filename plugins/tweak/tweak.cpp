@@ -145,8 +145,10 @@ tweak_onupdate_hookst(std::string name_, T_callback cb)
     T_callback callback;
 };
 static command_result tweak(color_ostream &out, vector <string> & parameters);
+typedef std::multimap<std::string, VMethodInterposeLinkBase> HooksMMap;
 static std::multimap<std::string, VMethodInterposeLinkBase> tweak_hooks;
-static std::multimap<std::string, tweak_onupdate_hookst> tweak_onupdate_hooks;
+typedef std::multimap<std::string, tweak_onupdate_hookst> OnUpdateHooksMMap;
+static OnUpdateHooksMMap tweak_onupdate_hooks;
 
 #define TWEAK_HOOK(tweak, cls, func) tweak_hooks.insert(std::pair<std::string, VMethodInterposeLinkBase>\
     (tweak, INTERPOSE_HOOK(cls, func)))
@@ -351,7 +353,7 @@ DFhackCExport command_result plugin_init (color_ostream &out, std::vector <Plugi
 
 DFhackCExport command_result plugin_onupdate (color_ostream &out)
 {
-    for (auto it = tweak_onupdate_hooks.begin(); it != tweak_onupdate_hooks.end(); ++it)
+    for (OnUpdateHooksMMap::iterator it = tweak_onupdate_hooks.begin(); it != tweak_onupdate_hooks.end(); ++it)
     {
         tweak_onupdate_hookst hook = it->second;
         if (hook.enabled)
@@ -447,7 +449,7 @@ static void correct_dimension(df::item_actual *self, int32_t &delta, int32_t dim
     color_ostream_proxy out(Core::getInstance().getConsole());
     out.print("fix-dimensions: splitting stack #%d for delta %d.\n", self->id, delta);
 
-    auto copy = self->splitStack(self->stack_size-1, true);
+    df::item* copy = self->splitStack(self->stack_size-1, true);
     if (copy) copy->categorize(true);
 }
 
@@ -779,7 +781,7 @@ static command_result enable_tweak(string tweak, color_ostream &out, vector <str
 {
     bool recognized = false;
     string cmd = parameters[0];
-    for (auto it = tweak_hooks.begin(); it != tweak_hooks.end(); ++it)
+    for (HooksMMap::iterator it = tweak_hooks.begin(); it != tweak_hooks.end(); ++it)
     {
         if (it->first == cmd)
         {
@@ -787,7 +789,7 @@ static command_result enable_tweak(string tweak, color_ostream &out, vector <str
             enable_hook(out, it->second, parameters);
         }
     }
-    for (auto it = tweak_onupdate_hooks.begin(); it != tweak_onupdate_hooks.end(); ++it)
+    for (OnUpdateHooksMMap::iterator it = tweak_onupdate_hooks.begin(); it != tweak_onupdate_hooks.end(); ++it)
     {
         if (it->first == cmd)
         {
@@ -823,13 +825,13 @@ static command_result tweak(color_ostream &out, vector <string> &parameters)
         if (!unit)
             return CR_FAILURE;
 
-        auto death = df::incident::find(unit->counters.death_id);
+        df::incident* death = df::incident::find(unit->counters.death_id);
 
         if (death)
         {
             death->flags.bits.discovered = true;
 
-            auto crime = df::crime::find(death->crime_id);
+            df::crime* crime = df::crime::find(death->crime_id);
             if (crime)
                 crime->flags.bits.discovered = true;
         }

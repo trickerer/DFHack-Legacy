@@ -25,7 +25,7 @@ struct do_job_now_hook : public df::viewscreen_joblistst {
     DEFINE_VMETHOD_INTERPOSE(void, render, ()) {
         INTERPOSE_NEXT(render)();
         int x = 32;
-        auto dim = Screen::getWindowSize();
+        df::coord2d dim = Screen::getWindowSize();
         int y = dim.y - 2;
         bool do_now = false;
 

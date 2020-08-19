@@ -38,7 +38,7 @@ struct hide_priority_hook : df::viewscreen_dwarfmodest {
         INTERPOSE_NEXT(render)();
         if (valid_mode())
         {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             if (dims.menu_on)
             {
                 int x = dims.menu_x1 + 1, y = gps->dimy - (gps->dimy > 26 ? 8 : 7);

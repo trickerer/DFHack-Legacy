@@ -13,9 +13,9 @@ struct military_assign_hook : df::viewscreen_layer_militaryst {
     {
         if (inPositionsMode() && !layer_objects[0]->active)
         {
-            auto pos_list = layer_objects[1];
-            auto plist = layer_objects[2];
-            auto &cand = positions.candidates;
+            df::layer_object* pos_list = layer_objects[1];
+            df::layer_object* plist = layer_objects[2];
+            std::vector<df::unit*> &cand = positions.candidates;
 
             // Save the candidate list and cursors
             std::vector<df::unit*> copy = cand;
@@ -71,7 +71,7 @@ struct military_assign_hook : df::viewscreen_layer_militaryst {
 
         if (inPositionsMode())
         {
-            auto plist = layer_objects[2];
+            df::layer_object* plist = layer_objects[2];
             int x1 = plist->getX1(), y1 = plist->getY1();
             int x2 = plist->getX2(), y2 = plist->getY2();
             int i1 = plist->getFirstVisible(), i2 = plist->getLastVisible();
@@ -79,7 +79,7 @@ struct military_assign_hook : df::viewscreen_layer_militaryst {
 
             for (int y = y1, i = i1; i <= i2; i++, y++)
             {
-                auto unit = vector_get(positions.candidates, i);
+                df::unit* unit = vector_get(positions.candidates, i);
                 if (!unit || unit->military.squad_id < 0)
                     continue;
 

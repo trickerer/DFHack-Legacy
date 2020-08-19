@@ -27,7 +27,7 @@ struct fast_heat_hook : df::item_actual {
         {
             int spec = getSpecHeat();
             if (spec != 60001)
-                rate_mult = std::max(map_temp_mult, spec/max_heat_ticks/abs(temp - temperature.whole));
+                rate_mult = std::max<int>(map_temp_mult, spec/max_heat_ticks/abs(temp - temperature.whole));
         }
 
         return INTERPOSE_NEXT(updateTemperature)(temp, local, contained, adjust, rate_mult);

@@ -25,11 +25,12 @@ struct egg_fertile_hook : df::viewscreen_dwarfmodest {
         df::building_nest_boxst* nest_box = getNestBox();
         if (nest_box)
         {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             bool has_eggs = false;
             bool fertile = false;
             int idx = 0;
-            for (auto iter = nest_box->contained_items.begin();
+            std::vector<df::building_actual::T_contained_items *>::const_iterator iter;
+            for (iter = nest_box->contained_items.begin();
                  iter != nest_box->contained_items.end(); ++iter)
             {
                 df::item_eggst* egg = virtual_cast<df::item_eggst>((*iter)->item);

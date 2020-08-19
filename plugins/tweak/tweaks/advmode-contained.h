@@ -5,8 +5,8 @@ struct advmode_contained_hook : df::viewscreen_layer_unit_actionst {
 
     DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
     {
-        auto old_reaction = cur_reaction;
-        auto old_reagent = reagent;
+        df::reaction* old_reaction = cur_reaction;
+        int32_t old_reagent = reagent;
 
         INTERPOSE_NEXT(feed)(input);
 
@@ -27,7 +27,7 @@ struct advmode_contained_hook : df::viewscreen_layer_unit_actionst {
                 // Reproduces a tiny part of the orginal screen code
                 choice_items.clear();
 
-                auto preagent = cur_reaction->reagents[reagent];
+                df::reaction_reagent* preagent = cur_reaction->reagents[reagent];
                 reagent_amnt_left = preagent->quantity;
 
                 for (int i = held_items.size()-1; i >= 0; i--)

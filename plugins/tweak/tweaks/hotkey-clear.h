@@ -10,7 +10,7 @@ struct hotkey_clear_hook : df::viewscreen_dwarfmodest {
         INTERPOSE_NEXT(render)();
         if (ui->main.mode == df::ui_sidebar_mode::Hotkeys)
         {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             int x = dims.menu_x1 + 1, y = 19;
             OutputHotkeyString(x, y, "Clear", df::interface_key::CUSTOM_C, false, 0, COLOR_WHITE, COLOR_LIGHTRED);
         }
@@ -22,7 +22,7 @@ struct hotkey_clear_hook : df::viewscreen_dwarfmodest {
             input->count(df::interface_key::CUSTOM_C) &&
             !ui->main.in_rename_hotkey)
         {
-            auto &hotkey = ui->main.hotkeys[ui->main.selected_hotkey];
+            df::ui_hotkey &hotkey = ui->main.hotkeys[ui->main.selected_hotkey];
             hotkey.name = "";
             hotkey.cmd = df::ui_hotkey::T_cmd::None;
             hotkey.x = 0;

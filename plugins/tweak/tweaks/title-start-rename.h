@@ -22,7 +22,7 @@ struct title_start_rename_hook : df::viewscreen_titlest {
 
     bool do_rename()
     {
-        auto save = get_cur_save();
+        df::viewscreen_titlest::T_start_savegames* save = get_cur_save();
         if (!save)
             return false;
         if (Filesystem::isdir(full_save_dir(entry)))
@@ -39,7 +39,7 @@ struct title_start_rename_hook : df::viewscreen_titlest {
         INTERPOSE_NEXT(render)();
         if (sel_subpage == T_sel_subpage::StartSelectWorld || sel_subpage == T_sel_subpage::StartSelectMode)
         {
-            auto save = get_cur_save();
+            df::viewscreen_titlest::T_start_savegames* save = get_cur_save();
             if (save)
             {
                 int x = 1, y = 7;
@@ -61,7 +61,7 @@ struct title_start_rename_hook : df::viewscreen_titlest {
         if (in_rename)
         {
             rename_failed = false;
-            auto string_key = get_string_key(input);
+            df::interface_key string_key = get_string_key(input);
             if (input->count(SELECT) && !entry.empty())
             {
                 if (do_rename())

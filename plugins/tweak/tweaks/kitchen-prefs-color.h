@@ -9,7 +9,7 @@ struct kitchen_prefs_color_hook : df::viewscreen_kitchenprefst {
         std::string s;
         for ( ; length; x++, length--)
         {
-            auto tile = Screen::readTile(x, y);
+            Screen::Pen tile = Screen::readTile(x, y);
             if (!tile.valid())
                 break;
             s += tile.ch;

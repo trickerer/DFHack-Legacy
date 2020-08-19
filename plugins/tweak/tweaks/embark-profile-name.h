@@ -5,7 +5,7 @@ struct embark_profile_name_hook : df::viewscreen_setupdwarfgamest {
 
     DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input)) {
         int ch = -1;
-        for (auto it = input->begin(); ch == -1 && it != input->end(); ++it) {
+        for (std::set<df::interface_key>::const_iterator it = input->begin(); ch == -1 && it != input->end(); ++it) {
             ch = Screen::keyToChar(*it);
         }
         // Intercept all printable characters except space.

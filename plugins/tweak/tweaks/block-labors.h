@@ -27,7 +27,7 @@ struct block_labors_hook : df::viewscreen_dwarfmodest {
 
     inline bool all_labors_enabled (df::unit *unit, df::unit_labor_category cat)
     {
-        FOR_ENUM_ITEMS(unit_labor, labor)
+        FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
         {
             if (ENUM_ATTR(unit_labor, category, labor) == cat &&
                     !unit->status.labors[labor] &&
@@ -41,7 +41,7 @@ struct block_labors_hook : df::viewscreen_dwarfmodest {
     {
         for (int x = x1; x <= x2; x++)
         {
-            auto tile = Screen::readTile(x, y);
+            Screen::Pen tile = Screen::readTile(x, y);
             tile.fg = color;
             tile.bold = false;
             Screen::paintTile(tile, x, y);
@@ -51,7 +51,7 @@ struct block_labors_hook : df::viewscreen_dwarfmodest {
     DEFINE_VMETHOD_INTERPOSE(void, render, ())
     {
         INTERPOSE_NEXT(render)();
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         if (valid_mode())
         {
             df::unit *unit = Gui::getAnyUnit(this);
@@ -63,7 +63,7 @@ struct block_labors_hook : df::viewscreen_dwarfmodest {
                 df::unit_labor labor = unit_labors_sidemenu[i];
                 df::unit_labor_category cat = df::unit_labor_category(labor);
 
-                if (is_valid_enum_item(cat) && all_labors_enabled(unit, cat))
+                if (is_valid_enum_item_simple(cat) && all_labors_enabled(unit, cat))
                     recolor_line(dims.menu_x1, dims.menu_x2, y, COLOR_WHITE);
 
                 if (forbidden_labor(unit, labor))
@@ -86,10 +86,10 @@ struct block_labors_hook : df::viewscreen_dwarfmodest {
                 unit->status.labors[labor] = false;
                 return;
             }
-            else if (input->count(SELECT_ALL) && is_valid_enum_item(cat))
+            else if (input->count(SELECT_ALL) && is_valid_enum_item_simple(cat))
             {
                 bool new_state = !all_labors_enabled(unit, cat);
-                FOR_ENUM_ITEMS(unit_labor, labor)
+                FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
                 {
                     if (ENUM_ATTR(unit_labor, category, labor) == cat)
                         unit->status.labors[labor] = (new_state && !forbidden_labor(unit, labor));
