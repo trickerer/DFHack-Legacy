@@ -1164,7 +1164,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
          (job->job_type == job_type::StrangeMoodFell)
        ))
     {
-        int extra_items = std::min(rng.df_trandom((ui->tasks.num_artifacts * 20 + moodable_units.size()) / 20 + 1), 7);
+        int extra_items = std::min<int>(rng.df_trandom((ui->tasks.num_artifacts * 20 + moodable_units.size()) / 20 + 1), 7);
         df::item_type avoid_type = item_type::NONE;
         int avoid_glass = 0;
         switch (skill)
