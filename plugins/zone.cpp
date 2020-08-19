@@ -30,15 +30,18 @@
 #include <climits>
 #include <vector>
 #include <algorithm>
-#include <unordered_map>
-#include <unordered_set>
+//#include <unordered_map>
+//#include <unordered_set>
 #include <functional>
 #include <string>
 #include <sstream>
 #include <stdexcept>
 #include <ctime>
 #include <cstdio>
-#include <cstdint>
+//#include <cstdint>
+#include <set>
+#include <hash_map>
+#include "common.h"
 
 #include "Core.h"
 #include "Console.h"
@@ -80,9 +83,11 @@
 
 using std::make_pair;
 using std::string;
-using std::unordered_map;
-using std::unordered_set;
+//using std::unordered_map;
+//using std::unordered_set;
 using std::vector;
+
+#define UNORDERED_MAP stdext::hash_map
 
 using namespace DFHack;
 using namespace DFHack::Units;
@@ -554,7 +559,7 @@ bool isAssigned(df::unit* unit)
     for (size_t r=0; r < unit->general_refs.size(); r++)
     {
         df::general_ref * ref = unit->general_refs[r];
-        auto rtype = ref->getType();
+        df::general_ref_type rtype = ref->getType();
         if(    rtype == df::general_ref_type::BUILDING_CIVZONE_ASSIGNED
             || rtype == df::general_ref_type::BUILDING_CAGED
             || rtype == df::general_ref_type::BUILDING_CHAIN
@@ -574,7 +579,7 @@ bool isAssignedToZone(df::unit* unit)
     for (size_t r=0; r < unit->general_refs.size(); r++)
     {
         df::general_ref * ref = unit->general_refs[r];
-        auto rtype = ref->getType();
+        df::general_ref_type rtype = ref->getType();
         if(rtype == df::general_ref_type::BUILDING_CIVZONE_ASSIGNED)
         {
             assigned = true;
@@ -592,7 +597,7 @@ bool isChained(df::unit* unit)
     for (size_t r=0; r < unit->general_refs.size(); r++)
     {
         df::general_ref * ref = unit->general_refs[r];
-        auto rtype = ref->getType();
+        df::general_ref_type rtype = ref->getType();
         if(rtype == df::general_ref_type::BUILDING_CHAIN)
         {
             contained = true;
@@ -609,7 +614,7 @@ bool isContainedInItem(df::unit* unit)
     for (size_t r=0; r < unit->general_refs.size(); r++)
     {
         df::general_ref * ref = unit->general_refs[r];
-        auto rtype = ref->getType();
+        df::general_ref_type rtype = ref->getType();
         if(rtype == df::general_ref_type::CONTAINED_IN_ITEM)
         {
             contained = true;
@@ -1161,10 +1166,10 @@ void zoneInfo(color_ostream & out, df::building* building, bool verbose)
     out.print("Building %i - \"%s\" - type %s (%i)",
                 building->id,
                 name.c_str(),
-                ENUM_KEY_STR(building_type, building->getType()).c_str(),
+                ENUM_KEY_STR_SIMPLE(building_type, building->getType()).c_str(),
                 building->getType());
     out.print(", subtype %s (%i)",
-                ENUM_KEY_STR(civzone_type, (df::civzone_type)building->getSubtype()).c_str(),
+                ENUM_KEY_STR_SIMPLE(civzone_type, (df::civzone_type)building->getSubtype()).c_str(),
                 building->getSubtype());
     out.print("\n");
 
@@ -1221,7 +1226,7 @@ void cageInfo(color_ostream & out, df::building* building, bool verbose)
     out.print("Building %i - \"%s\" - type %s (%i)",
                 building->id,
                 name.c_str(),
-                ENUM_KEY_STR(building_type, building->getType()).c_str(),
+                ENUM_KEY_STR_SIMPLE(building_type, building->getType()).c_str(),
                 building->getType());
     out.print("\n");
 
@@ -1261,7 +1266,7 @@ void chainInfo(color_ostream & out, df::building* building, bool list_refs = fal
     out.print("Building %i - \"%s\" - type %s (%i)",
                 building->id,
                 name.c_str(),
-                ENUM_KEY_STR(building_type, building->getType()).c_str(),
+                ENUM_KEY_STR_SIMPLE(building_type, building->getType()).c_str(),
                 building->getType());
     out.print("\n");
 
@@ -1288,7 +1293,7 @@ df::building* getAssignableBuildingAtCursor(color_ostream& out)
         return NULL;
     }
 
-    auto building_at_tile = Buildings::findAtTile(Gui::getCursorPos());
+    df::building* building_at_tile = Buildings::findAtTile(Gui::getCursorPos());
 
     // cagezone wants a pen/pit as starting point
     if (isCage(building_at_tile))
@@ -1298,7 +1303,7 @@ df::building* getAssignableBuildingAtCursor(color_ostream& out)
     }
     else
     {
-        auto zone_at_tile = findPenPitAt(Gui::getCursorPos());
+        df::building* zone_at_tile = findPenPitAt(Gui::getCursorPos());
         if(!zone_at_tile)
         {
             out << "No pen/pasture, pit, or cage under cursor!" << endl;
@@ -1314,39 +1319,8 @@ df::building* getAssignableBuildingAtCursor(color_ostream& out)
 
 // ZONE FILTERS (as in, filters used by 'zone')
 
-// Maps parameter names to filters.
-unordered_map<string, function<bool(df::unit*)>> zone_filters;
-static struct zone_filters_init { zone_filters_init() {
-    zone_filters["caged"] = isContainedInItem;
-    zone_filters["egglayer"] = isEggLayer;
-    zone_filters["female"] = isFemale;
-    zone_filters["grazer"] = isGrazer;
-    zone_filters["hunting"] = isHunter;
-    zone_filters["male"] = isMale;
-    zone_filters["milkable"] = isMilkable;
-    zone_filters["naked"] = isNaked;
-    zone_filters["own"] = isOwnCiv;
-    zone_filters["tamable"] = isTamable;
-    zone_filters["tame"] = isTame;
-    zone_filters["trainablewar"] = [](df::unit *unit) -> bool
-    {
-        return !isWar(unit) && !isHunter(unit) && isTrainableWar(unit);
-    };
-    zone_filters["trainablehunt"] = [](df::unit *unit) -> bool
-    {
-        return !isWar(unit) && !isHunter(unit) && isTrainableHunting(unit);
-    };
-    zone_filters["trained"] = isTrained;
-    // backwards compatibility
-    zone_filters["unassigned"] = [](df::unit *unit) -> bool
-    {
-        return !isAssigned(unit);
-    };
-    zone_filters["war"] = isWar;
-}} zone_filters_init_;
-
 // Extra annotations / descriptions for parameter names.
-unordered_map<string, string> zone_filter_notes;
+UNORDERED_MAP<string, string> zone_filter_notes;
 static struct zone_filter_notes_init { zone_filter_notes_init() {
     zone_filter_notes["caged"] = "caged (ignores built cages)";
     zone_filter_notes["hunting"] = "trained hunting creature";
@@ -1357,20 +1331,203 @@ static struct zone_filter_notes_init { zone_filter_notes_init() {
     zone_filter_notes["war"] = "trained war creature";
 }} zone_filter_notes_init_;
 
-pair<string, function<bool(df::unit*)>> createRaceFilter(vector<string> &filter_args)
+bool isTrainableForWar(df::unit* unit)
+{
+    return !isWar(unit) && !isHunter(unit) && isTrainableWar(unit);
+}
+bool isTrainableForHunting(df::unit* unit)
+{
+    return !isWar(unit) && !isHunter(unit) && isTrainableHunting(unit);
+}
+bool isUnassigned(df::unit* unit)
+{
+    return !isAssigned(unit);
+}
+
+bool isMerchantOrForest(df::unit *unit)
+{
+    return isMerchant(unit) || isForest(unit);
+}
+
+bool hasName(df::unit *unit)
+{
+    return unit->name.has_name;
+}
+
+bool isAssignedToBuildingOrZone(df::unit *unit, std::set<int32_t>* assigned_unit_ids)
+{
+    return assigned_unit_ids->count(unit->id) == 1;
+}
+
+bool isOwnRaceAndCiv(df::unit *unit)
+{
+    return isOwnRace(unit) && isOwnCiv(unit);
+}
+
+//active_filters.push_back([](df::unit *unit)
+//    {
+//        return !isOwnRace(unit) || !isOwnCiv(unit);
+//    }
+//);
+
+enum FilterFunctionType
+{
+    IS_RACE             = 0,
+    COMP_AGE,
+
+    IS_CAGED,
+    IS_EGGLAYER,
+    IS_FEMALE,
+    IS_GRAZER,
+    IS_HUNTING,
+    IS_MALE,
+    IS_MILKABLE,
+    IS_NAKED,
+    IS_OWN_CIV,
+    IS_TAMEABLE,
+    IS_TAME,
+    IS_TRAINABLE_WAR,
+    IS_TRAINABLE_HUNT,
+    IS_TRAINED,
+    IS_UNASSIGNED,
+    IS_WAR,
+    IS_MERCHANT_OR_FOREST,
+    HAS_NAME,
+    IS_ASSIGNED_TO_BUILDING_OR_ZONE,
+    IS_OWN_RACE_AND_CIV
+};
+
+enum Equality
+{
+    EQUAL       = 0,
+    NOT_EQUAL   = 1,
+    EQ_LESS     = 2,
+    EQ_GREA     = 3
+};
+
+struct UnitFilter
+{
+public:
+    UnitFilter() {}
+    UnitFilter(FilterFunctionType ft, Equality eq = EQUAL)
+        : _inv(false), _ft(ft), _eq(eq) {}
+    UnitFilter(FilterFunctionType ft, Equality eq, int _age)
+        : _inv(false), _ft(ft), _eq(eq), intval(_age) {}
+    UnitFilter(FilterFunctionType ft, Equality eq, char* _age)
+        : _inv(false), _ft(ft), _eq(eq), strval(_age) {}
+    UnitFilter(FilterFunctionType ft, Equality eq, std::set<int32_t>* _set_32i)
+        : _inv(false), _ft(ft), _eq(eq), set_32i(_set_32i) {}
+
+    void InvertResult()
+    {
+        _inv = !_inv;
+    }
+
+    bool operator()(df::unit* unit) const
+    {
+        return FilterResult(unit);
+    }
+private:
+
+    bool FilterResult(df::unit* unit) const
+    {
+        bool res;
+        switch (_ft)
+        {
+            case IS_RACE:
+            {
+                bool res = getRaceName(unit) == std::string(strval);
+                if (_eq == NOT_EQUAL) res = !res;
+                break;
+            }
+            case COMP_AGE:
+            {
+                res = (_eq == EQUAL) ? (getAge(unit, true) == intval) :
+                    (_eq == NOT_EQUAL) ? (getAge(unit, true) != intval) :
+                    (_eq == EQ_LESS) ? (getAge(unit, true) <= intval) :
+                    (_eq == EQ_GREA) ? (getAge(unit, true) >= intval) :
+                    false;
+                break;
+            }
+            case IS_CAGED:      res = isContainedInItem(unit); break;
+            case IS_EGGLAYER:   res = isEggLayer(unit); break;
+            case IS_FEMALE:     res = isFemale(unit); break;
+            case IS_GRAZER:     res = isGrazer(unit); break;
+            case IS_HUNTING:    res = isHunter(unit); break;
+            case IS_MALE:       res = isMale(unit); break;
+            case IS_MILKABLE:   res = isMilkable(unit); break;
+            case IS_NAKED:      res = isNaked(unit); break;
+            case IS_OWN_CIV:    res = isOwnCiv(unit); break;
+            case IS_TAMEABLE:   res = isTamable(unit); break;
+            case IS_TAME:       res = isTame(unit); break;
+            case IS_TRAINABLE_WAR: res = isTrainableForWar(unit); break;
+            case IS_TRAINABLE_HUNT: res = isTrainableForHunting(unit); break;
+            case IS_TRAINED:    res = isTrained(unit); break;
+            case IS_UNASSIGNED: res = isUnassigned(unit); break;
+            case IS_WAR:        res = isWar(unit); break;
+            case IS_MERCHANT_OR_FOREST: res = isMerchantOrForest(unit); break;
+            case HAS_NAME:      res = hasName(unit); break;
+            case IS_ASSIGNED_TO_BUILDING_OR_ZONE: res = isAssignedToBuildingOrZone(unit, set_32i); break;
+            case IS_OWN_RACE_AND_CIV: res = isOwnRaceAndCiv(unit); break;
+            default:
+                return false;
+        }
+
+        return !_inv ? res : !res;
+    }
+
+    FilterFunctionType _ft;
+    Equality _eq;
+    bool _inv;
+
+    union {
+        std::set<int32_t>* set_32i;
+        char* strval;
+        int intval;
+    };
+};
+
+// Maps parameter names to filters.
+//typedef bool(*filter_function)(df::unit*);
+UNORDERED_MAP<const char*, UnitFilter> zone_filters;
+static struct zone_filters_init
+{
+    zone_filters_init()
+    {
+        zone_filters["caged"] = UnitFilter(IS_CAGED);
+        zone_filters["egglayer"] = UnitFilter(IS_EGGLAYER);
+        zone_filters["female"] = UnitFilter(IS_FEMALE);
+        zone_filters["grazer"] = UnitFilter(IS_GRAZER);
+        zone_filters["hunting"] = UnitFilter(IS_HUNTING);
+        zone_filters["male"] = UnitFilter(IS_MALE);
+        zone_filters["milkable"] = UnitFilter(IS_MILKABLE);
+        zone_filters["naked"] = UnitFilter(IS_NAKED);
+        zone_filters["own"] = UnitFilter(IS_OWN_CIV);
+        zone_filters["tamable"] = UnitFilter(IS_TAMEABLE);
+        zone_filters["tame"] = UnitFilter(IS_TAME);
+        zone_filters["trainablewar"] = UnitFilter(IS_TRAINABLE_WAR);
+        zone_filters["trainablehunt"] = UnitFilter(IS_TRAINABLE_HUNT);
+        zone_filters["trained"] = UnitFilter(IS_TRAINED);
+        // backwards compatibility
+        zone_filters["unassigned"] = UnitFilter(IS_UNASSIGNED);
+        zone_filters["war"] = UnitFilter(IS_WAR);
+    }
+
+} zone_filters_init_;
+
+pair<string, UnitFilter> createRaceFilter(vector<string> &filter_args)
 {
     // guaranteed to exist.
-    string race = filter_args[0];
+    string race = "race of ";
+    race += filter_args[0];
 
     return make_pair(
-        "race of " + race,
-        [race](df::unit *unit) -> bool {
-            return getRaceName(unit) == race;
-        }
+        race,
+        UnitFilter(IS_RACE, EQUAL, (char*)race.c_str())
     );
 }
 
-pair<string, function<bool(df::unit*)>> createAgeFilter(vector<string> &filter_args)
+pair<string, UnitFilter> createAgeFilter(vector<string> &filter_args)
 {
     int target_age;
     stringstream ss(filter_args[0]);
@@ -1388,15 +1545,16 @@ pair<string, function<bool(df::unit*)>> createAgeFilter(vector<string> &filter_a
         throw runtime_error(err.str());
     }
 
+    string age = "age of exactly ";
+    age += int_to_string(target_age);
+
     return make_pair(
-        "age of exactly " + int_to_string(target_age),
-        [target_age](df::unit *unit) -> bool {
-            return getAge(unit, true) == target_age;
-        }
+        age,
+        UnitFilter(COMP_AGE, EQUAL, target_age)
     );
 }
 
-pair<string, function<bool(df::unit*)>> createMinAgeFilter(vector<string> &filter_args)
+pair<string, UnitFilter> createMinAgeFilter(vector<string> &filter_args)
 {
     int min_age;
     stringstream ss(filter_args[0]);
@@ -1414,15 +1572,16 @@ pair<string, function<bool(df::unit*)>> createMinAgeFilter(vector<string> &filte
         throw runtime_error(err.str());
     }
 
+    string age = "minimum age of ";
+    age += int_to_string(min_age);
+
     return make_pair(
-        "minimum age of " + int_to_string(min_age),
-        [min_age](df::unit *unit) -> bool {
-            return getAge(unit, true) >= min_age;
-        }
+        age,
+        UnitFilter(COMP_AGE, EQ_GREA, min_age)
     );
 }
 
-pair<string, function<bool(df::unit*)>> createMaxAgeFilter(vector<string> &filter_args)
+pair<string, UnitFilter> createMaxAgeFilter(vector<string> &filter_args)
 {
     int max_age;
     stringstream ss(filter_args[0]);
@@ -1440,11 +1599,12 @@ pair<string, function<bool(df::unit*)>> createMaxAgeFilter(vector<string> &filte
         throw runtime_error(err.str());
     }
 
+    string age = "maximum age of ";
+    age += int_to_string(max_age);
+
     return make_pair(
-        "maximum age of " + int_to_string(max_age),
-        [max_age](df::unit *unit) -> bool {
-            return getAge(unit, true) <= max_age;
-        }
+        age,
+        UnitFilter(COMP_AGE, EQ_LESS, max_age)
     );
 }
 
@@ -1459,14 +1619,35 @@ pair<string, function<bool(df::unit*)>> createMaxAgeFilter(vector<string> &filte
 // Constructor functions are permitted to throw strings, which will be caught and printed.
 // Result filter functions are not permitted to throw std::exceptions.
 // Result filter functions should not store references
-unordered_map<string, pair<int,
-           function<pair<string, function<bool(df::unit*)>>(vector<string>&)>>> zone_param_filters;
+//UNORDERED_MAP<string, pair<int,
+//           function<pair<string, function<bool(df::unit*)>>(vector<string>&)>>> zone_param_filters;
+
+typedef std::pair<std::string, UnitFilter>(*filter_function_ctor)(std::vector<std::string>&);
+typedef std::pair<int, filter_function_ctor> filter_ctor;
+
+UNORDERED_MAP<const char*, filter_ctor> zone_param_filters;
+
 static struct zone_param_filters_init { zone_param_filters_init() {
     zone_param_filters["race"] = make_pair(1, createRaceFilter);
     zone_param_filters["age"] = make_pair(1, createAgeFilter);
     zone_param_filters["minage"] = make_pair(1, createMinAgeFilter);
     zone_param_filters["maxage"] = make_pair(1, createMaxAgeFilter);
 }} zone_param_filters_init_;
+
+//UNORDERED_MAP<string,
+//                     pair<int,
+//                              function<
+//                                       pair<string, filter_function>(vector<string>&)
+//                                      >
+//                         >
+//             > zone_param_filters;
+
+//static struct zone_param_filters_init { zone_param_filters_init() {
+//    zone_param_filters["race"] = make_pair(1, createRaceFilter);
+//    zone_param_filters["age"] = make_pair(1, createAgeFilter);
+//    zone_param_filters["minage"] = make_pair(1, createMinAgeFilter);
+//    zone_param_filters["maxage"] = make_pair(1, createMaxAgeFilter);
+//}} zone_param_filters_init_;
 
 command_result df_zone (color_ostream &out, vector <string> & parameters)
 {
@@ -1527,7 +1708,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             // overlap and contain a cage or chain)
             vector<df::building_civzonest*> zones;
             Buildings::findCivzonesAt(&zones, Gui::getCursorPos());
-            for (auto zone = zones.begin(); zone != zones.end(); ++zone)
+            for (vector<df::building_civzonest*>::const_iterator zone = zones.begin(); zone != zones.end(); ++zone)
                 zoneInfo(out, *zone, verbose);
             df::building* building = Buildings::findAtTile(Gui::getCursorPos());
             chainInfo(out, building, verbose);
@@ -1580,7 +1761,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             bool target_building_given = false;
             if(parameters.size() >= 2)
             {
-                auto & str = parameters[1];
+                std::string & str = parameters[1];
                 if(str.size() > 0 && str[0] >= '0' && str[0] <= '9')
                 {
                     stringstream ss(parameters[1]);
@@ -1634,7 +1815,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             bool target_building_given = false;
             if(parameters.size() >= 2)
             {
-                auto & str = parameters[1];
+                std::string & str = parameters[1];
                 if(str.size() > 0 && str[0] >= '0' && str[0] <= '9')
                 {
                     stringstream ss(parameters[1]);
@@ -1726,7 +1907,8 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
     // a vector of active filters
     // if all filters return true, we process a unit
     // if any filter returns false, we skip that unit
-    vector<function<bool(df::unit*)>> active_filters;
+    //vector<function<bool(df::unit*)>> active_filters;
+    vector<UnitFilter> active_filters;
 
     for (size_t i = start_index; i < parameters.size(); i++)
     {
@@ -1803,25 +1985,32 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
 
             target_count = INT_MAX;
         }
-        else if (zone_filters.count(p) == 1) {
+        else if (zone_filters.count(p.c_str()) == 1) {
             string& desc = zone_filter_notes.count(p) == 1 ?
                 zone_filter_notes[p] : p;
 
             if (invert_filter) {
-                auto &filter = zone_filters[p];
+                //filter_function &filter = zone_filters[p.c_str()];
 
-                auto z = not1(filter);
+                //auto z = not1(filter);
 
                 // we have to invert the filter, so we use a closure
-                active_filters.push_back(not1(filter));
+                //active_filters.push_back(not1(filter));
+
+                UnitFilter &filter = zone_filters[p.c_str()];
+
+                //auto z = not1(filter);
+                filter.InvertResult();
+
+                // we have to invert the filter, so we use a closure
+                active_filters.push_back(filter);
 
                 out.color(COLOR_GREEN);
                 out << "Filter: 'not " << desc << "'"
                     << endl;
                 out.reset_color();
-
             } else {
-                active_filters.push_back(zone_filters[p]);
+                active_filters.push_back(zone_filters[p.c_str()]);
                 out.color(COLOR_GREEN);
                 out << "Filter: '" << desc << "'"
                     << endl;
@@ -1830,11 +2019,11 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             }
 
             invert_filter = false;
-        } else if (zone_param_filters.count(p) == 1) {
+        } else if (zone_param_filters.count(p.c_str()) == 1) {
             // get the constructor
-            auto &filter_pair = zone_param_filters[p];
-            auto arg_count = filter_pair.first;
-            auto &filter_constructor = filter_pair.second;
+            filter_ctor &filter_pair = zone_param_filters[p.c_str()];
+            int arg_count = filter_pair.first;
+            filter_function_ctor &filter_constructor = filter_pair.second;
             vector<string> args;
 
             // get arguments
@@ -1846,17 +2035,18 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
 
             // get results
             try {
-                auto result_pair = filter_constructor(args);
+                std::pair<std::string, UnitFilter> result_pair = filter_constructor(args);
                 string& desc = result_pair.first;
-                auto& filter = result_pair.second;
+                UnitFilter& filter = result_pair.second;
 
                 if (invert_filter) {
-                    active_filters.push_back(not1(filter));
+                    filter.InvertResult();
+                    active_filters.push_back(filter);
+                    //active_filters.push_back(not1(filter));
                     out.color(COLOR_GREEN);
                     out << "Filter: 'not " << desc << "'"
                         << endl;
                     out.reset_color();
-
                 } else {
                     active_filters.push_back(filter);
                     out.color(COLOR_GREEN);
@@ -1881,21 +2071,23 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                 out << "Filter: 'not merchant'" << endl;
                 out.reset_color();
 
-                active_filters.push_back([](df::unit *unit)
-                    {
-                        return !isMerchant(unit) && !isForest(unit);
-                    }
-                );
+                //active_filters.push_back([](df::unit *unit)
+                //    {
+                //        return !isMerchant(unit) && !isForest(unit);
+                //    }
+                //);
+                active_filters.push_back(UnitFilter(IS_MERCHANT_OR_FOREST, NOT_EQUAL));
             } else {
                 out.color(COLOR_GREEN);
                 out << "Filter: 'merchant'" << endl;
                 out.reset_color();
 
-                active_filters.push_back([](df::unit *unit)
-                    {
-                        return isMerchant(unit) || isForest(unit);
-                    }
-                );
+                //active_filters.push_back([](df::unit *unit)
+                //    {
+                //        return isMerchant(unit) || isForest(unit);
+                //    }
+                //);
+                active_filters.push_back(UnitFilter(IS_MERCHANT_OR_FOREST, EQUAL));
             }
             merchant_filter_set = true;
             invert_filter = false;
@@ -1914,11 +2106,12 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                     out.reset_color();
 
                 }
-                active_filters.push_back([](df::unit *unit)
-                    {
-                        return !unit->name.has_name;
-                    }
-                );
+                //active_filters.push_back([](df::unit *unit)
+                //    {
+                //        return !unit->name.has_name;
+                //    }
+                //);
+                active_filters.push_back(UnitFilter(HAS_NAME, NOT_EQUAL));
             }
             else
             {
@@ -1926,11 +2119,12 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                 out << "Filter: 'named'" << endl;
                 out.reset_color();
 
-                active_filters.push_back([](df::unit *unit)
-                    {
-                        return unit->name.has_name;
-                    }
-                );
+                //active_filters.push_back([](df::unit *unit)
+                //    {
+                //        return unit->name.has_name;
+                //    }
+                //);
+                active_filters.push_back(UnitFilter(HAS_NAME, EQUAL));
             }
             named_filter_set = true;
             invert_filter = false;
@@ -1943,11 +2137,11 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
     if (building_unassign)
     {
         // filter for units in the building
-        unordered_set<int32_t> assigned_unit_ids;
+        std::set<int32_t> assigned_unit_ids;
         if(isActivityZone(target_building))
         {
             df::building_civzonest *civz = (df::building_civzonest *) target_building;
-            auto &assigned_units_vec = civz->assigned_units;
+            std::vector<int32_t> &assigned_units_vec = civz->assigned_units;
 
             copy(assigned_units_vec.begin(),
                    assigned_units_vec.end(),
@@ -1957,7 +2151,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
         else if(isCage(target_building))
         {
             df::building_cagest *cage = (df::building_cagest *) target_building;
-            auto &assigned_units_vec = cage->assigned_units;
+            std::vector<int32_t> &assigned_units_vec = cage->assigned_units;
 
             copy(assigned_units_vec.begin(),
                    assigned_units_vec.end(),
@@ -1983,11 +2177,12 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             return CR_FAILURE;
         }
 
-        active_filters.push_back([assigned_unit_ids](df::unit *unit) -> bool
-            {
-                return assigned_unit_ids.count(unit->id) == 1;
-            }
-        );
+        //active_filters.push_back([assigned_unit_ids](df::unit *unit) -> bool
+        //    {
+        //        return assigned_unit_ids.count(unit->id) == 1;
+        //    }
+        //);
+        active_filters.push_back(UnitFilter(IS_ASSIGNED_TO_BUILDING_OR_ZONE, EQUAL, &assigned_unit_ids));
     }
 
     if (target_count == 0)
@@ -2010,11 +2205,12 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             << endl;
         out.reset_color();
 
-        active_filters.push_back([](df::unit *unit)
-            {
-                return !isOwnRace(unit) || !isOwnCiv(unit);
-            }
-        );
+        //active_filters.push_back([](df::unit *unit)
+        //    {
+        //        return !isOwnRace(unit) || !isOwnCiv(unit);
+        //    }
+        //);
+        active_filters.push_back(UnitFilter(IS_OWN_RACE_AND_CIV, NOT_EQUAL));
     }
     if(!named_filter_set && unit_slaughter)
     {
@@ -2024,11 +2220,12 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             << endl;
         out.reset_color();
 
-        active_filters.push_back([](df::unit *unit)
-            {
-                return !unit->name.has_name;
-            }
-        );
+        //active_filters.push_back([](df::unit *unit)
+        //    {
+        //        return !unit->name.has_name;
+        //    }
+        //);
+        active_filters.push_back(UnitFilter(HAS_NAME, NOT_EQUAL));
     }
     if(!merchant_filter_set && (building_assign || cagezone_assign || unit_slaughter))
     {
@@ -2038,11 +2235,12 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             << endl;
         out.reset_color();
 
-        active_filters.push_back([](df::unit *unit)
-            {
-                return !isMerchant(unit) && !isForest(unit);
-            }
-        );
+        //active_filters.push_back([](df::unit *unit)
+        //    {
+        //        return !isMerchant(unit) && !isForest(unit);
+        //    }
+        //);
+        active_filters.push_back(UnitFilter(IS_MERCHANT_OR_FOREST, NOT_EQUAL));
     }
 
     if(building_assign || cagezone_assign || (nick_set && target_count == 0))
@@ -2070,7 +2268,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
     {
         vector <df::unit*> units_for_cagezone;
         int count = 0;
-        for(auto unit_it = world->units.all.begin(); unit_it != world->units.all.end(); ++unit_it)
+        for (vector<df::unit*>::const_iterator unit_it = world->units.all.begin(); unit_it != world->units.all.end(); ++unit_it)
         {
             df::unit *unit = *unit_it;
 
@@ -2081,9 +2279,9 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
 
             bool passes_all_filters = true;
 
-            for (auto filter_it = active_filters.begin(); filter_it != active_filters.end(); ++filter_it)
+            for (std::vector<UnitFilter>::const_iterator filter_it = active_filters.begin(); filter_it != active_filters.end(); ++filter_it)
             {
-                auto &filter = *filter_it;
+                UnitFilter const &filter = *filter_it;
 
                 if (!filter(unit)) {
                     passes_all_filters = false;
@@ -3172,7 +3370,7 @@ command_result init_autobutcher(color_ostream &out)
 
     std::vector<PersistentDataItem> items;
     World::GetPersistentData(&items, "autobutcher/watchlist/", true);
-    for (auto p = items.begin(); p != items.end(); p++)
+    for (std::vector<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
     {
         string key = p->key();
         out << "Reading from save: " << key << endl;
