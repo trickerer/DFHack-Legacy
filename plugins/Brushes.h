@@ -96,7 +96,7 @@ public:
         DFHack::DFCoord iterc = blockc * 16;
         if( !mc.testCoord(start) )
             return v;
-        auto starty = iterc.y;
+        int16_t starty = iterc.y;
         for(int xi = 0; xi < 16; xi++)
         {
             for(int yi = 0; yi < 16; yi++)

@@ -61,31 +61,79 @@ const char *usage = (
 
 // ah, if only STL had a bimap
 
-static map<df::job_type, df::item_type> jobTypeMap = {
-    { df::job_type::MakeArmor, df::item_type::ARMOR },
-    { df::job_type::MakePants, df::item_type::PANTS },
-    { df::job_type::MakeHelm, df::item_type::HELM },
-    { df::job_type::MakeGloves, df::item_type::GLOVES },
-    { df::job_type::MakeShoes, df::item_type::SHOES }
-};
+//static map<df::job_type, df::item_type> jobTypeMap = {
+//    { df::job_type::MakeArmor, df::item_type::ARMOR },
+//    { df::job_type::MakePants, df::item_type::PANTS },
+//    { df::job_type::MakeHelm, df::item_type::HELM },
+//    { df::job_type::MakeGloves, df::item_type::GLOVES },
+//    { df::job_type::MakeShoes, df::item_type::SHOES }
+//};
+//
+//static map<df::item_type, df::job_type> itemTypeMap = {
+//    { df::item_type::ARMOR, df::job_type::MakeArmor },
+//    { df::item_type::PANTS, df::job_type::MakePants },
+//    { df::item_type::HELM, df::job_type::MakeHelm},
+//    { df::item_type::GLOVES, df::job_type::MakeGloves},
+//    { df::item_type::SHOES, df::job_type::MakeShoes}
+//};
 
-static map<df::item_type, df::job_type> itemTypeMap = {
-    { df::item_type::ARMOR, df::job_type::MakeArmor },
-    { df::item_type::PANTS, df::job_type::MakePants },
-    { df::item_type::HELM, df::job_type::MakeHelm},
-    { df::item_type::GLOVES, df::job_type::MakeGloves},
-    { df::item_type::SHOES, df::job_type::MakeShoes}
+std::pair<df::job_type, df::item_type> jobTypesArr[] = {
+    std::make_pair( df::job_type::MakeArmor, df::item_type::ARMOR ),
+    std::make_pair( df::job_type::MakePants, df::item_type::PANTS ),
+    std::make_pair( df::job_type::MakeHelm, df::item_type::HELM ),
+    std::make_pair( df::job_type::MakeGloves, df::item_type::GLOVES ),
+    std::make_pair( df::job_type::MakeShoes, df::item_type::SHOES )
+};
+static map<df::job_type, df::item_type> jobTypeMap(jobTypesArr, jobTypesArr + sizeof(jobTypesArr)/sizeof(jobTypesArr[0]));
+
+std::pair<df::item_type, df::job_type> itemTypesArr[] = {
+    std::make_pair( df::item_type::ARMOR, df::job_type::MakeArmor ),
+    std::make_pair( df::item_type::PANTS, df::job_type::MakePants ),
+    std::make_pair( df::item_type::HELM, df::job_type::MakeHelm ),
+    std::make_pair( df::item_type::GLOVES, df::job_type::MakeGloves ),
+    std::make_pair( df::item_type::SHOES, df::job_type::MakeShoes )
+};
+static map<df::item_type, df::job_type> itemTypeMap(itemTypesArr, itemTypesArr + sizeof(itemTypesArr)/sizeof(itemTypesArr[0]));
+
+//tuple substitute
+struct JobKey
+{
+public:
+    JobKey() : type(df::job_type::NONE), subtype(0), size(0) {}
+    explicit JobKey(df::job_type _type, int _subtype, int _size) : type(_type), subtype(_subtype), size(_size) {}
+
+    df::job_type type;
+    int subtype;
+    int size;
+};
+struct JobKeyHash
+{
+   size_t operator()(const JobKey& key) const
+   {
+       return key.subtype + (key.type*244)^0xBADFEEDA;
+   }
+	bool operator()(const JobKey& key1, const JobKey& key2) const
+	{
+	    return &key1 == &key2;
+	}
+	enum
+	{
+	    bucket_size = 4,
+	    min_buckets = 8
+   };
 };
 
 void do_scan(color_ostream& out)
 {
-    map<pair<df::item_type, int>, int> available; // key is item type & size
-    map<pair<df::item_type, int>, int> needed;    // same
-    map<pair<df::item_type, int>, int> queued;    // same
+    typedef map<pair<df::item_type, int>, int> OrdersMap;
+    OrdersMap available; // key is item type & size
+    OrdersMap needed;    // same
+    OrdersMap queued;    // same
 
     map<int, int> sizes; // this maps body size to races
 
-    map<tuple<df::job_type, int, int>, int> orders;  // key is item type, item subtype, size
+    //map<tuple<df::job_type, int, int>, int> orders;  // key is item type, item subtype, size
+    map<JobKey, int, JobKeyHash> orders;
 
     df::item_flags bad_flags;
     bad_flags.whole = 0;
@@ -105,8 +153,11 @@ void do_scan(color_ostream& out)
 
     // scan for useable clothing
 
-    for (auto i : world->items.other[df::items_other_id::ANY_GENERIC37]) // GENERIC37 is "clothing"
+    //for (auto i : world->items.other[df::items_other_id::ANY_GENERIC37]) // GENERIC37 is "clothing"
+    std::vector<df::item*> const& ovec = world->items.other[df::items_other_id::ANY_GENERIC37];
+    for (std::vector<df::item*>::const_iterator ci = ovec.begin(); ci != ovec.end(); ++ci)
     {
+        df::item* i = *ci;
         if (i->flags.whole & bad_flags.whole)
             continue;
         if (i->flags.bits.owned)
@@ -121,8 +172,11 @@ void do_scan(color_ostream& out)
 
     // scan for clothing raw materials
 
-    for (auto i : world->items.other[df::items_other_id::CLOTH])
+    //for (auto i : world->items.other[df::items_other_id::CLOTH])
+    std::vector<df::item*> const& cvec = world->items.other[df::items_other_id::CLOTH];
+    for (std::vector<df::item*>::const_iterator ci = cvec.begin(); ci != cvec.end(); ++ci)
     {
+        df::item* i = *ci;
         if (i->flags.whole & bad_flags.whole)
             continue;
         if (!i->hasImprovements()) // only count dyed
@@ -141,19 +195,24 @@ void do_scan(color_ostream& out)
         }
     }
 
-    for (auto i : world->items.other[df::items_other_id::SKIN_TANNED])
+    //for (auto i : world->items.other[df::items_other_id::SKIN_TANNED])
+    std::vector<df::item*> const& stvec = world->items.other[df::items_other_id::SKIN_TANNED];
+    for (std::vector<df::item*>::const_iterator ci = stvec.begin(); ci != stvec.end(); ++ci)
     {
-        if (i->flags.whole & bad_flags.whole)
+        if ((*ci)->flags.whole & bad_flags.whole)
             continue;
-        leather += i->getStackSize();
+        leather += (*ci)->getStackSize();
     }
 
     out.print("available: silk %d yarn %d cloth %d leather %d\n", silk, yarn, cloth, leather);
 
     // scan for units who need replacement clothing
 
-    for (auto u : world->units.active)
+    //for (auto u : world->units.active)
+    std::vector<df::unit*> const& aunits = world->units.active;
+    for (std::vector<df::unit*>::const_iterator ci = aunits.begin(); ci != aunits.end(); ++ci)
     {
+        df::unit* u = *ci;
         if (!Units::isOwnCiv(u) ||
             !Units::isOwnGroup(u) ||
             !Units::isActive(u) ||
@@ -166,8 +225,10 @@ void do_scan(color_ostream& out)
         deque<df::item*> worn;
         worn.empty();
 
-        for (auto inv : u->inventory)
+        //for (auto inv : u->inventory)
+        for (std::vector<df::unit_inventory_item*>::const_iterator cit = u->inventory.begin(); cit != u->inventory.end(); ++cit)
         {
+            df::unit_inventory_item* inv = *cit;
             if (inv->mode != df::unit_inventory_item::Worn)
                 continue;
             if (inv->item->getWear() > 0)
@@ -179,16 +240,21 @@ void do_scan(color_ostream& out)
         int size = world->raws.creatures.all[u->race]->adultsize;
         sizes[size] = u->race;
 
-        for (auto ty : set<df::item_type>{ df::item_type::ARMOR, df::item_type::PANTS, df::item_type::SHOES })
+        //for (auto ty : set<df::item_type>{ df::item_type::ARMOR, df::item_type::PANTS, df::item_type::SHOES })
+        static const df::item_type apstypes[3] = { df::item_type::ARMOR, df::item_type::PANTS, df::item_type::SHOES };
+        for (uint8 i = 0; i < 3; ++i)
         {
+            df::item_type ty = apstypes[i];
             if (wearing.count(ty) == 0)
                 needed[make_pair(ty, size)] += 1;
         }
 
-        for (auto w : worn)
+        //for (auto w : worn)
+        for (std::deque<df::item*>::const_iterator cit = worn.begin(); cit != worn.end(); ++cit)
         {
-            auto ty = w->getType();
-            auto oo = itemTypeMap.find(ty);
+            df::item* w = *cit;
+            df::item_type ty = w->getType();
+            map<df::item_type, df::job_type>::const_iterator oo = itemTypeMap.find(ty);
             if (oo == itemTypeMap.end())
                 continue;
             df::job_type o = oo->second;
@@ -223,15 +289,17 @@ void do_scan(color_ostream& out)
 //                    description.c_str(),
 //                    Translation::TranslateName(&u->name, false).c_str()
 //                );
-                orders[make_tuple(o, w->getSubtype(), size)] += 1;
+                orders[JobKey(o, w->getSubtype(), size)] += 1;
             }
         }
     }
 
-    auto entity = world->entities.all[ui->civ_id];
+    df::historical_entity* entity = world->entities.all[ui->civ_id];
 
-    for (auto a : needed)
+    //for (auto a : needed)
+    for (OrdersMap::const_iterator ci = needed.begin(); ci != needed.end(); ++ci)
     {
+        pair<pair<df::item_type, int>, int> const& a = *ci;
         df::item_type ty = a.first.first;
         int size = a.first.second;
         int count = a.second;
@@ -248,7 +316,10 @@ void do_scan(color_ostream& out)
         default: break;
         }
 
-        for (auto vv : v) {
+        //for (auto vv : v)
+        for (vector<int16_t>::const_iterator cit = v.begin(); cit != v.end(); ++cit)
+        {
+            uint16 vv = *cit;
             bool isClothing = false;
             switch (ty) {
             case df::item_type::ARMOR:  isClothing = world->raws.itemdefs.armor[vv] ->armorlevel == 0; break;
@@ -265,36 +336,43 @@ void do_scan(color_ostream& out)
             }
         }
 
-        orders[make_tuple(itemTypeMap[ty], sub, size)] += count;
+        orders[JobKey(itemTypeMap[ty], sub, size)] += count;
     }
 
     // scan orders
 
-    for (auto o : world->manager_orders)
+    //for (auto o : world->manager_orders)
+    for (std::vector<df::manager_order*>::const_iterator ci = world->manager_orders.begin(); ci != world->manager_orders.end(); ++ci)
     {
-        auto f = jobTypeMap.find(o->job_type);
+        df::manager_order const* o = *ci;
+        map<df::job_type, df::item_type>::const_iterator f = jobTypeMap.find(o->job_type);
         if (f == jobTypeMap.end())
             continue;
 
-        auto sub = o->item_subtype;
+        uint16 sub = o->item_subtype;
         int race = o->hist_figure_id;
         if (race == -1)
             continue; // -1 means that the race of the worker will determine the size made; we must ignore these jobs
 
         int size = world->raws.creatures.all[race]->adultsize;
 
-        orders[make_tuple(o->job_type, sub, size)] -= o->amount_left;
+        orders[JobKey(o->job_type, sub, size)] -= o->amount_left;
     }
 
     // place orders
 
-    for (auto o : orders)
+    //for (auto o : orders)
+    for (std::map<JobKey,int,JobKeyHash>::const_iterator ci = orders.begin(); ci != orders.end(); ++ci)
     {
-        df::job_type ty;
-        int sub;
-        int size;
+        std::pair<JobKey, int> const& o = *ci;
+        //df::job_type ty;
+        //int sub;
+        //int size;
+        //tie(ty, sub, size) = o.first;
+        df::job_type ty = o.first.type;
+        int sub = o.first.subtype;
+        int size = o.first.size;
 
-        tie(ty, sub, size) = o.first;
         int count = o.second;
 
         if (count > 0)
@@ -339,9 +417,10 @@ void do_scan(color_ostream& out)
             }
 
             bool can_make = false;
-            for (auto vv : v)
+            //for (auto vv : v)
+            for (vector<int16_t>::const_iterator cit = v.begin(); cit != v.end(); ++cit)
             {
-                if (vv == sub)
+                if ((*cit) == sub)
                 {
                     can_make = true;
                     break;
@@ -384,7 +463,7 @@ void do_scan(color_ostream& out)
             else // not enough appropriate material available
                 continue;
 
-            auto order = new df::manager_order();
+            df::manager_order* order = new df::manager_order();
             order->job_type = ty;
             order->item_type = df::item_type::NONE;
             order->item_subtype = sub;
