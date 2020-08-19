@@ -19,12 +19,19 @@ REQUIRE_GLOBAL(init);
 static std::string original_title;
 
 static DFLibrary *sdl_handle = NULL;
-static const std::vector<std::string> sdl_libs {
+//static const std::vector<std::string> sdl_libs {
+//    "SDLreal.dll",
+//    "SDL.framework/Versions/A/SDL",
+//    "SDL.framework/SDL",
+//    "libSDL-1.2.so.0"
+//};
+static const std::string sdl_lib_strs[] = { 
     "SDLreal.dll",
     "SDL.framework/Versions/A/SDL",
     "SDL.framework/SDL",
     "libSDL-1.2.so.0"
 };
+static const std::vector<std::string> sdl_libs(sdl_lib_strs, sdl_lib_strs + sizeof(sdl_lib_strs)/sizeof(sdl_lib_strs[0]));
 
 void (*_SDL_WM_GetCaption)(const char**, const char**) = NULL;
 void SDL_WM_GetCaption(const char **title, const char **icon) {
@@ -47,7 +54,7 @@ DFhackCExport command_result plugin_init (color_ostream &out, std::vector <Plugi
         return CR_OK;
     }
 
-    for (auto it = sdl_libs.begin(); it != sdl_libs.end(); ++it)
+    for (std::vector<std::string>::const_iterator it = sdl_libs.begin(); it != sdl_libs.end(); ++it)
     {
         if ((sdl_handle = OpenPlugin(it->c_str())))
             break;
@@ -58,16 +65,31 @@ DFhackCExport command_result plugin_init (color_ostream &out, std::vector <Plugi
         return CR_FAILURE;
     }
 
-    #define bind(name) \
-        _##name = (decltype(_##name))LookupPlugin(sdl_handle, #name); \
+    //#define bind(name) \
+    //    _##name = (decltype(_##name))LookupPlugin(sdl_handle, #name); \
+
+    //    if (!_##name) { \
+    //        out.printerr("title-folder: Bind failed: " #name "\n"); \
+    //        plugin_shutdown(out); \
+    //        return CR_FAILURE; \
+    //    }
+
+    //bind(SDL_WM_GetCaption);
+    //bind(SDL_WM_SetCaption);
+    //#undef bind
+
+    #define bind(name,type) \
+        _##name = (type)LookupPlugin(sdl_handle, #name); \
         if (!_##name) { \
             out.printerr("title-folder: Bind failed: " #name "\n"); \
             plugin_shutdown(out); \
             return CR_FAILURE; \
         }
 
-    bind(SDL_WM_GetCaption);
-    bind(SDL_WM_SetCaption);
+    typedef void (*_SDL_WM_GetCaption_T)(const char**, const char**);
+    typedef void (*_SDL_WM_SetCaption_T)(const char*, const char*);
+    bind(SDL_WM_GetCaption, _SDL_WM_GetCaption_T);
+    bind(SDL_WM_SetCaption, _SDL_WM_SetCaption_T);
     #undef bind
 
     const char *title = NULL;
@@ -109,7 +131,7 @@ DFhackCExport command_result plugin_enable (color_ostream &out, bool state)
             return CR_FAILURE;
         }
 
-        std::string path = Core::getInstance().p->getPath();
+        std::string path = Core::getInstance().proc->getPath();
         std::string folder;
         size_t pos = path.find_last_of('/');
         if (pos == std::string::npos)
