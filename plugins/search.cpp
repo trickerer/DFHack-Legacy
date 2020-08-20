@@ -107,7 +107,7 @@ static string get_unit_description(df::unit *unit)
     if (!unit)
         return "";
     string desc;
-    auto name = Units::getVisibleName(unit);
+    df::language_name* name = Units::getVisibleName(unit);
     if (name->has_name)
         desc = Translation::TranslateName(name, false);
     desc += ", " + Units::getProfessionName(unit); // Check animal type too
@@ -118,7 +118,7 @@ static string get_unit_description(df::unit *unit)
 static bool cursor_key_pressed (std::set<df::interface_key> *input)
 {
     // give text input (e.g. "2") priority over cursor keys
-    for (auto it = input->begin(); it != input->end(); ++it)
+    for (std::set<df::interface_key>::const_iterator it = input->begin(); it != input->end(); ++it)
     {
         if (Screen::keyToChar(*it) != -1)
             return false;
@@ -430,7 +430,7 @@ protected:
     // Display hotkey message
     void print_search_option(int x, int y = -1) const
     {
-        auto dim = Screen::getWindowSize();
+        df::coord2d dim = Screen::getWindowSize();
         if (y == -1)
             y = dim.y - 2;
 
@@ -468,7 +468,7 @@ class layered_search : public search_generic<S, T>
 protected:
     virtual bool can_init(S *screen)
     {
-        auto list = getLayerList(screen);
+        df::layer_object_listst* list = getLayerList(screen);
         if (!is_list_valid(screen) || !list || !list->active)
             return false;
 
@@ -483,13 +483,13 @@ protected:
     virtual void do_search()
     {
         search_generic<S,T>::do_search();
-        auto list = getLayerList(this->viewscreen);
+        df::layer_object_listst* list = getLayerList(this->viewscreen);
         list->num_entries = this->get_primary_list()->size();
     }
 
     int32_t *get_viewscreen_cursor()
     {
-        auto list = getLayerList(this->viewscreen);
+        df::layer_object_listst* list = getLayerList(this->viewscreen);
         return &list->cursor;
     }
 
@@ -499,7 +499,7 @@ protected:
 
         if (is_list_valid(this->viewscreen))
         {
-            auto list = getLayerList(this->viewscreen);
+            df::layer_object_listst* list = getLayerList(this->viewscreen);
             list->num_entries = this->get_primary_list()->size();
         }
     }
@@ -925,7 +925,7 @@ private:
 
     string get_element_description(int32_t id) const
     {
-        auto craw = df::creature_raw::find(id);
+        df::creature_raw* craw = df::creature_raw::find(id);
         string out;
         if (craw)
         {
@@ -1025,7 +1025,7 @@ public:
             print_search_option(2);
         else
         {
-            auto dim = Screen::getWindowSize();
+            df::coord2d dim = Screen::getWindowSize();
             int x = 2, y = dim.y - 2;
             OutputString(15, x, y, "Tab to enable Search");
         }
@@ -1121,7 +1121,7 @@ private:
     {
         if (!unit)
             return "";
-        for (auto p = unit->status.misc_traits.begin(); p < unit->status.misc_traits.end(); p++)
+        for (std::vector<df::unit_misc_trait*>::const_iterator p = unit->status.misc_traits.begin(); p < unit->status.misc_traits.end(); p++)
         {
             if ((*p)->id == misc_trait_type::Migrant)
             {
@@ -1461,7 +1461,7 @@ public:
         {
             // About to make an assignment, so restore original list (it will be changed by the game)
             int32_t *cursor = get_viewscreen_cursor();
-            auto list = get_primary_list();
+            std::vector<df::unit*>* list = get_primary_list();
             if (size_t(*cursor) >= list->size())
                 return false;
             df::unit *selected_unit = list->at(*cursor);
@@ -1518,7 +1518,7 @@ private:
 
         desc += ".";
 
-        string room_desc = Buildings::getRoomDescription(bld, nullptr);
+        string room_desc = Buildings::getRoomDescription(bld, NULL);
         desc += room_desc;
         if (room_desc.empty())
         {
@@ -1693,7 +1693,7 @@ IMPLEMENT_HOOKS(df::viewscreen_workshop_profilest, profiles_search);
 //
 void get_job_details(string &desc, df::job *job)
 {
-    string job_name = ENUM_KEY_STR(job_type,job->job_type);
+    string job_name = ENUM_KEY_STR_SIMPLE(job_type,job->job_type);
     for (size_t i = 0; i < job_name.length(); i++)
     {
         char c = job_name[i];
@@ -1858,7 +1858,7 @@ public:
 
     void render() const
     {
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = 1;
@@ -1930,7 +1930,7 @@ public:
 
     void render() const
     {
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = 23;
@@ -1999,7 +1999,7 @@ public:
 
     void render() const
     {
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = 19;
@@ -2188,7 +2188,7 @@ public:
 
     void reset_secondary_viewscreen_vectors()
     {
-        #define KVEC(type, name) name = nullptr
+        #define KVEC(type, name) name = NULL
         KITCHEN_VECTORS;
         #undef KVEC
     }
@@ -2266,7 +2266,7 @@ public:
 
     string get_element_description(int32_t stone_type) const override
     {
-        auto iraw = vector_get(world->raws.inorganics, stone_type);
+        df::inorganic_raw* iraw = vector_get(world->raws.inorganics, stone_type);
         if (!iraw)
             return "";
         return iraw->material.stone_name + " " + iraw->material.state_name[0];
