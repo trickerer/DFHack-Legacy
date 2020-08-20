@@ -112,8 +112,8 @@ DFHACK_PLUGIN_LUA_COMMANDS{
 
 DFhackCExport command_result plugin_init(color_ostream &out, std::vector<PluginCommand> &commands)
 {
-    auto addr =reinterpret_cast<RENDER_MAP>(Core::getInstance().vinfo->getAddress("twbt_render_map"));
-    if (addr == nullptr)
+    RENDER_MAP addr =reinterpret_cast<RENDER_MAP>(Core::getInstance().vinfo->getAddress("twbt_render_map"));
+    if (addr == NULL)
         return CR_FAILURE;
     _render_map = addr;
     return CR_OK;
