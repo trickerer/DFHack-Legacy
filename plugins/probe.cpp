@@ -119,7 +119,7 @@ void describeTile(color_ostream &out, df::tiletype tiletype)
     out.print("%d", tiletype);
     if(tileName(tiletype))
         out.print(" = %s",tileName(tiletype));
-    out.print(" (%s)", ENUM_KEY_STR(tiletype, tiletype).c_str());
+    out.print(" (%s)", ENUM_KEY_STR_SIMPLE(tiletype, tiletype).c_str());
     out.print("\n");
 
     df::tiletype_shape shape = tileShape(tiletype);
@@ -127,13 +127,13 @@ void describeTile(color_ostream &out, df::tiletype tiletype)
     df::tiletype_special special = tileSpecial(tiletype);
     df::tiletype_variant variant = tileVariant(tiletype);
     out.print("%-10s: %4d %s\n","Class"    ,shape,
-              ENUM_KEY_STR(tiletype_shape, shape).c_str());
+              ENUM_KEY_STR_SIMPLE(tiletype_shape, shape).c_str());
     out.print("%-10s: %4d %s\n","Material" ,
-              material, ENUM_KEY_STR(tiletype_material, material).c_str());
+              material, ENUM_KEY_STR_SIMPLE(tiletype_material, material).c_str());
     out.print("%-10s: %4d %s\n","Special"  ,
-              special, ENUM_KEY_STR(tiletype_special, special).c_str());
+              special, ENUM_KEY_STR_SIMPLE(tiletype_special, special).c_str());
     out.print("%-10s: %4d %s\n"   ,"Variant"  ,
-              variant, ENUM_KEY_STR(tiletype_variant, variant).c_str());
+              variant, ENUM_KEY_STR_SIMPLE(tiletype_variant, variant).c_str());
     out.print("%-10s: %s\n"    ,"Direction",
               tileDirection(tiletype).getStr());
     out.print("\n");
@@ -190,7 +190,7 @@ command_result df_probe (color_ostream &out, vector <string> & parameters)
         return CR_OK;
     }
 
-    auto &block = *b->getRaw();
+    df::map_block &block = *b->getRaw();
     out.print("block addr: 0x%p\n\n", &block);
 /*
     if (showBlock)
@@ -237,7 +237,7 @@ command_result df_probe (color_ostream &out, vector <string> & parameters)
     int bx = clip_range(block.region_pos.x + (offset % 3) - 1, 0, world->world_data->world_width-1);
     int by = clip_range(block.region_pos.y + (offset / 3) - 1, 0, world->world_data->world_height-1);
 
-    auto biome = &world->world_data->region_map[bx][by];
+    df::region_map_entry* biome = &world->world_data->region_map[bx][by];
 
     int sav = biome->savagery;
     int evi = biome->evilness;
@@ -276,7 +276,7 @@ command_result df_probe (color_ostream &out, vector <string> & parameters)
                 << " / "
                 << inorganic[vein_rock].name
                 << " ("
-                << ENUM_KEY_STR(inclusion_type,b->veinTypeAt(cursor))
+                << ENUM_KEY_STR_SIMPLE(inclusion_type,b->veinTypeAt(cursor))
                 << ")"
                 << endl;
         else
@@ -309,8 +309,8 @@ command_result df_probe (color_ostream &out, vector <string> & parameters)
     if(des.bits.water_stagnant)
         out << "stagnant" << endl;
 
-    out.print("%-16s= %s\n", "dig", ENUM_KEY_STR(tile_dig_designation, des.bits.dig).c_str());
-    out.print("%-16s= %s\n", "traffic", ENUM_KEY_STR(tile_traffic, des.bits.traffic).c_str());
+    out.print("%-16s= %s\n", "dig", ENUM_KEY_STR_SIMPLE(tile_dig_designation, des.bits.dig).c_str());
+    out.print("%-16s= %s\n", "traffic", ENUM_KEY_STR_SIMPLE(tile_traffic, des.bits.traffic).c_str());
 
     #define PRINT_FLAG( FIELD, BIT )  out.print("%-16s= %c\n", #BIT , ( FIELD.bits.BIT ? 'Y' : ' ' ) )
     PRINT_FLAG( des, hidden );
@@ -410,19 +410,19 @@ command_result df_bprobe (color_ostream &out, vector <string> & parameters)
         out.print("Building %i - \"%s\" - type %s (%i)",
                   building.origin->id,
                   name.c_str(),
-                  ENUM_KEY_STR(building_type, building.type).c_str(),
+                  ENUM_KEY_STR_SIMPLE(building_type, building.type).c_str(),
                   building.type);
 
         switch (building.type)
         {
         case building_type::Civzone:
             out.print(", subtype %s (%i)",
-                      ENUM_KEY_STR(civzone_type, building.civzone_type).c_str(),
+                      ENUM_KEY_STR_SIMPLE(civzone_type, building.civzone_type).c_str(),
                       building.civzone_type);
             break;
         case building_type::Furnace:
             out.print(", subtype %s (%i)",
-                      ENUM_KEY_STR(furnace_type, building.furnace_type).c_str(),
+                      ENUM_KEY_STR_SIMPLE(furnace_type, building.furnace_type).c_str(),
                       building.furnace_type);
             if (building.furnace_type == furnace_type::Custom)
                 out.print(", custom type %s (%i)",
@@ -431,7 +431,7 @@ command_result df_bprobe (color_ostream &out, vector <string> & parameters)
             break;
         case building_type::Workshop:
             out.print(", subtype %s (%i)",
-                      ENUM_KEY_STR(workshop_type, building.workshop_type).c_str(),
+                      ENUM_KEY_STR_SIMPLE(workshop_type, building.workshop_type).c_str(),
                       building.workshop_type);
             if (building.workshop_type == workshop_type::Custom)
                 out.print(", custom type %s (%i)",
@@ -440,22 +440,22 @@ command_result df_bprobe (color_ostream &out, vector <string> & parameters)
             break;
         case building_type::Construction:
             out.print(", subtype %s (%i)",
-                      ENUM_KEY_STR(construction_type, building.construction_type).c_str(),
+                      ENUM_KEY_STR_SIMPLE(construction_type, building.construction_type).c_str(),
                       building.construction_type);
             break;
         case building_type::Shop:
             out.print(", subtype %s (%i)",
-                      ENUM_KEY_STR(shop_type, building.shop_type).c_str(),
+                      ENUM_KEY_STR_SIMPLE(shop_type, building.shop_type).c_str(),
                       building.shop_type);
             break;
         case building_type::SiegeEngine:
             out.print(", subtype %s (%i)",
-                      ENUM_KEY_STR(siegeengine_type, building.siegeengine_type).c_str(),
+                      ENUM_KEY_STR_SIMPLE(siegeengine_type, building.siegeengine_type).c_str(),
                       building.siegeengine_type);
             break;
         case building_type::Trap:
             out.print(", subtype %s (%i)",
-                      ENUM_KEY_STR(trap_type, building.trap_type).c_str(),
+                      ENUM_KEY_STR_SIMPLE(trap_type, building.trap_type).c_str(),
                       building.trap_type);
             break;
         case building_type::NestBox:
