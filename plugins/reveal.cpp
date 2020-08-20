@@ -184,7 +184,7 @@ command_result reveal(color_ostream &out, vector<string> & params)
         no_hell = false;
         pause = false;
     }
-    auto & con = out;
+    color_ostream& con = out;
     if(revealed != NOT_REVEALED)
     {
         con.printerr("Map is already revealed or this is a different map.\n");
@@ -256,7 +256,7 @@ command_result reveal(color_ostream &out, vector<string> & params)
 
 command_result unreveal(color_ostream &out, vector<string> & params)
 {
-    auto & con = out;
+    color_ostream& con = out;
     for(size_t i = 0; i < params.size();i++)
     {
         if(params[i] == "help" || params[i] == "?")
@@ -506,7 +506,7 @@ command_result revflood(color_ostream &out, vector<string> & params)
 
 command_result revforget(color_ostream &out, vector<string> & params)
 {
-    auto & con = out;
+    color_ostream& con = out;
     for(size_t i = 0; i < params.size();i++)
     {
         if(params[i] == "help" || params[i] == "?")
