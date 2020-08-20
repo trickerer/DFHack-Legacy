@@ -251,7 +251,9 @@ void ServerConnection::cActiveSocketThreadFn(void* socket)
 
 void ServerConnection::Accepted(CActiveSocket* socket)
 {
-    (new tthread::thread(&cActiveSocketThreadFn, socket))->detach();
+    tthread::thread* asThreadFnThread = new tthread::thread(&cActiveSocketThreadFn, socket);
+    (void)asThreadFnThread;
+    asThreadFnThread->detach();
 }
 
 void ServerConnection::threadFn()
