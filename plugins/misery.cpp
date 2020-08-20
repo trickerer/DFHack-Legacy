@@ -29,6 +29,7 @@ REQUIRE_GLOBAL(cur_year);
 REQUIRE_GLOBAL(cur_year_tick);
 
 typedef df::unit_personality::T_emotions Emotion;
+typedef std::vector<Emotion*> emoVec;
 
 static int factor = 1;
 static int tick = 0;
@@ -59,14 +60,17 @@ void add_misery (df::unit *unit) {
     if (!unit || !unit->status.current_soul)
         return;
     clear_misery(unit);
-    auto &emotions = unit->status.current_soul->personality.emotions;
+    emoVec &emotions = unit->status.current_soul->personality.emotions;
     Emotion *e = new Emotion;
     e->type = df::emotion_type::MISERY;
     e->thought = df::unit_thought_type::SoapyBath;
     e->flags.whole |= FAKE_EMOTION_FLAG;
     emotions.push_back(e);
 
-    for (Emotion *e : emotions) {
+    //for (Emotion *e : emotions)
+    for (emoVec::const_iterator cit = emotions.begin(); cit != emotions.end(); ++cit)
+    {
+        Emotion* e = *cit;
         if (is_fake_emotion(e)) {
             e->year = *cur_year;
             e->year_tick = *cur_year_tick;
@@ -76,17 +80,28 @@ void add_misery (df::unit *unit) {
     }
 }
 
+bool clear_emotion_if_fake(Emotion *e)
+{
+    if (is_fake_emotion(e))
+    {
+        delete e;
+        return true;
+    }
+    return false;
+}
+
 void clear_misery (df::unit *unit) {
     if (!unit || !unit->status.current_soul)
         return;
-    auto &emotions = unit->status.current_soul->personality.emotions;
-    auto it = remove_if(emotions.begin(), emotions.end(), [](Emotion *e) {
-        if (is_fake_emotion(e)) {
-            delete e;
-            return true;
-        }
-        return false;
-    });
+    emoVec &emotions = unit->status.current_soul->personality.emotions;
+    //emoVec::const_iterator it = remove_if(emotions.begin(), emotions.end(), [](Emotion *e) {
+    //    if (is_fake_emotion(e)) {
+    //        delete e;
+    //        return true;
+    //    }
+    //    return false;
+    //});
+    emoVec::const_iterator it = remove_if(emotions.begin(), emotions.end(), &clear_emotion_if_fake);
     emotions.erase(it, emotions.end());
 }
 
@@ -118,9 +133,12 @@ DFhackCExport command_result plugin_onupdate(color_ostream& out) {
     tick = 0;
 
     //TODO: consider units.active
-    for (df::unit *unit : world->units.all) {
-        if (is_valid_unit(unit)) {
-            add_misery(unit);
+    //for (df::unit *unit : world->units.all) {
+    std::vector<df::unit*> const& ua_vec = world->units.all;
+    for (std::vector<df::unit*>::const_iterator cit = ua_vec.begin(); cit != ua_vec.end(); ++cit)
+    {
+        if (is_valid_unit(*cit)) {
+            add_misery(*cit);
         }
     }
 
@@ -188,9 +206,12 @@ command_result misery(color_ostream &out, vector<string>& parameters) {
         }
         tick = INTERVAL;
     } else if ( parameters[0] == "clear" ) {
-        for (df::unit *unit : world->units.all) {
-            if (is_valid_unit(unit)) {
-                clear_misery(unit);
+        //for (df::unit *unit : world->units.all) {
+        std::vector<df::unit*> const& ua_vec = world->units.all;
+        for (std::vector<df::unit*>::const_iterator cit = ua_vec.begin(); cit != ua_vec.end(); ++cit)
+        {
+            if (is_valid_unit(*cit)) {
+                clear_misery(*cit);
             }
         }
     } else {
