@@ -38,9 +38,12 @@ static void eggscan(color_ostream &out)
 {
     CoreSuspender suspend;
 
-    for (df::building *build : world->buildings.other[df::buildings_other_id::NEST_BOX])
+    //for (df::building *build : world->buildings.other[df::buildings_other_id::NEST_BOX])
+    std::vector<df::building*> const& nboxes = world->buildings.other[df::buildings_other_id::NEST_BOX];
+    for (std::vector<df::building*>::const_iterator cit = nboxes.begin(); cit != nboxes.end(); ++cit)
     {
-        auto type = build->getType();
+        df::building* build = *cit;
+        df::building_type type = build->getType();
         if (df::enums::building_type::NestBox == type)
         {
             bool fertile = false;
