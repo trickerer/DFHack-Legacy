@@ -145,7 +145,7 @@ static void setDebug(bool on)
 
 static void set_arrow_color(df::coord pos, int color)
 {
-    auto tile = Maps::getTileOccupancy(pos);
+    df::tile_occupancy* tile = Maps::getTileOccupancy(pos);
 
     if (tile)
         tile->bits.arrow_color = color;
@@ -161,12 +161,12 @@ static void set_range(coord_range *target, df::coord p1, df::coord p2)
     }
     else
     {
-        target->first.x = std::min(p1.x, p2.x);
-        target->first.y = std::min(p1.y, p2.y);
-        target->first.z = std::min(p1.z, p2.z);
-        target->second.x = std::max(p1.x, p2.x);
-        target->second.y = std::max(p1.y, p2.y);
-        target->second.z = std::max(p1.z, p2.z);
+        target->first.x = std::min<int16>(p1.x, p2.x);
+        target->first.y = std::min<int16>(p1.y, p2.y);
+        target->first.z = std::min<int16>(p1.z, p2.z);
+        target->second.x = std::max<int16>(p1.x, p2.x);
+        target->second.y = std::max<int16>(p1.y, p2.y);
+        target->second.z = std::max<int16>(p1.z, p2.z);
     }
 }
 
@@ -229,7 +229,7 @@ static float average_quality(df::building_actual *bld)
 
 static int point_distance(df::coord speed)
 {
-    return std::max(abs(speed.x), std::max(abs(speed.y), abs(speed.z)));
+    return std::max<int16>(abs(speed.x), std::max<int16>(abs(speed.y), abs(speed.z)));
 }
 
 inline void normalize(float &x, float &y, float &z)
@@ -275,7 +275,7 @@ static bool apply_impact_damage(df::item *item, int minv, int maxv)
         return false;
     }
 
-    auto &strength = info.material->strength;
+    df::material_common::T_strength &strength = info.material->strength;
 
     // Use random strain type excluding COMPRESSIVE (conveniently last)
     int type = rng.random(strain_type::COMPRESSIVE);
@@ -299,7 +299,7 @@ static bool apply_impact_damage(df::item *item, int minv, int maxv)
         return true;
 
     // Can wear?
-    auto actual = virtual_cast<df::item_actual>(item);
+    df::item_actual* actual = virtual_cast<df::item_actual>(item);
     if (!actual)
         return false;
 
@@ -361,16 +361,17 @@ struct EngineInfo {
     }
 };
 
-static std::map<df::building*, EngineInfo*> engines;
+typedef std::map<df::building*, EngineInfo*> EngineInfoMap;
+static EngineInfoMap engines;
 static std::map<df::coord, df::building*> coord_engines;
 
 static EngineInfo *find_engine(df::building *bld, bool create = false)
 {
-    auto ebld = strict_virtual_cast<df::building_siegeenginest>(bld);
+    df::building_siegeenginest* ebld = strict_virtual_cast<df::building_siegeenginest>(bld);
     if (!ebld)
         return NULL;
 
-    auto &obj = engines[bld];
+    EngineInfo* &obj = engines[bld];
 
     if (obj)
     {
@@ -410,9 +411,9 @@ static EngineInfo *find_engine(df::building *bld, bool create = false)
 
 static EngineInfo *find_engine(lua_State *L, int idx, bool create = false, bool silent = false)
 {
-    auto bld = Lua::CheckDFObject<df::building_siegeenginest>(L, idx);
+    df::building_siegeenginest* bld = Lua::CheckDFObject<df::building_siegeenginest>(L, idx);
 
-    auto engine = find_engine(bld, create);
+    EngineInfo* engine = find_engine(bld, create);
     if (!engine && !silent)
         luaL_error(L, "no such engine");
 
@@ -421,12 +422,12 @@ static EngineInfo *find_engine(lua_State *L, int idx, bool create = false, bool 
 
 static EngineInfo *find_engine(df::coord pos)
 {
-    auto engine = find_engine(coord_engines[pos]);
+    EngineInfo* engine = find_engine(coord_engines[pos]);
 
     if (engine)
     {
-        auto bld0 = df::building::find(engine->id);
-        auto bld = strict_virtual_cast<df::building_siegeenginest>(bld0);
+        df::building* bld0 = df::building::find(engine->id);
+        df::building_siegeenginest* bld = strict_virtual_cast<df::building_siegeenginest>(bld0);
         if (!bld)
             return NULL;
 
@@ -442,7 +443,7 @@ static EngineInfo *find_engine(df::coord pos)
 
 static void clear_engines()
 {
-    for (auto it = engines.begin(); it != engines.end(); ++it)
+    for (EngineInfoMap::const_iterator it = engines.begin(); it != engines.end(); ++it)
         delete it->second;
     engines.clear();
     coord_engines.clear();
@@ -455,30 +456,30 @@ static void load_engines()
     std::vector<PersistentDataItem> vec;
 
     World::GetPersistentData(&vec, "siege-engine/target/", true);
-    for (auto it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
-        auto engine = find_engine(df::building::find(it->ival(0)), true);
+        EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine) continue;
         engine->target.first = df::coord(it->ival(1), it->ival(2), it->ival(3));
         engine->target.second = df::coord(it->ival(4), it->ival(5), it->ival(6));
     }
 
     World::GetPersistentData(&vec, "siege-engine/ammo/", true);
-    for (auto it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
-        auto engine = find_engine(df::building::find(it->ival(0)), true);
+        EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine) continue;
         engine->ammo_vector_id = (df::job_item_vector_id)it->ival(1);
         engine->ammo_item_type = (df::item_type)it->ival(2);
     }
 
     World::GetPersistentData(&vec, "siege-engine/stockpiles/", true);
-    for (auto it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
-        auto engine = find_engine(df::building::find(it->ival(0)), true);
+        EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine)
             continue;
-        auto pile = df::building::find(it->ival(1));
+        df::building* pile = df::building::find(it->ival(1));
         if (!pile || pile->getType() != building_type::Stockpile)
         {
             World::DeletePersistentData(*it);
@@ -489,21 +490,21 @@ static void load_engines()
     }
 
     World::GetPersistentData(&vec, "siege-engine/profiles/", true);
-    for (auto it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
-        auto engine = find_engine(df::building::find(it->ival(0)), true);
+        EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine) continue;
         engine->profile.min_level = it->ival(1);
         engine->profile.max_level = it->ival(2);
     }
 
     World::GetPersistentData(&vec, "siege-engine/profile-workers/", true);
-    for (auto it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
-        auto engine = find_engine(df::building::find(it->ival(0)), true);
+        EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine)
             continue;
-        auto unit = df::unit::find(it->ival(1));
+        df::unit* unit = df::unit::find(it->ival(1));
         if (!unit || !Units::isCitizen(unit))
         {
             World::DeletePersistentData(*it);
@@ -515,7 +516,7 @@ static void load_engines()
 
 static int getTargetArea(lua_State *L)
 {
-    auto engine = find_engine(L, 1, false, true);
+    EngineInfo* engine = find_engine(L, 1, false, true);
 
     if (engine && engine->hasTarget())
     {
@@ -535,10 +536,10 @@ static void clearTargetArea(df::building_siegeenginest *bld)
 {
     CHECK_NULL_POINTER(bld);
 
-    if (auto engine = find_engine(bld))
+    if (EngineInfo* engine = find_engine(bld))
         engine->target = coord_range();
 
-    auto key = stl_sprintf("siege-engine/target/%d", bld->id);
+    std::string key = stl_sprintf("siege-engine/target/%d", bld->id);
     World::DeletePersistentData(World::GetPersistentData(key));
 }
 
@@ -551,12 +552,12 @@ static bool setTargetArea(df::building_siegeenginest *bld, df::coord target_min,
     if (!enable_plugin())
         return false;
 
-    auto key = stl_sprintf("siege-engine/target/%d", bld->id);
-    auto entry = World::GetPersistentData(key, NULL);
+    std::string key = stl_sprintf("siege-engine/target/%d", bld->id);
+    PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return false;
 
-    auto engine = find_engine(bld, true);
+    EngineInfo* engine = find_engine(bld, true);
 
     set_range(&engine->target, target_min, target_max);
 
@@ -576,7 +577,7 @@ static bool setTargetArea(df::building_siegeenginest *bld, df::coord target_min,
 
 static int getAmmoItem(lua_State *L)
 {
-    auto engine = find_engine(L, 1, false, true);
+    EngineInfo* engine = find_engine(L, 1, false, true);
     if (!engine)
         Lua::Push(L, item_type::BOULDER);
     else
@@ -589,24 +590,25 @@ static int setAmmoItem(lua_State *L)
     if (!enable_plugin())
         return 0;
 
-    auto engine = find_engine(L, 1, true);
-    auto item_type = (df::item_type)luaL_optint(L, 2, item_type::BOULDER);
-    if (!is_valid_enum_item(item_type))
+    EngineInfo* engine = find_engine(L, 1, true);
+    df::item_type item_type = (df::item_type)luaL_optint(L, 2, item_type::BOULDER);
+    if (!is_valid_enum_item_simple(item_type))
         luaL_argerror(L, 2, "invalid item type");
 
-    auto key = stl_sprintf("siege-engine/ammo/%d", engine->id);
-    auto entry = World::GetPersistentData(key, NULL);
+    std::string key = stl_sprintf("siege-engine/ammo/%d", engine->id);
+    PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return 0;
 
     engine->ammo_vector_id = job_item_vector_id::IN_PLAY;
     engine->ammo_item_type = item_type;
 
-    FOR_ENUM_ITEMS(job_item_vector_id, id)
+    FOR_ENUM_ITEMS_SIMPLE(job_item_vector_id, id)
     {
-        auto other = ENUM_ATTR(job_item_vector_id, other, id);
-        auto type = ENUM_ATTR(items_other_id, item, other);
-        if (type == item_type)
+        //auto other = ENUM_ATTR(job_item_vector_id, other, id);
+        //auto type = ENUM_ATTR(items_other_id, item, other);
+        //if (type == item_type)
+        if (ENUM_ATTR(items_other_id, item, ENUM_ATTR(job_item_vector_id, other, id)) == item_type)
         {
             engine->ammo_vector_id = id;
             break;
@@ -625,7 +627,7 @@ static void forgetStockpileLink(EngineInfo *engine, int pile_id)
 {
     engine->stockpiles.erase(pile_id);
 
-    auto key = stl_sprintf("siege-engine/stockpiles/%d/%d", engine->id, pile_id);
+    std::string key = stl_sprintf("siege-engine/stockpiles/%d/%d", engine->id, pile_id);
     World::DeletePersistentData(World::GetPersistentData(key));
 }
 
@@ -633,10 +635,10 @@ static void update_stockpile_links(EngineInfo *engine)
 {
     engine->links.take_from_pile.clear();
 
-    for (auto it = engine->stockpiles.begin(); it != engine->stockpiles.end(); )
+    for (std::set<int>::const_iterator it = engine->stockpiles.begin(); it != engine->stockpiles.end(); )
     {
         int id = *it; ++it;
-        auto pile = df::building::find(id);
+        df::building* pile = df::building::find(id);
 
         if (!pile || pile->getType() != building_type::Stockpile)
             forgetStockpileLink(engine, id);
@@ -648,13 +650,13 @@ static void update_stockpile_links(EngineInfo *engine)
 
 static int getStockpileLinks(lua_State *L)
 {
-    auto engine = find_engine(L, 1, false, true);
+    EngineInfo* engine = find_engine(L, 1, false, true);
     if (!engine || engine->stockpiles.empty())
         return 0;
 
     update_stockpile_links(engine);
 
-    auto &links = engine->links.take_from_pile;
+    std::vector<df::building*> &links = engine->links.take_from_pile;
     lua_createtable(L, links.size(), 0);
 
     for (size_t i = 0; i < links.size(); i++)
@@ -671,7 +673,7 @@ static bool isLinkedToPile(df::building_siegeenginest *bld, df::building_stockpi
     CHECK_NULL_POINTER(bld);
     CHECK_NULL_POINTER(pile);
 
-    auto engine = find_engine(bld);
+    EngineInfo* engine = find_engine(bld);
 
     return engine && engine->stockpiles.count(pile->id);
 }
@@ -685,12 +687,12 @@ static bool addStockpileLink(df::building_siegeenginest *bld, df::building_stock
     if (!enable_plugin())
         return false;
 
-    auto key = stl_sprintf("siege-engine/stockpiles/%d/%d", bld->id, pile->id);
-    auto entry = World::GetPersistentData(key, NULL);
+    std::string key = stl_sprintf("siege-engine/stockpiles/%d/%d", bld->id, pile->id);
+    PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return false;
 
-    auto engine = find_engine(bld, true);
+    EngineInfo* engine = find_engine(bld, true);
 
     entry.ival(0) = bld->id;
     entry.ival(1) = pile->id;
@@ -704,7 +706,7 @@ static bool removeStockpileLink(df::building_siegeenginest *bld, df::building_st
     CHECK_NULL_POINTER(bld);
     CHECK_NULL_POINTER(pile);
 
-    if (auto engine = find_engine(bld))
+    if (EngineInfo* engine = find_engine(bld))
     {
         forgetStockpileLink(engine, pile->id);
         return true;
@@ -722,12 +724,12 @@ static df::workshop_profile *saveWorkshopProfile(df::building_siegeenginest *bld
         return NULL;
 
     // Save skill limits
-    auto key = stl_sprintf("siege-engine/profiles/%d", bld->id);
-    auto entry = World::GetPersistentData(key, NULL);
+    std::string key = stl_sprintf("siege-engine/profiles/%d", bld->id);
+    PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return NULL;
 
-    auto engine = find_engine(bld, true);
+    EngineInfo* engine = find_engine(bld, true);
 
     entry.ival(0) = engine->id;
     entry.ival(1) = engine->profile.min_level;
@@ -735,12 +737,12 @@ static df::workshop_profile *saveWorkshopProfile(df::building_siegeenginest *bld
 
     // Save worker list
     std::vector<PersistentDataItem> vec;
-    auto &workers = engine->profile.permitted_workers;
+    std::vector<int32> &workers = engine->profile.permitted_workers;
 
     key = stl_sprintf("siege-engine/profile-workers/%d", bld->id);
     World::GetPersistentData(&vec, key, true);
 
-    for (auto it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
         if (linear_index(workers, it->ival(1)) < 0)
             World::DeletePersistentData(*it);
@@ -763,14 +765,14 @@ static df::unit *getOperatorUnit(df::building_siegeenginest *bld, bool force = f
 {
     CHECK_NULL_POINTER(bld);
 
-    auto engine = find_engine(bld);
+    EngineInfo* engine = find_engine(bld);
     if (!engine)
         return NULL;
 
     if (engine->operator_id != -1 &&
         (world->frame_counter - engine->operator_frame) <= 5)
     {
-        auto op_unit = df::unit::find(engine->operator_id);
+        df::unit* op_unit = df::unit::find(engine->operator_id);
         if (op_unit)
             return op_unit;
     }
@@ -780,7 +782,7 @@ static df::unit *getOperatorUnit(df::building_siegeenginest *bld, bool force = f
         color_ostream_proxy out(Core::getInstance().getConsole());
         out.print("Forced siege operator search\n");
 
-        auto &active = world->units.active;
+        std::vector<df::unit*> &active = world->units.active;
         for (size_t i = 0; i < active.size(); i++)
             if (active[i]->pos == engine->center && Units::isCitizen(active[i]))
                 return active[i];
@@ -876,8 +878,8 @@ static ProjectilePath decode_path(lua_State *L, int idx, df::coord origin)
 
 static int projPosAtStep(lua_State *L)
 {
-    auto engine = find_engine(L, 1);
-    auto path = decode_path(L, 2, engine->center);
+    EngineInfo* engine = find_engine(L, 1);
+    ProjectilePath path = decode_path(L, 2, engine->center);
     int step = luaL_checkint(L, 3);
     Lua::Push(L, path[step]);
     return 1;
@@ -885,21 +887,21 @@ static int projPosAtStep(lua_State *L)
 
 static bool isPassableTile(df::coord pos)
 {
-    auto ptile = Maps::getTileType(pos);
+    df::tiletype* ptile = Maps::getTileType(pos);
 
     return !ptile || FlowPassable(*ptile);
 }
 
 static bool isTargetableTile(df::coord pos)
 {
-    auto ptile = Maps::getTileType(pos);
+    df::tiletype* ptile = Maps::getTileType(pos);
 
     return ptile && FlowPassable(*ptile) && !isOpenTerrain(*ptile);
 }
 
 static bool isTreeTile(df::coord pos)
 {
-    auto ptile = Maps::getTileType(pos);
+    df::tiletype* ptile = Maps::getTileType(pos);
 
     return ptile &&
         (tileShape(*ptile) == tiletype_shape::BRANCH ||
@@ -935,7 +937,7 @@ static bool adjustToTarget(EngineInfo *engine, df::coord *pos)
 
 static int adjustToTarget(lua_State *L)
 {
-    auto engine = find_engine(L, 1, true);
+    EngineInfo* engine = find_engine(L, 1, true);
     df::coord pos;
     Lua::CheckDFAssign(L, &pos, 2);
     bool ok = adjustToTarget(engine, &pos);
@@ -985,7 +987,7 @@ struct PathMetrics {
 
             if (cur_pos.z == path.goal.z)
             {
-                goal_z_step = std::min(step, goal_z_step);
+                goal_z_step = std::min<int>(step, goal_z_step);
                 if (cur_pos == path.goal)
                     goal_step = step;
             }
@@ -1017,8 +1019,8 @@ struct PathMetrics {
 
             if (cur_pos.z != prev_pos.z)
             {
-                int top_z = std::max(prev_pos.z, cur_pos.z);
-                auto ptile = Maps::getTileType(cur_pos.x, cur_pos.y, top_z);
+                int top_z = std::max<int>(prev_pos.z, cur_pos.z);
+                df::tiletype* ptile = Maps::getTileType(cur_pos.x, cur_pos.y, top_z);
 
                 if (ptile && !LowPassable(*ptile))
                 {
@@ -1058,8 +1060,8 @@ static TargetTileStatus calcTileStatus(EngineInfo *engine, const PathMetrics &ra
 
 static int projPathMetrics(lua_State *L)
 {
-    auto engine = find_engine(L, 1);
-    auto path = decode_path(L, 2, engine->center);
+    EngineInfo* engine = find_engine(L, 1);
+    ProjectilePath path = decode_path(L, 2, engine->center);
 
     PathMetrics info(path);
 
@@ -1085,7 +1087,7 @@ static TargetTileStatus calcTileStatus(EngineInfo *engine, df::coord target, flo
 
 static TargetTileStatus calcTileStatus(EngineInfo *engine, df::coord target)
 {
-    auto status = calcTileStatus(engine, target, 0.0f);
+    TargetTileStatus status = calcTileStatus(engine, target, 0.0f);
 
     if (status == TARGET_BLOCKED)
     {
@@ -1101,7 +1103,7 @@ static TargetTileStatus calcTileStatus(EngineInfo *engine, df::coord target)
 
 static std::string getTileStatus(df::building_siegeenginest *bld, df::coord tile_pos)
 {
-    auto engine = find_engine(bld, true);
+    EngineInfo* engine = find_engine(bld, true);
     if (!engine)
         return "invalid";
 
@@ -1110,7 +1112,7 @@ static std::string getTileStatus(df::building_siegeenginest *bld, df::coord tile
 
 static void paintAimScreen(df::building_siegeenginest *bld, df::coord view, df::coord2d ltop, df::coord2d size)
 {
-    auto engine = find_engine(bld, true);
+    EngineInfo* engine = find_engine(bld, true);
     CHECK_NULL_POINTER(engine);
 
     for (int x = 0; x < size.x; x++)
@@ -1185,7 +1187,7 @@ struct UnitPath {
 
     static UnitPath *get(df::unit *unit)
     {
-        auto &cv = cache[unit];
+        UnitPath* &cv = cache[unit];
         if (!cv) cv = new UnitPath(unit);
         return cv;
     };
@@ -1194,7 +1196,7 @@ struct UnitPath {
     {
         if (unit->flags1.bits.rider)
         {
-            auto mount = df::unit::find(unit->relationship_ids[df::unit_relationship_type::RiderMount]);
+            df::unit* mount = df::unit::find(unit->relationship_ids[df::unit_relationship_type::RiderMount]);
 
             if (mount)
             {
@@ -1205,7 +1207,7 @@ struct UnitPath {
 
         df::coord pos = unit->pos;
         df::coord dest = unit->path.dest;
-        auto &upath = unit->path.path;
+        df::coord_path &upath = unit->path.path;
 
         if (dest.isValid() && !upath.x.empty())
         {
@@ -1242,7 +1244,7 @@ struct UnitPath {
 
     void get_margin(std::map<float,df::coord>::iterator &it, float time, float *lmargin, float *rmargin)
     {
-        auto it2 = it;
+        std::map<float,df::coord>::iterator it2 = it;
         *lmargin = (it == path.begin()) ? MAX_TIME : time - (--it2)->first;
         *rmargin = (it->first == MAX_TIME) ? MAX_TIME : it->first - time;
     }
@@ -1251,7 +1253,7 @@ struct UnitPath {
     {
         CHECK_INVALID_ARGUMENT(time < MAX_TIME);
 
-        auto it = path.upper_bound(time);
+        std::map<float,df::coord>::iterator it = path.upper_bound(time);
         if (lmargin)
             get_margin(it, time, lmargin, rmargin);
         return it->second;
@@ -1264,7 +1266,7 @@ struct UnitPath {
         Hit info;
         info.path = this;
 
-        for (auto it = path.begin(); it != path.end(); ++it)
+        for (std::map<float,df::coord>::iterator it = path.begin(); it != path.end(); ++it)
         {
             info.pos = it->second;
             info.dist = point_distance(origin - info.pos);
@@ -1294,16 +1296,16 @@ static void push_margin(lua_State *L, float margin)
 
 static int traceUnitPath(lua_State *L)
 {
-    auto unit = Lua::CheckDFObject<df::unit>(L, 1);
+    df::unit* unit = Lua::CheckDFObject<df::unit>(L, 1);
 
     CHECK_NULL_POINTER(unit);
 
     size_t idx = 1;
-    auto info = UnitPath::get(unit);
+    UnitPath* info = UnitPath::get(unit);
     lua_createtable(L, info->path.size(), 0);
 
     float last_time = 0.0f;
-    for (auto it = info->path.begin(); it != info->path.end(); ++it)
+    for (std::map<float,df::coord>::const_iterator it = info->path.begin(); it != info->path.end(); ++it)
     {
         Lua::Push(L, it->second);
         if (idx > 1)
@@ -1325,13 +1327,13 @@ static int traceUnitPath(lua_State *L)
 
 static int unitPosAtTime(lua_State *L)
 {
-    auto unit = Lua::CheckDFObject<df::unit>(L, 1);
+    df::unit* unit = Lua::CheckDFObject<df::unit>(L, 1);
     float time = luaL_checknumber(L, 2);
 
     CHECK_NULL_POINTER(unit);
 
     float lmargin, rmargin;
-    auto info = UnitPath::get(unit);
+    UnitPath* info = UnitPath::get(unit);
 
     Lua::Push(L, info->posAtTime(time, &lmargin, &rmargin));
     push_margin(L, lmargin);
@@ -1356,11 +1358,11 @@ static bool canTargetUnit(df::unit *unit)
 
 static void proposeUnitHits(EngineInfo *engine, std::vector<UnitPath::Hit> *hits, float bias)
 {
-    auto &active = world->units.active;
+    std::vector<df::unit*> &active = world->units.active;
 
     for (size_t i = 0; i < active.size(); i++)
     {
-        auto unit = active[i];
+        df::unit* unit = active[i];
 
         if (!canTargetUnit(unit))
             continue;
@@ -1371,7 +1373,7 @@ static void proposeUnitHits(EngineInfo *engine, std::vector<UnitPath::Hit> *hits
 
 static int proposeUnitHits(lua_State *L)
 {
-    auto engine = find_engine(L, 1);
+    EngineInfo* engine = find_engine(L, 1);
     float bias = luaL_optnumber(L, 2, 0);
 
     if (!engine->hasTarget())
@@ -1384,7 +1386,7 @@ static int proposeUnitHits(lua_State *L)
 
     for (size_t i = 0; i < hits.size(); i++)
     {
-        auto &hit = hits[i];
+        UnitPath::Hit &hit = hits[i];
         lua_createtable(L, 0, 6);
         Lua::SetField(L, hit.path->unit, -1, "unit");
         Lua::SetField(L, hit.pos, -1, "pos");
@@ -1400,7 +1402,7 @@ static int proposeUnitHits(lua_State *L)
 
 static int computeNearbyWeight(lua_State *L)
 {
-    auto engine = find_engine(L, 1);
+    EngineInfo* engine = find_engine(L, 1);
     luaL_checktype(L, 2, LUA_TTABLE);
     luaL_checktype(L, 3, LUA_TTABLE);
     const char *fname = luaL_optstring(L, 4, "nearby_weight");
@@ -1454,7 +1456,7 @@ static int computeNearbyWeight(lua_State *L)
             if (units[i]->unit == unit)
                 continue;
 
-            auto diff = units[i]->posAtTime(time) - pos;
+            df::coord diff = units[i]->posAtTime(time) - pos;
             float dist = 1 + sqrtf(diff.x*diff.x + diff.y*diff.y + diff.z*diff.z);
             sum += weights[i]/(dist*dist);
         }
@@ -1477,18 +1479,18 @@ static bool isTired(df::unit *worker)
 static void releaseTiredWorker(EngineInfo *engine, df::job *job, df::unit *worker)
 {
     // If not in siege
-    auto &sieges = ui->invasions.list;
+    std::vector<df::invasion_info*> &sieges = ui->invasions.list;
 
     for (size_t i = 0; i < sieges.size(); i++)
         if (sieges[i]->flags.bits.active)
             return;
 
     // And there is a free replacement
-    auto &others = world->units.active;
+    std::vector<df::unit*> &others = world->units.active;
 
     for (size_t i = 0; i < others.size(); i++)
     {
-        auto unit = others[i];
+        df::unit* unit = others[i];
 
         if (unit == worker ||
             unit->job.current_job || !unit->status.labors[unit_labor::SIEGEOPERATE] ||
@@ -1559,8 +1561,8 @@ struct projectile_hook : df::proj_itemst {
             }
         }
 
-        fall_threshold = std::max(fall_threshold, engine->fire_range.first);
-        fall_threshold = std::min(fall_threshold, engine->fire_range.second);
+        fall_threshold = std::max<int>(fall_threshold, engine->fire_range.first);
+        fall_threshold = std::min<int>(fall_threshold, engine->fire_range.second);
     }
 
     void aimAtPoint(EngineInfo *engine, int skill, const ProjectilePath &path)
@@ -1638,9 +1640,9 @@ struct projectile_hook : df::proj_itemst {
     static int safeAimProjectile(lua_State *L)
     {
         color_ostream &out = *Lua::GetOutput(L);
-        auto proj = (projectile_hook*)lua_touserdata(L, 1);
-        auto engine = (EngineInfo*)lua_touserdata(L, 2);
-        auto unit = (df::unit*)lua_touserdata(L, 3);
+        projectile_hook* proj = (projectile_hook*)lua_touserdata(L, 1);
+        EngineInfo* engine = (EngineInfo*)lua_touserdata(L, 2);
+        df::unit* unit = (df::unit*)lua_touserdata(L, 3);
         int skill = lua_tointeger(L, 4);
 
         if (!Lua::PushModulePublic(out, L, "plugins.siege-engine", "doAimProjectile"))
@@ -1669,11 +1671,11 @@ struct projectile_hook : df::proj_itemst {
             fall_counter != fall_delay || item == NULL)
             return;
 
-        auto engine = find_engine(origin_pos);
+        EngineInfo* engine = find_engine(origin_pos);
         if (!engine || !engine->hasTarget())
             return;
 
-        auto L = Lua::Core::State;
+        lua_State* L = Lua::Core::State;
         CoreSuspendClaimer suspend;
         color_ostream_proxy out(Core::getInstance().getConsole());
 
@@ -1732,7 +1734,7 @@ struct projectile_hook : df::proj_itemst {
 
         // Start at tile top, if hit a wall
         ProjectilePath path(origin_pos, target_pos);
-        auto next_pos = path[distance_flown+1];
+        df::coord next_pos = path[distance_flown+1];
         if (next_pos.z == cur_pos.z && !isPassableTile(next_pos))
             start_z = 49000;
 
@@ -1744,7 +1746,7 @@ struct projectile_hook : df::proj_itemst {
 
         for (size_t i = 0; i < contents.size(); i++)
         {
-            auto child = contents[i];
+            df::item* child = contents[i];
 
             if (forbid_ammo)
                 child->flags.bits.forbid = true;
@@ -1752,7 +1754,7 @@ struct projectile_hook : df::proj_itemst {
             // Liquids are vaporized so that they cover nearby units
             if (child->isLiquid())
             {
-                auto flow = Maps::spawnFlow(
+                df::flow_info* flow = Maps::spawnFlow(
                     cur_pos,
                     flow_type::MaterialVapor,
                     child->getMaterial(), child->getMaterialIndex(),
@@ -1764,7 +1766,7 @@ struct projectile_hook : df::proj_itemst {
                     continue;
             }
 
-            auto proj = Items::makeProjectile(mc, child);
+            df::proj_itemst* proj = Items::makeProjectile(mc, child);
             if (!proj) continue;
 
             bool keep = apply_impact_damage(child, 50000, int(250000*bonus));
@@ -1786,7 +1788,7 @@ struct projectile_hook : df::proj_itemst {
 
             proj->speed_x = int(speed * sx);
             proj->speed_y = int(speed * sy);
-            proj->speed_z = std::max(min_zspeed, int(speed * sz));
+            proj->speed_z = std::max<int>(min_zspeed, int(speed * sz));
         }
     }
 
@@ -1824,7 +1826,7 @@ struct building_hook : df::building_siegeenginest {
 
     DEFINE_VMETHOD_INTERPOSE(df::workshop_profile*, getWorkshopProfile, ())
     {
-        if (auto engine = find_engine(this))
+        if (EngineInfo* engine = find_engine(this))
             return &engine->profile;
 
         return INTERPOSE_NEXT(getWorkshopProfile)();
@@ -1832,7 +1834,7 @@ struct building_hook : df::building_siegeenginest {
 
     DEFINE_VMETHOD_INTERPOSE(df::stockpile_links*, getStockpileLinks, ())
     {
-        if (auto engine = find_engine(this))
+        if (EngineInfo* engine = find_engine(this))
         {
             update_stockpile_links(engine);
             return &engine->links;
@@ -1848,9 +1850,9 @@ struct building_hook : df::building_siegeenginest {
         if (jobs.empty())
             return;
 
-        if (auto engine = find_engine(this))
+        if (EngineInfo* engine = find_engine(this))
         {
-            auto job = jobs[0];
+            df::job* job = jobs[0];
             bool save_op = false;
             bool load_op = false;
 
@@ -1859,7 +1861,7 @@ struct building_hook : df::building_siegeenginest {
                 case job_type::LoadCatapult:
                     if (!job->job_items.empty())
                     {
-                        auto item = job->job_items[0];
+                        df::job_item* item = job->job_items[0];
                         item->item_type = engine->ammo_item_type;
                         item->vector_id = engine->ammo_vector_id;
 
@@ -1891,7 +1893,7 @@ struct building_hook : df::building_siegeenginest {
 
                 case job_type::FireCatapult:
                 case job_type::FireBallista:
-                    if (auto worker = Job::getWorker(job))
+                    if (df::unit* worker = Job::getWorker(job))
                     {
                         engine->operator_id = worker->id;
                         engine->operator_frame = world->frame_counter;
@@ -1973,7 +1975,7 @@ static bool enable_plugin()
     if (is_enabled)
         return true;
 
-    auto entry = World::GetPersistentData("siege-engine/enabled", NULL);
+    PersistentDataItem entry = World::GetPersistentData("siege-engine/enabled", NULL);
     if (!entry.isValid())
         return false;
 
@@ -1985,7 +1987,7 @@ static void clear_caches(color_ostream &out)
 {
     if (!UnitPath::cache.empty())
     {
-        for (auto it = UnitPath::cache.begin(); it != UnitPath::cache.end(); ++it)
+        for (std::map<df::unit*, UnitPath*>::const_iterator it = UnitPath::cache.begin(); it != UnitPath::cache.end(); ++it)
             delete it->second;
 
         UnitPath::cache.clear();
