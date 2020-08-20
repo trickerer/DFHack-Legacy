@@ -32,7 +32,7 @@ DFHACK_PLUGIN("luasocket");
 
 void server::close()
 {
-    for(auto it=clients.begin();it!=clients.end();it++)
+    for(clients_map::const_iterator it=clients.begin();it!=clients.end();it++)
     {
         CActiveSocket* sock=it->second;
         sock->Close();
@@ -115,7 +115,7 @@ static int lua_server_accept(int id,bool fail_on_timeout)
 }
 static void lua_client_close(int server_id,int client_id)
 {
-    auto info=get_client(server_id,client_id);
+    std::pair<CActiveSocket*,clients_map*> info=get_client(server_id,client_id);
 
     CActiveSocket *sock=info.first;
     std::map<int,CActiveSocket*>* target=info.second;
@@ -148,7 +148,7 @@ static void lua_server_close(int server_id)
 }
 static std::string lua_client_receive(int server_id,int client_id,int bytes,std::string pattern,bool fail_on_timeout)
 {
-    auto info=get_client(server_id,client_id);
+    std::pair<CActiveSocket*,clients_map*> info=get_client(server_id,client_id);
     CActiveSocket *sock=info.first;
     if(bytes>0)
     {
@@ -333,14 +333,14 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
 }
 DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 {
-    for(auto it=clients.begin();it!=clients.end();it++)
+    for(clients_map::const_iterator it=clients.begin();it!=clients.end();it++)
     {
         CActiveSocket* sock=it->second;
         sock->Close();
         delete sock;
     }
     clients.clear();
-    for(auto it=servers.begin();it!=servers.end();it++)
+    for(std::map<int,server>::iterator it=servers.begin();it!=servers.end();it++)
     {
         it->second.close();
     }
