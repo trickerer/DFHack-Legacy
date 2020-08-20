@@ -98,7 +98,7 @@ command_result mode (color_ostream &out_, vector <string> & parameters)
     bool abuse = false;
     int rv = 0;
     t_gamemodes gm;
-    for(auto iter = parameters.begin(); iter != parameters.end(); iter++)
+    for(vector<string>::const_iterator iter = parameters.begin(); iter != parameters.end(); iter++)
     {
         if((*iter) == "set")
         {
