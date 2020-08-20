@@ -61,7 +61,7 @@ void impregnateMany() {
     map<int32_t, vector<int32_t> > males;
     map<int32_t, vector<int32_t> > females;
     map<int32_t, int32_t> popcount;
-    auto units = world->units.all;
+    std::vector<df::unit*> units = world->units.all;
     for ( size_t a = 0; a < units.size(); a++ ) {
         df::unit* unit = units[a];
         if ( !Units::isActive(unit) || unit->flags1.bits.active_invader || unit->flags2.bits.underworld || unit->flags2.bits.visitor_uninvited || unit->flags2.bits.visitor )
@@ -91,7 +91,7 @@ void impregnateMany() {
             females[unit->race].push_back(a);
     }
 
-    for ( auto i = females.begin(); i != females.end(); i++ ) {
+    for (map<int32_t, vector<int32_t> >::iterator i = females.begin(); i != females.end(); i++ ) {
         int32_t race = i->first;
         vector<int32_t>& femalesList = i->second;
         for ( size_t a = 0; a < femalesList.size(); a++ ) {
