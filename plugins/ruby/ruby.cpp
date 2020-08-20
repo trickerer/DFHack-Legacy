@@ -296,27 +296,69 @@ static VALUE Qnil = 4;
 #define FIX2INT(i) (((intptr_t)i) >> 1)
 #define RUBY_METHOD_FUNC(func) ((VALUE(*)(...))func)
 
-void (*ruby_init_stack)(VALUE*);
-void (*ruby_sysinit)(int *, const char ***);
-void (*ruby_init)(void);
-void (*ruby_init_loadpath)(void);
-void (*ruby_script)(const char*);
-int (*ruby_cleanup)(int);
-ID (*rb_intern)(const char*);
-VALUE (*rb_funcall)(VALUE, ID, int, ...);
-VALUE (*rb_define_module)(const char*);
-void (*rb_define_singleton_method)(VALUE, const char*, VALUE(*)(...), int);
-VALUE (*rb_gv_get)(const char*);
-VALUE (*rb_str_new)(const char*, long);
-char* (*rb_string_value_ptr)(VALUE*);
-VALUE (*rb_eval_string_protect)(const char*, int*);
-VALUE (*rb_ary_shift)(VALUE);
-VALUE (*rb_float_new)(double);
-double (*rb_num2dbl)(VALUE);
-VALUE (*rb_int2inum)(intptr_t);        // XXX check on win64 long vs intptr_t
-VALUE (*rb_uint2inum)(uintptr_t);
-uintptr_t (*rb_num2ulong)(VALUE);
+//void (*ruby_init_stack)(VALUE*);
+//void (*ruby_sysinit)(int *, const char ***);
+//void (*ruby_init)(void);
+//void (*ruby_init_loadpath)(void);
+//void (*ruby_script)(const char*);
+//int (*ruby_cleanup)(int);
+//ID (*rb_intern)(const char*);
+//VALUE (*rb_funcall)(VALUE, ID, int, ...);
+//VALUE (*rb_define_module)(const char*);
+//void (*rb_define_singleton_method)(VALUE, const char*, VALUE(*)(...), int);
+//VALUE (*rb_gv_get)(const char*);
+//VALUE (*rb_str_new)(const char*, long);
+//char* (*rb_string_value_ptr)(VALUE*);
+//VALUE (*rb_eval_string_protect)(const char*, int*);
+//VALUE (*rb_ary_shift)(VALUE);
+//VALUE (*rb_float_new)(double);
+//double (*rb_num2dbl)(VALUE);
+//VALUE (*rb_int2inum)(intptr_t);        // XXX check on win64 long vs intptr_t
+//VALUE (*rb_uint2inum)(uintptr_t);
+//uintptr_t (*rb_num2ulong)(VALUE);
 // end of rip(ruby.h)
+
+typedef void(*ruby_init_stack_T)(VALUE*);
+typedef void (*ruby_sysinit_T)(int *, const char ***);
+typedef void (*ruby_init_T)(void);
+typedef void (*ruby_init_loadpath_T)(void);
+typedef void (*ruby_script_T)(const char*);
+typedef int (*ruby_cleanup_T)(int);
+typedef ID (*rb_intern_T)(const char*);
+typedef VALUE (*rb_funcall_T)(VALUE, ID, int, ...);
+typedef VALUE (*rb_define_module_T)(const char*);
+typedef void (*rb_define_singleton_method_T)(VALUE, const char*, VALUE(*)(...), int);
+typedef VALUE (*rb_gv_get_T)(const char*);
+typedef VALUE (*rb_str_new_T)(const char*, long);
+typedef char* (*rb_string_value_ptr_T)(VALUE*);
+typedef VALUE (*rb_eval_string_protect_T)(const char*, int*);
+typedef VALUE (*rb_ary_shift_T)(VALUE);
+typedef VALUE (*rb_float_new_T)(double);
+typedef double (*rb_num2dbl_T)(VALUE);
+typedef VALUE (*rb_int2inum_T)(intptr_t);
+typedef VALUE (*rb_uint2inum_T)(uintptr_t);
+typedef uintptr_t (*rb_num2ulong_T)(VALUE);
+
+ruby_init_stack_T ruby_init_stack;
+ruby_sysinit_T ruby_sysinit;
+ruby_init_T ruby_init;
+ruby_init_loadpath_T ruby_init_loadpath;
+ruby_script_T ruby_script;
+ruby_cleanup_T ruby_cleanup;
+rb_intern_T rb_intern;
+rb_funcall_T rb_funcall;
+rb_define_module_T rb_define_module;
+rb_define_singleton_method_T rb_define_singleton_method;
+rb_gv_get_T rb_gv_get;
+rb_str_new_T rb_str_new;
+rb_string_value_ptr_T rb_string_value_ptr;
+rb_eval_string_protect_T rb_eval_string_protect;
+rb_ary_shift_T rb_ary_shift;
+rb_float_new_T rb_float_new;
+rb_num2dbl_T rb_num2dbl;
+rb_int2inum_T rb_int2inum;
+rb_uint2inum_T rb_uint2inum;
+rb_num2ulong_T rb_num2ulong;
 
 DFHack::DFLibrary *libruby_handle;
 
@@ -349,38 +391,61 @@ static int df_loadruby(void)
     }
 
     // ruby_sysinit is optional (ruby1.9 only)
-    ruby_sysinit = (decltype(ruby_sysinit))LookupPlugin(libruby_handle, "ruby_sysinit");
-#define rbloadsyma(s,a) if (!(s = (decltype(s))LookupPlugin(libruby_handle, #a))) return 0
-#define rbloadsym(s) rbloadsyma(s,s)
-    rbloadsym(ruby_init_stack);
-    rbloadsym(ruby_init);
-    rbloadsym(ruby_init_loadpath);
-    rbloadsym(ruby_script);
-    rbloadsym(ruby_cleanup);
-    rbloadsym(rb_intern);
-    rbloadsym(rb_funcall);
-    rbloadsym(rb_define_module);
-    rbloadsym(rb_define_singleton_method);
-    rbloadsym(rb_gv_get);
-    rbloadsym(rb_str_new);
-    rbloadsym(rb_string_value_ptr);
-    rbloadsym(rb_eval_string_protect);
-    rbloadsym(rb_ary_shift);
-    rbloadsym(rb_num2dbl);
-    rbloadsym(rb_int2inum);
+//    ruby_sysinit = (decltype(ruby_sysinit))LookupPlugin(libruby_handle, "ruby_sysinit");
+//#define rbloadsyma(s,a) if (!(s = (decltype(s))LookupPlugin(libruby_handle, #a))) return 0
+//#define rbloadsym(s) rbloadsyma(s,s)
+//    rbloadsym(ruby_init_stack);
+//    rbloadsym(ruby_init);
+//    rbloadsym(ruby_init_loadpath);
+//    rbloadsym(ruby_script);
+//    rbloadsym(ruby_cleanup);
+//    rbloadsym(rb_intern);
+//    rbloadsym(rb_funcall);
+//    rbloadsym(rb_define_module);
+//    rbloadsym(rb_define_singleton_method);
+//    rbloadsym(rb_gv_get);
+//    rbloadsym(rb_str_new);
+//    rbloadsym(rb_string_value_ptr);
+//    rbloadsym(rb_eval_string_protect);
+//    rbloadsym(rb_ary_shift);
+//    rbloadsym(rb_num2dbl);
+//    rbloadsym(rb_int2inum);
+    ruby_sysinit = (ruby_sysinit_T)LookupPlugin(libruby_handle, "ruby_sysinit");
+#define rbloadsyma(s,a,t) if (!(s = (t)LookupPlugin(libruby_handle, #a))) return 0
+#define rbloadsym(s,t) rbloadsyma(s,s,t)
+    rbloadsym(ruby_init_stack, ruby_init_stack_T);
+    rbloadsym(ruby_init, ruby_init_T);
+    rbloadsym(ruby_init_loadpath, ruby_init_loadpath_T);
+    rbloadsym(ruby_script, ruby_script_T);
+    rbloadsym(ruby_cleanup ,ruby_cleanup_T);
+    rbloadsym(rb_intern, rb_intern_T);
+    rbloadsym(rb_funcall, rb_funcall_T);
+    rbloadsym(rb_define_module, rb_define_module_T);
+    rbloadsym(rb_define_singleton_method, rb_define_singleton_method_T);
+    rbloadsym(rb_gv_get, rb_gv_get_T);
+    rbloadsym(rb_str_new, rb_str_new_T);
+    rbloadsym(rb_string_value_ptr, rb_string_value_ptr_T);
+    rbloadsym(rb_eval_string_protect, rb_eval_string_protect_T);
+    rbloadsym(rb_ary_shift, rb_ary_shift_T);
+    rbloadsym(rb_num2dbl, rb_num2dbl_T);
+    rbloadsym(rb_int2inum, rb_int2inum_T);
 #if defined(_WIN64)
-    rbloadsyma(rb_uint2inum, rb_ull2inum);
-    rbloadsyma(rb_num2ulong, rb_num2ull);
+    rbloadsyma(rb_uint2inum, rb_ull2inum, rb_uint2inum_T);
+    rbloadsyma(rb_num2ulong, rb_num2ull, rb_num2ulong_T);
 #else
-    rbloadsym(rb_uint2inum);
-    rbloadsym(rb_num2ulong);
+    rbloadsym(rb_uint2inum, rb_uint2inum_T);
+    rbloadsym(rb_num2ulong, rb_num2ulong_T);
 #endif
 
 #undef rbloadsym
     // rb_float_new_in_heap in ruby 2
-    if (!((rb_float_new = (decltype(rb_float_new))(LookupPlugin(libruby_handle, "rb_float_new"))) ||
-          (rb_float_new = (decltype(rb_float_new))(LookupPlugin(libruby_handle, "rb_float_new_in_heap")))))
-        return 0;
+    //if (!((rb_float_new = (decltype(rb_float_new))(LookupPlugin(libruby_handle, "rb_float_new"))) ||
+    //      (rb_float_new = (decltype(rb_float_new))(LookupPlugin(libruby_handle, "rb_float_new_in_heap")))))
+    //    return 0;
+
+    if (!((rb_float_new = (rb_float_new_T)(LookupPlugin(libruby_handle, "rb_float_new"))) ||
+          (rb_float_new = (rb_float_new_T)(LookupPlugin(libruby_handle, "rb_float_new_in_heap")))))
+          return 0;
 
     return 1;
 }
@@ -608,7 +673,7 @@ static VALUE rb_dfget_rtti_classname(VALUE self, VALUE vptr)
 #if defined(_WIN64)
     // win64
     char *rtti = *(char**)(ptr - 0x8);
-    char *typeinfo = (char*)Core::getInstance().p->getBase() + *(uint32_t*)(rtti + 0xC);
+    char *typeinfo = (char*)Core::getInstance().proc->getBase() + *(uint32_t*)(rtti + 0xC);
     // skip the .?AV, trim @@ from end
     return rb_str_new(typeinfo+0x14, strlen(typeinfo+0x14)-2);
 #elif defined(WIN32)
@@ -757,7 +822,7 @@ static VALUE rb_dfmemory_check(VALUE self, VALUE addr)
 {
     void *ptr = (void*)rb_num2ulong(addr);
     std::vector<t_memrange> ranges;
-    Core::getInstance().p->getMemRanges(ranges);
+    Core::getInstance().proc->getMemRanges(ranges);
 
     unsigned i = 0;
     while (i < ranges.size() && ranges[i].end <= ptr)
@@ -785,7 +850,7 @@ static VALUE rb_dfmemory_patch(VALUE self, VALUE addr, VALUE raw)
     int strlen = FIX2INT(rb_funcall(raw, rb_intern("bytesize"), 0));
     bool ret;
 
-    ret = Core::getInstance().p->patchMemory((void*)rb_num2ulong(addr),
+    ret = Core::getInstance().proc->patchMemory((void*)rb_num2ulong(addr),
             rb_string_value_ptr(&raw), strlen);
 
     return ret ? Qtrue : Qfalse;
@@ -794,7 +859,7 @@ static VALUE rb_dfmemory_patch(VALUE self, VALUE addr, VALUE raw)
 // allocate memory pages
 static VALUE rb_dfmemory_pagealloc(VALUE self, VALUE len)
 {
-    void *ret = Core::getInstance().p->memAlloc(rb_num2ulong(len));
+    void *ret = Core::getInstance().proc->memAlloc(rb_num2ulong(len));
 
     return (ret == (void*)-1) ? Qnil : rb_uint2inum((uintptr_t)ret);
 }
@@ -802,7 +867,7 @@ static VALUE rb_dfmemory_pagealloc(VALUE self, VALUE len)
 // free memory from pagealloc
 static VALUE rb_dfmemory_pagedealloc(VALUE self, VALUE ptr, VALUE len)
 {
-    int ret = Core::getInstance().p->memDealloc((void*)rb_num2ulong(ptr), rb_num2ulong(len));
+    int ret = Core::getInstance().proc->memDealloc((void*)rb_num2ulong(ptr), rb_num2ulong(len));
 
     return ret ? Qfalse : Qtrue;
 }
@@ -829,7 +894,7 @@ static VALUE rb_dfmemory_pageprotect(VALUE self, VALUE ptr, VALUE len, VALUE pro
     }
 
     Core::printerr("pageprot %zx %zx %x\n", rb_num2ulong(ptr), rb_num2ulong(len), prot);
-    ret = Core::getInstance().p->memProtect((void*)rb_num2ulong(ptr), rb_num2ulong(len), prot);
+    ret = Core::getInstance().proc->memProtect((void*)rb_num2ulong(ptr), rb_num2ulong(len), prot);
 
     return ret ? Qfalse : Qtrue;
 }
@@ -1128,9 +1193,12 @@ __declspec(naked) static intptr_t raw_vcall(void *that, void *fptr, uintptr_t a0
 static intptr_t raw_vcall(void *that, void *fptr, uintptr_t a0,
         uintptr_t a1, uintptr_t a2, uintptr_t a3, uintptr_t a4, uintptr_t a5)
 {
-    intptr_t (*t_fptr)(void *me, uintptr_t, uintptr_t, uintptr_t,
-                            uintptr_t, uintptr_t, uintptr_t);
-    t_fptr = (decltype(t_fptr))fptr;
+    //intptr_t (*t_fptr)(void *me, uintptr_t, uintptr_t, uintptr_t,
+    //                        uintptr_t, uintptr_t, uintptr_t);
+    //t_fptr = (decltype(t_fptr))fptr;
+    //return t_fptr(that, a0, a1, a2, a3, a4, a5);
+    typedef intptr_t (*t_fptr_T)(void *, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t);
+    t_fptr_T t_fptr = (t_fptr_T)fptr;
     return t_fptr(that, a0, a1, a2, a3, a4, a5);
 }
 #endif
