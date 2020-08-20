@@ -93,26 +93,26 @@ struct trap_hook : df::building_trapst {
     {
         if (is_power_meter())
         {
-            auto pdsgn = Maps::getTileDesignation(centerx,centery,z);
+            df::tile_designation* pdsgn = Maps::getTileDesignation(centerx,centery,z);
 
             if (pdsgn)
             {
                 bool active = false;
-                auto &gears = world->buildings.other[buildings_other_id::GEAR_ASSEMBLY];
+                std::vector<df::building*> &gears = world->buildings.other[buildings_other_id::GEAR_ASSEMBLY];
 
                 for (size_t i = 0; i < gears.size(); i++)
                 {
                     // Adjacent
-                    auto gear = gears[i];
+                    df::building* gear = gears[i];
                     int deltaxy = abs(centerx - gear->centerx) + abs(centery - gear->centery);
                     if (gear->z != z || deltaxy != 1)
                         continue;
                     // Linked to machine
-                    auto info = gears[i]->getMachineInfo();
+                    df::machine_info* info = gears[i]->getMachineInfo();
                     if (!info || info->machine_id < 0)
                         continue;
                     // an active machine
-                    auto machine = df::machine::find(info->machine_id);
+                    df::machine* machine = df::machine::find(info->machine_id);
                     if (!machine || !machine->flags.bits.active)
                         continue;
                     // with adequate power?
@@ -132,7 +132,7 @@ struct trap_hook : df::building_trapst {
                     active = !active;
 
                 // Temporarily set the tile water amount based on power state
-                auto old_dsgn = *pdsgn;
+                df::tile_designation old_dsgn = *pdsgn;
                 pdsgn->bits.liquid_type = tile_liquid::Water;
                 pdsgn->bits.flow_size = (active ? 7 : 0);
 
@@ -178,7 +178,7 @@ static bool makePowerMeter(df::pressure_plate_info *info, int min_power, int max
 
     if (!enabled)
     {
-        auto entry = World::GetPersistentData("power-meter/enabled", NULL);
+        PersistentDataItem entry = World::GetPersistentData("power-meter/enabled", NULL);
         if (!entry.isValid())
             return false;
 
