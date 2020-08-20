@@ -329,7 +329,7 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
 
         map<t_materialIndex, unsigned int> watchMap;
         Kitchen::fillWatchMap(watchMap);
-        for(auto i = watchMap.begin(); i != watchMap.end(); ++i)
+        for(map<t_materialIndex, unsigned int>::const_iterator i = watchMap.begin(); i != watchMap.end(); ++i)
         {
             if(seedCount[i->first] <= i->second)
             {
