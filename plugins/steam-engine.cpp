@@ -176,17 +176,17 @@ void enable_updates_at(df::coord pos, bool flow, bool temp)
 
     for (int i = 0; i < 4; i++)
     {
-        auto blk = Maps::getTileBlock(pos.x+delta[i][0], pos.y+delta[i][1], pos.z);
+        df::map_block* blk = Maps::getTileBlock(pos.x+delta[i][0], pos.y+delta[i][1], pos.z);
         Maps::enableBlockUpdates(blk, flow, temp);
     }
 }
 
 void decrement_flow(df::coord pos, int amount)
 {
-    auto pldes = Maps::getTileDesignation(pos);
+    df::tile_designation* pldes = Maps::getTileDesignation(pos);
     if (!pldes) return;
 
-    int nsize = std::max(0, int(pldes->bits.flow_size - amount));
+    int nsize = std::max<int>(0, int(pldes->bits.flow_size - amount));
     pldes->bits.flow_size = nsize;
     pldes->bits.flow_forbid = (nsize > 3 || pldes->bits.liquid_type == tile_liquid::Magma);
 
@@ -209,7 +209,7 @@ void make_explosion(df::coord center, int power)
         for (int dy = -1; dy <= 1; dy++)
         {
             int size = power - bias[i++];
-            auto pos = center + df::coord(dx,dy,0);
+            df::coord pos = center + df::coord(dx,dy,0);
 
             if (size > 0)
                 Maps::spawnFlow(pos, flow_type::MaterialDust, mat_type, mat_index, size);
@@ -260,7 +260,7 @@ struct liquid_hook : df::item_liquid_miscst {
     DEFINE_VMETHOD_INTERPOSE(bool, adjustTemperature, (uint16_t temp, int32_t unk))
     {
         if (mat_state.whole & BOILING_FLAG)
-            temp = std::max(int(temp), getBoilingPoint()-1);
+            temp = std::max<int>(int(temp), getBoilingPoint()-1);
 
         return INTERPOSE_NEXT(adjustTemperature)(temp, unk);
     }
@@ -268,7 +268,7 @@ struct liquid_hook : df::item_liquid_miscst {
     DEFINE_VMETHOD_INTERPOSE(bool, checkTemperatureDamage, ())
     {
         if (mat_state.whole & BOILING_FLAG)
-            temperature.whole = std::max(int(temperature.whole), getBoilingPoint()-1);
+            temperature.whole = std::max<int>(int(temperature.whole), getBoilingPoint()-1);
 
         return INTERPOSE_NEXT(checkTemperatureDamage)();
     }
@@ -324,15 +324,15 @@ struct workshop_hook : df::building_workshopst {
         {
             for (int y = y1; y <= y2; y++)
             {
-                auto ptile = Maps::getTileType(x,y,z);
+                df::tiletype* ptile = Maps::getTileType(x,y,z);
                 if (!ptile || !FlowPassableDown(*ptile))
                     continue;
 
-                auto pltile = Maps::getTileType(x,y,z-1);
+                df::tiletype* pltile = Maps::getTileType(x,y,z-1);
                 if (!pltile || !FlowPassable(*pltile))
                     continue;
 
-                auto pldes = Maps::getTileDesignation(x,y,z-1);
+                df::tile_designation* pldes = Maps::getTileDesignation(x,y,z-1);
                 if (!pldes || pldes->bits.flow_size < min_level)
                     continue;
 
@@ -413,11 +413,11 @@ struct workshop_hook : df::building_workshopst {
 
         for (int i = contained_items.size()-1; i >= 0; i--)
         {
-            auto item = contained_items[i];
+            df::building_actual::T_contained_items* item = contained_items[i];
             if (item->use_mode != 0)
                 continue;
 
-            auto liquid = strict_virtual_cast<df::item_liquid_miscst>(item->item);
+            df::item_liquid_miscst* liquid = strict_virtual_cast<df::item_liquid_miscst>(item->item);
             if (!liquid)
                 continue;
 
@@ -455,11 +455,11 @@ struct workshop_hook : df::building_workshopst {
 
         for (int i = contained_items.size()-1; i >= 0; i--)
         {
-            auto item = contained_items[i];
+            df::building_actual::T_contained_items* item = contained_items[i];
             if (item->use_mode != 0 || !item->item->flags.bits.in_building)
                 continue;
 
-            auto liquid = strict_virtual_cast<df::item_liquid_miscst>(item->item);
+            df::item_liquid_miscst* liquid = strict_virtual_cast<df::item_liquid_miscst>(item->item);
             if (!liquid)
                 continue;
 
@@ -538,7 +538,7 @@ struct workshop_hook : df::building_workshopst {
         // true power use
         float power_rate = 1.0f;
         // check the actual load
-        if (auto mptr = df::machine::find(machine.machine_id))
+        if (df::machine* mptr = df::machine::find(machine.machine_id))
         {
             if (mptr->cur_power >= mptr->min_power)
                 power_rate = float(mptr->min_power) / mptr->cur_power;
@@ -552,7 +552,7 @@ struct workshop_hook : df::building_workshopst {
         // apply rate and waste factor
         ticks *= (waste + 0.9f*power_rate)*power_level*efficiency_coeff;
         // end result
-        return std::max(1, int(ticks));
+        return std::max<int>(1, int(ticks));
     }
 
     void update_under_construction(steam_engine_workshop *engine)
@@ -562,7 +562,7 @@ struct workshop_hook : df::building_workshopst {
 
         int cur_count = 0;
 
-        if (auto first = collect_steam(engine, &cur_count))
+        if (df::item_liquid_miscst* first = collect_steam(engine, &cur_count))
         {
             if (add_wear_nodestroy(first, WEAR_TICKS*4/10))
             {
@@ -577,10 +577,10 @@ struct workshop_hook : df::building_workshopst {
     void update_working(steam_engine_workshop *engine)
     {
         int old_count = get_steam_amount();
-        int old_power = std::min(engine->max_power, old_count);
+        int old_power = std::min<int>(engine->max_power, old_count);
         int cur_count = 0;
 
-        if (auto first = collect_steam(engine, &cur_count))
+        if (df::item_liquid_miscst* first = collect_steam(engine, &cur_count))
         {
             int rate = get_steam_use_rate(engine, first->dimension, old_power);
 
@@ -601,10 +601,10 @@ struct workshop_hook : df::building_workshopst {
 
         set_steam_amount(cur_count);
 
-        int cur_power = std::min(engine->max_power, cur_count);
+        int cur_power = std::min<int>(engine->max_power, cur_count);
         if (cur_power != old_power)
         {
-            auto mptr = df::machine::find(machine.machine_id);
+            df::machine* mptr = df::machine::find(machine.machine_id);
             if (mptr)
                 mptr->cur_power += (cur_power - old_power)*100;
         }
@@ -623,9 +623,9 @@ struct workshop_hook : df::building_workshopst {
     // Machine interface
     DEFINE_VMETHOD_INTERPOSE(void, getPowerInfo, (df::power_info *info))
     {
-        if (auto engine = get_steam_engine())
+        if (steam_engine_workshop* engine = get_steam_engine())
         {
-            info->produced = std::min(engine->max_power, get_steam_amount())*100;
+            info->produced = std::min<int>(engine->max_power, get_steam_amount())*100;
             info->consumed = 10 - int(get_component_quality(0));
             return;
         }
@@ -653,7 +653,7 @@ struct workshop_hook : df::building_workshopst {
     {
         if (get_steam_engine())
         {
-            auto &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             insert_into_vector(vec, &df::building::id, (df::building*)this);
         }
 
@@ -664,7 +664,7 @@ struct workshop_hook : df::building_workshopst {
     {
         if (get_steam_engine())
         {
-            auto &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             erase_from_vector(vec, &df::building::id, id);
         }
 
@@ -673,7 +673,7 @@ struct workshop_hook : df::building_workshopst {
 
     DEFINE_VMETHOD_INTERPOSE(bool, canConnectToMachine, (df::machine_tile_set *info))
     {
-        if (auto engine = get_steam_engine())
+        if (steam_engine_workshop* engine = get_steam_engine())
         {
             int real_cx = centerx, real_cy = centery;
             bool ok = false;
@@ -701,7 +701,7 @@ struct workshop_hook : df::building_workshopst {
     // Operation logic
     DEFINE_VMETHOD_INTERPOSE(bool, isUnpowered, ())
     {
-        if (auto engine = get_steam_engine())
+        if (steam_engine_workshop* engine = get_steam_engine())
         {
             df::coord water, magma;
             return !find_liquids(&water, &magma, engine->is_magma, 3);
@@ -712,7 +712,7 @@ struct workshop_hook : df::building_workshopst {
 
     DEFINE_VMETHOD_INTERPOSE(void, updateAction, ())
     {
-        if (auto engine = get_steam_engine())
+        if (steam_engine_workshop* engine = get_steam_engine())
         {
             if (is_fully_built())
                 update_working(engine);
@@ -730,18 +730,18 @@ struct workshop_hook : df::building_workshopst {
     {
         INTERPOSE_NEXT(drawBuilding)(db, unk);
 
-        if (auto engine = get_steam_engine())
+        if (steam_engine_workshop* engine = get_steam_engine())
         {
             if (!is_fully_built())
                 return;
 
             // If machine is running, tweak gear assemblies
-            auto mptr = df::machine::find(machine.machine_id);
+            df::machine* mptr = df::machine::find(machine.machine_id);
             if (mptr && (mptr->visual_phase & 1) != 0)
             {
                 for (size_t i = 0; i < engine->gear_tiles.size(); i++)
                 {
-                    auto pos = engine->gear_tiles[i];
+                    df::coord2d pos = engine->gear_tiles[i];
                     db->tile[pos.x][pos.y] = 42;
                 }
             }
@@ -749,8 +749,8 @@ struct workshop_hook : df::building_workshopst {
             // Use the hearth color to display power level
             if (engine->hearth_tile.isValid())
             {
-                auto pos = engine->hearth_tile;
-                int power = std::min(engine->max_power, get_steam_amount());
+                df::coord2d pos = engine->hearth_tile;
+                int power = std::min<int>(engine->max_power, get_steam_amount());
                 db->fore[pos.x][pos.y] = hearth_colors[power][0];
                 db->bright[pos.x][pos.y] = hearth_colors[power][1];
             }
@@ -851,7 +851,7 @@ struct dwarfmode_hook : df::viewscreen_dwarfmodest
                 if (ui_build_selector->tiles[x][y] >= 5)
                     continue;
 
-                auto ptile = Maps::getTileType(x1+x,y1+y,cursor->z);
+                df::tiletype* ptile = Maps::getTileType(x1+x,y1+y,cursor->z);
                 if (ptile && !isOpenTerrain(*ptile))
                     continue;
 
@@ -898,7 +898,7 @@ static bool find_engines(color_ostream &out)
 {
     engines.clear();
 
-    auto &wslist = world->raws.buildings.workshops;
+    std::vector<df::building_def_workshopst*> &wslist = world->raws.buildings.workshops;
 
     for (size_t i = 0; i < wslist.size(); i++)
     {
