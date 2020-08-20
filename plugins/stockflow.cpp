@@ -122,7 +122,7 @@ public:
         // but may be overkill for other situations.
         CoreSuspender suspend;
 
-        auto L = Lua::Core::State;
+        lua_State* L = Lua::Core::State;
         Lua::StackUnwinder top(L);
 
         if (!lua_checkstack(L, 1))
@@ -142,7 +142,7 @@ public:
         // because they share the same signature.
         CoreSuspendClaimer suspend;
 
-        auto L = Lua::Core::State;
+        lua_State* L = Lua::Core::State;
         color_ostream_proxy out(Core::getInstance().getConsole());
 
         Lua::StackUnwinder top(L);
@@ -167,7 +167,7 @@ public:
     bool collect_settings(building_stockpilest *sp) {
         // Find strings representing the job to order, and the trigger condition.
         // There might be a memory leak here; C++ is odd like that.
-        auto L = Lua::Core::State;
+        lua_State* L = Lua::Core::State;
         color_ostream_proxy out(Core::getInstance().getConsole());
 
         CoreSuspendClaimer suspend;
@@ -209,7 +209,7 @@ public:
             }
         }
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = dims.y2 - 3;
