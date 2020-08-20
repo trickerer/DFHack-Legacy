@@ -125,20 +125,21 @@ void lightingEngineViewscreen::reinit()
     lights.resize(size);
 }
 
-void plotCircle(int xm, int ym, int r,const std::function<void(int,int)>& setPixel)
-{
-    int x = -r, y = 0, err = 2-2*r; /* II. Quadrant */
-    do {
-        setPixel(xm-x, ym+y); /*   I. Quadrant */
-        setPixel(xm-y, ym-x); /*  II. Quadrant */
-        setPixel(xm+x, ym-y); /* III. Quadrant */
-        setPixel(xm+y, ym+x); /*  IV. Quadrant */
-        r = err;
-        if (r <= y) err += ++y*2+1;           /* e_xy+e_y < 0 */
-        if (r > x || err > y) err += ++x*2+1; /* e_xy+e_x > 0 or no 2nd y-step */
-    } while (x < 0);
-}
-void plotSquare(int xm, int ym, int r,const std::function<void(int,int)>& setPixel)
+//void plotCircle(int xm, int ym, int r,const std::function<void(int,int)>& setPixel)
+//{
+//    int x = -r, y = 0, err = 2-2*r; /* II. Quadrant */
+//    do {
+//        setPixel(xm-x, ym+y); /*   I. Quadrant */
+//        setPixel(xm-y, ym-x); /*  II. Quadrant */
+//        setPixel(xm+x, ym-y); /* III. Quadrant */
+//        setPixel(xm+y, ym+x); /*  IV. Quadrant */
+//        r = err;
+//        if (r <= y) err += ++y*2+1;           /* e_xy+e_y < 0 */
+//        if (r > x || err > y) err += ++x*2+1; /* e_xy+e_x > 0 or no 2nd y-step */
+//    } while (x < 0);
+//}
+//void plotSquare(int xm, int ym, int r,const std::function<void(int,int)>& setPixel)
+void plotSquare(int xm, int ym, int r,const lightThread::RayPlotter& setPixel)
 {
     for(int x = 0; x <= r; x++)
     {
@@ -152,29 +153,30 @@ void plotSquare(int xm, int ym, int r,const std::function<void(int,int)>& setPix
         setPixel(xm-x, ym+r); /*   IV.2 Quadrant */
     }
 }
-void plotLine(int x0, int y0, int x1, int y1,rgbf power,const std::function<rgbf(rgbf,int,int,int,int)>& setPixel)
-{
-    int dx =  abs(x1-x0), sx = x0<x1 ? 1 : -1;
-    int dy = -abs(y1-y0), sy = y0<y1 ? 1 : -1;
-    int err = dx+dy, e2; /* error value e_xy */
-    int rdx=0;
-    int rdy=0;
-    for(;;){  /* loop */
-        if(rdx!=0 || rdy!=0) //dirty hack to skip occlusion on the first tile.
-        {
-            power=setPixel(power,rdx,rdy,x0,y0);
-            if(power.dot(power)<0.00001f)
-                return ;
-        }
-        if (x0==x1 && y0==y1) break;
-        e2 = 2*err;
-        rdx=rdy=0;
-        if (e2 >= dy) { err += dy; x0 += sx; rdx=sx;} /* e_xy+e_x > 0 */
-        if (e2 <= dx) { err += dx; y0 += sy; rdy=sy;} /* e_xy+e_y < 0 */
-    }
-    return ;
-}
-void plotLineDiffuse(int x0, int y0, int x1, int y1,rgbf power,int num_diffuse,const std::function<rgbf(rgbf,int,int,int,int)>& setPixel,bool skip_hack=false)
+//void plotLine(int x0, int y0, int x1, int y1,rgbf power,const std::function<rgbf(rgbf,int,int,int,int)>& setPixel)
+//{
+//    int dx =  abs(x1-x0), sx = x0<x1 ? 1 : -1;
+//    int dy = -abs(y1-y0), sy = y0<y1 ? 1 : -1;
+//    int err = dx+dy, e2; /* error value e_xy */
+//    int rdx=0;
+//    int rdy=0;
+//    for(;;){  /* loop */
+//        if(rdx!=0 || rdy!=0) //dirty hack to skip occlusion on the first tile.
+//        {
+//            power=setPixel(power,rdx,rdy,x0,y0);
+//            if(power.dot(power)<0.00001f)
+//                return ;
+//        }
+//        if (x0==x1 && y0==y1) break;
+//        e2 = 2*err;
+//        rdx=rdy=0;
+//        if (e2 >= dy) { err += dy; x0 += sx; rdx=sx;} /* e_xy+e_x > 0 */
+//        if (e2 <= dx) { err += dx; y0 += sy; rdy=sy;} /* e_xy+e_y < 0 */
+//    }
+//    return ;
+//}
+//void plotLineDiffuse(int x0, int y0, int x1, int y1,rgbf power,int num_diffuse,const std::function<rgbf(rgbf,int,int,int,int)>& setPixel,bool skip_hack=false)
+void plotLineDiffuse(int x0, int y0, int x1, int y1,rgbf power,int num_diffuse,const lightThread::CellLighter& setPixel,bool skip_hack=false)
 {
 
     int dx =  abs(x1-x0), sx = x0<x1 ? 1 : -1;
@@ -210,58 +212,58 @@ void plotLineDiffuse(int x0, int y0, int x1, int y1,rgbf power,int num_diffuse,c
     }
     return ;
 }
-void plotLineAA(int x0, int y0, int x1, int y1,rgbf power,const std::function<rgbf(rgbf,int,int,int,int)>& setPixelAA)
-{
-    int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
-    int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
-    int err = dx-dy, e2, x2;                       /* error value e_xy */
-    int ed = dx+dy == 0 ? 1 : sqrt((float)dx*dx+(float)dy*dy);
-    int rdx=0;
-    int rdy=0;
-    int lrdx,lrdy;
-    rgbf sumPower;
-    for ( ; ; ){                                         /* pixel loop */
-        float strsum=0;
-        float str=1-abs(err-dx+dy)/(float)ed;
-        strsum=str;
-        sumPower=setPixelAA(power*str,rdx,rdy,x0,y0);
-        e2 = err; x2 = x0;
-        lrdx=rdx;
-        lrdy=rdy;
-        rdx=rdy=0;
-        if (2*e2 >= -dx) {                                    /* x step */
-            if (x0 == x1) break;
-
-            if (e2+dy < ed)
-                {
-                    str=1-(e2+dy)/(float)ed;
-                    sumPower+=setPixelAA(power*str,lrdx,lrdy,x0,y0+sy);
-                    strsum+=str;
-                }
-            err -= dy; x0 += sx; rdx=sx;
-        }
-        if (2*e2 <= dy) {                                     /* y step */
-            if (y0 == y1) break;
-
-            if (dx-e2 < ed)
-                {
-                    str=1-(dx-e2)/(float)ed;
-                    sumPower+=setPixelAA(power*str,lrdx,lrdy,x2+sx,y0);
-                    strsum+=str;
-                }
-            err += dx; y0 += sy; rdy=sy;
-        }
-        if(strsum<0.001f)
-            return;
-        sumPower=sumPower/strsum;
-        if(sumPower.dot(sumPower)<0.00001f)
-            return;
-        power=sumPower;
-    }
-}
+//void plotLineAA(int x0, int y0, int x1, int y1,rgbf power,const std::function<rgbf(rgbf,int,int,int,int)>& setPixelAA)
+//{
+//    int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
+//    int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
+//    int err = dx-dy, e2, x2;                       /* error value e_xy */
+//    int ed = dx+dy == 0 ? 1 : sqrt((float)dx*dx+(float)dy*dy);
+//    int rdx=0;
+//    int rdy=0;
+//    int lrdx,lrdy;
+//    rgbf sumPower;
+//    for ( ; ; ){                                         /* pixel loop */
+//        float strsum=0;
+//        float str=1-abs(err-dx+dy)/(float)ed;
+//        strsum=str;
+//        sumPower=setPixelAA(power*str,rdx,rdy,x0,y0);
+//        e2 = err; x2 = x0;
+//        lrdx=rdx;
+//        lrdy=rdy;
+//        rdx=rdy=0;
+//        if (2*e2 >= -dx) {                                    /* x step */
+//            if (x0 == x1) break;
+//
+//            if (e2+dy < ed)
+//                {
+//                    str=1-(e2+dy)/(float)ed;
+//                    sumPower+=setPixelAA(power*str,lrdx,lrdy,x0,y0+sy);
+//                    strsum+=str;
+//                }
+//            err -= dy; x0 += sx; rdx=sx;
+//        }
+//        if (2*e2 <= dy) {                                     /* y step */
+//            if (y0 == y1) break;
+//
+//            if (dx-e2 < ed)
+//                {
+//                    str=1-(dx-e2)/(float)ed;
+//                    sumPower+=setPixelAA(power*str,lrdx,lrdy,x2+sx,y0);
+//                    strsum+=str;
+//                }
+//            err += dx; y0 += sy; rdy=sy;
+//        }
+//        if(strsum<0.001f)
+//            return;
+//        sumPower=sumPower/strsum;
+//        if(sumPower.dot(sumPower)<0.00001f)
+//            return;
+//        power=sumPower;
+//    }
+//}
 rgbf blendMax(const rgbf& a,const rgbf& b)
 {
-    return rgbf(std::max(a.r,b.r),std::max(a.g,b.g),std::max(a.b,b.b));
+    return rgbf(std::max<float>(a.r,b.r),std::max<float>(a.g,b.g),std::max<float>(a.b,b.b));
 }
 rgbf blend(const rgbf& a,const rgbf& b)
 {
@@ -270,7 +272,7 @@ rgbf blend(const rgbf& a,const rgbf& b)
 void lightingEngineViewscreen::clear()
 {
     lightMap.assign(lightMap.size(),rgbf(1,1,1));
-    std::lock_guard<std::mutex> guard{myRenderer->dataMutex};
+    tthread::lock_guard<tthread::mutex> guard(myRenderer->dataMutex);
     if(lightMap.size()==myRenderer->lightGrid.size())
     {
         std::swap(myRenderer->lightGrid,lightMap);
@@ -299,7 +301,7 @@ void lightingEngineViewscreen::calculate()
 }
 void lightingEngineViewscreen::updateWindow()
 {
-    std::lock_guard<std::mutex> guard{myRenderer->dataMutex};
+    tthread::lock_guard<tthread::mutex> guard(myRenderer->dataMutex);
     if(lightMap.size()!=myRenderer->lightGrid.size())
     {
         reinit();
@@ -365,7 +367,7 @@ void lightingEngineViewscreen::fixAdvMode(int mode)
 void lightSource::combine(const lightSource& other)
 {
     power=blend(power,other.power);
-    radius=std::max(other.radius,radius);//hack... but who cares
+    radius=std::max<int>(other.radius,radius);//hack... but who cares
 }
 bool lightingEngineViewscreen::addLight(int tileId,const lightSource& light)
 {
@@ -408,29 +410,30 @@ void addPlant(const std::string& id,std::map<int,lightSource>& map,const lightSo
 }
 matLightDef* lightingEngineViewscreen::getMaterialDef( int matType,int matIndex )
 {
-    auto it=matDefs.find(std::make_pair(matType,matIndex));
-    if(it!=matDefs.end())
+    MatDefsMap::iterator it = matDefs.find(std::make_pair(matType,matIndex));
+    if(it != matDefs.end())
         return &it->second;
     else
         return NULL;
 }
 buildingLightDef* lightingEngineViewscreen::getBuildingDef( df::building* bld )
 {
-    auto it=buildingDefs.find(std::make_tuple((int)bld->getType(),(int)bld->getSubtype(),(int)bld->getCustomType()));
-    if(it!=buildingDefs.end())
+    BuildingDefsMap::iterator it =
+        buildingDefs.find(BuildingDefKey((int)bld->getType(),(int)bld->getSubtype(),(int)bld->getCustomType()));
+    if(it != buildingDefs.end())
         return &it->second;
     else
         return NULL;
 }
 creatureLightDef* lightingEngineViewscreen::getCreatureDef(df::unit* u)
 {
-    auto it=creatureDefs.find(std::make_pair(int(u->race),int(u->caste)));
-    if(it!=creatureDefs.end())
+    CreatureDefsMap::iterator it = creatureDefs.find(std::make_pair(int(u->race),int(u->caste)));
+    if(it != creatureDefs.end())
         return &it->second;
     else
     {
-        auto it2=creatureDefs.find(std::make_pair(int(u->race),int(-1)));
-        if(it2!=creatureDefs.end())
+        CreatureDefsMap::iterator it2 = creatureDefs.find(std::make_pair(int(u->race),int(-1)));
+        if(it2 != creatureDefs.end())
             return &it2->second;
         else
             return NULL;
@@ -438,13 +441,13 @@ creatureLightDef* lightingEngineViewscreen::getCreatureDef(df::unit* u)
 }
 itemLightDef* lightingEngineViewscreen::getItemDef(df::item* it)
 {
-    auto iter=itemDefs.find(std::make_pair(int(it->getType()),int(it->getSubtype())));
-    if(iter!=itemDefs.end())
+    ItemDefsMap::iterator iter = itemDefs.find(std::make_pair(int(it->getType()),int(it->getSubtype())));
+    if(iter != itemDefs.end())
         return &iter->second;
     else
     {
-        auto iter2=itemDefs.find(std::make_pair(int(it->getType()),int(-1)));
-        if(iter2!=itemDefs.end())
+        ItemDefsMap::iterator iter2=itemDefs.find(std::make_pair(int(it->getType()),int(-1)));
+        if(iter2 != itemDefs.end())
             return &iter2->second;
         else
             return NULL;
@@ -548,8 +551,8 @@ void lightingEngineViewscreen::doSun(const lightSource& sky,MapExtras::MapCache&
     rect2d blockVp;
     blockVp.first=window2d/16;
     blockVp.second=(window2d+vpSize)/16;
-    blockVp.second.x=std::min(blockVp.second.x,(int16_t)df::global::world->map.x_count_block);
-    blockVp.second.y=std::min(blockVp.second.y,(int16_t)df::global::world->map.y_count_block);
+    blockVp.second.x=std::min<int16>(blockVp.second.x,(int16_t)df::global::world->map.x_count_block);
+    blockVp.second.y=std::min<int16>(blockVp.second.y,(int16_t)df::global::world->map.y_count_block);
     //endof mess
     for(int blockX=blockVp.first.x;blockX<=blockVp.second.x;blockX++)
     for(int blockY=blockVp.first.y;blockY<=blockVp.second.y;blockY++)
@@ -636,8 +639,8 @@ void lightingEngineViewscreen::doOcupancyAndLights()
     rect2d blockVp;
     blockVp.first=coord2d(window_x,window_y)/16;
     blockVp.second=(window2d+vpSize)/16;
-    blockVp.second.x=std::min(blockVp.second.x,(int16_t)df::global::world->map.x_count_block);
-    blockVp.second.y=std::min(blockVp.second.y,(int16_t)df::global::world->map.y_count_block);
+    blockVp.second.x=std::min<int16>(blockVp.second.x,(int16_t)df::global::world->map.x_count_block);
+    blockVp.second.y=std::min<int16>(blockVp.second.y,(int16_t)df::global::world->map.y_count_block);
 
     for(int blockX=blockVp.first.x;blockX<=blockVp.second.x;blockX++)
     for(int blockY=blockVp.first.y;blockY<=blockVp.second.y;blockY++)
@@ -966,7 +969,7 @@ matLightDef lua_parseMatDef(lua_State* L)
 }
 int lightingEngineViewscreen::parseMaterials(lua_State* L)
 {
-    auto engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
+    lightingEngineViewscreen* engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
     engine->matDefs.clear();
     //color_ostream* os=Lua::GetOutput(L);
     Lua::StackUnwinder unwinder(L);
@@ -998,7 +1001,7 @@ int lightingEngineViewscreen::parseMaterials(lua_State* L)
     lua_pop(L,1)
 int lightingEngineViewscreen::parseSpecial(lua_State* L)
 {
-    auto engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
+    lightingEngineViewscreen* engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
     Lua::StackUnwinder unwinder(L);
     lua_getfield(L,2,"special");
     if(!lua_istable(L,-1))
@@ -1033,7 +1036,7 @@ int lightingEngineViewscreen::parseSpecial(lua_State* L)
 #undef LOAD_SPECIAL
 int lightingEngineViewscreen::parseItems(lua_State* L)
 {
-    auto engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
+    lightingEngineViewscreen* engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
     engine->itemDefs.clear();
     Lua::StackUnwinder unwinder(L);
     lua_getfield(L,2,"items");
@@ -1069,7 +1072,7 @@ int lightingEngineViewscreen::parseItems(lua_State* L)
 }
 int lightingEngineViewscreen::parseCreatures(lua_State* L)
 {
-    auto engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
+    lightingEngineViewscreen* engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
     engine->creatureDefs.clear();
     Lua::StackUnwinder unwinder(L);
     lua_getfield(L,2,"creatures");
@@ -1099,7 +1102,7 @@ int lightingEngineViewscreen::parseCreatures(lua_State* L)
 }
 int lightingEngineViewscreen::parseBuildings(lua_State* L)
 {
-    auto engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
+    lightingEngineViewscreen* engine= (lightingEngineViewscreen*)lua_touserdata(L, 1);
     engine->buildingDefs.clear();
     Lua::StackUnwinder unwinder(L);
     lua_getfield(L,2,"buildings");
@@ -1126,7 +1129,7 @@ int lightingEngineViewscreen::parseBuildings(lua_State* L)
             //os->print("\tProcessing custom:%d\n",index);
             buildingLightDef current;
             current.light=lua_parseMatDef(L);
-            engine->buildingDefs[std::make_tuple(type,subtype,custom)]=current;
+            engine->buildingDefs[BuildingDefKey(type,subtype,custom)]=current;
             GETLUAFLAG(current.poweredOnly,"poweredOnly");
             GETLUAFLAG(current.useMaterial,"useMaterial");
 
@@ -1364,13 +1367,14 @@ rgbf lightThread::lightUpCell(rgbf power,int dx,int dy,int tx,int ty)
 }
 void lightThread::doRay(const rgbf& power,int cx,int cy,int tx,int ty,int num_diffuse)
 {
-    using namespace std::placeholders;
-    plotLineDiffuse(cx,cy,tx,ty,power,num_diffuse,std::bind(&lightThread::lightUpCell,this,_1,_2,_3,_4,_5));
+    //using namespace std::placeholders;
+    //plotLineDiffuse(cx,cy,tx,ty,power,num_diffuse,std::bind(&lightThread::lightUpCell,this,_1,_2,_3,_4,_5));
+    plotLineDiffuse(cx,cy,tx,ty,power,num_diffuse,CellLighter(this));
 }
 
 void lightThread::doLight( int x,int y )
 {
-    using namespace std::placeholders;
+    //using namespace std::placeholders;
     lightSource& csource=dispatch.lights[x*dispatch.getH()+y];
     int num_diffuse=dispatch.num_diffusion;
     if(csource.radius>0)
@@ -1392,8 +1396,9 @@ void lightThread::doLight( int x,int y )
         if(surrounds.dot(surrounds)>0.00001f) //if we needed to light up the suroundings, then raycast
         {
 
-            plotSquare(x,y,radius,
-                std::bind(&lightThread::doRay,this,power,x,y,_1,_2,num_diffuse));
+            //plotSquare(x,y,radius,
+            //    std::bind(&lightThread::doRay,this,power,x,y,_1,_2,num_diffuse));
+            plotSquare(x,y,radius,RayPlotter(this,power,x,y,num_diffuse));
         }
     }
 }
@@ -1444,6 +1449,10 @@ void lightThreadDispatch::shutdown()
     {
         threadPool[i]->myThread->join();
     }
+    for(size_t i=0;i<threadPool.size();i++)
+    {
+        delete threadPool[i];
+    }
     threadPool.clear();
 }
 
@@ -1465,16 +1474,16 @@ void lightThreadDispatch::start(int count)
 {
     for(int i=0;i<count;i++)
     {
-        std::unique_ptr<lightThread> nthread(new lightThread(*this));
-        nthread->myThread=new tthread::thread(&threadStub,nthread.get());
-        threadPool.push_back(std::move(nthread));
+        lightThread* nthread = new lightThread(*this);
+        nthread->myThread = new tthread::thread(&threadStub,nthread);
+        threadPool.push_back(nthread);
     }
 }
 
 void lightThreadDispatch::waitForWrites()
 {
     tthread::lock_guard<tthread::mutex> guard(writeLock);
-    while(threadPool.size()>size_t(writeCount))//missed it somehow already.
+    while (threadPool.size()>size_t(writeCount))//missed it somehow already.
     {
         writesDone.wait(writeLock); //if not, wait a bit
     }

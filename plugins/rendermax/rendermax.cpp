@@ -1,7 +1,9 @@
-#include <mutex>
+//#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "tinythread.h"
 
 #include "Console.h"
 #include "Core.h"
@@ -363,7 +365,7 @@ static command_result rendermax(color_ostream &out, vector <string> & parameters
                 cur=blue;
 
             renderer_test* r=reinterpret_cast<renderer_test*>(enabler->renderer);
-            std::lock_guard<std::mutex> guard{r->dataMutex};
+            tthread::lock_guard<tthread::mutex> guard(r->dataMutex);
             int h=gps->dimy;
             int w=gps->dimx;
             int cx=w/2;

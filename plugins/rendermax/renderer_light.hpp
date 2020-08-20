@@ -1,47 +1,66 @@
 #pragma once
 
 #include <memory>
-#include <mutex>
+//#include <mutex>
 #include <stack>
-#include <tuple>
-#include <unordered_map>
+//#include <tuple>
+//#include <unordered_map>
+#include <hash_map>
+
+#include "tinythread.h"
 
 #include "renderer_opengl.hpp"
 #include "Types.h"
 
 // we are not using boost so let's cheat:
-template <class T>
-inline void hash_combine(std::size_t & seed, const T & v)
-{
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
+//template <class T>
+//inline void hash_combine(std::size_t & seed, const T & v)
+//{
+//    std::hash<T> hasher;
+//    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+//}
 
-namespace std
-{
-    template<typename S, typename T> struct hash<pair<S, T>>
-    {
-        inline size_t operator()(const pair<S, T> & v) const
-        {
-            size_t seed = 0;
-            ::hash_combine(seed, v.first);
-            ::hash_combine(seed, v.second);
-            return seed;
-        }
-    };
-    template<typename S, typename T,typename V> struct hash<tuple<S, T, V>>
-    {
-        inline size_t operator()(const tuple<S, T, V> & v) const
-        {
-            size_t seed = 0;
-            ::hash_combine(seed,get<0>(v));
-            ::hash_combine(seed,get<1>(v));
-            ::hash_combine(seed,get<2>(v));
-            return seed;
-        }
-    };
-}
-// now we can hash pairs and tuples
+//namespace stdext
+//{
+//    template<typename S, typename T>
+//    struct _Hash<std::pair<S, T>>
+//    {
+//        inline size_t operator()(const std::pair<S, T> & v) const
+//        {
+//            size_t seed = 0;
+//            ::hash_combine(seed, v.first);
+//            ::hash_combine(seed, v.second);
+//            return seed;
+//        }
+//    };
+//}
+
+//namespace std
+//{
+//    template<typename S, typename T>
+//    struct hash<pair<S, T>>
+//    {
+//        inline size_t operator()(const pair<S, T> & v) const
+//        {
+//            size_t seed = 0;
+//            ::hash_combine(seed, v.first);
+//            ::hash_combine(seed, v.second);
+//            return seed;
+//        }
+//    };
+//    template<typename S, typename T,typename V> struct hash<tuple<S, T, V>>
+//    {
+//        inline size_t operator()(const tuple<S, T, V> & v) const
+//        {
+//            size_t seed = 0;
+//            ::hash_combine(seed,get<0>(v));
+//            ::hash_combine(seed,get<1>(v));
+//            ::hash_combine(seed,get<2>(v));
+//            return seed;
+//        }
+//    };
+//}
+ //now we can hash pairs and tuples
 
 #include "modules/MapCache.h"
 bool isInRect(const df::coord2d& pos,const DFHack::rect2d& rect);
@@ -94,7 +113,7 @@ private:
     }
     void reinitLightGrid(int w,int h)
     {
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         lightGrid.resize(w*h,rgbf(1,1,1));
     }
     void reinitLightGrid()
@@ -103,7 +122,7 @@ private:
     }
 
 public:
-    std::mutex dataMutex;
+    tthread::mutex dataMutex;
     std::vector<rgbf> lightGrid;
     renderer_light(renderer* parent):renderer_wrap(parent),light_adaptation(1)
     {
@@ -111,12 +130,12 @@ public:
     }
     virtual void update_tile(int32_t x, int32_t y) {
         renderer_wrap::update_tile(x,y);
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         colorizeTile(x,y);
     };
     virtual void update_all() {
         renderer_wrap::update_all();
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         for (int x = 0; x < df::global::gps->dimx; x++)
             for (int y = 0; y < df::global::gps->dimy; y++)
                 colorizeTile(x,y);
@@ -230,7 +249,7 @@ class lightThreadDispatch
 public:
     DFHack::rect2d viewPort;
 
-    std::vector<std::unique_ptr<lightThread> > threadPool;
+    std::vector<lightThread*> threadPool;
     std::vector<lightSource>& lights;
 
     tthread::mutex occlusionMutex;
@@ -274,6 +293,38 @@ private:
     void doLight(int x,int y);
     void doRay(const rgbf& power,int cx,int cy,int tx,int ty,int num_diffuse);
     rgbf lightUpCell(rgbf power,int dx,int dy,int tx,int ty);
+public:
+    struct RayPlotter
+    {
+    public:
+        explicit RayPlotter(lightThread* const _lt, const rgbf& _rf, int _x, int _y, int _num_diffuse) :
+            lt(_lt), rf(_rf), x(_x), y(_y), num_diffuse(_num_diffuse) {}
+
+        void operator()(int tx, int ty) const
+        {
+            lt->doRay(rf, x, y, tx, ty, num_diffuse);
+        }
+
+        lightThread* const lt;
+        const rgbf& rf;
+        int x;
+        int y;
+        int num_diffuse;
+    };
+    friend struct RayPlotter;
+    struct CellLighter
+    {
+    public:
+        explicit CellLighter(lightThread* const _lt) : lt(_lt) {}
+
+        rgbf operator()(rgbf power, int dx, int dy, int tx, int ty) const
+        {
+            return lt->lightUpCell(power, dx, dy, tx, ty);
+        }
+
+        lightThread* const lt;
+    };
+    friend struct CellLighter;
 };
 class lightingEngineViewscreen:public lightingEngine
 {
@@ -363,14 +414,67 @@ private:
     matLightDef matCitizen;
     float levelDim;
     int adv_mode;
-    //materials
-    std::unordered_map<std::pair<int,int>,matLightDef> matDefs;
-    //buildings
-    std::unordered_map<std::tuple<int,int,int>,buildingLightDef> buildingDefs;
-    //creatures
-    std::unordered_map<std::pair<int,int>,creatureLightDef> creatureDefs;
-    //items
-    std::unordered_map<std::pair<int,int>,itemLightDef> itemDefs;
+    ////materials
+    //std::unordered_map<std::pair<int,int>,matLightDef> matDefs;
+    ////buildings
+    //std::unordered_map<std::tuple<int,int,int>,buildingLightDef> buildingDefs;
+    ////creatures
+    //std::unordered_map<std::pair<int,int>,creatureLightDef> creatureDefs;
+    ////items
+    //std::unordered_map<std::pair<int,int>,itemLightDef> itemDefs;
+
+    struct BuildingDefKey
+    {
+    public:
+        BuildingDefKey(int f, int s, int t) : first(f), second(s), third(t) {}
+        BuildingDefKey() : first(0), second(0), third(0) {}
+
+        int first;
+        int second;
+        int third;
+    };
+    struct BuildDefKeyHash
+    {
+        size_t operator()(const BuildingDefKey& k) const
+        {
+            return k.first*65537 + k.second*32769 + k.third;
+        }
+	    bool operator()(const BuildingDefKey& k1, const BuildingDefKey& k2) const
+	    {
+	        return k1.first == k2.first && k1.second == k2.second && k1.third == k2.third;
+	    }
+	    enum
+	    {
+	        bucket_size = 4,
+	        min_buckets = 8
+        };
+    };
+    struct DefPairHash
+    {
+        size_t operator()(const std::pair<int,int>& p) const
+        {
+            return p.first*65537 + p.second*32769;
+        }
+	    bool operator()(const std::pair<int,int>& p1, const std::pair<int,int>& p2) const
+	    {
+	        return p1.first == p2.first && p1.second == p2.second;
+	    }
+	    enum
+	    {
+	        bucket_size = 4,
+	        min_buckets = 8
+        };
+    };
+    typedef stdext::hash_map<std::pair<int,int>,matLightDef,DefPairHash> MatDefsMap;
+    typedef stdext::hash_map<BuildingDefKey,buildingLightDef,BuildDefKeyHash> BuildingDefsMap;
+    typedef stdext::hash_map<std::pair<int,int>,creatureLightDef,DefPairHash> CreatureDefsMap;
+    typedef stdext::hash_map<std::pair<int,int>,itemLightDef,DefPairHash> ItemDefsMap;
+
+    MatDefsMap matDefs;
+    BuildingDefsMap buildingDefs;
+    CreatureDefsMap creatureDefs;
+    ItemDefsMap itemDefs;
+
     int w,h;
     DFHack::rect2d mapPort;
     friend class lightThreadDispatch;

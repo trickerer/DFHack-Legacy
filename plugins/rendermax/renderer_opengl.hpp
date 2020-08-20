@@ -13,7 +13,7 @@
 #include "df/graphic.h"
 #include <math.h>
 #include <cmath>
-#include <mutex>
+//#include <mutex>
 
 using df::renderer;
 using df::init;
@@ -280,7 +280,7 @@ private:
     }
     void reinitLightGrid(int w,int h)
     {
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         lightGrid.resize(w*h);
     }
     void reinitLightGrid()
@@ -288,7 +288,7 @@ private:
         reinitLightGrid(df::global::gps->dimy,df::global::gps->dimx);
     }
 public:
-    std::mutex dataMutex;
+    tthread::mutex dataMutex;
     std::vector<rgbf> lightGrid;
     renderer_test(renderer* parent):renderer_wrap(parent)
     {
@@ -296,14 +296,14 @@ public:
     }
     virtual void update_tile(int32_t x, int32_t y) {
         renderer_wrap::update_tile(x,y);
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         colorizeTile(x,y);
         //some sort of mutex or sth?
         //and then map read
     };
     virtual void update_all() {
         renderer_wrap::update_all();
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         for (int x = 0; x < df::global::gps->dimx; x++)
             for (int y = 0; y < df::global::gps->dimy; y++)
                 colorizeTile(x,y);
@@ -365,7 +365,7 @@ private:
     }
     void reinitGrids(int w,int h)
     {
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         foreOffset.resize(w*h);
         foreMult.resize(w*h);
         backOffset.resize(w*h);
@@ -376,7 +376,7 @@ private:
         reinitGrids(df::global::gps->dimy,df::global::gps->dimx);
     }
 public:
-    std::mutex dataMutex;
+    tthread::mutex dataMutex;
     std::vector<rgbf> foreOffset,foreMult;
     std::vector<rgbf> backOffset,backMult;
     inline int xyToTile(int x, int y)
@@ -389,14 +389,14 @@ public:
     }
     virtual void update_tile(int32_t x, int32_t y) {
         renderer_wrap::update_tile(x,y);
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         overwriteTile(x,y);
         //some sort of mutex or sth?
         //and then map read
     };
     virtual void update_all() {
         renderer_wrap::update_all();
-        std::lock_guard<std::mutex> guard{dataMutex};
+        tthread::lock_guard<tthread::mutex> guard(dataMutex);
         for (int x = 0; x < df::global::gps->dimx; x++)
             for (int y = 0; y < df::global::gps->dimy; y++)
                 overwriteTile(x,y);
