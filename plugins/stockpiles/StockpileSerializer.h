@@ -117,8 +117,8 @@ private:
  template<typename E>
  static typename df::enum_traits<E>::base_type linear_index ( std::ostream & out, df::enum_traits<E> traits, const std::string &token )
  {
-  auto j = traits.first_item_value;
-  auto limit = traits.last_item_value;
+  df::enum_traits<E>::base_type j = traits.first_item_value;
+  df::enum_traits<E>::base_type limit = traits.last_item_value;
   // sometimes enums start at -1, which is bad news for array indexing
   if ( j < 0 )
   {
@@ -135,13 +135,185 @@ private:
  }
 
  //  read the token from the serailized list during import
- typedef std::function<std::string ( const size_t& ) > FuncReadImport;
+ //typedef std::function<std::string ( const size_t& ) > FuncReadImport;
  //  add the token to the serialized list during export
- typedef std::function<void ( const std::string & ) > FuncWriteExport;
+ //typedef std::function<void ( const std::string & ) > FuncWriteExport;
  //  are item's of item_type allowed?
- typedef std::function<bool ( df::enums::item_type::item_type ) > FuncItemAllowed;
+ //typedef std::function<bool ( df::enums::item_type::item_type ) > FuncItemAllowed;
  //  is this material allowed?
- typedef std::function<bool ( const DFHack::MaterialInfo & ) > FuncMaterialAllowed;
+ //typedef std::function<bool ( const DFHack::MaterialInfo & ) > FuncMaterialAllowed;
+
+enum IEDataType
+{
+    ITEM_C_MEAT = 0,
+    ITEM_C_FISH,
+    ITEM_C_UNPREP_FISH,
+    ITEM_C_EGGS,
+    ITEM_C_PLANTS,
+    ITEM_C_PLANTDRINK,
+    ITEM_C_CREATDRINK,
+    ITEM_C_PLANTCHEESE,
+    ITEM_C_CREATCHEESE,
+    ITEM_C_SEED,
+    ITEM_C_LEAF,
+    ITEM_C_PLANTPOWDER,
+    ITEM_C_CREATPOWDER,
+    ITEM_C_GLOB,
+    ITEM_C_PLANTLIQUID,
+    ITEM_C_CREATLIQUID,
+    ITEM_C_MISCLIQUID,
+    ITEM_C_PASTE,
+    ITEM_C_PRESSED,
+    ITEM_T_LEATHER,
+    ITEM_T_FURNITURE,
+    ITEM_T_FURNITURE_OTHER,
+    ITEM_Q_FURNITURE_CORE,
+    ITEM_Q_FURNITURE_TOTAL,
+    ITEM_T_REFUSE,
+    ITEM_T_REFUSE_CORPSE,
+    ITEM_T_REFUSE_PART,
+    ITEM_T_REFUSE_SKULL,
+    ITEM_T_REFUSE_BONE,
+    ITEM_T_REFUSE_HAIR,
+    ITEM_T_REFUSE_SHELL,
+    ITEM_T_REFUSE_TEETH,
+    ITEM_T_REFUSE_HORN,
+    ITEM_T_STONE,
+    ITEM_T_AMMO_TYPE,
+    ITEM_T_AMMO_MATS,
+    ITEM_Q_AMMO_CORE,
+    ITEM_Q_AMMO_TOTAL,
+    ITEM_T_COIN_MATS,
+    ITEM_T_BAR_MATS,
+    ITEM_T_BAR_MATS_O,
+    ITEM_T_BLK_MATS,
+    ITEM_T_BLK_MATS_O,
+    ITEM_T_GEM_R_MATS,
+    ITEM_T_GEM_C_MATS,
+    ITEM_T_FGOOD_TYPE,
+    ITEM_T_FGOOD_MATS,
+    ITEM_T_FGOOD_MATS_O,
+    ITEM_Q_FGOOD_CORE,
+    ITEM_Q_FGOOD_TOTAL,
+    ITEM_T_CLOTH_T_SILK,
+    ITEM_T_CLOTH_T_PLANT,
+    ITEM_T_CLOTH_T_YARN,
+    ITEM_T_CLOTH_T_METAL,
+    ITEM_T_CLOTH_SILK,
+    ITEM_T_CLOTH_PLANT,
+    ITEM_T_CLOTH_YARN,
+    ITEM_T_CLOTH_METAL,
+    ITEM_T_WEAP_TYPE,
+    ITEM_T_WEAP_TYPE_T,
+    ITEM_T_WEAP_MATS,
+    ITEM_T_WEAP_MATS_O,
+    ITEM_Q_WEAP_CORE,
+    ITEM_Q_WEAP_TOTAL,
+    ITEM_T_ARMO_BODY,
+    ITEM_T_ARMO_HELM,
+    ITEM_T_ARMO_SHOES,
+    ITEM_T_ARMO_GLOVES,
+    ITEM_T_ARMO_PANTS,
+    ITEM_T_ARMO_SHIELD,
+    ITEM_T_ARMO_MATS,
+    ITEM_T_ARMO_MATS_O,
+    ITEM_Q_ARMO_CORE,
+    ITEM_Q_ARMO_TOTAL
+};
+struct FuncReadImport
+{
+public:
+    FuncReadImport(dfstockpiles::StockpileSettings* _buf, IEDataType _cat) : buf(_buf), cat(_cat) {}
+    FuncReadImport() : buf(NULL), cat(ITEM_C_MEAT) {} //validity checked in food_pair()
+
+    std::string operator()(const size_t& idx) const;
+
+private:
+    dfstockpiles::StockpileSettings* buf;
+    IEDataType cat;
+};
+struct FuncWriteExport
+{
+public:
+    FuncWriteExport(dfstockpiles::StockpileSettings* _buf, IEDataType _cat) : buf(_buf), cat(_cat) {}
+    FuncWriteExport() : buf(NULL), cat(ITEM_C_MEAT) {} //validity checked in food_pair()
+
+    void operator()(const std::string &id);
+
+private:
+    dfstockpiles::StockpileSettings* buf;
+    IEDataType cat;
+};
+
+enum ItemAllowType
+{
+    ITEM_ALLOW_REFUSE,
+    ITEM_ALLOW_FGOODS
+};
+struct FuncItemAllowed
+{
+public:
+    explicit FuncItemAllowed(StockpileSerializer* const _sr, ItemAllowType _cat) : sr(_sr), cat(_cat) {}
+
+    bool operator()(df::enums::item_type::item_type itype)
+    {
+        switch (cat)
+        {
+            case ITEM_ALLOW_REFUSE:     return sr->refuse_type_is_allowed(itype);
+            case ITEM_ALLOW_FGOODS:     return sr->finished_goods_type_is_allowed(itype);
+            default:                    return true;
+        }
+    }
+
+private:
+    StockpileSerializer* const sr;
+    ItemAllowType cat;
+};
+friend struct FuncItemAllowed; //calling private functions here
+
+enum ItemMaterialAllowType
+{
+    MATERIAL_ALLOW_FURNITURE,
+    MATERIAL_ALLOW_STONE,
+    MATERIAL_ALLOW_AMMO,
+    MATERIAL_ALLOW_COINS,
+    MATERIAL_ALLOW_BARS,
+    MATERIAL_ALLOW_BLOCKS,
+    MATERIAL_ALLOW_GEM_ROUGH,
+    MATERIAL_ALLOW_GEM_CUT,
+    MATERIAL_ALLOW_FGOODS,
+    MATERIAL_ALLOW_WEAPON,
+    MATERIAL_ALLOW_ARMOR
+};
+struct FuncMaterialAllowed
+{
+public:
+    explicit FuncMaterialAllowed(StockpileSerializer* const _sr, ItemMaterialAllowType _cat) : sr(_sr), cat(_cat) {}
+
+    bool operator()(const DFHack::MaterialInfo &mi)
+    {
+        switch (cat)
+        {
+            case MATERIAL_ALLOW_FURNITURE:      return sr->furniture_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_STONE:          return sr->stone_is_allowed(mi);
+            case MATERIAL_ALLOW_AMMO:           return sr->ammo_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_COINS:          return sr->coins_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_BARS:           return sr->bars_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_BLOCKS:         return sr->blocks_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_GEM_ROUGH:      return sr->gem_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_GEM_CUT:        return sr->gem_cut_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_FGOODS:         return sr->finished_goods_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_WEAPON:         return sr->weapons_mat_is_allowed(mi);
+            case MATERIAL_ALLOW_ARMOR:          return sr->armor_mat_is_allowed(mi);
+            default:                            return true;
+        }
+    }
+
+private:
+    StockpileSerializer* const sr;
+    ItemMaterialAllowType cat;
+};
+friend struct FuncMaterialAllowed; //calling private functions here
 
  // convenient struct for parsing food stockpile items
  struct food_pair
@@ -283,14 +455,16 @@ private:
  bool refuse_creature_is_allowed ( const df::creature_raw *raw );
 
 
- void refuse_write_helper ( std::function<void ( const std::string & ) > add_value, const std::vector<char> & list );
+ //void refuse_write_helper ( std::function<void ( const std::string & ) > add_value, const std::vector<char> & list );
+ void refuse_write_helper ( FuncWriteExport add_value, const std::vector<char> & list );
 
 
  bool refuse_type_is_allowed ( df::enums::item_type::item_type type );
 
 
  void write_refuse();
- void refuse_read_helper ( std::function<std::string ( const size_t& ) > get_value, size_t list_size, std::vector<char>* pile_list );
+ //void refuse_read_helper ( std::function<std::string ( const size_t& ) > get_value, size_t list_size, std::vector<char>* pile_list );
+ void refuse_read_helper ( FuncReadImport get_value, size_t list_size, std::vector<char>* pile_list );
 
  void read_refuse();
 

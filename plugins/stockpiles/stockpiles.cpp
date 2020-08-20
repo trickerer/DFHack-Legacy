@@ -46,7 +46,7 @@ REQUIRE_GLOBAL(ui);
 REQUIRE_GLOBAL(selection_rect);
 
 using df::building_stockpilest;
-using std::placeholders::_1;
+//using std::placeholders::_1;
 
 static command_result copystock ( color_ostream &out, vector <string> & parameters );
 static bool copystock_guard ( df::viewscreen *top );
@@ -326,7 +326,7 @@ static command_result loadstock ( color_ostream &out, vector <string> & paramete
  */
 bool manage_settings ( building_stockpilest *sp )
 {
-    auto L = Lua::Core::State;
+    lua_State* L = Lua::Core::State;
     color_ostream_proxy out ( Core::getInstance().getConsole() );
 
     CoreSuspendClaimer suspend;
@@ -348,7 +348,7 @@ bool manage_settings ( building_stockpilest *sp )
 
 bool show_message_box ( const std::string & title,  const std::string & msg,  bool is_error = false )
 {
-    auto L = Lua::Core::State;
+    lua_State* L = Lua::Core::State;
     color_ostream_proxy out ( Core::getInstance().getConsole() );
 
     CoreSuspendClaimer suspend;
@@ -406,7 +406,7 @@ struct stockpiles_import_hook : public df::viewscreen_dwarfmodest
         if ( !sp )
             return;
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = dims.y2 - 3;
@@ -488,6 +488,16 @@ static std::vector<std::string> list_dir ( const std::string &path, bool recursi
     return files;
 }
 
+bool is_not_dfstockfile(const std::string &f)
+{
+    return !is_dfstockfile(f);
+}
+
+std::string drop_filename_ext(const std::string &f)
+{
+    return f.substr(0, f.find_last_of("."));
+}
+
 static std::vector<std::string> clean_dfstock_list ( const std::string &path )
 {
     if ( !Filesystem::exists ( path ) )
@@ -495,21 +505,23 @@ static std::vector<std::string> clean_dfstock_list ( const std::string &path )
         return std::vector<std::string>();
     }
     std::vector<std::string> files ( list_dir ( path,  true) );
-    files.erase ( std::remove_if ( files.begin(), files.end(), [] ( const std::string &f )
-    {
-        return !is_dfstockfile ( f );
-    } ),  files.end() );
-    std::transform ( files.begin(), files.end(), files.begin(), [] ( const std::string &f )
-    {
-        return f.substr ( 0, f.find_last_of ( "." ) );
-    } );
+    //files.erase ( std::remove_if ( files.begin(), files.end(), [] ( const std::string &f )
+    //{
+    //    return !is_dfstockfile ( f );
+    //} ),  files.end() );
+    //std::transform ( files.begin(), files.end(), files.begin(), [] ( const std::string &f )
+    //{
+    //    return f.substr ( 0, f.find_last_of ( "." ) );
+    //} );
+    files.erase(std::remove_if(files.begin(), files.end(), &is_not_dfstockfile), files.end());
+    std::transform ( files.begin(), files.end(), files.begin(), &drop_filename_ext);
     std::sort ( files.begin(),files.end(), CompareNoCase );
     return files;
 }
 
 static int stockpiles_list_settings ( lua_State *L )
 {
-    auto path = luaL_checkstring ( L, 1 );
+    const char* path = luaL_checkstring ( L, 1 );
     color_ostream &out = *Lua::GetOutput ( L );
     if ( Filesystem::exists ( path ) && !Filesystem::isdir ( path ) )
     {
