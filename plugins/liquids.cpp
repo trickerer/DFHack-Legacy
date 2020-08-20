@@ -335,7 +335,7 @@ command_result df_liquids (color_ostream &out_, vector <string> & parameters)
         }
         else if (command.size() > 2 && memcmp(command.c_str(), "pf", 2) == 0)
         {
-            auto *tail = command.c_str()+2;
+            const char *tail = command.c_str()+2;
             for (int pm = PF_KEEP; pm <= PF_SOUTHWEST; pm++)
             {
                 if (strcmp(tail, permaflow_name[pm]) != 0)
@@ -395,14 +395,14 @@ command_result df_liquids_execute(color_ostream &out)
 {
     CoreSuspender suspend;
 
-    auto cursor = Gui::getCursorPos();
+    df::coord cursor = Gui::getCursorPos();
     if (!cursor.isValid())
     {
         out.printerr("Can't get cursor coords! Make sure you have a cursor active in DF.\n");
         return CR_WRONG_USAGE;
     }
 
-    auto rv = df_liquids_execute(out, cur_mode, cursor);
+    command_result rv = df_liquids_execute(out, cur_mode, cursor);
     if (rv == CR_OK)
         out << "OK" << endl;
     return rv;
@@ -410,41 +410,56 @@ command_result df_liquids_execute(color_ostream &out)
 
 command_result df_liquids_execute(color_ostream &out, OperationMode &cur_mode, df::coord cursor)
 {
-    // create brush type depending on old parameters
-    std::unique_ptr<Brush> brush;
-
-    switch (cur_mode.brush)
-    {
-    case B_POINT:
-        brush.reset(new RectangleBrush(1,1,1,0,0,0));
-        break;
-    case B_RANGE:
-        brush.reset(new RectangleBrush(cur_mode.size.x,cur_mode.size.y,cur_mode.size.z,0,0,0));
-        break;
-    case B_BLOCK:
-        brush.reset(new BlockBrush());
-        break;
-    case B_COLUMN:
-        brush.reset(new ColumnBrush());
-        break;
-    case B_FLOOD:
-        brush.reset(new FloodBrush(&Core::getInstance()));
-        break;
-    default:
-        // this should never happen!
-        out << "Old brushtype is invalid! Resetting to point brush.\n";
-        cur_mode.brush = B_POINT;
-        brush.reset(new RectangleBrush(1,1,1,0,0,0));
-    }
-
     if (!Maps::IsValid())
     {
         out << "Can't see any DF map loaded." << endl;
         return CR_FAILURE;
     }
 
+    // create brush type depending on old parameters
+    //std::unique_ptr<Brush> brush;
+    Brush* brush;
+
+    switch (cur_mode.brush)
+    {
+    case B_POINT:
+        //brush.reset(new RectangleBrush(1,1,1,0,0,0));
+        brush = (new RectangleBrush(1,1,1,0,0,0));
+        break;
+    case B_RANGE:
+        //brush.reset(new RectangleBrush(cur_mode.size.x,cur_mode.size.y,cur_mode.size.z,0,0,0));
+        brush = (new RectangleBrush(cur_mode.size.x,cur_mode.size.y,cur_mode.size.z,0,0,0));
+        break;
+    case B_BLOCK:
+        //brush.reset(new BlockBrush());
+        brush = (new BlockBrush());
+        break;
+    case B_COLUMN:
+        //brush.reset(new ColumnBrush());
+        brush = (new ColumnBrush());
+        break;
+    case B_FLOOD:
+        //brush.reset(new FloodBrush(&Core::getInstance()));
+        brush = (new FloodBrush(&Core::getInstance()));
+        break;
+    default:
+        // this should never happen!
+        out << "Old brushtype is invalid! Resetting to point brush.\n";
+        cur_mode.brush = B_POINT;
+        //brush.reset(new RectangleBrush(1,1,1,0,0,0));
+        brush = (new RectangleBrush(1,1,1,0,0,0));
+    }
+
+    //if (!Maps::IsValid())
+    //{
+    //    out << "Can't see any DF map loaded." << endl;
+    //    delete brush;
+    //    return CR_FAILURE;
+    //}
+
     MapCache mcache;
     coord_vec all_tiles = brush->points(mcache,cursor);
+    delete brush; //brush is not used anymore - dev note
 
     // Force the game to recompute its walkability cache
     world->reindex_pathfinding = true;
@@ -524,13 +539,13 @@ command_result df_liquids_execute(color_ostream &out, OperationMode &cur_mode, d
                 DFHack::DFCoord current = *iter; // current tile coord
                 DFHack::DFCoord curblock = current /16; // current block coord
                 // check if the block is actually there
-                auto block = mcache.BlockAt(curblock);
+                Block* block = mcache.BlockAt(curblock);
                 if(!block)
                 {
                     iter ++;
                     continue;
                 }
-                auto raw_block = block->getRaw();
+                df::map_block* raw_block = block->getRaw();
                 df::tile_designation des = mcache.designationAt(current);
                 df::tiletype tt = mcache.tiletypeAt(current);
                 // don't put liquids into places where they don't belong...
@@ -592,7 +607,7 @@ command_result df_liquids_execute(color_ostream &out, OperationMode &cur_mode, d
                 }
                 if (cur_mode.permaflow != PF_KEEP && raw_block)
                 {
-                    auto &flow = raw_block->liquid_flow[current.x&15][current.y&15];
+                    df::tile_liquid_flow &flow = raw_block->liquid_flow[current.x&15][current.y&15];
                     flow.bits.perm_flow_dir = permaflow_id[cur_mode.permaflow];
                     flow.bits.temp_flow_timer = 0;
                 }
@@ -608,7 +623,7 @@ command_result df_liquids_execute(color_ostream &out, OperationMode &cur_mode, d
                     (*biter)->enableBlockUpdates(true);
                     break;
                 case M_DEC:
-                    if (auto block = (*biter)->getRaw())
+                    if (df::map_block* block = (*biter)->getRaw())
                     {
                         block->flags.bits.update_liquid = false;
                         block->flags.bits.update_liquid_twice = false;
@@ -616,7 +631,7 @@ command_result df_liquids_execute(color_ostream &out, OperationMode &cur_mode, d
                     break;
                 case M_KEEP:
                     {
-                        auto bflags = (*biter)->BlockFlags();
+                        t_blockflags bflags = (*biter)->BlockFlags();
                         out << "flow bit 1 = " << bflags.bits.update_liquid << endl;
                         out << "flow bit 2 = " << bflags.bits.update_liquid_twice << endl;
                     }
