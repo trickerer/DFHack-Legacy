@@ -28,7 +28,7 @@ enum state
 command_result lair(color_ostream &out, std::vector<std::string> & params)
 {
     state do_what = LAIR_SET;
-    for(auto iter = params.begin(); iter != params.end(); iter++)
+    for(std::vector<std::string>::const_iterator iter = params.begin(); iter != params.end(); iter++)
     {
         if(*iter == "reset")
             do_what = LAIR_RESET;
