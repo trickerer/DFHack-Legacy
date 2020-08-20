@@ -43,9 +43,9 @@ REQUIRE_GLOBAL(gps);
 REQUIRE_GLOBAL(ui);
 REQUIRE_GLOBAL(world);
 
-#ifndef HAVE_NULLPTR
-#define nullptr 0L
-#endif
+//#ifndef HAVE_NULL
+//#define NULL 0L
+//#endif
 
 DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 {
@@ -55,16 +55,16 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 df::job *get_suspended_job(df::building *bld)
 {
     if (bld->getBuildStage() != 0)
-        return nullptr;
+        return NULL;
 
     if (bld->jobs.size() == 0)
-        return nullptr;
+        return NULL;
 
-    auto job = bld->jobs[0];
+    df::job* job = bld->jobs[0];
     if (job->flags.bits.suspend)
         return job;
 
-    return nullptr;
+    return NULL;
 }
 
 struct SuspendedBuilding
@@ -94,16 +94,17 @@ void scan_for_suspended_buildings()
     if (buildings_scanned)
         return;
 
-    for (auto b = world->buildings.all.begin(); b != world->buildings.all.end(); b++)
+    std::vector<df::building*>::const_iterator b;
+    for (b = world->buildings.all.begin(); b != world->buildings.all.end(); b++)
     {
-        auto bld = *b;
-        auto job = get_suspended_job(bld);
+        df::building* bld = *b;
+        df::job* job = get_suspended_job(bld);
         if (job)
         {
             SuspendedBuilding sb(bld);
             sb.is_planned = job->job_items.size() == 1 && job->job_items[0]->item_type == item_type::NONE;
 
-            auto it = resumed_buildings.begin();
+            std::vector<SuspendedBuilding>::const_iterator it = resumed_buildings.begin();
 
             for (; it != resumed_buildings.end(); ++it)
                 if (it->bld == bld) break;
@@ -123,11 +124,12 @@ void show_suspended_buildings()
     if (!Gui::getViewCoords(vx, vy, vz))
         return;
 
-    auto dims = Gui::getDwarfmodeViewDims();
+    Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
     int left_margin = vx + dims.map_x2;
     int bottom_margin = vy + dims.map_y2 - 1;
 
-    for (auto sb = suspended_buildings.begin(); sb != suspended_buildings.end();)
+    std::vector<SuspendedBuilding>::iterator sb;
+    for (sb = suspended_buildings.begin(); sb != suspended_buildings.end();)
     {
         if (!sb->isValid())
         {
@@ -140,7 +142,7 @@ void show_suspended_buildings()
         {
             int x = sb->bld->centerx - vx + 1;
             int y = sb->bld->centery - vy + 1;
-            auto color = COLOR_YELLOW;
+            color_value color = COLOR_YELLOW;
             if (sb->is_planned)
                 color = COLOR_GREEN;
             else if (sb->was_resumed)
@@ -163,7 +165,8 @@ void resume_suspended_buildings(color_ostream &out)
 {
     out << "Resuming all buildings." << endl;
 
-    for (auto isb = resumed_buildings.begin(); isb != resumed_buildings.end();)
+    std::vector<SuspendedBuilding>::iterator isb, sb;
+    for (isb = resumed_buildings.begin(); isb != resumed_buildings.end();)
     {
         if (isb->isValid())
         {
@@ -175,7 +178,7 @@ void resume_suspended_buildings(color_ostream &out)
     }
 
     scan_for_suspended_buildings();
-    for (auto sb = suspended_buildings.begin(); sb != suspended_buildings.end(); sb++)
+    for (sb = suspended_buildings.begin(); sb != suspended_buildings.end(); sb++)
     {
         if (sb->is_planned)
             continue;
@@ -241,7 +244,7 @@ static command_result resume_cmd(color_ostream &out, vector <string> & parameter
     }
     else
     {
-        auto cmd = parameters[0][0];
+        char cmd = parameters[0][0];
         if (cmd == 'v')
         {
             out << "Resume" << endl << "Version: " << PLUGIN_VERSION << endl;
