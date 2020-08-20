@@ -75,7 +75,7 @@ static df::coord get_mouse_pos(int32_t &mx, int32_t &my)
 
 static bool is_valid_pos(const df::coord pos)
 {
-    auto designation = Maps::getTileDesignation(pos);
+    df::tile_designation* designation = Maps::getTileDesignation(pos);
     if (!designation)
         return false;
 
@@ -89,7 +89,7 @@ static vector<df::unit *> get_units_at(const df::coord pos, bool only_one)
 {
     vector<df::unit *> list;
 
-    auto count = world->units.active.size();
+    size_t count = world->units.active.size();
     if (count > max_list_size)
         return list;
 
@@ -119,7 +119,7 @@ static vector<df::unit *> get_units_at(const df::coord pos, bool only_one)
 static vector<df::item *> get_items_at(const df::coord pos, bool only_one)
 {
     vector<df::item *> list;
-    auto count = world->items.other[items_other_id::IN_PLAY].size();
+    size_t count = world->items.other[items_other_id::IN_PLAY].size();
     if (count > max_list_size)
         return list;
 
@@ -155,12 +155,12 @@ static df::interface_key get_default_query_mode(const df::coord pos)
     bool fallback_to_building_query = false;
 
     // Check for unit under cursor
-    auto ulist = get_units_at(pos, true);
+    std::vector<df::unit*> ulist = get_units_at(pos, true);
     if (ulist.size() > 0)
         return df::interface_key::D_VIEWUNIT;
 
     // Check for building under cursor
-    auto bld = Buildings::findAtTile(pos);
+    df::building* bld = Buildings::findAtTile(pos);
     if (bld)
     {
         df::building_type type = bld->getType();
@@ -179,7 +179,7 @@ static df::interface_key get_default_query_mode(const df::coord pos)
     }
 
     // Check for items under cursor
-    auto ilist = get_items_at(pos, true);
+    std::vector<df::item*> ilist = get_items_at(pos, true);
     if (ilist.size() > 0)
         return df::interface_key::D_LOOK;
 
@@ -368,7 +368,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
 
         // Can't check limits earlier as we must be sure we are in query or default mode
         // (so we can clear the button down flag)
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         if (mx < 1 || mx > dims.map_x2 || my < 1 || my > dims.map_y2)
             return false;
 
@@ -378,11 +378,11 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             int32_t x, y, z;
             if (Gui::getDesignationCoords(x, y, z))
             {
-                auto dX = abs(x - mpos.x);
+                int dX = abs(x - mpos.x);
                 if (dX > 30)
                     return false;
 
-                auto dY = abs(y - mpos.y);
+                int dY = abs(y - mpos.y);
                 if (dY > 30)
                     return false;
             }
@@ -428,7 +428,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
         }
         else
         {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             int scroll_trigger_x = dims.menu_x1 / 3;
             int scroll_trigger_y = gps->dimy / 3;
             if (mx < scroll_trigger_x)
@@ -450,7 +450,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
     bool handleMouse(const set<df::interface_key> *input)
     {
         int32_t mx, my;
-        auto mpos = get_mouse_pos(mx, my);
+        df::coord mpos = get_mouse_pos(mx, my);
         if (mpos.x == -30000)
             return false;
 
@@ -568,12 +568,12 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
         if (!plugin_enabled)
             return;
 
-        static decltype(enabler->clock) last_t = 0;
+        static uint32_t last_t = 0;
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
 
         int32_t mx, my;
-        auto mpos = get_mouse_pos(mx, my);
+        df::coord mpos = get_mouse_pos(mx, my);
         bool mpos_valid = mpos.x != -30000 && mpos.y != -30000 && mpos.z != -30000;
         if (mx < 1 || mx > dims.map_x2 || my < 1 || my > dims.map_y2)
             mpos_valid = false;
@@ -610,8 +610,8 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
                     int newx = (*df::global::window_x) - (mpos.x - last_move_pos.x);
                     int newy = (*df::global::window_y) - (mpos.y - last_move_pos.y);
 
-                    newx = std::max(0, std::min(newx, world->map.x_count - dims.map_x2+1));
-                    newy = std::max(0, std::min(newy, world->map.y_count - dims.map_y2+1));
+                    newx = std::max<int>(0, std::min<int>(newx, world->map.x_count - dims.map_x2+1));
+                    newy = std::max<int>(0, std::min<int>(newy, world->map.y_count - dims.map_y2+1));
 
                     (*df::global::window_x) = newx;
                     (*df::global::window_y) = newy;
@@ -653,9 +653,9 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             {
                 Gui::getCursorCoords(curr_pos.x, curr_pos.y, curr_pos.z);
             }
-            auto dX = abs(x - curr_pos.x) + 1;
-            auto dY = abs(y - curr_pos.y) + 1;
-            auto dZ = abs(z - curr_pos.z) + 1;
+            int32 dX = abs(x - curr_pos.x) + 1;
+            int32 dY = abs(y - curr_pos.y) + 1;
+            int32 dZ = abs(z - curr_pos.z) + 1;
 
             int disp_y = gps->dimy - 3;
             stringstream label;
@@ -671,7 +671,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             return;
 
         int scroll_buffer = 6;
-        auto delta_t = enabler->clock - last_t;
+        uint32_t delta_t = enabler->clock - last_t;
         if (active_scrolling && !isInTrackableMode() && delta_t > scroll_delay)
         {
             last_t = enabler->clock;
@@ -713,11 +713,11 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
                 if (ui->main.mode == df::ui_sidebar_mode::Zones ||
                     ui->main.mode == df::ui_sidebar_mode::Stockpiles)
                 {
-                    auto dX = abs(x - mpos.x);
+                    int32 dX = abs(x - mpos.x);
                     if (dX > 30)
                         color = COLOR_RED;
 
-                    auto dY = abs(y - mpos.y);
+                    int32 dY = abs(y - mpos.y);
                     if (dY > 30)
                         color = COLOR_RED;
                 }
@@ -755,9 +755,9 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             return;
 
         // Display live query
-        auto ulist = get_units_at(mpos, false);
-        auto bld = Buildings::findAtTile(mpos);
-        auto ilist = get_items_at(mpos, false);
+        std::vector<df::unit*> ulist = get_units_at(mpos, false);
+        df::building* bld = Buildings::findAtTile(mpos);
+        std::vector<df::item*> ilist = get_items_at(mpos, false);
 
         int look_list = ulist.size() + ((bld) ? 1 : 0) + ilist.size() + 1;
         set_to_limit(look_list, 8);
@@ -772,10 +772,10 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
         }
 
         int c = 0;
-        for (auto it = ulist.begin(); it != ulist.end() && c < 8; it++, c++)
+        for (std::vector<df::unit*>::const_iterator it = ulist.begin(); it != ulist.end() && c < 8; it++, c++)
         {
             string label;
-            auto name = Units::getVisibleName(*it);
+            df::language_name* name = Units::getVisibleName(*it);
             if (name->has_name)
                 label = Translation::TranslateName(name, false);
             if (label.length() > 0)
@@ -787,9 +787,9 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             OutputString(COLOR_WHITE, disp_x, disp_y, label, true, left_margin);
         }
 
-        for (auto it = ilist.begin(); it != ilist.end() && c < 8; it++, c++)
+        for (std::vector<df::item*>::const_iterator it = ilist.begin(); it != ilist.end() && c < 8; it++, c++)
         {
-            auto label = Items::getDescription(*it, 0, false);
+            std::string label = Items::getDescription(*it, 0, false);
             label = pad_string(label, look_width, false, true);
             OutputString(COLOR_YELLOW, disp_x, disp_y, label, true, left_margin);
         }
@@ -808,7 +808,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
         if (c > 7)
             return;
 
-        auto tt = Maps::getTileType(mpos);
+        df::tiletype* tt = Maps::getTileType(mpos);
         OutputString(COLOR_BLUE, disp_x, disp_y, tileName(*tt), true, left_margin);
     }
 };
@@ -825,8 +825,8 @@ static command_result mousequery_cmd(color_ostream &out, vector <string> & param
     }
     else
     {
-        auto cmd = toLower(parameters[0]);
-        auto state = (parameters.size() == 2) ? toLower(parameters[1]) : "-1";
+        std::string cmd = toLower(parameters[0]);
+        std::string state = (parameters.size() == 2) ? toLower(parameters[1]) : "-1";
         if (cmd[0] == 'v')
         {
             out << "MouseQuery" << endl << "Version: " << PLUGIN_VERSION << endl;
@@ -875,7 +875,7 @@ static command_result mousequery_cmd(color_ostream &out, vector <string> & param
         }
         else if (cmd[0] == 'd')
         {
-            auto l = atoi(state.c_str());
+            int32 l = atoi(state.c_str());
             if (l > 0 || state == "0")
                 scroll_delay = l;
             else
