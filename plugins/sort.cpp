@@ -277,7 +277,7 @@ DEFINE_SORT_HANDLER(unit_sorters, joblist, "", jobs)
     std::vector<df::unit*> units;
     for (size_t i = 0; i < jobs->units.size(); i++)
     {
-        auto unit = jobs->units[i];
+        df::unit* unit = jobs->units[i];
         if (!unit && jobs->jobs[i])
             unit = Job::getWorker(jobs->jobs[i]);
         units.push_back(unit);
@@ -297,8 +297,8 @@ DEFINE_SORT_HANDLER(unit_sorters, joblist, "", jobs)
 
 DEFINE_SORT_HANDLER(unit_sorters, layer_military, "/Positions/Candidates", military)
 {
-    auto &candidates = military->positions.candidates;
-    auto list3 = getLayerList(military, 2);
+    std::vector<df::unit*> &candidates = military->positions.candidates;
+    df::layer_object_listst* list3 = getLayerList(military, 2);
 
     PARSE_SPEC("units", parameters);
 
@@ -312,7 +312,7 @@ DEFINE_SORT_HANDLER(unit_sorters, layer_military, "/Positions/Candidates", milit
 
 DEFINE_SORT_HANDLER(unit_sorters, layer_noblelist, "/Appoint", nobles)
 {
-    auto list2 = getLayerList(nobles, 1);
+    df::layer_object_listst* list2 = getLayerList(nobles, 1);
 
     sort_null_first(parameters);
     PARSE_SPEC("units", parameters);
@@ -373,7 +373,7 @@ DEFINE_SORT_HANDLER(unit_sorters, pet, "/SelectTrainer", animals)
 
 DEFINE_SORT_HANDLER(unit_sorters, layer_overall_health, "/Units", health)
 {
-    auto list1 = getLayerList(health, 0);
+    df::layer_object_listst* list1 = getLayerList(health, 0);
 
     PARSE_SPEC("units", parameters);
 
@@ -461,7 +461,7 @@ DEFINE_SORT_HANDLER(unit_sorters, dwarfmode, "/ZonesPenInfo/Assign", screen)
 
 static bool unit_list_hotkey(df::viewscreen *screen)
 {
-    auto focus = Gui::getFocusString(screen);
+    std::string focus = Gui::getFocusString(screen);
     return findPrefixInMap(unit_sorters, focus) != NULL;
 }
 
@@ -470,16 +470,19 @@ static command_result sort_units(color_ostream &out, vector <string> &parameters
     if (parameters.empty())
         return CR_WRONG_USAGE;
 
-    auto L = Lua::Core::State;
-    auto screen = Core::getInstance().getTopViewscreen();
+    lua_State* L = Lua::Core::State;
+    df::viewscreen* screen = Core::getInstance().getTopViewscreen();
 
     Lua::StackUnwinder top(L);
 
     if (!prepare_sort(&out, L))
         return CR_WRONG_USAGE;
 
-    auto focus = Gui::getFocusString(screen);
-    auto handler = findPrefixInMap(unit_sorters, focus);
+    //fix this crap
+    typedef void (__cdecl * hndl_T)(DFHack::color_ostream*,lua_State*,int,df::viewscreen*,std::vector<std::string>&);
+
+    std::string focus = Gui::getFocusString(screen);
+    hndl_T handler = findPrefixInMap(unit_sorters, focus);
 
     if (!handler)
         return CR_WRONG_USAGE;
@@ -519,13 +522,13 @@ DEFINE_SORT_HANDLER(item_sorters, tradegoods, "/Items/Trader", trade)
 
 DEFINE_SORT_HANDLER(item_sorters, layer_assigntrade, "/Items", bring)
 {
-    auto list1 = getLayerList(bring, 0);
-    auto list2 = getLayerList(bring, 1);
+    df::layer_object_listst* list1 = getLayerList(bring, 0);
+    df::layer_object_listst* list2 = getLayerList(bring, 1);
     int list_idx = vector_get(bring->visible_lists, list1->cursor, (int16_t)-1);
 
     PARSE_SPEC("items", parameters);
 
-    auto &vec = bring->lists[list_idx];
+    std::vector<int32> &vec = bring->lists[list_idx];
 
     std::vector<df::item*> items;
     for (size_t i = 0; i < vec.size(); i++)
@@ -551,7 +554,7 @@ DEFINE_SORT_HANDLER(item_sorters, stores, "/Items", stocks)
 
 static bool item_list_hotkey(df::viewscreen *screen)
 {
-    auto focus = Gui::getFocusString(screen);
+    std::string focus = Gui::getFocusString(screen);
     return findPrefixInMap(item_sorters, focus) != NULL;
 }
 
@@ -560,16 +563,19 @@ static command_result sort_items(color_ostream &out, vector <string> &parameters
     if (parameters.empty())
         return CR_WRONG_USAGE;
 
-    auto L = Lua::Core::State;
-    auto screen = Core::getInstance().getTopViewscreen();
+    lua_State* L = Lua::Core::State;
+    df::viewscreen* screen = Core::getInstance().getTopViewscreen();
 
     Lua::StackUnwinder top(L);
 
     if (!prepare_sort(&out, L))
         return CR_WRONG_USAGE;
 
-    auto focus = Gui::getFocusString(screen);
-    auto handler = findPrefixInMap(item_sorters, focus);
+    //... and this
+    typedef void (__cdecl * hndl_T)(DFHack::color_ostream*,lua_State*,int,df::viewscreen*,std::vector<std::string>&);
+
+    std::string focus = Gui::getFocusString(screen);
+    hndl_T handler = findPrefixInMap(item_sorters, focus);
 
     if (!handler)
         return CR_WRONG_USAGE;

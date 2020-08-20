@@ -327,7 +327,8 @@ typename T::mapped_type findPrefixInMap(
     const T &table, const std::string &key,
     const typename T::mapped_type& defval = typename T::mapped_type()
 ) {
-    auto it = table.lower_bound(key);
+    //auto it = table.lower_bound(key);
+    T::const_iterator it = table.lower_bound(key);
     if (it != table.end() && it->first == key)
         return it->second;
     if (it != table.begin()) {
