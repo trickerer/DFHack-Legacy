@@ -177,8 +177,10 @@ void printVeins(color_ostream &con, MatMap &mat_map,
     MatMap gems;
     MatMap rest;
 
-    for (const auto &kv : mat_map)
+    //for (const auto &kv : mat_map)
+    for (MatMap::const_iterator ci = mat_map.begin(); ci != mat_map.end(); ++ci)
     {
+        const MatMap::value_type& kv = *ci;
         df::inorganic_raw *gloss = vector_get(world->raws.inorganics, kv.first);
         if (!gloss)
         {
@@ -273,7 +275,7 @@ bool estimate_underground(color_ostream &out, EmbarkTileLayout &tile, df::world_
 
     // Compute surface elevation
     tile.elevation = details->elevation[x][y];
-    tile.max_soil_depth = std::max((154-tile.elevation)/5,1);
+    tile.max_soil_depth = std::max<int>((154-tile.elevation)/5,1);
     tile.penalty.clear();
 
     // Special biome adjustments
@@ -290,7 +292,7 @@ bool estimate_underground(color_ostream &out, EmbarkTileLayout &tile, df::world_
 
             if (tile.geo_biome && (tile.geo_biome->unk1 == 4 || tile.geo_biome->unk1 == 5))
             {
-                auto b_details = get_details(data, tile.biome_pos);
+                df::world_region_details* b_details = get_details(data, tile.biome_pos);
 
                 if (b_details && b_details->unk12e8 < 500)
                     tile.max_soil_depth = 0;
@@ -300,7 +302,7 @@ bool estimate_underground(color_ostream &out, EmbarkTileLayout &tile, df::world_
 
     tile.base_z = tile.elevation-1;
 
-    auto &features = details->features[x][y];
+    std::vector<df::world_region_feature*> &features = details->features[x][y];
 
     // Collect global feature layer depths and apply penalties
     std::map<int, int> layer_bottom, layer_top;
@@ -308,13 +310,13 @@ bool estimate_underground(color_ostream &out, EmbarkTileLayout &tile, df::world_
 
     for (size_t i = 0; i < features.size(); i++)
     {
-        auto feature = features[i];
-        auto layer = df::world_underground_region::find(feature->layer);
+        df::world_region_feature* feature = features[i];
+        df::world_underground_region* layer = df::world_underground_region::find(feature->layer);
         if (!layer || feature->min_z == -30000) continue;
 
         layer_bottom[layer->layer_depth] = feature->min_z;
         layer_top[layer->layer_depth] = feature->max_z;
-        tile.base_z = std::min(tile.base_z, (int)feature->min_z);
+        tile.base_z = std::min<int>(tile.base_z, (int)feature->min_z);
 
         float penalty = 1.0f;
         switch (layer->type) {
@@ -348,8 +350,8 @@ bool estimate_underground(color_ostream &out, EmbarkTileLayout &tile, df::world_
     // Scan for big local features and apply their penalties
     for (size_t i = 0; i < features.size(); i++)
     {
-        auto feature = features[i];
-        auto lfeature = Maps::getLocalInitFeature(details->pos, feature->feature_idx);
+        df::world_region_feature* feature = features[i];
+        df::feature_init* lfeature = Maps::getLocalInitFeature(details->pos, feature->feature_idx);
         if (!lfeature)
             continue;
 
@@ -360,7 +362,7 @@ bool estimate_underground(color_ostream &out, EmbarkTileLayout &tile, df::world_
         case feature_type::volcano:
             for (int i = layer_bottom[lfeature->end_depth];
                  i <= layer_top[lfeature->start_depth]; i++)
-                tile.penalty[i] = std::min(0.4f, map_find(tile.penalty, i, 1.0f));
+                tile.penalty[i] = std::min<float>(0.4f, map_find(tile.penalty, i, 1.0f));
             break;
         default:
             break;
@@ -395,19 +397,19 @@ bool estimate_materials(color_ostream &out, EmbarkTileLayout &tile, MatMap &laye
 
     for (unsigned i = 0; i < nlayers; i++)
     {
-        auto layer = geo_biome->layers[i];
+        df::world_geo_layer* layer = geo_biome->layers[i];
         if (layer->type == SOIL || layer->type == SOIL_SAND)
             soil_size += layer->top_height - layer->bottom_height + 1;
     }
 
     // Compute shifts for layers in the stack
-    int soil_erosion = soil_size - std::min(soil_size,tile.max_soil_depth);
+    int soil_erosion = soil_size - std::min<int>(soil_size,tile.max_soil_depth);
     int layer_shift[16];
     int cur_shift = tile.elevation+soil_erosion-1;
 
     for (unsigned i = 0; i < nlayers; i++)
     {
-        auto layer = geo_biome->layers[i];
+        df::world_geo_layer* layer = geo_biome->layers[i];
         layer_shift[i] = cur_shift;
 
         if (layer->type == SOIL || layer->type == SOIL_SAND)
@@ -422,7 +424,7 @@ bool estimate_materials(color_ostream &out, EmbarkTileLayout &tile, MatMap &laye
             if (size > soil_erosion)
                 cur_shift -= soil_erosion;
 
-            soil_erosion -= std::min(soil_erosion, size);
+            soil_erosion -= std::min<int>(soil_erosion, size);
         }
     }
 
@@ -431,10 +433,10 @@ bool estimate_materials(color_ostream &out, EmbarkTileLayout &tile, MatMap &laye
 
     for (unsigned i = 0; i < nlayers; i++)
     {
-        auto layer = geo_biome->layers[i];
+        df::world_geo_layer* layer = geo_biome->layers[i];
 
         int top_z = last_bottom-1;
-        int bottom_z = std::max(layer->bottom_height + layer_shift[i], tile.min_z);
+        int bottom_z = std::max<int>(layer->bottom_height + layer_shift[i], tile.min_z);
         if (i+1 == nlayers) // stretch layer if needed
             bottom_z = tile.min_z;
         if (top_z < bottom_z)
@@ -447,7 +449,7 @@ bool estimate_materials(color_ostream &out, EmbarkTileLayout &tile, MatMap &laye
         int sums[ENUM_LAST_ITEM(inclusion_type)+1] = { 0 };
 
         for (unsigned j = 0; j < layer->vein_mat.size(); j++)
-            if (is_valid_enum_item<df::inclusion_type>(layer->vein_type[j]))
+            if (is_valid_enum_item_simple<df::inclusion_type>(layer->vein_type[j]))
                 sums[layer->vein_type[j]] += layer->vein_unk_38[j];
 
         for (unsigned j = 0; j < layer->vein_mat.size(); j++)
@@ -501,7 +503,7 @@ static command_result embark_prospector(color_ostream &out, df::viewscreen_choos
 
     df::world_data *data = world->world_data;
     coord2d cur_region = screen->location.region_pos;
-    auto cur_details = get_details(data, cur_region);
+    df::world_region_details* cur_details = get_details(data, cur_region);
 
     if (!cur_details)
     {
@@ -585,7 +587,7 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
     CoreSuspender suspend;
 
     // Embark screen active: estimate using world geology data
-    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     if (screen)
         return embark_prospector(con, screen, showHidden, showValue);
 
@@ -749,7 +751,7 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
                 // and we can check visibility more easily here
                 if (showPlants)
                 {
-                    auto block = Maps::getBlockColumn(b_x,b_y);
+                    df::map_block_column* block = Maps::getBlockColumn(b_x,b_y);
                     vector<df::plant *> *plants = block ? &block->plants : NULL;
                     if(plants)
                     {
@@ -783,7 +785,7 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
     con << "Base materials:" << std::endl;
     for (it = baseMats.begin(); it != baseMats.end(); ++it)
     {
-        con << std::setw(25) << ENUM_KEY_STR(tiletype_material,(df::tiletype_material)it->first) << " : " << it->second.count << std::endl;
+        con << std::setw(25) << ENUM_KEY_STR_SIMPLE(tiletype_material,(df::tiletype_material)it->first) << " : " << it->second.count << std::endl;
     }
 
     if (liquidWater.count || liquidMagma.count)
