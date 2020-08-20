@@ -31,7 +31,7 @@ DFhackCExport command_result plugin_shutdown(color_ostream &out)
 
 static void paintScreen(df::coord cursor, bool skip_unrevealed = false)
 {
-    auto dims = Gui::getDwarfmodeViewDims();
+    Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
     for (int y = dims.map_y1; y <= dims.map_y2; y++)
     {
         for (int x = dims.map_x1; x <= dims.map_x2; x++)
