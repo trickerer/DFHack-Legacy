@@ -1,21 +1,22 @@
 // Dwarf Manipulator - a Therapist-style labor editor
 
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
-#include <MiscUtils.h>
-#include <modules/Screen.h>
-#include <modules/Translation.h>
-#include <modules/Units.h>
-#include <modules/Filesystem.h>
-#include <modules/Job.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
+#include "MiscUtils.h"
+#include "modules/Screen.h"
+#include "modules/Translation.h"
+#include "modules/Units.h"
+#include "modules/Filesystem.h"
+#include "modules/Job.h"
+
 #include <vector>
 #include <string>
 #include <set>
 #include <algorithm>
-#include <tuple>
-#include <VTableInterpose.h>
+//#include <tuple>
+#include "VTableInterpose.h"
 
 #include "df/activity_event.h"
 #include "df/world.h"
@@ -467,10 +468,28 @@ bool sortBySelected (const UnitInfo *d1, const UnitInfo *d2)
 }
 
 template<typename T>
+struct StringFmtCaller
+{
+    typedef string(*T_callback)(T);
+public:
+    explicit StringFmtCaller(string const& _s1, string const& _s2, T_callback _cb) : s1(_s1), s2(_s2), cb(_cb) {}
+
+    string operator()(T obj) const
+    {
+        return cb(obj);
+    }
+
+    string s1; //code
+    string s2; //help
+    T_callback cb;
+};
+
+template<typename T>
 class StringFormatter {
 public:
     typedef string(*T_callback)(T);
-    typedef std::tuple<string, string, T_callback> T_opt;
+    //typedef std::tuple<string, string, T_callback> T_opt;
+    typedef StringFmtCaller<T> T_opt;
     typedef vector<T_opt> T_optlist;
     static bool compare_opts(const string &first, const string &second)
     {
@@ -479,7 +498,8 @@ public:
     StringFormatter() {}
     void add_option(string spec, string help, string (*callback)(T))
     {
-        opt_list.push_back(std::make_tuple(spec, help, callback));
+        //opt_list.push_back(std::make_tuple(spec, help, callback));
+        opt_list.push_back(StringFmtCaller<T>(spec, help, callback));
     }
     T_optlist *get_options() { return &opt_list; }
     void clear_options()
@@ -489,9 +509,10 @@ public:
     string grab_opt (string s, size_t start)
     {
         vector<string> candidates;
-        for (auto it = opt_list.begin(); it != opt_list.end(); ++it)
+        for (T_optlist::const_iterator it = opt_list.begin(); it != opt_list.end(); ++it)
         {
-            string opt = std::get<0>(*it);
+            //string opt = std::get<0>(*it);
+            string opt = (*it).s1;
             string slice = s.substr(start, opt.size());
             if (slice == opt)
                 candidates.push_back(slice);
@@ -504,10 +525,12 @@ public:
     }
     T_callback get_callback (string s)
     {
-        for (auto it = opt_list.begin(); it != opt_list.end(); ++it)
+        for (T_optlist::const_iterator it = opt_list.begin(); it != opt_list.end(); ++it)
         {
-            if (std::get<0>(*it) == s)
-                return std::get<2>(*it);
+            //if (std::get<0>(*it) == s)
+            //    return std::get<2>(*it);
+            if ((*it).s1 == s)
+                return (*it).cb;
         }
         return NULL;
     }
@@ -660,7 +683,9 @@ struct ProfessionTemplate
     bool load(string directory, string file)
     {
         cerr << "Attempt to load " << file << endl;
-        std::ifstream infile(directory + "/" + file);
+        string fullPath = directory;
+        fullPath += "/" + file;
+        std::ifstream infile(fullPath.c_str());
         if (infile.bad()) {
             return false;
         }
@@ -671,7 +696,7 @@ struct ProfessionTemplate
         while (std::getline(infile, line)) {
             if (strcmp(line.substr(0,5).c_str(),"NAME ")==0)
             {
-                auto nextInd = line.find(' ');
+                string::size_type nextInd = line.find(' ');
                 name = line.substr(nextInd + 1);
                 continue;
             }
@@ -683,7 +708,7 @@ struct ProfessionTemplate
 
             for (size_t i = 0; i < NUM_COLUMNS; i++)
             {
-                if (line == ENUM_KEY_STR(unit_labor, columns[i].labor))
+                if (line == ENUM_KEY_STR_SIMPLE(unit_labor, columns[i].labor))
                 {
                     labors.push_back(columns[i].labor);
                 }
@@ -694,7 +719,9 @@ struct ProfessionTemplate
     }
     bool save(string directory)
     {
-        std::ofstream outfile(directory + "/" + name);
+        string fullPath = directory;
+        fullPath += "/" + name;
+        std::ofstream outfile(fullPath.c_str());
         if (outfile.bad())
             return false;
 
@@ -706,7 +733,7 @@ struct ProfessionTemplate
         {
             if (hasLabor(columns[i].labor))
             {
-                outfile << ENUM_KEY_STR(unit_labor, columns[i].labor) << std::endl;
+                outfile << ENUM_KEY_STR_SIMPLE(unit_labor, columns[i].labor) << std::endl;
             }
         }
 
@@ -833,7 +860,7 @@ public:
         formatter.add_option("gi", "Position in list, among dwarves in same profession group", unit_ops::get_list_id_group);
         formatter.add_option("ri", "Raw unit ID", unit_ops::get_unit_id);
         selection_empty = true;
-        for (auto it = base_units.begin(); it != base_units.end(); ++it)
+        for (std::vector<UnitInfo*>::const_iterator it = base_units.begin(); it != base_units.end(); ++it)
         {
             UnitInfo* uinfo = *it;
             if (uinfo->selected || !filter_selected)
@@ -854,7 +881,7 @@ public:
     {
         if (dirty)
             *dirty = true;
-        for (auto it = units.begin(); it != units.end(); ++it)
+        for (std::vector<UnitInfo*>::const_iterator it = units.begin(); it != units.end(); ++it)
         {
             UnitInfo* u = (*it);
             if (!u || !u->unit || !u->allowEdit) continue;
@@ -895,7 +922,7 @@ public:
             }
             else
             {
-                for (auto it = events->begin(); it != events->end(); ++it)
+                for (set<df::interface_key>::const_iterator it = events->begin(); it != events->end(); ++it)
                 {
                     int ch = Screen::keyToChar(*it);
                     if (ch == 0 && entry.size())
@@ -954,12 +981,15 @@ public:
             x = 2; y += 2;
             OutputString(COLOR_WHITE, x, y, "Format options:");
             StringFormatter<UnitInfo*>::T_optlist *format_options = formatter.get_options();
-            for (auto it = format_options->begin(); it != format_options->end(); ++it)
+            for (StringFormatter<UnitInfo*>::T_optlist::const_iterator it =
+                format_options->begin(); it != format_options->end(); ++it)
             {
                 x = 2; y++;
-                auto opt = *it;
-                OutputString(COLOR_LIGHTCYAN, x, y, "%" + string(std::get<0>(opt)));
-                OutputString(COLOR_WHITE, x, y, ": " + string(std::get<1>(opt)));
+                StringFormatter<UnitInfo*>::T_opt opt = *it;
+                //OutputString(COLOR_LIGHTCYAN, x, y, "%" + string(std::get<0>(opt)));
+                //OutputString(COLOR_WHITE, x, y, ": " + string(std::get<1>(opt)));
+                OutputString(COLOR_LIGHTCYAN, x, y, "%" + opt.s1);
+                OutputString(COLOR_WHITE, x, y, ": " + opt.s2);
             }
         }
     }
@@ -1003,7 +1033,7 @@ public:
         menu_options.filterDisplay();
 
         selection_empty = true;
-        for (auto it = base_units.begin(); it != base_units.end(); ++it)
+        for (vector<UnitInfo*>::const_iterator it = base_units.begin(); it != base_units.end(); ++it)
         {
             UnitInfo* uinfo = *it;
             if (uinfo->selected || !filter_selected)
@@ -1045,8 +1075,10 @@ public:
             return;
         ProfessionTemplate prof = manager.templates[selected];
 
-        for (UnitInfo *u : units)
+        //for (UnitInfo *u : units)
+        for (std::vector<UnitInfo*>::const_iterator ci = units.begin(); ci != units.end(); ++ci)
         {
+            UnitInfo* u = *ci;
             if (!u || !u->unit || !u->allowEdit) continue;
             prof.apply(u);
         }
@@ -1153,7 +1185,7 @@ protected:
 viewscreen_unitlaborsst::viewscreen_unitlaborsst(vector<df::unit*> &src, int cursor_pos)
 {
     std::map<df::unit*,int> active_idx;
-    auto &active = world->units.active;
+    std::vector<df::unit*> &active = world->units.active;
     for (size_t i = 0; i < active.size(); i++)
         active_idx[active[i]] = i;
 
@@ -1242,7 +1274,7 @@ void viewscreen_unitlaborsst::calcIDs()
         cur->ids.list_id = (int)i + 1;
         cur->ids.list_id_prof = ++list_prof_ids[cur->unit->profession];
         cur->ids.list_id_group = 0;
-        auto it = group_map.find(cur->unit->profession);
+        map<df::profession,int>::const_iterator it = group_map.find(cur->unit->profession);
         if (it != group_map.end())
             cur->ids.list_id_group = ++list_group_ids[it->second];
     }
@@ -1296,7 +1328,7 @@ void viewscreen_unitlaborsst::refreshNames()
 
 void viewscreen_unitlaborsst::calcSize()
 {
-    auto dim = Screen::getWindowSize();
+    df::coord2d dim = Screen::getWindowSize();
 
     num_rows = dim.y - 11;
     if (num_rows > int(units.size()))
@@ -1827,8 +1859,8 @@ void viewscreen_unitlaborsst::feed(set<df::interface_key> *events)
             events->insert(interface_key::CUSTOM_X);
         else
         {
-            for (int i = std::min(input_row, last_selection);
-                 i <= std::max(input_row, last_selection);
+            for (int i = std::min<int>(input_row, last_selection);
+                 i <= std::max<int>(input_row, last_selection);
                  i++)
             {
                 if (i == last_selection) continue;
@@ -1853,14 +1885,16 @@ void viewscreen_unitlaborsst::feed(set<df::interface_key> *events)
 
     if (events->count(interface_key::CUSTOM_B))
     {
-        Screen::show(dts::make_unique<viewscreen_unitbatchopst>(units, true, &do_refresh_names), plugin_self);
+        //Screen::show(dts::make_unique<viewscreen_unitbatchopst>(units, true, &do_refresh_names), plugin_self);
+        Screen::show(new viewscreen_unitbatchopst(units, true, &do_refresh_names), NULL, plugin_self);
     }
 
     if (events->count(interface_key::CUSTOM_E))
     {
         vector<UnitInfo*> tmp;
         tmp.push_back(cur);
-        Screen::show(dts::make_unique<viewscreen_unitbatchopst>(tmp, false, &do_refresh_names), plugin_self);
+        //Screen::show(dts::make_unique<viewscreen_unitbatchopst>(tmp, false, &do_refresh_names), plugin_self);
+        Screen::show(new viewscreen_unitbatchopst(tmp, false, &do_refresh_names), NULL, plugin_self);
     }
 
     if (events->count(interface_key::CUSTOM_P))
@@ -1871,11 +1905,13 @@ void viewscreen_unitlaborsst::feed(set<df::interface_key> *events)
                 has_selected = true;
 
         if (has_selected) {
-            Screen::show(dts::make_unique<viewscreen_unitprofessionset>(units, true), plugin_self);
+            //Screen::show(dts::make_unique<viewscreen_unitprofessionset>(units, true), plugin_self);
+            Screen::show(new viewscreen_unitprofessionset(units, true), NULL, plugin_self);
         } else {
             vector<UnitInfo*> tmp;
             tmp.push_back(cur);
-            Screen::show(dts::make_unique<viewscreen_unitprofessionset>(tmp, false), plugin_self);
+            //Screen::show(dts::make_unique<viewscreen_unitprofessionset>(tmp, false), plugin_self);
+            Screen::show(new viewscreen_unitprofessionset(tmp, false), NULL, plugin_self);
         }
     }
 
@@ -1912,7 +1948,7 @@ void viewscreen_unitlaborsst::render()
 
     dfhack_viewscreen::render();
 
-    auto dim = Screen::getWindowSize();
+    df::coord2d dim = Screen::getWindowSize();
 
     Screen::clear();
     Screen::drawBorder("  Dwarf Manipulator - Manage Labors  ");
@@ -1953,7 +1989,7 @@ void viewscreen_unitlaborsst::render()
         df::profession profession = columns[col_offset].profession;
         if ((profession != profession::NONE) && (ui->race_id != -1))
         {
-            auto graphics = world->raws.creatures.all[ui->race_id]->graphics;
+            df::creature_raw::T_graphics graphics = world->raws.creatures.all[ui->race_id]->graphics;
             Screen::paintTile(
                 Screen::Pen(' ', fg, 0,
                     graphics.profession_add_color[creature_graphics_role::DEFAULT][profession],
@@ -1973,13 +2009,21 @@ void viewscreen_unitlaborsst::render()
         int8_t fg = 15, bg = 0;
 
         int stress_lvl = unit->status.current_soul ? unit->status.current_soul->personality.stress_level : 0;
-        const vector<UIColor> stress_colors {
+        //const vector<UIColor> stress_colors {
+        //    13, // 5:1
+        //    12, // 4:1
+        //    14, // 6:1
+        //    2,  // 2:0
+        //    10  // 2:1 (default)
+        //};
+        static const UIColor stress_c_arr[] = {
             13, // 5:1
             12, // 4:1
             14, // 6:1
             2,  // 2:0
             10  // 2:1 (default)
         };
+        static const vector<UIColor> stress_colors(stress_c_arr, stress_c_arr + sizeof(stress_c_arr)/sizeof(stress_c_arr[0]));
         fg = vector_get(stress_colors, Units::getStressCategoryRaw(stress_lvl), stress_colors.back());
 
         // cap at 6 digits
@@ -2095,7 +2139,7 @@ void viewscreen_unitlaborsst::render()
         int x = 1, y = 3 + num_rows + 2;
         Screen::Pen white_pen(' ', 15, 0);
 
-        auto symbol = cur->unit ? ENUM_ATTR(pronoun_type, symbol, cur->unit->sex) : nullptr;
+        const char* symbol = cur->unit ? ENUM_ATTR(pronoun_type, symbol, cur->unit->sex) : NULL;
         if (symbol)
             Screen::paintString(white_pen, x, y, symbol);
         x += 2;
@@ -2255,7 +2299,8 @@ struct unitlist_hook : df::viewscreen_unitlistst
         {
             if (units[page].size())
             {
-                Screen::show(dts::make_unique<viewscreen_unitlaborsst>(units[page], cursor_pos[page]), plugin_self);
+                //Screen::show(dts::make_unique<viewscreen_unitlaborsst>(units[page], cursor_pos[page]), plugin_self);
+                Screen::show(new viewscreen_unitlaborsst(units[page], cursor_pos[page]), NULL, plugin_self);
                 return;
             }
         }
@@ -2268,7 +2313,7 @@ struct unitlist_hook : df::viewscreen_unitlistst
 
         if (units[page].size())
         {
-            auto dim = Screen::getWindowSize();
+            df::coord2d dim = Screen::getWindowSize();
             int x = 2, y = dim.y - 2;
             OutputString(12, x, y, Screen::getKeyDisplay(interface_key::UNITVIEW_PRF_PROF));
             OutputString(15, x, y, ": Manage labors (DFHack)");
