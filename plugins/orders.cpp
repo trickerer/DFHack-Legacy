@@ -109,8 +109,10 @@ static bool is_safe_filename(color_ostream & out, const std::string & name)
         return false;
     }
 
-    for (auto it : name)
+    //for (auto it : name)
+    for (uint32 i = 0; i < name.size(); ++i)
     {
+        char it = name[i];
         if (isalnum(it))
         {
             continue;
@@ -132,9 +134,10 @@ static void bitfield_to_json_array(Json::Value & out, B bits)
     std::vector<std::string> names;
     bitfield_to_string(&names, bits);
 
-    for (auto & it : names)
+    //for (auto & it : names)
+    for (std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end(); ++cit)
     {
-        out.append(it);
+        out.append(*cit);
     }
 }
 
@@ -176,14 +179,20 @@ static df::itemdef *get_itemdef(int16_t subtype)
 template<typename D>
 static df::itemdef *get_itemdef(const std::string & subtype)
 {
-    for (auto it : D::get_vector())
+    //for (auto it : D::get_vector())
+    //for (st)
+    //df::itemdef a = D::get_vector();
+    std::vector<D*> const& dVec = D::get_vector();
+    for (std::vector<D*>::const_iterator cit = dVec.begin(); cit != dVec.end(); ++cit)
     {
-        if (it->id == subtype)
-        {
-            return it;
-        }
+        //if (it->id == subtype)
+        //{
+        //    return it;
+        //}
+        if ((*cit)->id == subtype)
+            return (*cit);
     }
-    return nullptr;
+    return NULL;
 }
 
 template<typename ST>
@@ -220,8 +229,8 @@ static df::itemdef *get_itemdef(color_ostream & out, df::item_type type, ST subt
     case item_type::WEAPON:
         return get_itemdef<df::itemdef_weaponst>(subtype);
     default:
-        out << COLOR_YELLOW << "Unhandled raw item type in manager order: " << enum_item_key(type) << "! Please report this bug to DFHack." << std::endl;
-        return nullptr;
+        out << COLOR_YELLOW << "Unhandled raw item type in manager order: " << enum_item_key_simple(type) << "! Please report this bug to DFHack." << std::endl;
+        return NULL;
     }
 }
 
@@ -237,12 +246,15 @@ static command_result orders_export_command(color_ostream & out, const std::stri
     {
         CoreSuspender suspend;
 
-        for (auto it : world->manager_orders)
+        //for (auto it : world->manager_orders)
+        for (std::vector<df::manager_order*>::const_iterator cit = world->manager_orders.begin();
+            cit != world->manager_orders.end(); ++cit)
         {
+            df::manager_order* it = *cit;
             Json::Value order(Json::objectValue);
 
             order["id"] = it->id;
-            order["job"] = enum_item_key(it->job_type);
+            order["job"] = enum_item_key_simple(it->job_type);
             if (!it->reaction_name.empty())
             {
                 order["reaction"] = it->reaction_name;
@@ -250,7 +262,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
             if (it->item_type != item_type::NONE)
             {
-                order["item_type"] = enum_item_key(it->item_type);
+                order["item_type"] = enum_item_key_simple(it->item_type);
             }
             if (it->item_subtype != -1)
             {
@@ -290,7 +302,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             {
                 Json::Value art(Json::objectValue);
 
-                art["type"] = enum_item_key(it->art_spec.type);
+                art["type"] = enum_item_key_simple(it->art_spec.type);
                 art["id"] = it->art_spec.id;
                 if (it->art_spec.subid != -1)
                 {
@@ -305,7 +317,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             order["is_validated"] = bool(it->status.bits.validated);
             order["is_active"] = bool(it->status.bits.active);
 
-            order["frequency"] = enum_item_key(it->frequency);
+            order["frequency"] = enum_item_key_simple(it->frequency);
 
             // TODO: finished_year, finished_year_tick
 
@@ -323,11 +335,14 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             {
                 Json::Value conditions(Json::arrayValue);
 
-                for (auto it2 : it->item_conditions)
+                //for (auto it2 : it->item_conditions)
+                for (std::vector<df::manager_order_condition_item*>::const_iterator ci = it->item_conditions.begin();
+                    ci != it->item_conditions.end(); ++ci)
                 {
+                    df::manager_order_condition_item* it2 = *ci;
                     Json::Value condition(Json::objectValue);
 
-                    condition["condition"] = enum_item_key(it2->compare_type);
+                    condition["condition"] = enum_item_key_simple(it2->compare_type);
                     condition["value"] = it2->compare_val;
 
                     if (it2->flags1.whole != 0 || it2->flags2.whole != 0 || it2->flags3.whole != 0)
@@ -340,7 +355,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
                     if (it2->item_type != item_type::NONE)
                     {
-                        condition["item_type"] = enum_item_key(it2->item_type);
+                        condition["item_type"] = enum_item_key_simple(it2->item_type);
                     }
                     if (it2->item_subtype != -1)
                     {
@@ -374,7 +389,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
                     if (it2->has_tool_use != tool_uses::NONE)
                     {
-                        condition["tool"] = enum_item_key(it2->has_tool_use);
+                        condition["tool"] = enum_item_key_simple(it2->has_tool_use);
                     }
 
                     // TODO: anon_1, anon_2, anon_3
@@ -389,12 +404,15 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             {
                 Json::Value conditions(Json::arrayValue);
 
-                for (auto it2 : it->order_conditions)
+                //for (auto it2 : it->order_conditions)
+                for (std::vector<df::manager_order_condition_order*>::const_iterator ci = it->order_conditions.begin();
+                    ci != it->order_conditions.end(); ++ci)
                 {
+                    df::manager_order_condition_order* it2 = *ci;
                     Json::Value condition(Json::objectValue);
 
                     condition["order"] = it2->order_id;
-                    condition["condition"] = enum_item_key(it2->condition);
+                    condition["condition"] = enum_item_key_simple(it2->condition);
 
                     // TODO: anon_1
 
@@ -412,12 +430,27 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
     Filesystem::mkdir("dfhack-config/orders");
 
-    std::ofstream file("dfhack-config/orders/" + name + ".json");
+    std::string ordersJsonFileName = "dfhack-config/orders/";
+    ordersJsonFileName += name + ".json";
+    std::ofstream file(ordersJsonFileName.c_str());
 
     file << orders << std::endl;
 
     return file.good() ? CR_OK : CR_FAILURE;
 }
+
+struct InorganicRawCompare
+{
+public:
+    explicit InorganicRawCompare(const std::string init) : _my(init) {}
+
+    bool operator()(const df::inorganic_raw* s2) const
+    {
+        return s2->id == _my;
+    }
+
+    const std::string _my;
+};
 
 static command_result orders_import_command(color_ostream & out, const std::string & name)
 {
@@ -429,7 +462,9 @@ static command_result orders_import_command(color_ostream & out, const std::stri
     Json::Value orders;
 
     {
-        std::ifstream file("dfhack-config/orders/" + name + ".json");
+        std::string ordersJsonFileName = "dfhack-config/orders/";
+        ordersJsonFileName += name + ".json";
+        std::ifstream file(ordersJsonFileName.c_str());
 
         if (!file.good())
         {
@@ -455,17 +490,24 @@ static command_result orders_import_command(color_ostream & out, const std::stri
     CoreSuspender suspend;
 
     std::map<int32_t, int32_t> id_mapping;
-    for (auto it : orders)
+    //for (auto it : orders)
+    for (Json::Value::const_iterator cit = orders.begin(); cit != orders.end(); ++cit)
     {
-        id_mapping[it["id"].asInt()] = world->manager_order_next_id;
+        id_mapping[(*cit)["id"].asInt()] = world->manager_order_next_id;
         world->manager_order_next_id++;
     }
 
-    for (auto & it : orders)
+    //for (auto & it : orders)
+    for (Json::Value::iterator cit = orders.begin(); cit != orders.end(); ++cit)
     {
+        Json::Value& it = *cit;
+
         df::manager_order *order = new df::manager_order();
 
-        order->id = id_mapping.at(it["id"].asInt());
+        std::map<int32_t, int32_t>::const_iterator m_at = id_mapping.find(it["id"].asInt());
+        order->id = m_at != id_mapping.end() ? m_at->second : 0;
+
+        //order->id = id_mapping.at(it["id"].asInt());
 
         if (!find_enum_item(&order->job_type, it["job"].asString()))
         {
@@ -504,7 +546,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
             {
                 delete order;
 
-                out << COLOR_LIGHTRED << "Invalid item subtype for imported manager order: " << enum_item_key(order->item_type) << ":" << it["item_subtype"].asString() << std::endl;
+                out << COLOR_LIGHTRED << "Invalid item subtype for imported manager order: " << enum_item_key_simple(order->item_type) << ":" << it["item_subtype"].asString() << std::endl;
 
                 return CR_FAILURE;
             }
@@ -625,8 +667,11 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
         if (it.isMember("item_conditions"))
         {
-            for (auto & it2 : it["item_conditions"])
+            //for (auto & it2 : it["item_conditions"])
+            Json::Value& it2arr = it["item_conditions"];
+            for (Json::Value::iterator cit = it2arr.begin(); cit != it2arr.end(); ++cit)
             {
+                Json::Value& it2 = *cit;
                 df::manager_order_condition_item *condition = new df::manager_order_condition_item();
 
                 if (!find_enum_item(&condition->compare_type, it2["condition"].asString()))
@@ -680,7 +725,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
                     {
                         delete condition;
 
-                        out << COLOR_YELLOW << "Invalid item condition item subtype for imported manager order: " << enum_item_key(condition->item_type) << ":" << it2["item_subtype"].asString() << std::endl;
+                        out << COLOR_YELLOW << "Invalid item condition item subtype for imported manager order: " << enum_item_key_simple(condition->item_type) << ":" << it2["item_subtype"].asString() << std::endl;
 
                         continue;
                     }
@@ -704,7 +749,9 @@ static command_result orders_import_command(color_ostream & out, const std::stri
                 if (it2.isMember("bearing"))
                 {
                     std::string bearing(it2["bearing"].asString());
-                    auto found = std::find_if(world->raws.inorganics.begin(), world->raws.inorganics.end(), [bearing](df::inorganic_raw *raw) -> bool { return raw->id == bearing; });
+                    std::vector<df::inorganic_raw*>::const_iterator found =
+                        std::find_if(world->raws.inorganics.begin(), world->raws.inorganics.end(),
+                        InorganicRawCompare(bearing));
                     if (found == world->raws.inorganics.end())
                     {
                         delete condition;
@@ -746,8 +793,11 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
         if (it.isMember("order_conditions"))
         {
-            for (auto & it2 : it["order_conditions"])
+            //for (auto & it2 : it["order_conditions"])
+            Json::Value& it2arr = it["order_conditions"];
+            for (Json::Value::const_iterator ci = it2arr.begin(); ci != it2arr.end(); ++ci)
             {
+                Json::Value const& it2 = *ci;
                 df::manager_order_condition_order *condition = new df::manager_order_condition_order();
 
                 int32_t id = it2["order"].asInt();
@@ -759,7 +809,9 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
                     continue;
                 }
-                condition->order_id = id_mapping.at(id);
+                //condition->order_id = id_mapping.at(id);
+                m_at = id_mapping.find(id);
+                condition->order_id = m_at != id_mapping.end() ? m_at->second : 0;
 
                 if (!find_enum_item(&condition->condition, it2["condition"].asString()))
                 {
@@ -788,21 +840,29 @@ static command_result orders_clear_command(color_ostream & out)
 {
     CoreSuspender suspend;
 
-    for (auto order : world->manager_orders)
+    //for (auto order : world->manager_orders)
+    for (uint32 i = 0; i < world->manager_orders.size(); ++i)
     {
-        for (auto condition : order->item_conditions)
+        df::manager_order const* order = world->manager_orders[i];
+        //for (auto condition : order->item_conditions)
+        for (uint32 j = 0; j < order->item_conditions.size(); ++j)
         {
-            delete condition;
+            //delete condition;
+            delete order->item_conditions[j];
         }
-        for (auto condition : order->order_conditions)
+        //for (auto condition : order->order_conditions)
+        for (uint32 j = 0; j < order->order_conditions.size(); ++j)
         {
-            delete condition;
+            //delete condition;
+            delete order->order_conditions[j];
         }
         if (order->items)
         {
-            for (auto item : *order->items)
+            //for (auto item : *order->items)
+            for (uint32 j = 0; j < order->items->size(); ++j)
             {
-                delete item;
+                //delete item;
+                delete (*order->items)[j];
             }
             delete order->items;
         }
