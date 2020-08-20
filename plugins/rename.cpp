@@ -3,8 +3,8 @@
 #include "Export.h"
 #include "PluginManager.h"
 
-#include <Error.h>
-#include <LuaTools.h>
+#include "Error.h"
+#include "LuaTools.h"
 
 #include "modules/Gui.h"
 #include "modules/Translation.h"
@@ -12,7 +12,7 @@
 #include "modules/World.h"
 #include "modules/Screen.h"
 
-#include <VTableInterpose.h>
+#include "VTableInterpose.h"
 #include "df/ui.h"
 #include "df/ui_sidebar_menus.h"
 #include "df/world.h"
@@ -146,7 +146,7 @@ struct dwarf_render_zone_hook : df::viewscreen_dwarfmodest {
             ui_sidebar_menus && ui_sidebar_menus->zone.selected &&
             !ui_sidebar_menus->zone.selected->name.empty())
         {
-            auto dims = Gui::getDwarfmodeViewDims();
+            Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             int width = dims.menu_x2 - dims.menu_x1 - 1;
 
             Screen::Pen pen(' ',COLOR_WHITE);
@@ -220,7 +220,7 @@ static void init_buildings(bool enable)
 
     if (enable)
     {
-        auto entry = World::GetPersistentData("rename/building_types");
+        PersistentDataItem entry = World::GetPersistentData("rename/building_types");
 
         if (entry.isValid())
         {
@@ -249,7 +249,7 @@ static bool renameBuilding(df::building *bld, std::string name)
 
     if (!name.empty() && !is_enabled_building(code))
     {
-        auto entry = World::GetPersistentData("rename/building_types", NULL);
+        PersistentDataItem entry = World::GetPersistentData("rename/building_types", NULL);
         if (!entry.isValid())
             return false;
 
@@ -265,7 +265,7 @@ static bool renameBuilding(df::building *bld, std::string name)
 
 static df::squad *getSquadByIndex(unsigned idx)
 {
-    auto entity = df::historical_entity::find(ui->group_id);
+    df::historical_entity* entity = df::historical_entity::find(ui->group_id);
     if (!entity)
         return NULL;
 
@@ -305,7 +305,7 @@ static command_result RenameUnit(color_ostream &stream, const RenameUnitIn *in)
 
 static command_result RenameBuilding(color_ostream &stream, const RenameBuildingIn *in)
 {
-    auto building = df::building::find(in->building_id());
+    df::building* building = df::building::find(in->building_id());
     if (!building)
         return CR_NOT_FOUND;
 
