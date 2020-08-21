@@ -83,7 +83,8 @@ static bool monitor_jobs = false;
 static bool monitor_misery = true;
 static bool monitor_date = true;
 static bool monitor_weather = true;
-static map<df::unit *, deque<activity_type>> work_history;
+typedef map<df::unit*, deque<activity_type> > WorkHistoryMap;
+static WorkHistoryMap work_history;
 
 static int misery[] = { 0, 0, 0, 0, 0, 0, 0 };
 static bool misery_upto_date = false;
@@ -121,7 +122,7 @@ static int getPercentage(const int n, const int d)
 static string getUnitName(df::unit * unit)
 {
     string label = "";
-    auto name = Units::getVisibleName(unit);
+    df::language_name* name = Units::getVisibleName(unit);
     if (name->has_name)
         label = Translation::TranslateName(name, false);
 
@@ -281,8 +282,8 @@ static string getActivityLabel(const activity_type activity)
     }
     else
     {
-        string raw_label = enum_item_key_str(static_cast<df::job_type>(activity));
-        for (auto c = raw_label.begin(); c != raw_label.end(); c++)
+        string raw_label = enum_item_key_str_simple(static_cast<df::job_type>(activity));
+        for (std::string::const_iterator c = raw_label.begin(); c != raw_label.end(); c++)
         {
             if (label.length() > 0 && *c >= 'A' && *c <= 'Z')
                 label += ' ';
@@ -317,26 +318,27 @@ public:
     {
         selected_column = 0;
 
-        auto last_selected_index = dwarf_activity_column.highlighted_index;
+        int last_selected_index = dwarf_activity_column.highlighted_index;
         dwarves_column.clear();
         dwarf_activity_values.clear();
 
-        for (auto it = work_history.begin(); it != work_history.end();)
+        for (WorkHistoryMap::const_iterator it = work_history.begin(); it != work_history.end();)
         {
-            auto unit = it->first;
+            df::unit* unit = it->first;
             if (!Units::isActive(unit))
             {
                 work_history.erase(it++);
                 continue;
             }
 
-            deque<activity_type> *work_list = &it->second;
+            deque<activity_type> const *work_list = &it->second;
             ++it;
 
             size_t dwarf_total = 0;
             dwarf_activity_values[unit] =  map<activity_type, size_t>();
             size_t count = window_days * ticks_per_day;
-            for (auto entry = work_list->rbegin(); entry != work_list->rend() && count > 0; entry++, count--)
+            for (deque<activity_type>::const_reverse_iterator entry = work_list->rbegin();
+                entry != work_list->rend() && count > 0; entry++, count--)
             {
                 if (*entry == JOB_UNKNOWN || *entry == job_type::DrinkBlood)
                     continue;
@@ -345,8 +347,8 @@ public:
                 addDwarfActivity(unit, *entry);
             }
 
-            auto &values = dwarf_activity_values[unit];
-            for (auto it = values.begin(); it != values.end(); ++it)
+            DwarfActivity &values = dwarf_activity_values[unit];
+            for (DwarfActivity::iterator it = values.begin(); it != values.end(); ++it)
                 it->second = getPercentage(it->second, dwarf_total);
 
             dwarves_column.add(getUnitName(unit), unit);
@@ -368,17 +370,17 @@ public:
         if (dwarves_column.getDisplayedListSize() == 0)
             return;
 
-        auto unit = dwarves_column.getFirstSelectedElem();
+        df::unit* unit = dwarves_column.getFirstSelectedElem();
         if (dwarf_activity_values.find(unit) == dwarf_activity_values.end())
             return;
 
-        auto dwarf_activities = &dwarf_activity_values[unit];
+        DwarfActivity const* dwarf_activities = &dwarf_activity_values[unit];
         if (dwarf_activities)
         {
             vector<pair<activity_type, size_t>> rev_vec(dwarf_activities->begin(), dwarf_activities->end());
             sort(rev_vec.begin(), rev_vec.end(), less_second<activity_type, size_t>());
 
-            for (auto it = rev_vec.begin(); it != rev_vec.end(); ++it)
+            for (vector<pair<activity_type, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
                 dwarf_activity_column.add(getActivityItem(it->first, it->second), it->first);
         }
 
@@ -434,7 +436,7 @@ public:
         }
         else if  (input->count(interface_key::CUSTOM_SHIFT_Z))
         {
-            df::unit *selected_unit = (selected_column == 0) ? dwarves_column.getFirstSelectedElem() : nullptr;
+            df::unit *selected_unit = (selected_column == 0) ? dwarves_column.getFirstSelectedElem() : NULL;
             if (selected_unit)
             {
                 input->clear();
@@ -515,7 +517,9 @@ private:
     int selected_column;
     size_t window_days;
 
-    map<df::unit *, map<activity_type, size_t>> dwarf_activity_values;
+    typedef map<activity_type, size_t> DwarfActivity;
+    typedef map<df::unit*, DwarfActivity> DwarfActivityMap;
+    DwarfActivityMap dwarf_activity_values;
 
     void validateColumn()
     {
@@ -560,40 +564,41 @@ public:
         selected_column = 0;
         fort_activity_count = 0;
 
-        auto last_selected_index = fort_activity_column.highlighted_index;
+        int last_selected_index = fort_activity_column.highlighted_index;
         fort_activity_column.clear();
         fort_activity_totals.clear();
         dwarf_activity_values.clear();
         category_breakdown.clear();
 
-        for (auto it = work_history.begin(); it != work_history.end();)
+        for (WorkHistoryMap::const_iterator it = work_history.begin(); it != work_history.end();)
         {
-            auto unit = it->first;
+            df::unit* const unit = it->first;
             if (!Units::isActive(unit))
             {
                 work_history.erase(it++);
                 continue;
             }
 
-            deque<activity_type> *work_list = &it->second;
+            deque<activity_type> const *work_list = &it->second;
             ++it;
 
             size_t count = window_days * ticks_per_day;
-            for (auto entry = work_list->rbegin(); entry != work_list->rend() && count > 0; entry++, count--)
+            for (deque<activity_type>::const_reverse_iterator entry = work_list->rbegin();
+                entry != work_list->rend() && count > 0; entry++, count--)
             {
                 if (*entry == JOB_UNKNOWN)
                     continue;
 
                 ++fort_activity_count;
 
-                auto real_activity = *entry;
+                activity_type real_activity = *entry;
                 if (real_activity < 0)
                 {
                     addFortActivity(real_activity);
                 }
                 else
                 {
-                    auto activity = static_cast<df::job_type>(real_activity);
+                    df::job_type activity = static_cast<df::job_type>(real_activity);
 
                     switch (activity)
                     {
@@ -876,22 +881,23 @@ public:
         vector<pair<activity_type, size_t>> rev_vec(fort_activity_totals.begin(), fort_activity_totals.end());
         sort(rev_vec.begin(), rev_vec.end(), less_second<activity_type, size_t>());
 
-        for (auto rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
+        for (vector<pair<activity_type, size_t>>::const_iterator rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
         {
-            auto activity = rev_it->first;
+            activity_type activity = rev_it->first;
             addToFortAverageColumn(activity);
 
-            for (auto it = dwarf_activity_values[activity].begin(); it != dwarf_activity_values[activity].end(); it++)
+            for (DwarfActivities::const_iterator it = dwarf_activity_values[activity].begin();
+                it != dwarf_activity_values[activity].end(); it++)
             {
-                auto avg = getPercentage(it->second, getFortActivityCount(activity));
+                int avg = getPercentage(it->second, getFortActivityCount(activity));
                 dwarf_activity_values[activity][it->first] = avg;
             }
         }
 
-        for (auto cat_it = category_breakdown.begin(); cat_it != category_breakdown.end(); cat_it++)
+        for (ActivitiesCategories::const_iterator cat_it = category_breakdown.begin(); cat_it != category_breakdown.end(); cat_it++)
         {
-            auto cat_total = fort_activity_totals[cat_it->first];
-            for (auto val_it = cat_it->second.begin(); val_it != cat_it->second.end(); val_it++)
+            size_t cat_total = fort_activity_totals[cat_it->first];
+            for (ActivitiesCount::const_iterator val_it = cat_it->second.begin(); val_it != cat_it->second.end(); val_it++)
             {
                 category_breakdown[cat_it->first][val_it->first] = getPercentage(val_it->second, cat_total);
             }
@@ -910,13 +916,13 @@ public:
         if (fort_activity_column.getDisplayListSize() > 0)
         {
             activity_type selected_activity = fort_activity_column.getFirstSelectedElem();
-            auto dwarf_activities = &dwarf_activity_values[selected_activity];
+            DwarfActivities const* dwarf_activities = &dwarf_activity_values[selected_activity];
             if (dwarf_activities)
             {
                 vector<pair<df::unit *, size_t>> rev_vec(dwarf_activities->begin(), dwarf_activities->end());
                 sort(rev_vec.begin(), rev_vec.end(), less_second<df::unit *, size_t>());
 
-                for (auto it = rev_vec.begin(); it != rev_vec.end(); ++it)
+                for (vector<pair<df::unit *, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
                     dwarf_activity_column.add(getDwarfAverage(it->first, it->second), it->first);
             }
         }
@@ -932,14 +938,14 @@ public:
         if (fort_activity_column.getDisplayListSize() == 0)
             return;
 
-        auto selected_activity = fort_activity_column.getFirstSelectedElem();
-        auto category_activities = &category_breakdown[selected_activity];
+        activity_type selected_activity = fort_activity_column.getFirstSelectedElem();
+        ActivitiesCount* category_activities = &category_breakdown[selected_activity];
         if (category_activities)
         {
             vector<pair<activity_type, size_t>> rev_vec(category_activities->begin(), category_activities->end());
             sort(rev_vec.begin(), rev_vec.end(), less_second<activity_type, size_t>());
 
-            for (auto it = rev_vec.begin(); it != rev_vec.end(); ++it)
+            for (vector<pair<activity_type, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
                 category_breakdown_column.add(getBreakdownAverage(it->first, it->second), it->first);
         }
 
@@ -956,25 +962,25 @@ public:
 
     string getFortAverage(const activity_type &activity)
     {
-        auto average = getPercentage(getFortActivityCount(activity), fort_activity_count);
-        auto label = getActivityLabel(activity);
-        auto result = pad_string(int_to_string(average), 3) + " " + label;
+        int average = getPercentage(getFortActivityCount(activity), fort_activity_count);
+        std::string label = getActivityLabel(activity);
+        std::string result = pad_string(int_to_string(average), 3) + " " + label;
 
         return result;
     }
 
     string getDwarfAverage(df::unit *unit, const size_t value)
     {
-        auto label = getUnitName(unit);
-        auto result = pad_string(int_to_string(value), 3) + " " + label;
+        std::string label = getUnitName(unit);
+        std::string result = pad_string(int_to_string(value), 3) + " " + label;
 
         return result;
     }
 
     string getBreakdownAverage(activity_type activity, const size_t value)
     {
-        auto label = getActivityLabel(activity);
-        auto result = pad_string(int_to_string(value), 3) + " " + label;
+        std::string label = getActivityLabel(activity);
+        std::string result = pad_string(int_to_string(value), 3) + " " + label;
 
         return result;
     }
@@ -1046,13 +1052,13 @@ public:
         }
         else if  (input->count(interface_key::CUSTOM_SHIFT_D))
         {
-            df::unit *selected_unit = (selected_column == 1) ? dwarf_activity_column.getFirstSelectedElem() : nullptr;
+            df::unit *selected_unit = (selected_column == 1) ? dwarf_activity_column.getFirstSelectedElem() : NULL;
             Screen::dismiss(this);
-            Screen::show(dts::make_unique<ViewscreenDwarfStats>(selected_unit), plugin_self);
+            Screen::show(new ViewscreenDwarfStats(selected_unit), NULL, plugin_self);
         }
         else if  (input->count(interface_key::CUSTOM_SHIFT_Z))
         {
-            df::unit *selected_unit = (selected_column == 1) ? dwarf_activity_column.getFirstSelectedElem() : nullptr;
+            df::unit *selected_unit = (selected_column == 1) ? dwarf_activity_column.getFirstSelectedElem() : NULL;
             if (selected_unit)
             {
                 input->clear();
@@ -1125,9 +1131,13 @@ private:
     ListColumn<df::unit *> dwarf_activity_column;
     int selected_column;
 
-    map<activity_type, size_t> fort_activity_totals;
-    map<int, map<activity_type, size_t>> category_breakdown;
-    map<activity_type, map<df::unit *, size_t>> dwarf_activity_values;
+    typedef map<activity_type, size_t> ActivitiesCount;
+    ActivitiesCount fort_activity_totals;
+    typedef map<int, ActivitiesCount> ActivitiesCategories;
+    ActivitiesCategories category_breakdown;
+    typedef map<df::unit*, size_t> DwarfActivities;
+    typedef map<activity_type, DwarfActivities> DwarfActivitiesMap;
+    DwarfActivitiesMap dwarf_activity_values;
     size_t fort_activity_count;
     size_t window_days;
 
@@ -1250,10 +1260,10 @@ struct preference_map
             label = "Food     :";
             if (pref.matindex < 0 || pref.item_type == item_type::MEAT)
             {
-                auto index = (pref.item_type == item_type::FISH) ? pref.mattype : pref.matindex;
+                int32 index = (pref.item_type == item_type::FISH) ? pref.mattype : pref.matindex;
                 if (index > 0)
                 {
-                    auto creature = df::creature_raw::find(index);
+                    df::creature_raw* creature = df::creature_raw::find(index);
                     if (creature)
                         label += creature->name[0];
                 }
@@ -1316,7 +1326,7 @@ struct preference_map
             break;
 
         default:
-            label += string("UNKNOWN ") + ENUM_KEY_STR(unit_preference::T_type, pref.type);
+            label += string("UNKNOWN ") + ENUM_KEY_STR_SIMPLE(unit_preference::T_type, pref.type);
             break;
         }
     }
@@ -1348,11 +1358,11 @@ public:
     {
         selected_column = 0;
 
-        auto last_selected_index = preferences_column.highlighted_index;
+        int last_selected_index = preferences_column.highlighted_index;
         preferences_column.clear();
         preference_totals.clear();
 
-        for (auto iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
+        for (std::vector<df::unit*>::const_iterator iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
         {
             df::unit* unit = *iter;
             if (!Units::isCitizen(unit))
@@ -1364,11 +1374,11 @@ public:
             if (!unit->status.current_soul)
                 continue;
 
-            for (auto it = unit->status.current_soul->preferences.begin();
+            for (std::vector<df::unit_preference*>::const_iterator it = unit->status.current_soul->preferences.begin();
                  it != unit->status.current_soul->preferences.end();
                  it++)
             {
-                auto pref = *it;
+                df::unit_preference* pref = *it;
                 if (!pref->active)
                     continue;
                 bool foundInStore = false;
@@ -1399,9 +1409,9 @@ public:
         vector<pair<size_t, size_t>> rev_vec(preference_totals.begin(), preference_totals.end());
         sort(rev_vec.begin(), rev_vec.end(), less_second<size_t, size_t>());
 
-        for (auto rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
+        for (vector<pair<size_t, size_t>>::const_iterator rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
         {
-            auto pref_index = rev_it->first;
+            size_t pref_index = rev_it->first;
             preferences_store[pref_index].makeLabel();
 
             string label = pad_string(int_to_string(rev_it->second), 3);
@@ -1540,13 +1550,13 @@ public:
         dwarf_column.clear();
         if (preferences_column.getDisplayListSize() > 0)
         {
-            auto selected_preference = preferences_column.getFirstSelectedElem();
-            for (auto dfit = preferences_store[selected_preference].dwarves.begin();
+            size_t selected_preference = preferences_column.getFirstSelectedElem();
+            for (std::vector<df::unit*>::const_iterator dfit = preferences_store[selected_preference].dwarves.begin();
                  dfit != preferences_store[selected_preference].dwarves.end();
                  dfit++)
             {
                 string label = getUnitName(*dfit);
-                auto happy = get_happiness_cat(*dfit);
+                int happy = get_happiness_cat(*dfit);
                 UIColor color = monitor_colors[happy];
                 switch (happy)
                 {
@@ -1590,7 +1600,7 @@ public:
 
     df::unit *getSelectedUnit() override
     {
-        return (selected_column == 1) ? dwarf_column.getFirstSelectedElem() : nullptr;
+        return (selected_column == 1) ? dwarf_column.getFirstSelectedElem() : NULL;
     }
 
     void feed(set<df::interface_key> *input)
@@ -1627,9 +1637,9 @@ public:
             df::unit *unit = getSelectedUnit();
             if (unit)
             {
-                auto unitscr = df::allocate<df::viewscreen_unitst>();
+                df::viewscreen_unitst* unitscr = df::allocate<df::viewscreen_unitst>();
                 unitscr->unit = unit;
-                Screen::show(std::unique_ptr<df::viewscreen>(unitscr));
+                Screen::show(unitscr);
             }
         }
         else if  (input->count(interface_key::CUSTOM_SHIFT_Z))
@@ -1723,14 +1733,14 @@ private:
 
 static void open_stats_screen()
 {
-    Screen::show(dts::make_unique<ViewscreenFortStats>(), plugin_self);
+    Screen::show(new ViewscreenFortStats(), NULL, plugin_self);
 }
 
 static void add_work_history(df::unit *unit, activity_type type)
 {
     if (work_history.find(unit) == work_history.end())
     {
-        auto max_history = get_max_history();
+        int max_history = get_max_history();
         for (int i = 0; i < max_history; i++)
             work_history[unit].push_back(JOB_UNKNOWN);
     }
@@ -1768,7 +1778,7 @@ static void update_dwarf_stats(bool is_paused)
             misery[i] = 0;
     }
 
-    for (auto iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
+    for (std::vector<df::unit*>::const_iterator iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
     {
         df::unit* unit = *iter;
         if (!Units::isCitizen(unit))
@@ -1776,7 +1786,7 @@ static void update_dwarf_stats(bool is_paused)
 
         if (!DFHack::Units::isActive(unit))
         {
-            auto it = work_history.find(unit);
+            WorkHistoryMap::const_iterator it = work_history.find(unit);
             if (it != work_history.end())
                 work_history.erase(it);
 
@@ -1938,7 +1948,7 @@ static command_result dwarfmonitor_cmd(color_ostream &out, vector <string> & par
     }
     else
     {
-        auto cmd = parameters[0][0];
+        char cmd = parameters[0][0];
         string mode;
 
         if (parameters.size() > 1)
@@ -1973,13 +1983,13 @@ static command_result dwarfmonitor_cmd(color_ostream &out, vector <string> & par
         {
             CoreSuspender guard;
             if(Maps::IsValid())
-                Screen::show(dts::make_unique<ViewscreenFortStats>(), plugin_self);
+                Screen::show(new ViewscreenFortStats(), NULL, plugin_self);
         }
         else if (cmd == 'p' || cmd == 'P')
         {
             CoreSuspender guard;
             if(Maps::IsValid())
-                Screen::show(dts::make_unique<ViewscreenPreferences>(), plugin_self);
+                Screen::show(new ViewscreenPreferences(), NULL, plugin_self);
         }
         else if (cmd == 'r' || cmd == 'R')
         {
