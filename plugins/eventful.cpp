@@ -290,7 +290,7 @@ struct product_hook : item_product {
          int32_t quality, df::historical_entity *entity,  df::world_site *site, std::vector<void *> *unk2)
     ) {
         color_ostream_proxy out(Core::getInstance().getConsole());
-        auto product = products[this];
+        ProductInfo* product = products[this];
         if ( !product ) {
             INTERPOSE_NEXT(produce)(unit, out_products, out_items, in_reag, in_items, quantity, skill, quality, entity, site, unk2);
             return;
@@ -386,21 +386,21 @@ static bool find_reactions(color_ostream &out)
 {
     reactions.clear();
 
-    auto &rlist = df::reaction::get_vector();
+    std::vector<df::reaction*> &rlist = df::reaction::get_vector();
 
     for (size_t i = 0; i < rlist.size(); i++)
     {
         reactions[rlist[i]->code].react = rlist[i];
     }
 
-    for (auto it = reactions.begin(); it != reactions.end(); ++it)
+    for (std::map<std::string, ReactionInfo>::iterator it = reactions.begin(); it != reactions.end(); ++it)
     {
-        auto &prod = it->second.react->products;
-        auto &out_prod = it->second.products;
+        std::vector<df::reaction_product*> &prod = it->second.react->products;
+        std::vector<ProductInfo> &out_prod = it->second.products;
 
         for (size_t i = 0; i < prod.size(); i++)
         {
-            auto itprod = strict_virtual_cast<item_product>(prod[i]);
+            item_product* itprod = strict_virtual_cast<item_product>(prod[i]);
             if (!itprod) continue;
 
             out_prod.push_back(ProductInfo());
