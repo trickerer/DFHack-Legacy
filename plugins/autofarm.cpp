@@ -51,14 +51,71 @@ const char *usage = (
                 "``autofarm threshold 150 helmet_plump tail_pig``: Sets thresholds\n"
                 );
 
+static const df::plant_raw_flags autofarm_seasons[4] = { df::plant_raw_flags::SPRING, df::plant_raw_flags::SUMMER, df::plant_raw_flags::AUTUMN, df::plant_raw_flags::WINTER };
+static const std::pair<df::plant_raw_flags, df::biome_type> biomeFlagMap_arr[] = {
+    std::make_pair(df::plant_raw_flags::BIOME_MOUNTAIN, df::biome_type::MOUNTAIN ),
+    std::make_pair(df::plant_raw_flags::BIOME_GLACIER, df::biome_type::GLACIER),
+    std::make_pair(df::plant_raw_flags::BIOME_TUNDRA, df::biome_type::TUNDRA),
+    std::make_pair(df::plant_raw_flags::BIOME_SWAMP_TEMPERATE_FRESHWATER, df::biome_type::SWAMP_TEMPERATE_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_SWAMP_TEMPERATE_SALTWATER, df::biome_type::SWAMP_TEMPERATE_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_MARSH_TEMPERATE_FRESHWATER, df::biome_type::MARSH_TEMPERATE_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_MARSH_TEMPERATE_SALTWATER, df::biome_type::MARSH_TEMPERATE_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_SWAMP_TROPICAL_FRESHWATER, df::biome_type::SWAMP_TROPICAL_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_SWAMP_TROPICAL_SALTWATER, df::biome_type::SWAMP_TROPICAL_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_SWAMP_MANGROVE, df::biome_type::SWAMP_MANGROVE),
+    std::make_pair(df::plant_raw_flags::BIOME_MARSH_TROPICAL_FRESHWATER, df::biome_type::MARSH_TROPICAL_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_MARSH_TROPICAL_SALTWATER, df::biome_type::MARSH_TROPICAL_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_FOREST_TAIGA, df::biome_type::FOREST_TAIGA),
+    std::make_pair(df::plant_raw_flags::BIOME_FOREST_TEMPERATE_CONIFER, df::biome_type::FOREST_TEMPERATE_CONIFER),
+    std::make_pair(df::plant_raw_flags::BIOME_FOREST_TEMPERATE_BROADLEAF, df::biome_type::FOREST_TEMPERATE_BROADLEAF),
+    std::make_pair(df::plant_raw_flags::BIOME_FOREST_TROPICAL_CONIFER, df::biome_type::FOREST_TROPICAL_CONIFER),
+    std::make_pair(df::plant_raw_flags::BIOME_FOREST_TROPICAL_DRY_BROADLEAF, df::biome_type::FOREST_TROPICAL_DRY_BROADLEAF),
+    std::make_pair(df::plant_raw_flags::BIOME_FOREST_TROPICAL_MOIST_BROADLEAF, df::biome_type::FOREST_TROPICAL_MOIST_BROADLEAF),
+    std::make_pair(df::plant_raw_flags::BIOME_GRASSLAND_TEMPERATE, df::biome_type::GRASSLAND_TEMPERATE),
+    std::make_pair(df::plant_raw_flags::BIOME_SAVANNA_TEMPERATE, df::biome_type::SAVANNA_TEMPERATE),
+    std::make_pair(df::plant_raw_flags::BIOME_SHRUBLAND_TEMPERATE, df::biome_type::SHRUBLAND_TEMPERATE),
+    std::make_pair(df::plant_raw_flags::BIOME_GRASSLAND_TROPICAL, df::biome_type::GRASSLAND_TROPICAL),
+    std::make_pair(df::plant_raw_flags::BIOME_SAVANNA_TROPICAL, df::biome_type::SAVANNA_TROPICAL),
+    std::make_pair(df::plant_raw_flags::BIOME_SHRUBLAND_TROPICAL, df::biome_type::SHRUBLAND_TROPICAL),
+    std::make_pair(df::plant_raw_flags::BIOME_DESERT_BADLAND, df::biome_type::DESERT_BADLAND),
+    std::make_pair(df::plant_raw_flags::BIOME_DESERT_ROCK, df::biome_type::DESERT_ROCK),
+    std::make_pair(df::plant_raw_flags::BIOME_DESERT_SAND, df::biome_type::DESERT_SAND),
+    std::make_pair(df::plant_raw_flags::BIOME_OCEAN_TROPICAL, df::biome_type::OCEAN_TROPICAL),
+    std::make_pair(df::plant_raw_flags::BIOME_OCEAN_TEMPERATE, df::biome_type::OCEAN_TEMPERATE),
+    std::make_pair(df::plant_raw_flags::BIOME_OCEAN_ARCTIC, df::biome_type::OCEAN_ARCTIC),
+    std::make_pair(df::plant_raw_flags::BIOME_POOL_TEMPERATE_FRESHWATER, df::biome_type::POOL_TEMPERATE_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_POOL_TEMPERATE_BRACKISHWATER, df::biome_type::POOL_TEMPERATE_BRACKISHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_POOL_TEMPERATE_SALTWATER, df::biome_type::POOL_TEMPERATE_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_POOL_TROPICAL_FRESHWATER, df::biome_type::POOL_TROPICAL_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_POOL_TROPICAL_BRACKISHWATER, df::biome_type::POOL_TROPICAL_BRACKISHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_POOL_TROPICAL_SALTWATER, df::biome_type::POOL_TROPICAL_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_LAKE_TEMPERATE_FRESHWATER, df::biome_type::LAKE_TEMPERATE_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_LAKE_TEMPERATE_BRACKISHWATER, df::biome_type::LAKE_TEMPERATE_BRACKISHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_LAKE_TEMPERATE_SALTWATER, df::biome_type::LAKE_TEMPERATE_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_LAKE_TROPICAL_FRESHWATER, df::biome_type::LAKE_TROPICAL_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_LAKE_TROPICAL_BRACKISHWATER, df::biome_type::LAKE_TROPICAL_BRACKISHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_LAKE_TROPICAL_SALTWATER, df::biome_type::LAKE_TROPICAL_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_RIVER_TEMPERATE_FRESHWATER, df::biome_type::RIVER_TEMPERATE_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_RIVER_TEMPERATE_BRACKISHWATER, df::biome_type::RIVER_TEMPERATE_BRACKISHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_RIVER_TEMPERATE_SALTWATER, df::biome_type::RIVER_TEMPERATE_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_RIVER_TROPICAL_FRESHWATER, df::biome_type::RIVER_TROPICAL_FRESHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_RIVER_TROPICAL_BRACKISHWATER, df::biome_type::RIVER_TROPICAL_BRACKISHWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_RIVER_TROPICAL_SALTWATER, df::biome_type::RIVER_TROPICAL_SALTWATER),
+    std::make_pair(df::plant_raw_flags::BIOME_SUBTERRANEAN_WATER, df::biome_type::SUBTERRANEAN_WATER),
+    std::make_pair(df::plant_raw_flags::BIOME_SUBTERRANEAN_CHASM, df::biome_type::SUBTERRANEAN_CHASM),
+    std::make_pair(df::plant_raw_flags::BIOME_SUBTERRANEAN_LAVA, df::biome_type::SUBTERRANEAN_LAVA)
+};
+const map<df::plant_raw_flags, df::biome_type> biomeFlagMap(biomeFlagMap_arr, biomeFlagMap_arr + sizeof(biomeFlagMap_arr)/sizeof(biomeFlagMap_arr[0]));
+
 class AutoFarm {
 private:
     map<int, int> thresholds;
-    int defaultThreshold = 50;
-
+    int defaultThreshold;
     map<int, int> lastCounts;
 
 public:
+    AutoFarm() : defaultThreshold(50) {}
+
     void initialize()
     {
         thresholds.clear();
@@ -82,9 +139,6 @@ public:
         defaultThreshold = val;
     }
 
-private:
-    const df::plant_raw_flags seasons[4] = { df::plant_raw_flags::SPRING, df::plant_raw_flags::SUMMER, df::plant_raw_flags::AUTUMN, df::plant_raw_flags::WINTER };
-
 public:
     bool is_plantable(df::plant_raw* plant)
     {
@@ -93,11 +147,11 @@ public:
 
         int8_t season = *df::global::cur_season;
         int harvest = (*df::global::cur_season_tick) + plant->growdur * 10;
-        bool can_plant = has_seed && !is_tree && plant->flags.is_set(seasons[season]);
+        bool can_plant = has_seed && !is_tree && plant->flags.is_set(autofarm_seasons[season]);
         while (can_plant && harvest >= 10080) {
             season = (season + 1) % 4;
             harvest -= 10080;
-            can_plant = can_plant && plant->flags.is_set(seasons[season]);
+            can_plant = can_plant && plant->flags.is_set(autofarm_seasons[season]);
         }
 
         return can_plant;
@@ -105,61 +159,6 @@ public:
 
 private:
     map<int, set<df::biome_type>> plantable_plants;
-
-    const map<df::plant_raw_flags, df::biome_type> biomeFlagMap = {
-        { df::plant_raw_flags::BIOME_MOUNTAIN, df::biome_type::MOUNTAIN },
-        { df::plant_raw_flags::BIOME_GLACIER, df::biome_type::GLACIER },
-        { df::plant_raw_flags::BIOME_TUNDRA, df::biome_type::TUNDRA },
-        { df::plant_raw_flags::BIOME_SWAMP_TEMPERATE_FRESHWATER, df::biome_type::SWAMP_TEMPERATE_FRESHWATER },
-        { df::plant_raw_flags::BIOME_SWAMP_TEMPERATE_SALTWATER, df::biome_type::SWAMP_TEMPERATE_SALTWATER },
-        { df::plant_raw_flags::BIOME_MARSH_TEMPERATE_FRESHWATER, df::biome_type::MARSH_TEMPERATE_FRESHWATER },
-        { df::plant_raw_flags::BIOME_MARSH_TEMPERATE_SALTWATER, df::biome_type::MARSH_TEMPERATE_SALTWATER },
-        { df::plant_raw_flags::BIOME_SWAMP_TROPICAL_FRESHWATER, df::biome_type::SWAMP_TROPICAL_FRESHWATER },
-        { df::plant_raw_flags::BIOME_SWAMP_TROPICAL_SALTWATER, df::biome_type::SWAMP_TROPICAL_SALTWATER },
-        { df::plant_raw_flags::BIOME_SWAMP_MANGROVE, df::biome_type::SWAMP_MANGROVE },
-        { df::plant_raw_flags::BIOME_MARSH_TROPICAL_FRESHWATER, df::biome_type::MARSH_TROPICAL_FRESHWATER },
-        { df::plant_raw_flags::BIOME_MARSH_TROPICAL_SALTWATER, df::biome_type::MARSH_TROPICAL_SALTWATER },
-        { df::plant_raw_flags::BIOME_FOREST_TAIGA, df::biome_type::FOREST_TAIGA },
-        { df::plant_raw_flags::BIOME_FOREST_TEMPERATE_CONIFER, df::biome_type::FOREST_TEMPERATE_CONIFER },
-        { df::plant_raw_flags::BIOME_FOREST_TEMPERATE_BROADLEAF, df::biome_type::FOREST_TEMPERATE_BROADLEAF },
-        { df::plant_raw_flags::BIOME_FOREST_TROPICAL_CONIFER, df::biome_type::FOREST_TROPICAL_CONIFER },
-        { df::plant_raw_flags::BIOME_FOREST_TROPICAL_DRY_BROADLEAF, df::biome_type::FOREST_TROPICAL_DRY_BROADLEAF },
-        { df::plant_raw_flags::BIOME_FOREST_TROPICAL_MOIST_BROADLEAF, df::biome_type::FOREST_TROPICAL_MOIST_BROADLEAF },
-        { df::plant_raw_flags::BIOME_GRASSLAND_TEMPERATE, df::biome_type::GRASSLAND_TEMPERATE },
-        { df::plant_raw_flags::BIOME_SAVANNA_TEMPERATE, df::biome_type::SAVANNA_TEMPERATE },
-        { df::plant_raw_flags::BIOME_SHRUBLAND_TEMPERATE, df::biome_type::SHRUBLAND_TEMPERATE },
-        { df::plant_raw_flags::BIOME_GRASSLAND_TROPICAL, df::biome_type::GRASSLAND_TROPICAL },
-        { df::plant_raw_flags::BIOME_SAVANNA_TROPICAL, df::biome_type::SAVANNA_TROPICAL },
-        { df::plant_raw_flags::BIOME_SHRUBLAND_TROPICAL, df::biome_type::SHRUBLAND_TROPICAL },
-        { df::plant_raw_flags::BIOME_DESERT_BADLAND, df::biome_type::DESERT_BADLAND },
-        { df::plant_raw_flags::BIOME_DESERT_ROCK, df::biome_type::DESERT_ROCK },
-        { df::plant_raw_flags::BIOME_DESERT_SAND, df::biome_type::DESERT_SAND },
-        { df::plant_raw_flags::BIOME_OCEAN_TROPICAL, df::biome_type::OCEAN_TROPICAL },
-        { df::plant_raw_flags::BIOME_OCEAN_TEMPERATE, df::biome_type::OCEAN_TEMPERATE },
-        { df::plant_raw_flags::BIOME_OCEAN_ARCTIC, df::biome_type::OCEAN_ARCTIC },
-        { df::plant_raw_flags::BIOME_POOL_TEMPERATE_FRESHWATER, df::biome_type::POOL_TEMPERATE_FRESHWATER },
-        { df::plant_raw_flags::BIOME_POOL_TEMPERATE_BRACKISHWATER, df::biome_type::POOL_TEMPERATE_BRACKISHWATER },
-        { df::plant_raw_flags::BIOME_POOL_TEMPERATE_SALTWATER, df::biome_type::POOL_TEMPERATE_SALTWATER },
-        { df::plant_raw_flags::BIOME_POOL_TROPICAL_FRESHWATER, df::biome_type::POOL_TROPICAL_FRESHWATER },
-        { df::plant_raw_flags::BIOME_POOL_TROPICAL_BRACKISHWATER, df::biome_type::POOL_TROPICAL_BRACKISHWATER },
-        { df::plant_raw_flags::BIOME_POOL_TROPICAL_SALTWATER, df::biome_type::POOL_TROPICAL_SALTWATER },
-        { df::plant_raw_flags::BIOME_LAKE_TEMPERATE_FRESHWATER, df::biome_type::LAKE_TEMPERATE_FRESHWATER },
-        { df::plant_raw_flags::BIOME_LAKE_TEMPERATE_BRACKISHWATER, df::biome_type::LAKE_TEMPERATE_BRACKISHWATER },
-        { df::plant_raw_flags::BIOME_LAKE_TEMPERATE_SALTWATER, df::biome_type::LAKE_TEMPERATE_SALTWATER },
-        { df::plant_raw_flags::BIOME_LAKE_TROPICAL_FRESHWATER, df::biome_type::LAKE_TROPICAL_FRESHWATER },
-        { df::plant_raw_flags::BIOME_LAKE_TROPICAL_BRACKISHWATER, df::biome_type::LAKE_TROPICAL_BRACKISHWATER },
-        { df::plant_raw_flags::BIOME_LAKE_TROPICAL_SALTWATER, df::biome_type::LAKE_TROPICAL_SALTWATER },
-        { df::plant_raw_flags::BIOME_RIVER_TEMPERATE_FRESHWATER, df::biome_type::RIVER_TEMPERATE_FRESHWATER },
-        { df::plant_raw_flags::BIOME_RIVER_TEMPERATE_BRACKISHWATER, df::biome_type::RIVER_TEMPERATE_BRACKISHWATER },
-        { df::plant_raw_flags::BIOME_RIVER_TEMPERATE_SALTWATER, df::biome_type::RIVER_TEMPERATE_SALTWATER },
-        { df::plant_raw_flags::BIOME_RIVER_TROPICAL_FRESHWATER, df::biome_type::RIVER_TROPICAL_FRESHWATER },
-        { df::plant_raw_flags::BIOME_RIVER_TROPICAL_BRACKISHWATER, df::biome_type::RIVER_TROPICAL_BRACKISHWATER },
-        { df::plant_raw_flags::BIOME_RIVER_TROPICAL_SALTWATER, df::biome_type::RIVER_TROPICAL_SALTWATER },
-        { df::plant_raw_flags::BIOME_SUBTERRANEAN_WATER, df::biome_type::SUBTERRANEAN_WATER },
-        { df::plant_raw_flags::BIOME_SUBTERRANEAN_CHASM, df::biome_type::SUBTERRANEAN_CHASM },
-        { df::plant_raw_flags::BIOME_SUBTERRANEAN_LAVA, df::biome_type::SUBTERRANEAN_LAVA }
-    };
-
 
 public:
     void find_plantable_plants()
@@ -177,22 +176,29 @@ public:
         F(in_building); F(construction); F(artifact);
 #undef F
 
-        for (auto ii : world->items.other[df::items_other_id::SEEDS])
+        //for (auto ii : world->items.other[df::items_other_id::SEEDS])
+        std::vector<df::item*> const& seed_vec = world->items.other[df::items_other_id::SEEDS];
+        for (std::vector<df::item*>::const_iterator ci = seed_vec.begin(); ci != seed_vec.end(); ++ci)
         {
+            df::item* ii = *ci;
             df::item_plantst* i = (df::item_plantst*)ii;
             if ((i->flags.whole & bad_flags.whole) == 0)
                 counts[i->mat_index] += i->stack_size;
         }
 
-        for (auto ci : counts)
+        //for (auto ci : counts)
+        for (map<int, int>::const_iterator c = counts.begin(); c != counts.end(); ++c)
         {
+            map<int, int>::value_type const& ci = *c;
             if (df::global::ui->tasks.discovered_plants[ci.first])
             {
                 df::plant_raw* plant = world->raws.plants.all[ci.first];
                 if (is_plantable(plant))
-                    for (auto flagmap : biomeFlagMap)
-                        if (plant->flags.is_set(flagmap.first))
-                            plantable_plants[plant->index].insert(flagmap.second);
+                    //for (auto flagmap : biomeFlagMap)
+                    for (map<df::plant_raw_flags, df::biome_type>::const_iterator cit = biomeFlagMap.begin();
+                        cit != biomeFlagMap.end(); ++cit)
+                        if (plant->flags.is_set(cit->first))
+                            plantable_plants[plant->index].insert(cit->second);
             }
         }
     }
@@ -216,8 +222,10 @@ public:
         queue<df::building_farmplotst*> toChange;
         toChange.empty();
 
-        for (auto farm : farms)
+        //for (auto farm : farms)
+        for (vector<df::building_farmplotst*>::const_iterator ci = farms.begin(); ci != farms.end(); ++ci)
         {
+            df::building_farmplotst* farm = *ci;
             int o = farm->plant_id[season];
             if (plants.count(o)==0 || counters[o] > min || (counters[o] == min && extra == 0))
                 toChange.push(farm); // this farm is an excess instance for the plant it is currently planting
@@ -229,8 +237,10 @@ public:
             }
         }
 
-        for (auto n : plants)
+        //for (auto n : plants)
+        for (set<int>::const_iterator ci = plants.begin(); ci != plants.end(); ++ci)
         {
+            int n = *ci;
             int c = counters[n];
             while (toChange.size() > 0 && (c < min || (c == min && extra > 0)))
             {
@@ -266,8 +276,11 @@ public:
         F(in_building); F(construction); F(artifact);
 #undef F
 
-        for (auto ii : world->items.other[df::items_other_id::PLANT])
+        std::vector<df::item*> const& plant_vec = world->items.other[df::items_other_id::PLANT];
+        //for (auto ii : world->items.other[df::items_other_id::PLANT])
+        for (std::vector<df::item*>::const_iterator ci = plant_vec.begin(); ci != plant_vec.end(); ++ci)
         {
+            df::item* ii = *ci;
             df::item_plantst* i = (df::item_plantst*)ii;
             if ((i->flags.whole & bad_flags.whole) == 0 &&
                 plantable_plants.count(i->mat_index) > 0)
@@ -279,21 +292,29 @@ public:
         map<df::biome_type, set<int>> plants;
         plants.clear();
 
-        for (auto plantable : plantable_plants)
+        //for (auto plantable : plantable_plants)
+        for (map<int, set<df::biome_type>>::const_iterator ci = plantable_plants.begin();
+            ci != plantable_plants.end(); ++ci)
         {
+            map<int, set<df::biome_type>>::value_type const& plantable = *ci;
             df::plant_raw* plant = world->raws.plants.all[plantable.first];
             if (lastCounts[plant->index] < getThreshold(plant->index))
-                for (auto biome : plantable.second)
+                //for (auto biome : plantable.second)
+                for (set<df::biome_type>::const_iterator cit = plantable.second.begin();
+                    cit != plantable.second.end(); ++cit)
                 {
-                    plants[biome].insert(plant->index);
+                    plants[*cit].insert(plant->index);
                 }
         }
 
         map<df::biome_type, vector<df::building_farmplotst*>> farms;
         farms.clear();
 
-        for (auto bb : world->buildings.other[df::buildings_other_id::FARM_PLOT])
+        //for (auto bb : world->buildings.other[df::buildings_other_id::FARM_PLOT])
+        std::vector<df::building*> const& plot_vec = world->buildings.other[df::buildings_other_id::FARM_PLOT];
+        for (std::vector<df::building*>::const_iterator ci = plot_vec.begin(); ci != plot_vec.end(); ++ci)
         {
+            df::building* bb = *ci;
             df::building_farmplotst* farm = (df::building_farmplotst*) bb;
             if (farm->flags.bits.exists)
             {
@@ -308,27 +329,31 @@ public:
             }
         }
 
-        for (auto ff : farms)
+        //for (auto ff : farms)
+        for (map<df::biome_type, vector<df::building_farmplotst*>>::const_iterator ci = farms.begin();
+            ci != farms.end(); ++ci)
         {
-            set_farms(out, plants[ff.first], ff.second);
+            set_farms(out, plants[ci->first], ci->second);
         }
     }
 
     void status(color_ostream& out)
     {
         out << (enabled ? "Running." : "Stopped.") << endl;
-        for (auto lc : lastCounts)
+        //for (auto lc : lastCounts)
+        for (map<int, int>::const_iterator ci = lastCounts.begin(); ci != lastCounts.end(); ++ci)
         {
-            auto plant = world->raws.plants.all[lc.first];
-            out << plant->id << " limit " << getThreshold(lc.first) << " current " << lc.second << endl;
+            df::plant_raw const* plant = world->raws.plants.all[ci->first];
+            out << plant->id << " limit " << getThreshold(ci->first) << " current " << ci->second << endl;
         }
 
-        for (auto th : thresholds)
+        //for (auto th : thresholds)
+        for (map<int, int>::const_iterator ci = thresholds.begin(); ci != thresholds.end(); ++ci)
         {
-            if (lastCounts[th.first] > 0)
+            if (lastCounts[ci->first] > 0)
                 continue;
-            auto plant = world->raws.plants.all[th.first];
-            out << plant->id << " limit " << getThreshold(th.first) << " current 0" << endl;
+            df::plant_raw const* plant = world->raws.plants.all[ci->first];
+            out << plant->id << " limit " << getThreshold(ci->first) << " current 0" << endl;
         }
         out << "Default: " << defaultThreshold << endl;
     }
@@ -394,8 +419,11 @@ static command_result setThresholds(color_ostream& out, vector<string> & paramet
         transform(id.begin(), id.end(), id.begin(), ::toupper);
 
         bool ok = false;
-        for (auto plant : world->raws.plants.all)
+        //for (auto plant : world->raws.plants.all)
+        for (std::vector<df::plant_raw*>::const_iterator ci = world->raws.plants.all.begin();
+            ci != world->raws.plants.all.end(); ++ci)
         {
+            df::plant_raw* plant = *ci;
             if (plant->flags.is_set(df::plant_raw_flags::SEED) && (plant->id == id))
             {
                 autofarmInstance->setThreshold(plant->index, val);
