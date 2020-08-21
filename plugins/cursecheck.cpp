@@ -29,7 +29,7 @@ using namespace std;
 #include "Console.h"
 #include "PluginManager.h"
 #include "modules/Units.h"
-#include <modules/Translation.h>
+#include "modules/Translation.h"
 #include "modules/Gui.h"
 #include "MiscUtils.h"
 
@@ -55,17 +55,27 @@ DFHACK_PLUGIN("cursecheck");
 REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cursor);
 
-enum class curses : int8_t {
-    None,
-    Unknown,
-    Ghost,
-    Zombie,
-    Necromancer,
-    Werebeast,
-    Vampire
+enum CurseTypes : int8_t
+{
+    CURSE_TYPE_NONE,
+    CURSE_TYPE_UNKNOWN,
+    CURSE_TYPE_GHOST,
+    CURSE_TYPE_ZOMBIE,
+    CURSE_TYPE_NECROMANCER,
+    CURSE_TYPE_WEREBEAST,
+    CURSE_TYPE_VAMPIRE
 };
 
-std::vector<string> curse_names = {
+//std::vector<string> curse_names = {
+//    "none",
+//    "unknown",
+//    "ghost",
+//    "zombie",
+//    "necromancer",
+//    "werebeast",
+//    "vampire"
+//};
+std::string curs_str[] = {
     "none",
     "unknown",
     "ghost",
@@ -74,6 +84,7 @@ std::vector<string> curse_names = {
     "werebeast",
     "vampire"
 };
+std::vector<string> curse_names(curs_str, curs_str + sizeof(curs_str)/sizeof(curs_str[0]));
 
 command_result cursecheck (color_ostream &out, vector <string> & parameters);
 
@@ -90,25 +101,25 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-curses determineCurse(df::unit * unit)
+CurseTypes determineCurse(df::unit * unit)
 {
-    curses cursetype = curses::None;
+    CurseTypes cursetype = CURSE_TYPE_NONE;
 
     if (unit->curse_year != -1)
     {
-        cursetype = curses::Unknown;
+        cursetype = CURSE_TYPE_UNKNOWN;
     }
 
     // ghosts: ghostly, duh
     // as of DF 34.05 and higher vampire ghosts and the like should not be possible
     // if they get reintroduced later it will become necessary to watch 'ghostly' seperately
     if(unit->flags3.bits.ghostly)
-        cursetype = curses::Ghost;
+        cursetype = CURSE_TYPE_GHOST;
 
     // zombies: undead or hate life (according to ag), not bloodsuckers
     if( (unit->curse.add_tags1.bits.OPPOSED_TO_LIFE || unit->curse.add_tags1.bits.NOT_LIVING)
         && !unit->curse.add_tags1.bits.BLOODSUCKER )
-        cursetype = curses::Zombie;
+        cursetype = CURSE_TYPE_ZOMBIE;
 
     // necromancers: alive, don't eat, don't drink, don't age
     if(!unit->curse.add_tags1.bits.NOT_LIVING
@@ -116,7 +127,7 @@ curses determineCurse(df::unit * unit)
         && unit->curse.add_tags1.bits.NO_DRINK
         && unit->curse.add_tags2.bits.NO_AGING
         )
-        cursetype = curses::Necromancer;
+        cursetype = CURSE_TYPE_NECROMANCER;
 
     // werecreatures: subjected to a were syndrome. The curse effects are active only when
     // in were form.
@@ -126,7 +137,7 @@ curses determineCurse(df::unit * unit)
         {
             if (strcmp (world->raws.syndromes.all[unit->syndromes.active[i]->type]->syn_class[k]->c_str(), "WERECURSE") == 0)
             {
-                cursetype = curses::Werebeast;
+                cursetype = CURSE_TYPE_WEREBEAST;
                 break;
             }
         }
@@ -134,7 +145,7 @@ curses determineCurse(df::unit * unit)
 
     // vampires: bloodsucker (obvious enough)
     if(unit->curse.add_tags1.bits.BLOODSUCKER)
-        cursetype = curses::Vampire;
+        cursetype = CURSE_TYPE_VAMPIRE;
 
     return cursetype;
 }
@@ -207,9 +218,9 @@ command_result cursecheck (color_ostream &out, vector <string> & parameters)
             continue;
         }
 
-        curses cursetype = determineCurse(unit);
+        CurseTypes cursetype = determineCurse(unit);
 
-        if (cursetype != curses::None)
+        if (cursetype != CURSE_TYPE_NONE)
         {
              cursecount++;
 
@@ -238,7 +249,7 @@ command_result cursecheck (color_ostream &out, vector <string> & parameters)
                     out.print("Unnamed creature ");
                 }
 
-                auto death = df::incident::find(unit->counters.death_id);
+                df::incident* death = df::incident::find(unit->counters.death_id);
                 bool missing = false;
                 if (death && !death->flags.bits.discovered)
                 {
