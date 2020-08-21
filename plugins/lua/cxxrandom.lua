@@ -97,11 +97,11 @@ normal_distribution = {}
 function normal_distribution:new(avg, stddev)
     local o = {}
     self.__index = self
-    if type(avg) ~= 'number' or type(stddev) ~= 'number' then
-        error("Invalid arguments in normal_distribution construction. Average and standard deviation must be numbers.")
-    end
-    o.average = avg
-    o.std_deviation = stddev
+    --if type(avg) ~= 'number' or type(stddev) ~= 'number' then
+    --    error("Invalid arguments in normal_distribution construction. Average and standard deviation must be numbers.")
+    --end
+    o.average = 0 --unused
+    o.std_deviation = 0 --unused
     setmetatable(o,self)
     return o
 end

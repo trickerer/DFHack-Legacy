@@ -20,3 +20,7 @@ typedef int32               int32_t;
 typedef uint32              uint32_t;
 typedef int64               int64_t;
 typedef uint64              uint64_t;
+
+// print helpers
+#define INT64FMT "%I64d"
+#define UINT64FMT "%I64u"
