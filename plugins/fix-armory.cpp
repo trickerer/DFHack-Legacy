@@ -16,7 +16,7 @@
 #include "MiscUtils.h"
 
 #include "DataDefs.h"
-#include <VTableInterpose.h>
+#include "VTableInterpose.h"
 #include "df/ui.h"
 #include "df/world.h"
 #include "df/squad.h"
@@ -140,7 +140,7 @@ static bool is_assigned_item(df::item *item)
     if (!ui)
         return false;
 
-    auto type = item->getType();
+    df::item_type type = item->getType();
     int idx = binsearch_index(ui->equipment.items_assigned[type], item->id);
     if (idx < 0)
         return false;
@@ -153,7 +153,7 @@ static bool is_squad_ammo(df::item *item, df::squad *squad, bool combat, bool tr
 {
     for (size_t i = 0; i < squad->ammunition.size(); i++)
     {
-        auto spec = squad->ammunition[i];
+        df::squad_ammo_spec* spec = squad->ammunition[i];
         bool cs = spec->flags.bits.use_combat;
         bool ts = spec->flags.bits.use_training;
 
@@ -171,13 +171,13 @@ static bool is_squad_ammo(df::item *item, df::squad *squad, bool combat, bool tr
 // Recursively check room parents to find out if this ammo item is allowed here
 static bool can_store_ammo_rec(df::item *item, df::building *holder, int squad_id)
 {
-    auto squads = holder->getSquads();
+    std::vector<df::building_squad_use*> *squads = holder->getSquads();
 
     if (squads)
     {
         for (size_t i = 0; i < squads->size(); i++)
         {
-            auto use = (*squads)[i];
+            df::building_squad_use* use = (*squads)[i];
 
             // For containers assigned to a squad, only consider that squad
             if (squad_id >= 0 && use->squad_id != squad_id)
@@ -189,7 +189,7 @@ static bool can_store_ammo_rec(df::item *item, df::building *holder, int squad_i
 
             if (combat || train)
             {
-                auto squad = df::squad::find(use->squad_id);
+                df::squad* squad = df::squad::find(use->squad_id);
 
                 if (squad && is_squad_ammo(item, squad, combat, train))
                     return true;
@@ -199,11 +199,11 @@ static bool can_store_ammo_rec(df::item *item, df::building *holder, int squad_i
     // Ugh, archery targets don't actually have a squad use vector
     else if (holder->getType() == building_type::ArcheryTarget)
     {
-        auto &squads = world->squads.all;
+        std::vector<df::squad*> &squads = world->squads.all;
 
         for (size_t si = 0; si < squads.size(); si++)
         {
-            auto squad = squads[si];
+            df::squad* squad = squads[si];
 
             // For containers assigned to a squad, only consider that squad
             if (squad_id >= 0 && squad->id != squad_id)
@@ -211,7 +211,7 @@ static bool can_store_ammo_rec(df::item *item, df::building *holder, int squad_i
 
             for (size_t j = 0; j < squad->rooms.size(); j++)
             {
-                auto use = squad->rooms[j];
+                df::squad::T_rooms* use = squad->rooms[j];
 
                 if (use->building_id != holder->id)
                     continue;
@@ -257,7 +257,7 @@ static bool belongs_to_position(df::item *item, df::building *holder)
     if (sid < 0)
         return false;
 
-    auto squad = df::squad::find(sid);
+    df::squad* squad = df::squad::find(sid);
     if (!squad)
         return false;
 
@@ -274,7 +274,7 @@ static bool belongs_to_position(df::item *item, df::building *holder)
     }
     else
     {
-        auto cpos = vector_get(squad->positions, position);
+        df::squad_position* cpos = vector_get(squad->positions, position);
         if (cpos && binsearch_index(cpos->assigned_items, item->id) >= 0)
             return true;
     }
@@ -288,7 +288,7 @@ static bool is_in_armory(df::item *item)
     if (item->flags.bits.in_inventory || item->flags.bits.on_ground)
         return false;
 
-    auto holder = Items::getHolderBuilding(item);
+    df::building* holder = Items::getHolderBuilding(item);
     if (!holder)
         return false;
 
@@ -381,7 +381,7 @@ template<class Item> struct armory_hook : Item {
         if (is_assigned_item(this))
         {
             // The original vmethod adds the item to this vector to force instant check
-            auto &ovec = world->items.other[items_other_id::ANY_RECENTLY_DROPPED];
+            std::vector<df::item*> &ovec = world->items.other[items_other_id::ANY_RECENTLY_DROPPED];
 
             // If it is indeed there, remove it
             if (erase_from_vector(ovec, &df::item::id, this->id))
@@ -449,11 +449,11 @@ static bool can_store_item(df::item *item)
         return false;
 
     // in unit inventory?
-    auto top = item;
+    df::item* top = item;
 
     while (top->flags.bits.in_inventory)
     {
-        auto parent = Items::getContainer(top);
+        df::item* parent = Items::getContainer(top);
         if (!parent) break;
         top = parent;
     }
@@ -483,11 +483,11 @@ static bool try_store_item(df::building *target, df::item *item)
         return false;
 
     // Create the job
-    auto href = df::allocate<df::general_ref_building_holderst>();
+    df::general_ref_building_holderst* href = df::allocate<df::general_ref_building_holderst>();
     if (!href)
         return false;
 
-    auto job = new df::job();
+    df::job* job = new df::job();
 
     job->pos = tpos;
 
@@ -533,7 +533,7 @@ static bool try_store_item(df::building *target, df::item *item)
     // They also don't actually need BUILDING_HOLDER, but it doesn't hurt.
     if (dest)
     {
-        auto rdest = df::allocate<df::general_ref_building_destinationst>();
+        df::general_ref_building_destinationst* rdest = df::allocate<df::general_ref_building_destinationst>();
 
         if (rdest)
         {
@@ -552,7 +552,7 @@ static void try_store_item(std::vector<int32_t> &vec, df::item *item)
 {
     for (size_t i = 0; i < vec.size(); i++)
     {
-        auto target = df::building::find(vec[i]);
+        df::building* target = df::building::find(vec[i]);
         if (!target)
             continue;
 
@@ -566,7 +566,7 @@ static void try_store_item_set(std::vector<int32_t> &items, df::squad *squad, df
 {
     for (size_t j = 0; j < items.size(); j++)
     {
-        auto item = df::item::find(items[j]);
+        df::item* item = df::item::find(items[j]);
 
         // not loose
         if (!can_store_item(item))
@@ -612,14 +612,14 @@ static bool try_store_ammo(df::item *item, ammo_box_set &group)
 {
     int volume = item->getVolume();
 
-    for (auto it = group.rbegin(); it != group.rend(); ++it)
+    for (ammo_box_set::reverse_iterator it = group.rbegin(); it != group.rend(); ++it)
     {
         if (it->first < volume)
             break;
 
-        for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+        for (std::set<df::building*>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
         {
-            auto bld = *it2;
+            df::building* bld = *it2;
 
             if (try_store_item(bld, item))
             {
@@ -638,8 +638,8 @@ static void index_ammo_boxes(df::squad *squad, ammo_box_set &train_set, ammo_box
 {
     for (size_t j = 0; j < squad->rooms.size(); j++)
     {
-        auto room = squad->rooms[j];
-        auto bld = df::building::find(room->building_id);
+        df::squad::T_rooms* room = squad->rooms[j];
+        df::building* bld = df::building::find(room->building_id);
 
         // Chests in rooms marked for Squad Equipment used for combat ammo
         if (room->mode.bits.squad_eq)
@@ -659,13 +659,13 @@ static void try_store_ammo(df::squad *squad)
 
     for (size_t i = 0; i < squad->ammunition.size(); i++)
     {
-        auto spec = squad->ammunition[i];
+        df::squad_ammo_spec* spec = squad->ammunition[i];
         bool cs = spec->flags.bits.use_combat;
         bool ts = spec->flags.bits.use_training;
 
         for (size_t j = 0; j < spec->assigned.size(); j++)
         {
-            auto item = df::item::find(spec->assigned[j]);
+            df::item* item = df::item::find(spec->assigned[j]);
 
             // not loose
             if (!can_store_item(item))
@@ -708,15 +708,15 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out, state_change_ev
         return CR_OK;
 
     // Loop over squads
-    auto &squads = world->squads.all;
+    std::vector<df::squad*> &squads = world->squads.all;
 
     for (size_t si = 0; si < squads.size(); si++)
     {
-        auto squad = squads[si];
+        df::squad* squad = squads[si];
 
         for (size_t i = 0; i < squad->positions.size(); i++)
         {
-            auto pos = squad->positions[i];
+            df::squad_position* pos = squad->positions[i];
 
             try_store_item_set(pos->assigned_items, squad, pos);
         }
@@ -764,7 +764,7 @@ static void enable_hooks(color_ostream &out, bool enable)
 
 static void enable_plugin(color_ostream &out)
 {
-    auto entry = World::GetPersistentData("fix-armory/enabled", NULL);
+    PersistentDataItem entry = World::GetPersistentData("fix-armory/enabled", NULL);
     if (!entry.isValid())
     {
         out.printerr("Could not save the status.\n");
@@ -776,7 +776,7 @@ static void enable_plugin(color_ostream &out)
 
 static void disable_plugin(color_ostream &out)
 {
-    auto entry = World::GetPersistentData("fix-armory/enabled");
+    PersistentDataItem entry = World::GetPersistentData("fix-armory/enabled");
     World::DeletePersistentData(entry);
 
     enable_hooks(out, false);
