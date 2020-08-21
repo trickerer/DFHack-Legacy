@@ -14,6 +14,8 @@
 #include "df/unit.h"
 #include "df/world.h"
 
+#include <ctime>
+
 using namespace DFHack;
 
 DFHACK_PLUGIN("fix-unit-occupancy");
@@ -132,7 +134,7 @@ unsigned fix_unit_occupancy (color_ostream &out, uo_opts &opts)
         }
     }
 
-    for (auto it = world->units.active.begin(); it != world->units.active.end(); ++it)
+    for (std::vector<df::unit*>::const_iterator it = world->units.active.begin(); it != world->units.active.end(); ++it)
     {
         df::unit *u = *it;
         if (!u || u->flags1.bits.caged || u->pos.x < 0)
@@ -253,7 +255,7 @@ command_result cmd_fix_unit_occupancy (color_ostream &out, std::vector <std::str
             return CR_WRONG_USAGE;
     }
 
-    for (auto opt = parameters.begin(); opt != parameters.end(); ++opt)
+    for (std::vector<std::string>::const_iterator opt = parameters.begin(); opt != parameters.end(); ++opt)
     {
         if (*opt == "-n" || opt->find("dry") != std::string::npos)
             opts.dry_run = true;
