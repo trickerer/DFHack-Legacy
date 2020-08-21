@@ -97,7 +97,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
     {
         if (isInPlannedBuildingPlacementMode())
         {
-            auto type = ui_build_selector->building_type;
+            df::building_type type = ui_build_selector->building_type;
             if (input->count(interface_key::CUSTOM_SHIFT_P))
             {
                 planmode_enabled[type] = !planmode_enabled[type];
@@ -156,7 +156,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                 }
                 else if (input->count(interface_key::CUSTOM_SHIFT_M))
                 {
-                    Screen::show(dts::make_unique<ViewscreenChooseMaterial>(planner.getDefaultItemFilterForType(type)), plugin_self);
+                    Screen::show(new ViewscreenChooseMaterial(planner.getDefaultItemFilterForType(type)), NULL, plugin_self);
                 }
                 else if (input->count(interface_key::CUSTOM_Q))
                 {
@@ -197,7 +197,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
         {
             if (Gui::inRenameBuilding())
                 return false;
-            auto np = getNoblePositionOfSelectedBuildingOwner();
+            std::vector<Units::NoblePosition> np = getNoblePositionOfSelectedBuildingOwner();
             df::interface_key last_token = get_string_key(input);
             if (last_token >= interface_key::STRING_A048 && last_token <= interface_key::STRING_A058)
             {
@@ -229,7 +229,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                 ui_build_selector->stage = 1;
             }
 
-            for (auto iter = ui_build_selector->errors.begin(); iter != ui_build_selector->errors.end();)
+            for (std::vector<std::string*>::iterator iter = ui_build_selector->errors.begin(); iter != ui_build_selector->errors.end();)
             {
                 //FIXME Hide bags
                 if (((*iter)->find("Needs") != string::npos && **iter != "Needs adjacent wall")  ||
@@ -246,10 +246,10 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
 
         INTERPOSE_NEXT(render)();
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
-        auto type = ui_build_selector->building_type;
+        df::building_type type = ui_build_selector->building_type;
         if (plannable)
         {
             if (planner.inQuickFortMode() && planner.in_dummmy_screen)
@@ -278,7 +278,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                 {
                     OutputToggleString(x, y, "Quickfort Mode", "F", planner.inQuickFortMode(), true, left_margin);
 
-                    auto filter = planner.getDefaultItemFilterForType(type);
+                    ItemFilter* filter = planner.getDefaultItemFilterForType(type);
 
                     OutputHotkeyString(x, y, "Min Quality: ", "qw");
                     OutputString(COLOR_BROWN, x, y, filter->getMinQuality(), true, left_margin);
@@ -289,8 +289,8 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                     OutputToggleString(x, y, "Decorated Only: ", "D", filter->decorated_only, true, left_margin);
 
                     OutputHotkeyString(x, y, "Material Filter:", "M", true, left_margin);
-                    auto filter_descriptions = filter->getMaterialFilterAsVector();
-                    for (auto it = filter_descriptions.begin(); it != filter_descriptions.end(); ++it)
+                    std::vector<std::string> filter_descriptions = filter->getMaterialFilterAsVector();
+                    for (std::vector<std::string>::iterator it = filter_descriptions.begin(); it != filter_descriptions.end(); ++it)
                         OutputString(COLOR_BROWN, x, y, "   *" + *it, true, left_margin);
                 }
                 else
@@ -308,7 +308,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
             Screen::Pen pen(' ', COLOR_BLACK);
             Screen::fillRect(pen, x, y, dims.menu_x2, y);
 
-            auto filter = planner.getSelectedPlannedBuilding()->getFilter();
+            ItemFilter* filter = planner.getSelectedPlannedBuilding()->getFilter();
             y = 24;
             OutputString(COLOR_BROWN, x, y, "Planned Building Filter:", true, left_margin);
             OutputString(COLOR_BROWN, x, y, "Min Quality: ", false, left_margin);
@@ -320,13 +320,13 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                 OutputString(COLOR_BLUE, x, y, "Decorated Only", true, left_margin);
 
             OutputString(COLOR_BROWN, x, y, "Materials:", true, left_margin);
-            auto filters = filter->getMaterialFilterAsVector();
-            for (auto it = filters.begin(); it != filters.end(); ++it)
+            std::vector<std::string> filters = filter->getMaterialFilterAsVector();
+            for (std::vector<std::string>::iterator it = filters.begin(); it != filters.end(); ++it)
                 OutputString(COLOR_BLUE, x, y, "*" + *it, true, left_margin);
         }
         else if (isInNobleRoomQueryMode())
         {
-            auto np = getNoblePositionOfSelectedBuildingOwner();
+            std::vector<Units::NoblePosition> np = getNoblePositionOfSelectedBuildingOwner();
             int y = 24;
             OutputString(COLOR_BROWN, x, y, "DFHack", true, left_margin);
             OutputString(COLOR_WHITE, x, y, "Auto-allocate to:", true, left_margin);
