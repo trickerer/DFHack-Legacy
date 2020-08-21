@@ -129,7 +129,7 @@ std::vector<std::vector<std::string>> tokenizeFile(std::string filename) {
             continue;
         }
         int start = 0;
-        auto nextInd = line.find(',');
+        size_t nextInd = line.find(',');
         std::string curCell = line.substr(start,nextInd-start);
         do {
             fileTokens[y][x] = curCell;
@@ -145,7 +145,7 @@ std::vector<std::vector<std::string>> tokenizeFile(std::string filename) {
 
 command_result fortplan(color_ostream &out, vector<string> & params) {
 
-    auto & con = out;
+    color_ostream & con = out;
     std::vector<std::vector<std::string>> layout(128, std::vector<std::string>(128));
     if (params.size()) {
         coord32_t cursor;
@@ -175,24 +175,26 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
         bool started = false;
         for (y = 0; y < layout.size(); y++) {
             x = 0;
-            auto hashBuild = layout[y][x].find("#build");
+            size_t hashBuild = layout[y][x].find("#build");
             if (hashBuild != layout[y][x].npos) {
-                auto startLoc = layout[y][x].find("start(");
+                size_t startLoc = layout[y][x].find("start(");
                 if (startLoc != layout[y][x].npos) {
                     startLoc += 6;
-                    auto nextDelimiter = layout[y][x].find(";",startLoc);
+                    size_t nextDelimiter = layout[y][x].find(";",startLoc);
                     std::string startXStr = layout[y][x].substr(startLoc,nextDelimiter-startLoc);
-                    int startXOffset = std::stoi(startXStr);
+                    //int startXOffset = std::stoi(startXStr);
+                    int startXOffset = atoi(startXStr.c_str());
                     startLoc = nextDelimiter+1;
                     nextDelimiter = layout[y][x].find(";",startLoc);
                     std::string startYStr = layout[y][x].substr(startLoc,nextDelimiter-startLoc);
-                    int startYOffset = std::stoi(startYStr);
+                    //int startYOffset = std::stoi(startYStr);
+                    int startYOffset = atoi(startYStr.c_str());
                     startCursor.x -= startXOffset;
                     startCursor.y -= startYOffset;
                     DFHack::Gui::setCursorCoords(startCursor.x,startCursor.y,startCursor.z);
                     started = true;
 
-                    auto startEnd = layout[y][x].find(")",nextDelimiter);
+                    size_t startEnd = layout[y][x].find(")",nextDelimiter);
 
                     con.print("Starting at (%d,%d,%d) which is described as: %s\n",startCursor.x,startCursor.y,startCursor.z,layout[y][x].substr(nextDelimiter+1,startEnd-nextDelimiter).c_str());
                     std::string desc = layout[y][x].substr(startEnd+1);
@@ -214,13 +216,13 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                 }
 
                 if (strcmp(layout[y][x].c_str(),"`")!=0) {
-                    auto dataIndex = layout[y][x].find("(");
+                    size_t dataIndex = layout[y][x].find("(");
                     std::string curCode;
                     std::vector<std::string> curData;
                     if (dataIndex != layout[y][x].npos) {
                         curCode = layout[y][x].substr(0,dataIndex);
                         int dataStart = dataIndex+1;
-                        auto nextDataStart = layout[y][x].find(",",dataStart);
+                        size_t nextDataStart = layout[y][x].find(",",dataStart);
                         while (nextDataStart!=layout[y][x].npos) {
                             std::string nextData = layout[y][x].substr(dataStart,nextDataStart);
                             if (strcmp(nextData.substr(nextData.size()-1,1).c_str(),")")==0) {
@@ -234,7 +236,8 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                         curCode = layout[y][x];
                     }
                     //con.print("Found a cell with '%s' in it (layout[y][x] %d:%d-%d)\n",layout[y][x].c_str(),lineNum,start,nextInd);
-                    auto buildingIndex = std::find_if(buildings.begin(), buildings.end(), MatchesCode(curCode.c_str()));
+                    std::vector<BuildingInfo>::const_iterator buildingIndex =
+                        std::find_if(buildings.begin(), buildings.end(), MatchesCode(curCode.c_str()));
 
                     // = std::find(validInstructions.begin(), validInstructions.end(), layout[y][x]);
                     if(buildingIndex == buildings.end()) {
@@ -262,7 +265,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                                         if (checkX==x && checkY==y) {
                                             continue;
                                         }
-                                        auto checkDataIndex = layout[checkY][checkX].find("(");
+                                        size_t checkDataIndex = layout[checkY][checkX].find("(");
                                         std::string checkCode;
                                         if (checkDataIndex != layout[checkY][checkX].npos) {
                                             checkCode = layout[checkY][checkX].substr(0,checkDataIndex);
@@ -271,7 +274,8 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                                         }
 
                                         con.print(" - Code at (%zu,%zu) is '%s': ",checkX,checkY,checkCode.c_str());
-                                        auto checkIndex = std::find_if(buildings.begin(), buildings.end(), MatchesCode(checkCode.c_str()));
+                                        std::vector<BuildingInfo>::const_iterator checkIndex =
+                                            std::find_if(buildings.begin(), buildings.end(), MatchesCode(checkCode.c_str()));
                                         //if (checkIndex == buildings.end()) {
                                         //    con.print("this is not a valid code, so we keep going.\n");
                                         //    continue;
@@ -299,7 +303,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                                             if (checkX==x && checkY==y) {
                                                 continue;
                                             }
-                                            auto checkDataIndex = layout[checkY][checkX].find("(");
+                                            size_t checkDataIndex = layout[checkY][checkX].find("(");
                                             std::string checkCode;
                                             if (checkDataIndex != layout[checkY][checkX].npos) {
                                                 checkCode = layout[checkY][checkX].substr(0,checkDataIndex);
