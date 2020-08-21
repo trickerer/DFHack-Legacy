@@ -5,10 +5,10 @@
 #include <vector>
 
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
-#include <VTableInterpose.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
+#include "VTableInterpose.h"
 
 
 // DF data structure definition headers
@@ -218,7 +218,7 @@ static bool move_material_to_top(MaterialDescriptor &material)
     size_t i;
     if (is_material_in_list(i, material))
     {
-        auto sel_item = ui_build_selector->choices[i];
+        df::build_req_choicest* sel_item = ui_build_selector->choices[i];
         ui_build_selector->choices.erase(ui_build_selector->choices.begin() + i);
         ui_build_selector->choices.insert(ui_build_selector->choices.begin(), sel_item);
 
@@ -298,7 +298,7 @@ static bool is_orthogonal_to_pending_construction(building_site &site)
 
 static df::building_constructionst *get_construction_on_tile(const df::coord &pos)
 {
-    auto current = Buildings::findAtTile(pos);
+    df::building* current = Buildings::findAtTile(pos);
     if (current)
         return strict_virtual_cast<df::building_constructionst>(current);
 
@@ -310,7 +310,7 @@ static df::tiletype *read_tile_shapes(const df::coord &pos, df::tiletype_shape &
     if (!Maps::isValidTilePos(pos))
         return NULL;
 
-    auto ttype = Maps::getTileType(pos);
+    df::tiletype* ttype = Maps::getTileType(pos);
 
     if (!ttype)
         return NULL;
@@ -326,7 +326,7 @@ static bool is_valid_building_site(building_site &site, bool orthogonal_check, b
     df::tiletype_shape shape;
     df::tiletype_shape_basic shape_basic;
 
-    auto ttype = read_tile_shapes(site.pos, shape, shape_basic);
+    df::tiletype* ttype = read_tile_shapes(site.pos, shape, shape_basic);
     if (!ttype)
         return false;
 
@@ -356,7 +356,7 @@ static bool is_valid_building_site(building_site &site, bool orthogonal_check, b
             ui_build_selector->building_subtype == construction_type::UpDownStair)
         {
             df::coord below(site.pos.x, site.pos.y, site.pos.z - 1);
-            auto ttype_s = read_tile_shapes(below, shape_s, shape_basic_s);
+            df::tiletype* ttype_s = read_tile_shapes(below, shape_s, shape_basic_s);
             if (ttype_s)
             {
                 if (shape_s == tiletype_shape::STAIR_UP || shape_s == tiletype_shape::STAIR_UPDOWN)
@@ -368,7 +368,7 @@ static bool is_valid_building_site(building_site &site, bool orthogonal_check, b
             ui_build_selector->building_subtype == construction_type::UpDownStair)
         {
             df::coord above(site.pos.x, site.pos.y, site.pos.z + 1);
-            auto ttype_s = read_tile_shapes(above, shape_s, shape_basic_s);
+            df::tiletype* ttype_s = read_tile_shapes(above, shape_s, shape_basic_s);
             if (ttype_s)
             {
                 if (shape_s == tiletype_shape::STAIR_DOWN || shape_s == tiletype_shape::STAIR_UPDOWN)
@@ -414,7 +414,7 @@ static bool is_valid_building_site(building_site &site, bool orthogonal_check, b
     }
     else
     {
-        auto material = tileMaterial(*ttype);
+        df::tiletype_material material = tileMaterial(*ttype);
         if (shape == tiletype_shape::RAMP)
         {
             if (material == tiletype_material::CONSTRUCTION)
@@ -426,7 +426,7 @@ static bool is_valid_building_site(building_site &site, bool orthogonal_check, b
                 return false;
 
             // Can build on top of a wall, but not on other construction
-            auto construction = Constructions::findAtTile(site.pos);
+            df::construction* construction = Constructions::findAtTile(site.pos);
             if (construction)
             {
                 if (construction->flags.bits.top_of_wall==0)
@@ -449,11 +449,11 @@ static bool is_valid_building_site(building_site &site, bool orthogonal_check, b
     if (orthogonal_check)
         return true;
 
-    auto designation = Maps::getTileDesignation(site.pos);
+    df::tile_designation* designation = Maps::getTileDesignation(site.pos);
     if (designation->bits.flow_size > 2)
         return false;
 
-    auto current = Buildings::findAtTile(site.pos);
+    df::building* current = Buildings::findAtTile(site.pos);
     if (current)
         return false;
 
@@ -552,7 +552,7 @@ static bool find_valid_building_sites(bool in_future_placement_mode)
 
 static bool designate_new_construction(df::coord &pos, df::construction_type &type, df::item *item)
 {
-    auto newinst = Buildings::allocInstance(pos, building_type::Construction, type);
+    df::building* newinst = Buildings::allocInstance(pos, building_type::Construction, type);
     if (!newinst)
         return false;
 
@@ -702,7 +702,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
 
                     if (box_select_enabled)
                     {
-                        auto curr_index = ui_build_selector->sel_index;
+                        int32_t curr_index = ui_build_selector->sel_index;
                         vector<MaterialDescriptor> gen_material;
                         gen_material.push_back(get_material_in_list(curr_index));
                         box_select_materials.clear();
@@ -1070,7 +1070,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
             return;
         }
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = 25;
