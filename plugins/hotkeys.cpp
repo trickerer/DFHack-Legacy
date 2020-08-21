@@ -54,14 +54,14 @@ static void find_active_keybindings(df::viewscreen *screen)
         valid_keys.push_back("F" + int_to_string(i));
     }
 
-    auto current_focus = Gui::getFocusString(screen);
+    std::string current_focus = Gui::getFocusString(screen);
     for (int shifted = 0; shifted < 2; shifted++)
     {
         for (int ctrl = 0; ctrl < 2; ctrl++)
         {
             for (int alt = 0; alt < 2; alt++)
             {
-                for (auto it = valid_keys.begin(); it != valid_keys.end(); it++)
+                for (vector<string>::const_iterator it = valid_keys.begin(); it != valid_keys.end(); it++)
                 {
                     string sym;
                     if (shifted) sym += "Shift-";
@@ -69,8 +69,8 @@ static void find_active_keybindings(df::viewscreen *screen)
                     if (alt) sym += "Alt-";
                     sym += *it;
 
-                    auto list = Core::getInstance().ListKeyBindings(sym);
-                    for (auto invoke_cmd = list.begin(); invoke_cmd != list.end(); invoke_cmd++)
+                    vector<string> list = Core::getInstance().ListKeyBindings(sym);
+                    for (vector<string>::const_iterator invoke_cmd = list.begin(); invoke_cmd != list.end(); invoke_cmd++)
                     {
                         bool add_temp_binding = false;
                         if (invoke_cmd->find(":") == string::npos)
@@ -84,7 +84,7 @@ static void find_active_keybindings(df::viewscreen *screen)
                             string focus = tokens[0].substr(1);
                             if (prefix_matches(focus, current_focus))
                             {
-                                auto cmdline = trim(tokens[1]);
+                                string cmdline = trim(tokens[1]);
                                 add_binding_if_valid(sym, cmdline, screen);
                             }
                         }
@@ -95,15 +95,21 @@ static void find_active_keybindings(df::viewscreen *screen)
     }
 }
 
+static bool clear_bindings(const string& sym)
+{
+    return Core::getInstance().ClearKeyBindings(sym + "@dfhack/viewscreen_hotkeys");
+}
+
 static bool close_hotkeys_screen()
 {
-    auto screen = Core::getTopViewscreen();
+    df::viewscreen* screen = Core::getTopViewscreen();
     if (Gui::getFocusString(screen) != "dfhack/viewscreen_hotkeys")
         return false;
 
     Screen::dismiss(Core::getTopViewscreen());
-    for_each_(sorted_keys, [] (const string &sym)
-        { Core::getInstance().ClearKeyBindings(sym + "@dfhack/viewscreen_hotkeys"); });
+    //for_each_(sorted_keys, [] (const string &sym)
+    //    { Core::getInstance().ClearKeyBindings(sym + "@dfhack/viewscreen_hotkeys"); });
+    for_each_(sorted_keys, &clear_bindings);
     sorted_keys.clear();
     return true;
 }
@@ -114,12 +120,22 @@ static void invoke_command(const size_t index)
     if (sorted_keys.size() <= index)
         return;
 
-    auto cmd = current_bindings[sorted_keys[index]];
+    string cmd = current_bindings[sorted_keys[index]];
     if (close_hotkeys_screen())
     {
         Core::getInstance().setHotkeyCmd(cmd);
     }
 }
+
+struct GetMaxStringLen {
+public:
+    explicit GetMaxStringLen(size_t* base_len) { len = base_len; }
+    void operator()(const string& sym) {
+        if (sym.length() > *len) { *len = sym.length(); }
+    }
+private:
+    size_t* len;
+};
 
 class ViewscreenHotkeys : public dfhack_viewscreen
 {
@@ -141,8 +157,9 @@ public:
         hotkeys_column.clear();
 
         size_t max_key_length = 0;
-        for_each_(sorted_keys, [&] (const string &sym)
-        { if (sym.length() > max_key_length) { max_key_length = sym.length(); } });
+        //for_each_(sorted_keys, [&] (const string &sym)
+        //{ if (sym.length() > max_key_length) { max_key_length = sym.length(); } });
+        for_each_(sorted_keys, GetMaxStringLen(&max_key_length));
         int padding = max_key_length + 2;
 
         for (size_t i = 0; i < sorted_keys.size(); i++)
@@ -208,7 +225,7 @@ public:
         y = 2;
         x = help_start;
 
-        auto width = gps->dimx - help_start - 2;
+        int32 width = gps->dimx - help_start - 2;
         vector <string> parts;
         Core::cheap_tokenise(current_bindings[sorted_keys[hotkeys_column.highlighted_index]], parts);
         if(parts.size() == 0)
@@ -225,7 +242,7 @@ public:
         {
             for (size_t i = 0; i < plugin->size(); i++)
             {
-                auto pc = plugin->operator[](i);
+                const DFHack::PluginCommand pc = plugin->operator[](i);
                 if (pc.name == first)
                 {
                     OutputString(COLOR_BROWN, x, y, "Help", true, help_start);
@@ -235,10 +252,11 @@ public:
                         help_text += "\n\n" + pc.usage;
 
                     split_string(&lines, help_text, "\n");
-                    for (auto it = lines.begin(); it != lines.end() && y < gps->dimy - 4; it++)
+                    for (vector<string>::const_iterator it = lines.begin(); it != lines.end() && y < gps->dimy - 4; it++)
                     {
-                        auto wrapped_lines = wrapString(*it, width);
-                        for (auto wit = wrapped_lines.begin(); wit != wrapped_lines.end() && y < gps->dimy - 4; wit++)
+                        vector<string> wrapped_lines = wrapString(*it, width);
+                        for (vector<string>::const_iterator wit =
+                            wrapped_lines.begin(); wit != wrapped_lines.end() && y < gps->dimy - 4; wit++)
                         {
                             OutputString(COLOR_WHITE, x, y, *wit, true, help_start);
                         }
@@ -273,7 +291,7 @@ private:
         string excess;
         if (int(str.length()) > width)
         {
-            auto cut_space = str.rfind(' ', width-1);
+            string::size_type cut_space = str.rfind(' ', width-1);
             int excess_start;
             if (cut_space == string::npos)
             {
@@ -288,7 +306,7 @@ private:
             string line = str.substr(0, cut_space);
             excess = str.substr(excess_start);
             result.push_back(line);
-            auto excess_lines = wrapString(excess, width);
+            vector<string> excess_lines = wrapString(excess, width);
             result.insert(result.end(), excess_lines.begin(), excess_lines.end());
         }
         else
@@ -308,17 +326,18 @@ static command_result hotkeys_cmd(color_ostream &out, vector <string> & paramete
     {
         if (Maps::IsValid())
         {
-            auto top_screen = Core::getTopViewscreen();
+            df::viewscreen* top_screen = Core::getTopViewscreen();
             if (Gui::getFocusString(top_screen) != "dfhack/viewscreen_hotkeys")
             {
                 find_active_keybindings(top_screen);
-                Screen::show(dts::make_unique<ViewscreenHotkeys>(top_screen), plugin_self);
+                //Screen::show(dts::make_unique<ViewscreenHotkeys>(top_screen), plugin_self);
+                Screen::show(new ViewscreenHotkeys(top_screen), NULL, plugin_self);
             }
         }
     }
     else
     {
-        auto cmd = parameters[0][0];
+        char cmd = parameters[0][0];
         if (cmd == 'v')
         {
             out << "Hotkeys" << endl << "Version: " << PLUGIN_VERSION << endl;
