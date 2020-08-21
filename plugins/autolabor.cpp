@@ -1,7 +1,7 @@
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
 
 #include <vector>
 #include <algorithm>
@@ -11,30 +11,30 @@
 
 // DF data structure definition headers
 #include "DataDefs.h"
-#include <df/ui.h>
-#include <df/world.h>
-#include <df/unit.h>
-#include <df/unit_soul.h>
-#include <df/unit_labor.h>
-#include <df/unit_skill.h>
-#include <df/job.h>
-#include <df/building.h>
-#include <df/workshop_type.h>
-#include <df/unit_misc_trait.h>
-#include <df/entity_position_responsibility.h>
-#include <df/historical_figure.h>
-#include <df/historical_entity.h>
-#include <df/histfig_entity_link.h>
-#include <df/histfig_entity_link_positionst.h>
-#include <df/entity_position_assignment.h>
-#include <df/entity_position.h>
-#include <df/building_tradedepotst.h>
-#include <df/building_stockpilest.h>
-#include <df/items_other_id.h>
-#include <df/ui.h>
-#include <df/activity_info.h>
+#include "df/ui.h"
+#include "df/world.h"
+#include "df/unit.h"
+#include "df/unit_soul.h"
+#include "df/unit_labor.h"
+#include "df/unit_skill.h"
+#include "df/job.h"
+#include "df/building.h"
+#include "df/workshop_type.h"
+#include "df/unit_misc_trait.h"
+#include "df/entity_position_responsibility.h"
+#include "df/historical_figure.h"
+#include "df/historical_entity.h"
+#include "df/histfig_entity_link.h"
+#include "df/histfig_entity_link_positionst.h"
+#include "df/entity_position_assignment.h"
+#include "df/entity_position.h"
+#include "df/building_tradedepotst.h"
+#include "df/building_stockpilest.h"
+#include "df/items_other_id.h"
+#include "df/ui.h"
+#include "df/activity_info.h"
 
-#include <MiscUtils.h>
+#include "MiscUtils.h"
 
 #include "modules/MapCache.h"
 #include "modules/Items.h"
@@ -586,7 +586,7 @@ static void init_state()
     if (!enable_autolabor)
         return;
 
-    auto cfg_haulpct = World::GetPersistentData("autolabor/haulpct");
+    PersistentDataItem cfg_haulpct = World::GetPersistentData("autolabor/haulpct");
     if (cfg_haulpct.isValid())
     {
         hauler_pct = cfg_haulpct.ival(0);
@@ -602,7 +602,7 @@ static void init_state()
     std::vector<PersistentDataItem> items;
     World::GetPersistentData(&items, "autolabor/labors/", true);
 
-    for (auto p = items.begin(); p != items.end(); p++)
+    for (std::vector<PersistentDataItem>::iterator p = items.begin(); p != items.end(); p++)
     {
         string key = p->key();
         df::unit_labor labor = (df::unit_labor) atoi(key.substr(strlen("autolabor/labors/")).c_str());
@@ -642,7 +642,7 @@ static void generate_labor_to_skill_map()
     for (int i = 0; i <= ENUM_LAST_ITEM(unit_labor); i++)
         labor_to_skill[i] = job_skill::NONE;
 
-    FOR_ENUM_ITEMS(job_skill, skill)
+    FOR_ENUM_ITEMS_SIMPLE(job_skill, skill)
     {
         int labor = ENUM_ATTR(job_skill, labor, skill);
         if (labor != unit_labor::NONE)
@@ -769,6 +769,28 @@ struct laborinfo_sorter
     };
 };
 
+struct values_sorter_desc
+{
+    values_sorter_desc(std::map<int, int>& dwarf_skill, std::map<int, int>& dwarf_skillxp, int pool) :
+        dwarf_skill(dwarf_skill), dwarf_skillxp(dwarf_skillxp), pool(pool) {}
+    bool operator()(int lhs, int rhs) const
+    {
+        if (dwarf_skill[lhs] == dwarf_skill[rhs])
+            if (pool > 0)
+                return dwarf_skillxp[lhs] > dwarf_skillxp[rhs];
+            else
+                return dwarf_skillxp[lhs] < dwarf_skillxp[rhs];
+        else
+            if (pool > 0)
+                return dwarf_skill[lhs] > dwarf_skill[rhs];
+            else
+                return dwarf_skill[lhs] < dwarf_skill[rhs];
+    };
+    std::map<int, int>& dwarf_skill;
+    std::map<int, int>& dwarf_skillxp;
+    int pool;
+};
+
 struct values_sorter
 {
     values_sorter(std::vector <int> & values):values(values){};
@@ -804,7 +826,7 @@ static void assign_labor(unit_labor::unit_labor labor,
         std::map<int, int> dwarf_skillxp;
         std::vector<bool> previously_enabled(n_dwarfs);
 
-        auto mode = labor_infos[labor].mode();
+        labor_mode mode = labor_infos[labor].mode();
 
         // Find candidate dwarfs, and calculate a preference value for each dwarf
         for (int dwarf = 0; dwarf < n_dwarfs; dwarf++)
@@ -828,7 +850,8 @@ static void assign_labor(unit_labor::unit_labor labor,
                 int skill_level = 0;
                 int skill_experience = 0;
 
-                for (auto s = dwarfs[dwarf]->status.souls[0]->skills.begin(); s < dwarfs[dwarf]->status.souls[0]->skills.end(); s++)
+                for (std::vector<df::unit_skill*>::iterator s = dwarfs[dwarf]->status.souls[0]->skills.begin();
+                    s < dwarfs[dwarf]->status.souls[0]->skills.end(); s++)
                 {
                     if ((*s)->id == skill)
                     {
@@ -880,18 +903,19 @@ static void assign_labor(unit_labor::unit_labor labor,
         if (pool < 200 && candidates.size() > 1 && abs(pool) < candidates.size())
         {
             // Sort in descending order
-            std::sort(candidates.begin(), candidates.end(), [&](const int lhs, const int rhs) -> bool {
-                if (dwarf_skill[lhs] == dwarf_skill[rhs])
-                    if (pool > 0)
-                        return dwarf_skillxp[lhs] > dwarf_skillxp[rhs];
-                    else
-                        return dwarf_skillxp[lhs] < dwarf_skillxp[rhs];
-                else
-                    if (pool > 0)
-                        return dwarf_skill[lhs] > dwarf_skill[rhs];
-                    else
-                        return dwarf_skill[lhs] < dwarf_skill[rhs];
-            });
+            //std::sort(candidates.begin(), candidates.end(), [&](const int lhs, const int rhs) -> bool {
+            //    if (dwarf_skill[lhs] == dwarf_skill[rhs])
+            //        if (pool > 0)
+            //            return dwarf_skillxp[lhs] > dwarf_skillxp[rhs];
+            //        else
+            //            return dwarf_skillxp[lhs] < dwarf_skillxp[rhs];
+            //    else
+            //        if (pool > 0)
+            //            return dwarf_skill[lhs] > dwarf_skill[rhs];
+            //        else
+            //            return dwarf_skill[lhs] < dwarf_skill[rhs];
+            //});
+            std::sort(candidates.begin(), candidates.end(), values_sorter_desc(dwarf_skill, dwarf_skillxp, pool));
 
             // Check if all dwarves have equivalent skills, usually zero
             int first_dwarf = candidates[0];
@@ -997,7 +1021,7 @@ static void assign_labor(unit_labor::unit_labor labor,
             }
 
             if (print_debug)
-                out.print("Dwarf %i \"%s\" assigned %s: value %i %s %s\n", dwarf, dwarfs[dwarf]->name.first_name.c_str(), ENUM_KEY_STR(unit_labor, labor).c_str(), values[dwarf], dwarf_info[dwarf].trader ? "(trader)" : "", dwarf_info[dwarf].diplomacy ? "(diplomacy)" : "");
+                out.print("Dwarf %i \"%s\" assigned %s: value %i %s %s\n", dwarf, dwarfs[dwarf]->name.first_name.c_str(), ENUM_KEY_STR_SIMPLE(unit_labor, labor).c_str(), values[dwarf], dwarf_info[dwarf].trader ? "(trader)" : "", dwarf_info[dwarf].diplomacy ? "(diplomacy)" : "");
 
             if (dwarf_info[dwarf].state == IDLE || dwarf_info[dwarf].state == BUSY || dwarf_info[dwarf].state == EXCLUSIVE)
                 labor_infos[labor].active_dwarfs++;
@@ -1051,7 +1075,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     for (size_t i = 0; i < world->buildings.all.size(); ++i)
     {
         df::building *build = world->buildings.all[i];
-        auto type = build->getType();
+        df::building_type type = build->getType();
         if (building_type::Workshop == type)
         {
             df::workshop_type subType = (df::workshop_type)build->getSubtype();
@@ -1156,7 +1180,8 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
             }
         }
 
-        for (auto s = dwarfs[dwarf]->status.souls[0]->skills.begin(); s != dwarfs[dwarf]->status.souls[0]->skills.end(); s++)
+        for (std::vector<df::unit_skill*>::iterator s = dwarfs[dwarf]->status.souls[0]->skills.begin();
+            s != dwarfs[dwarf]->status.souls[0]->skills.end(); s++)
         {
             df::job_skill skill = (*s)->id;
 
@@ -1184,7 +1209,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
         dwarf_info[dwarf].mastery_penalty -= 10 * dwarf_info[dwarf].total_skill;
         dwarf_info[dwarf].mastery_penalty -= dwarf_info[dwarf].noble_penalty;
 
-        FOR_ENUM_ITEMS(unit_labor, labor)
+        FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
         {
             if (labor == unit_labor::NONE)
                 continue;
@@ -1239,7 +1264,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
     std::vector<df::unit_labor> labors;
 
-    FOR_ENUM_ITEMS(unit_labor, labor)
+    FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
     {
         if (labor == unit_labor::NONE)
             continue;
@@ -1254,9 +1279,9 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     // Handle DISABLED skills (just bookkeeping).
     // Note that autolabor should *NEVER* enable or disable a skill that has been marked as DISABLED, for any reason.
     // The user has told us that they want manage this skill manually, and we must respect that.
-    for (auto lp = labors.begin(); lp != labors.end(); ++lp)
+    for (std::vector<df::unit_labor>::const_iterator lp = labors.begin(); lp != labors.end(); ++lp)
     {
-        auto labor = *lp;
+        df::unit_labor labor = *lp;
 
         if (labor_infos[labor].mode() != DISABLE)
             continue;
@@ -1275,9 +1300,9 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
     // Handle all skills except those marked HAULERS
 
-    for (auto lp = labors.begin(); lp != labors.end(); ++lp)
+    for (std::vector<df::unit_labor>::const_iterator lp = labors.begin(); lp != labors.end(); ++lp)
     {
-        auto labor = *lp;
+        df::unit_labor labor = *lp;
 
         assign_labor(labor, n_dwarfs, dwarf_info, trader_requested, dwarfs, has_butchers, has_fishery, out);
     }
@@ -1296,7 +1321,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
         if ((dwarf_info[dwarf].trader && trader_requested) ||
             dwarf_info[dwarf].diplomacy)
         {
-            FOR_ENUM_ITEMS(unit_labor, labor)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
             {
                 if (labor == unit_labor::NONE)
                     continue;
@@ -1323,7 +1348,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
         num_haulers = 0;
     }
 
-    FOR_ENUM_ITEMS(unit_labor, labor)
+    FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
     {
         if (labor == unit_labor::NONE)
             continue;
@@ -1346,7 +1371,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
                 labor_infos[labor].active_dwarfs++;
 
             if (print_debug)
-                out.print("Dwarf %i \"%s\" assigned %s: hauler\n", dwarf, dwarfs[dwarf]->name.first_name.c_str(), ENUM_KEY_STR(unit_labor, labor).c_str());
+                out.print("Dwarf %i \"%s\" assigned %s: hauler\n", dwarf, dwarfs[dwarf]->name.first_name.c_str(), ENUM_KEY_STR_SIMPLE(unit_labor, labor).c_str());
         }
 
         for (size_t i = num_haulers; i < hauler_ids.size(); i++)
@@ -1369,7 +1394,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
 void print_labor (df::unit_labor labor, color_ostream &out)
 {
-    string labor_name = ENUM_KEY_STR(unit_labor, labor);
+    string labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
     out << labor_name << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
@@ -1447,9 +1472,9 @@ command_result autolabor (color_ostream &out, std::vector <std::string> & parame
 
         df::unit_labor labor = unit_labor::NONE;
 
-        FOR_ENUM_ITEMS(unit_labor, test_labor)
+        FOR_ENUM_ITEMS_SIMPLE(unit_labor, test_labor)
         {
-            if (parameters[0] == ENUM_KEY_STR(unit_labor, test_labor))
+            if (parameters[0] == ENUM_KEY_STR_SIMPLE(unit_labor, test_labor))
                 labor = test_labor;
         }
 
@@ -1485,7 +1510,7 @@ command_result autolabor (color_ostream &out, std::vector <std::string> & parame
         if (parameters.size() >= 3)
             maximum = atoi (parameters[2].c_str());
         if (parameters.size() == 4)
-            pool = std::stoi(parameters[3]);
+            pool = atoi(parameters[3].c_str());
 
         if (maximum < minimum || maximum < 0 || minimum < 0)
         {
@@ -1538,7 +1563,7 @@ command_result autolabor (color_ostream &out, std::vector <std::string> & parame
 
         if (parameters[0] == "list")
         {
-            FOR_ENUM_ITEMS(unit_labor, labor)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
             {
                 if (labor == unit_labor::NONE)
                     continue;
