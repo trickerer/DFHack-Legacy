@@ -96,7 +96,7 @@ command_result cleanitems (color_ostream &out)
             std::vector<df::spatter*> saved;
             for (size_t j = 0; j < item->contaminants->size(); j++)
             {
-                auto obj = (*item->contaminants)[j];
+                df::spatter* obj = (*item->contaminants)[j];
                 if (obj->flags.whole & 0x8000) // DFHack-generated contaminant
                     saved.push_back(obj);
                 else
