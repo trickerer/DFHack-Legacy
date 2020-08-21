@@ -1,4 +1,4 @@
-#include <modules/Gui.h>
+#include "modules/Gui.h"
 
 #include "df/coord2d.h"
 #include "df/entity_raw.h"
@@ -15,6 +15,8 @@
 #include "overlay.h"
 #include "screen.h"
 
+#include "../uicommon.h"
+
 using df::global::world;
 
 namespace embark_assist {
@@ -25,6 +27,7 @@ namespace embark_assist {
         const Screen::Pen green_x_pen = Screen::Pen('X', COLOR_BLACK, COLOR_GREEN, false);
 
         struct display_strings {
+            display_strings(Screen::Pen _pen, std::string _text) : pen(_pen), text(_text) {}
             Screen::Pen pen;
             std::string text;
         };
@@ -32,11 +35,22 @@ namespace embark_assist {
         typedef Screen::Pen *pen_column;
 
         struct states {
-            int blink_count = 0;
-            bool show = true;
+            states() {
+                blink_count = 0;
+                show = true;
+                matching = false;
+                match_active = false;
+                current_site_grid = 0;
+                world_match_grid = NULL;
+                match_count = 0;
+                fileresult = false;
+                fileresult_pass = 0;
+            }
+            int blink_count;
+            bool show;
 
-            bool matching = false;
-            bool match_active = false;
+            bool matching;
+            bool match_active;
 
             embark_update_callbacks embark_update;
             match_callbacks match_callback;
@@ -45,22 +59,22 @@ namespace embark_assist {
             shutdown_callbacks shutdown_callback;
 
             Screen::Pen site_grid[16][16];
-            uint8_t current_site_grid = 0;
+            uint8_t current_site_grid;
 
             std::vector<display_strings> embark_info;
 
             Screen::Pen local_match_grid[16][16];
 
-            pen_column *world_match_grid = nullptr;
-            uint16_t match_count = 0;
+            pen_column *world_match_grid;
+            uint16_t match_count;
 
             uint16_t max_inorganic;
 
-            bool fileresult = false;
-            uint8_t fileresult_pass = 0;
+            bool fileresult;
+            uint8_t fileresult_pass;
         };
 
-        static states *state = nullptr;
+        static states *state = NULL;
 
         //====================================================================
 
@@ -70,7 +84,7 @@ namespace embark_assist {
             uint16_t result = (map_size + ((factor - 1) / 2)) / factor;
             if (result > region_size) { result = region_size; }
 
-            return{ result, factor};
+            return df::coord2d(result, factor);
         }
 
         //====================================================================
@@ -134,11 +148,11 @@ namespace embark_assist {
             {
                 INTERPOSE_NEXT(render)();
 //                color_ostream_proxy out(Core::getInstance().getConsole());
-                auto current_screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+                df::viewscreen_choose_start_sitest* current_screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
                 int16_t x = current_screen->location.region_pos.x;
                 int16_t y = current_screen->location.region_pos.y;
-                auto width = Screen::getWindowSize().x;
-                auto height = Screen::getWindowSize().y;
+                int16_t width = Screen::getWindowSize().x;
+                int16_t height = Screen::getWindowSize().y;
 
                 state->blink_count++;
                 if (state->blink_count == 35) {
@@ -163,7 +177,7 @@ namespace embark_assist {
                 Screen::paintString(pen_lr, width - 28, 23, DFHack::Screen::getKeyDisplay(df::interface_key::CUSTOM_Q).c_str(), false);
                 Screen::paintString(pen_w, width - 27, 23, ": Quit Embark Assistant", false);
                 Screen::paintString(pen_w, width - 28, 25, "Matching World Tiles:", false);
-                Screen::paintString(empty_pen, width - 6, 25, to_string(state->match_count), false);
+                Screen::paintString(empty_pen, width - 6, 25, uint_to_string(state->match_count), false);
                 Screen::paintString(pen_g, width - 28, 26, "(Those on the Region Map)", false);
 
                 if (height > 25) {  //  Mask the vanilla DF find help as it's overridden.
@@ -349,28 +363,28 @@ void embark_assist::overlay::set_embark(embark_assist::defs::site_infos *site_in
     state->embark_info.clear();
 
     if (!site_info->incursions_processed) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_LIGHTRED), "Incomp. Survey" });
+        state->embark_info.push_back(display_strings(Screen::Pen(' ', COLOR_LIGHTRED), "Incomp. Survey" ));
     }
 
     if (site_info->sand) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_YELLOW), "Sand" });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_YELLOW), "Sand" ));
     }
 
     if (site_info->clay) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_RED), "Clay" });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_RED), "Clay" ));
     }
 
     if (site_info->coal) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_GREY), "Coal" });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_GREY), "Coal" ));
     }
 
-    state->embark_info.push_back({ Screen::Pen(' ', COLOR_BROWN), "Soil " + std::to_string(site_info->min_soil) + " - " + std::to_string(site_info->max_soil) });
+    state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_BROWN), "Soil " + uint_to_string(site_info->min_soil) + " - " + uint_to_string(site_info->max_soil) ));
 
     if (site_info->flat) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_BROWN), "Flat" });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_BROWN), "Flat" ));
     }
 
-    if (site_info->aquifer != embark_assist::defs::aquifer_sizes::None) {
+    if (site_info->aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE) {
         std::string none = "   ";
         std::string light = "   ";
         std::string heavy = "  ";
@@ -379,45 +393,45 @@ void embark_assist::overlay::set_embark(embark_assist::defs::site_infos *site_in
         std::string hv = "Hv";
 
         switch (site_info->aquifer) {
-        case embark_assist::defs::aquifer_sizes::NA:
-        case embark_assist::defs::aquifer_sizes::None:  //  Neither of these should appear
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NA:
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE:  //  Neither of these should appear
             break;
 
-        case embark_assist::defs::aquifer_sizes::Light:
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT:
             light = lt;
             break;
 
-        case embark_assist::defs::aquifer_sizes::None_Light:
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_LIGHT:
             none = no;
             light = lt;
             break;
 
-        case embark_assist::defs::aquifer_sizes::Heavy:
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY:
             heavy = hv;
             break;
 
-        case embark_assist::defs::aquifer_sizes::None_Heavy:
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_HEAVY:
             none = no;
             heavy = hv;
             break;
 
-        case embark_assist::defs::aquifer_sizes::Light_Heavy:
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT_HEAVY:
             light = lt;
             heavy = hv;
             break;
 
-        case embark_assist::defs::aquifer_sizes::None_Light_Heavy:
+        case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_LIGHT_HEAVY:
             none = no;
             light = lt;
             heavy = hv;
             break;
         }
 
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_LIGHTBLUE), "Aq: " + none + light + heavy });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_LIGHTBLUE), "Aq: " + none + light + heavy ));
     }
 
     if (site_info->max_waterfall > 0) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_LIGHTBLUE), "Waterfall " + std::to_string(site_info->max_waterfall) });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_LIGHTBLUE), "Waterfall " + uint_to_string(site_info->max_waterfall) ));
     }
 
     if (site_info->blood_rain ||
@@ -466,33 +480,39 @@ void embark_assist::overlay::set_embark(embark_assist::defs::site_infos *site_in
             thralling = "  ";
         }
 
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_LIGHTRED), blood_rain + temporary_syndrome_rain + permanent_syndrome_rain + reanimating + thralling });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_LIGHTRED), blood_rain + temporary_syndrome_rain + permanent_syndrome_rain + reanimating + thralling ));
     }
 
     if (site_info->flux) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_WHITE), "Flux" });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_WHITE), "Flux" ));
     }
 
-    for (auto const& i : site_info->metals) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_GREY), world->raws.inorganics[i]->id });
+    //for (auto const& i : site_info->metals)
+    for (std::vector<uint16_t>::const_iterator ci = site_info->metals.begin(); ci != site_info->metals.end(); ++ci)
+    {
+        const uint16_t& i = *ci;
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_GREY), world->raws.inorganics[i]->id ));
     }
 
-    for (auto const& i : site_info->economics) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_WHITE), world->raws.inorganics[i]->id });
+    //for (auto const& i : site_info->economics)
+    for (std::vector<uint16_t>::const_iterator ci = site_info->economics.begin(); ci != site_info->economics.end(); ++ci)
+    {
+        const uint16_t& i = *ci;
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_WHITE), world->raws.inorganics[i]->id ));
     }
 
     for (uint16_t i = 0; i < site_info->neighbors.size(); i++) {
         if (world->raws.entities[site_info->neighbors[i]]->translation == "") {
-            state->embark_info.push_back({ Screen::Pen(' ', COLOR_YELLOW), world->raws.entities[site_info->neighbors[i]]->code });  //  Kobolds have an empty translation field
+            state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_YELLOW), world->raws.entities[site_info->neighbors[i]]->code ));  //  Kobolds have an empty translation field
         }
         else
         {
-            state->embark_info.push_back({ Screen::Pen(' ', COLOR_YELLOW), world->raws.entities[site_info->neighbors[i]]->translation });
+            state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_YELLOW), world->raws.entities[site_info->neighbors[i]]->translation ));
         }
     }
 
     if (site_info->necro_neighbors > 0) {
-        state->embark_info.push_back({ Screen::Pen(' ', COLOR_LIGHTRED), "Towers: " + std::to_string(site_info->necro_neighbors) });
+        state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_LIGHTRED), "Towers: " + uint_to_string(site_info->necro_neighbors) ));
     }
 }
 
@@ -554,6 +574,6 @@ void embark_assist::overlay::shutdown() {
     if (state) {
         state->embark_info.clear();
         delete state;
-        state = nullptr;
+        state = NULL;
     }
 }

@@ -1,9 +1,9 @@
 #include "Core.h"
-#include <Console.h>
+#include "Console.h"
 
 #include <string>
 #include <set>
-#include <modules/Gui.h>
+#include "modules/Gui.h"
 
 #include "Types.h"
 
@@ -14,12 +14,20 @@ using std::vector;
 
 namespace embark_assist{
     namespace help_ui {
-        enum class pages {
-            Intro,
-            General,
-            Finder,
-            Caveats_1,
-            Caveats_2
+        //enum class pages {
+        //    Intro,
+        //    General,
+        //    Finder,
+        //    Caveats_1,
+        //    Caveats_2
+        //};
+
+        enum pages {
+            PAGE_INTRO,
+            PAGE_GENERAL,
+            PAGE_FINDER,
+            PAGE_CAVEATS_1,
+            PAGE_CAVEATS_2
         };
 
         class ViewscreenHelpUi : public dfhack_viewscreen
@@ -34,7 +42,7 @@ namespace embark_assist{
             std::string getFocusString() { return "Help UI"; }
 
         private:
-            pages current_page = pages::Intro;
+            pages current_page;
         };
 
         //===============================================================================
@@ -48,47 +56,47 @@ namespace embark_assist{
             }
             else if (input->count(df::interface_key::CHANGETAB)) {
                 switch (current_page) {
-                case pages::Intro:
-                    current_page = pages::General;
+                case pages::PAGE_INTRO:
+                    current_page = pages::PAGE_GENERAL;
                     break;
 
-                case pages::General:
-                    current_page = pages::Finder;
+                case pages::PAGE_GENERAL:
+                    current_page = pages::PAGE_FINDER;
                     break;
 
-                case pages::Finder:
-                    current_page = pages::Caveats_1;
+                case pages::PAGE_FINDER:
+                    current_page = pages::PAGE_CAVEATS_1;
                     break;
 
-                case pages::Caveats_1:
-                    current_page = pages::Caveats_2;
+                case pages::PAGE_CAVEATS_1:
+                    current_page = pages::PAGE_CAVEATS_2;
                     break;
 
-                case pages::Caveats_2:
-                    current_page = pages::Intro;
+                case pages::PAGE_CAVEATS_2:
+                    current_page = pages::PAGE_INTRO;
                     break;
                 }
             }
             else if (input->count(df::interface_key::SEC_CHANGETAB)) {
                 switch (current_page) {
-                case pages::Intro:
-                    current_page = pages::Caveats_2;
+                case pages::PAGE_INTRO:
+                    current_page = pages::PAGE_CAVEATS_2;
                     break;
 
-                case pages::General:
-                    current_page = pages::Intro;
+                case pages::PAGE_GENERAL:
+                    current_page = pages::PAGE_INTRO;
                     break;
 
-                case pages::Finder:
-                    current_page = pages::General;
+                case pages::PAGE_FINDER:
+                    current_page = pages::PAGE_GENERAL;
                     break;
 
-                case pages::Caveats_1:
-                    current_page = pages::Finder;
+                case pages::PAGE_CAVEATS_1:
+                    current_page = pages::PAGE_FINDER;
                     break;
 
-                case pages::Caveats_2:
-                    current_page = pages::Caveats_1;
+                case pages::PAGE_CAVEATS_2:
+                    current_page = pages::PAGE_CAVEATS_1;
                     break;
                 }
             }
@@ -107,7 +115,7 @@ namespace embark_assist{
             Screen::clear();
 
             switch (current_page) {
-            case pages::Intro:
+            case pages::PAGE_INTRO:
                 Screen::drawBorder("  Embark Assistant Help/Info Introduction Page  ");
 
                 help_text.push_back("Embark Assistant is used on the embark selection screen to provide information");
@@ -149,7 +157,7 @@ namespace embark_assist{
 
                 break;
 
-            case pages::General:
+            case pages::PAGE_GENERAL:
                 Screen::drawBorder("  Embark Assistant Help/Info General Page  ");
 
                 help_text.push_back("The Embark Assistant overlays the region map with characters indicating sites");
@@ -194,7 +202,7 @@ namespace embark_assist{
 
                 break;
 
-            case pages::Finder:
+            case pages::PAGE_FINDER:
                 Screen::drawBorder("  Embark Assistant Help/Info Find Page  ");
 
                 help_text.push_back("The Embark Assist Finder page is brought up with the f command key.");
@@ -241,7 +249,7 @@ namespace embark_assist{
                 help_text.push_back("Note that Find is a fairly time consuming task (as it is in vanilla).");
                 break;
 
-            case pages::Caveats_1:
+            case pages::PAGE_CAVEATS_1:
                 Screen::drawBorder("  Embark Assistant Help/Info Caveats 1 Page  ");
 
                 help_text.push_back("The plugin surveys world tiles through two actions: using the 'f'ind");
@@ -293,7 +301,7 @@ namespace embark_assist{
 
                 break;
 
-            case pages::Caveats_2:
+            case pages::PAGE_CAVEATS_2:
                 Screen::drawBorder("  Embark Assistant Help/Info Caveats 2 Page  ");
 
                 help_text.push_back("- Aquifer indications are based on the author's belief that they occur");
@@ -356,14 +364,14 @@ namespace embark_assist{
             }
 
             switch (current_page) {
-            case pages::Intro:
+            case pages::PAGE_INTRO:
                 embark_assist::screen::paintString(pen_lr, 1, 26, DFHack::Screen::getKeyDisplay(df::interface_key::CUSTOM_I).c_str());
                 embark_assist::screen::paintString(pen_lr, 1, 27, DFHack::Screen::getKeyDisplay(df::interface_key::CUSTOM_F).c_str());
                 embark_assist::screen::paintString(pen_lr, 1, 28, DFHack::Screen::getKeyDisplay(df::interface_key::CUSTOM_C).c_str());
                 embark_assist::screen::paintString(pen_lr, 1, 30, DFHack::Screen::getKeyDisplay(df::interface_key::CUSTOM_Q).c_str());
                 break;
 
-            case pages::General:
+            case pages::PAGE_GENERAL:
                 embark_assist::screen::paintString(site_pen, 1, 4, "C");
                 embark_assist::screen::paintString(site_pen, 1, 5, "c");
                 embark_assist::screen::paintString(site_pen, 1, 6, "i");
@@ -374,7 +382,7 @@ namespace embark_assist{
                 embark_assist::screen::paintString(site_pen, 1, 11, "V");
                 break;
 
-            case pages::Finder:
+            case pages::PAGE_FINDER:
                 embark_assist::screen::paintString(pen_lr, 1, 4, DFHack::Screen::getKeyDisplay(df::interface_key::STANDARDSCROLL_LEFT).c_str());
                 embark_assist::screen::paintString(pen_lr, 3, 4, DFHack::Screen::getKeyDisplay(df::interface_key::STANDARDSCROLL_RIGHT).c_str());
                 embark_assist::screen::paintString(pen_lr, 1, 5, DFHack::Screen::getKeyDisplay(df::interface_key::STANDARDSCROLL_UP).c_str());
@@ -386,10 +394,10 @@ namespace embark_assist{
                 embark_assist::screen::paintString(pen_lr, 3, 9, DFHack::Screen::getKeyDisplay(df::interface_key::CUSTOM_L).c_str());
                 break;
 
-            case pages::Caveats_1:
+            case pages::PAGE_CAVEATS_1:
                 break;
 
-            case pages::Caveats_2:
+            case pages::PAGE_CAVEATS_2:
                 break;
             }
             dfhack_viewscreen::render();
@@ -398,6 +406,7 @@ namespace embark_assist{
         //===============================================================================
 
         ViewscreenHelpUi::ViewscreenHelpUi() {
+            current_page = pages::PAGE_INTRO;
         }
     }
 }
@@ -407,5 +416,6 @@ namespace embark_assist{
 //===============================================================================
 
 void embark_assist::help_ui::init(DFHack::Plugin *plugin_self) {
-    Screen::show(dts::make_unique<embark_assist::help_ui::ViewscreenHelpUi>(), plugin_self);
+    //Screen::show(dts::make_unique<embark_assist::help_ui::ViewscreenHelpUi>(), plugin_self);
+    Screen::show(new embark_assist::help_ui::ViewscreenHelpUi(), NULL, plugin_self);
 }

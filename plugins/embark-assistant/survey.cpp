@@ -2,11 +2,11 @@
 #include <vector>
 
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
 
-#include <modules/Gui.h>
+#include "modules/Gui.h"
 #include "modules/Materials.h"
 #include "modules/Maps.h"
 
@@ -72,8 +72,12 @@ using df::global::world;
 namespace embark_assist {
     namespace survey {
         struct states {
-            uint16_t clay_reaction = -1;
-            uint16_t flux_reaction = -1;
+            states() {
+                clay_reaction = -1;
+                flux_reaction = -1;
+            }
+            uint16_t clay_reaction;
+            uint16_t flux_reaction;
             std::vector<uint16_t> coals;
             uint16_t x;
             uint16_t y;
@@ -91,7 +95,7 @@ namespace embark_assist {
         bool geo_survey(embark_assist::defs::geo_data *geo_summary) {
             color_ostream_proxy out(Core::getInstance().getConsole());
             df::world_data *world_data = world->world_data;
-            auto reactions = df::reaction::get_vector();
+            std::vector<df::reaction*> const& reactions = df::reaction::get_vector();
             bool non_soil_found;
             uint16_t size;
 
@@ -186,7 +190,7 @@ namespace embark_assist {
                     size = (uint16_t)layer->vein_mat.size();
 
                     for (uint16_t l = 0; l < size; l++) {
-                        auto vein = layer->vein_mat[l];
+                        int32 vein = layer->vein_mat[l];
                         geo_summary->at(i).possible_minerals[vein] = true;
 
                         for (uint16_t m = 0; m < world->raws.inorganics[vein]->metal_ore.mat_index.size(); m++) {
@@ -245,20 +249,20 @@ namespace embark_assist {
 
                     if (world_data->rivers[i]->flow[k] < 5000) {
                         if (world_data->region_map[x][y].flags.is_set(df::region_map_entry_flags::is_brook)) {
-                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Brook;
+                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_BROOK;
                         }
                         else {
-                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Stream;
+                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_STREAM;
                         }
                     }
                     else if (world_data->rivers[i]->flow[k] < 10000) {
-                        survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Minor;
+                        survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_MINOR;
                     }
                     else if (world_data->rivers[i]->flow[k] < 20000) {
-                        survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Medium;
+                        survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_MEDIUM;
                     }
                     else {
-                        survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Major;
+                        survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_MAJOR;
                     }
                 }
 
@@ -270,24 +274,24 @@ namespace embark_assist {
                 //  We also assume the is_river/is_brook flags are actually set properly for the end tile.
                 //
                 if (x >= 0 && y >= 0 && x < world->worldgen.worldgen_parms.dim_x && y < world->worldgen.worldgen_parms.dim_y) {
-                    if (survey_results->at(x).at(y).river_size == embark_assist::defs::river_sizes::None) {
+                    if (survey_results->at(x).at(y).river_size == embark_assist::defs::river_sizes::RIVER_SIZE_NONE) {
                         if (world_data->rivers[i]->path.x.size() &&
                             world_data->rivers[i]->flow[world_data->rivers[i]->path.x.size() - 1] < 5000) {
                             if (world_data->region_map[x][y].flags.is_set(df::region_map_entry_flags::is_brook)) {
-                                survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Brook;
+                                survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_BROOK;
                             }
                             else {
-                                survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Stream;
+                                survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_STREAM;
                             }
                         }
                         else if (world_data->rivers[i]->flow[world_data->rivers[i]->path.x.size() - 1] < 10000) {
-                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Minor;
+                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_MINOR;
                         }
                         else if (world_data->rivers[i]->flow[world_data->rivers[i]->path.x.size() - 1] < 20000) {
-                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Medium;
+                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_MEDIUM;
                         }
                         else {
-                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::Major;
+                            survey_results->at(x).at(y).river_size = embark_assist::defs::river_sizes::RIVER_SIZE_MAJOR;
                         }
                     }
                 }
@@ -300,7 +304,7 @@ namespace embark_assist {
             df::world_data *world_data = world->world_data;
 
             for (uint16_t i = 0; i < world->interaction_instances.all.size(); i++) {
-                auto interaction = world->raws.interactions[world->interaction_instances.all[i]->interaction_id];
+                df::interaction* interaction = world->raws.interactions[world->interaction_instances.all[i]->interaction_id];
                 uint16_t region_index = world->interaction_instances.all[i]->region_index;
                 bool blood_rain = false;
                 bool permanent_syndrome_rain = false;
@@ -319,13 +323,24 @@ namespace embark_assist {
                                 }
                             }
                         }
-                        else if (interaction->targets[k]->getType() == df::interaction_target_type::MATERIAL) {
+                        else if (interaction->targets[k]->getType() == df::interaction_target_type::MATERIAL)
+                        {
                             df::interaction_target_materialst* material = virtual_cast<df::interaction_target_materialst>(interaction->targets[k]);
-                            if (material && DFHack::MaterialInfo(material->mat_type, material->mat_index).isInorganic()) {
-                                for (const auto &syndrome : world->raws.inorganics[material->mat_index]->material.syndrome) {
-                                    for (const auto &ce : syndrome->ce) {
+                            if (material && DFHack::MaterialInfo(material->mat_type, material->mat_index).isInorganic())
+                            {
+                                std::vector<df::syndrome*> const& syn_vec = world->raws.inorganics[material->mat_index]->material.syndrome;
+                                //for (const auto &syndrome : world->raws.inorganics[material->mat_index]->material.syndrome)
+                                for (std::vector<df::syndrome*>::const_iterator ci = syn_vec.begin(); ci != syn_vec.end(); ++ci)
+                                {
+                                    std::vector<df::creature_interaction_effect*> const& cie_vec = (*ci)->ce;
+                                    //for (const auto &ce : syndrome->ce)
+                                    for (std::vector<df::creature_interaction_effect*>::const_iterator cit =
+                                        cie_vec.begin(); cit != cie_vec.end(); ++cit)
+                                    {
+                                        df::creature_interaction_effect* ce = *cit;
                                         df::creature_interaction_effect_type ce_type = ce->getType();
-                                        if (ce_type == df::creature_interaction_effect_type::FLASH_TILE) {
+                                        if (ce_type == df::creature_interaction_effect_type::FLASH_TILE)
+                                        {
                                             //  Using this as a proxy. There seems to be a group of 4 effects for thralls:
                                             //  display symbol, flash symbol, phys att change and one more.
                                             thralling = true;
@@ -366,7 +381,7 @@ namespace embark_assist {
                 }
 
                 for (uint16_t k = 0; k < world_data->regions[region_index]->region_coords.size(); k++) {
-                    auto &results = survey_results->at(world_data->regions[region_index]->region_coords[k].x).at(world_data->regions[region_index]->region_coords[k].y);
+                    embark_assist::defs::region_tile_datum &results = survey_results->at(world_data->regions[region_index]->region_coords[k].x).at(world_data->regions[region_index]->region_coords[k].y);
                     results.blood_rain[5] = blood_rain;
                     results.permanent_syndrome_rain[5] = permanent_syndrome_rain;
                     results.temporary_syndrome_rain[5] = temporary_syndrome_rain;
@@ -377,7 +392,7 @@ namespace embark_assist {
 
             for (uint16_t i = 0; i < world->worldgen.worldgen_parms.dim_x; i++) {
                 for (uint16_t k = 0; k < world->worldgen.worldgen_parms.dim_y; k++) {
-                    auto &results = survey_results->at(i).at(k);
+                    embark_assist::defs::region_tile_datum &results = survey_results->at(i).at(k);
                     results.blood_rain_possible = false;
                     results.permanent_syndrome_rain_possible = false;
                     results.temporary_syndrome_rain_possible = false;
@@ -496,7 +511,7 @@ namespace embark_assist {
                 return max_temperature; // Not any standard world height. No formula available
             }
 
-            return max_temperature - ceil(divisor * 3 / 4);
+            return max_temperature - ceil(divisor * 3 / 4.f);
         }
 
         //=================================================================================
@@ -723,7 +738,8 @@ void embark_assist::survey::setup(uint16_t max_inorganic) {
 //=================================================================================
 
 df::coord2d embark_assist::survey::get_last_pos() {
-    return{ embark_assist::survey::state->x, embark_assist::survey::state->y };
+    //return{ embark_assist::survey::state->x, embark_assist::survey::state->y };
+    return df::coord2d(embark_assist::survey::state->x, embark_assist::survey::state->y);
 }
 
 //=================================================================================
@@ -762,23 +778,23 @@ embark_assist::defs::tree_levels tree_level_of(df::world_region_type region_type
         region_type == df::world_region_type::Lake ||
         region_type == df::world_region_type::Mountains ||
         region_type == df::world_region_type::Ocean) {
-        return embark_assist::defs::tree_levels::None;
+        return embark_assist::defs::tree_levels::TREE_LEVEL_NONE;
     }
     else {
         if (vegetation == 0) {
-            return embark_assist::defs::tree_levels::None;
+            return embark_assist::defs::tree_levels::TREE_LEVEL_NONE;
         }
         else if (vegetation <= 9) {
-            return embark_assist::defs::tree_levels::Very_Scarce;
+            return embark_assist::defs::tree_levels::TREE_LEVEL_VERY_SCARCE;
         }
         else if (vegetation <= 32) {
-            return embark_assist::defs::tree_levels::Scarce;
+            return embark_assist::defs::tree_levels::TREE_LEVEL_SCARCE;
         }
         else if (vegetation <= 65) {
-            return embark_assist::defs::tree_levels::Woodland;
+            return embark_assist::defs::tree_levels::TREE_LEVEL_WOODLAND;
         }
         else {
-            return embark_assist::defs::tree_levels::Heavily_Forested;
+            return embark_assist::defs::tree_levels::TREE_LEVEL_HEAVILY_FORESTED;
         }
     }
 }
@@ -800,9 +816,9 @@ void embark_assist::survey::high_level_world_survey(embark_assist::defs::geo_dat
             uint16_t geo_index;
             uint16_t sav_ev;
             uint8_t offset_count = 0;
-            auto &results = survey_results->at(i).at(k);
+            embark_assist::defs::region_tile_datum &results = survey_results->at(i).at(k);
             results.surveyed = false;
-            results.aquifer = embark_assist::defs::aquifer_sizes::NA;
+            results.aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NA;
             results.clay_count = 0;
             results.sand_count = 0;
             results.flux_count = 0;
@@ -810,8 +826,8 @@ void embark_assist::survey::high_level_world_survey(embark_assist::defs::geo_dat
             results.min_region_soil = 10;
             results.max_region_soil = 0;
             results.max_waterfall = 0;
-            results.min_tree_level = embark_assist::defs::tree_levels::Heavily_Forested;
-            results.max_tree_level = embark_assist::defs::tree_levels::None;
+            results.min_tree_level = embark_assist::defs::tree_levels::TREE_LEVEL_HEAVILY_FORESTED;
+            results.max_tree_level = embark_assist::defs::tree_levels::TREE_LEVEL_NONE;
             results.savagery_count[0] = 0;
             results.savagery_count[1] = 0;
             results.savagery_count[2] = 0;
@@ -926,7 +942,7 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
     embark_assist::defs::world_tile_data *survey_results,
     embark_assist::defs::mid_level_tiles *mlt) {
 //                color_ostream_proxy out(Core::getInstance().getConsole());
-    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     int16_t x = screen->location.region_pos.x;
     int16_t y = screen->location.region_pos.y;
     embark_assist::defs::region_tile_datum *tile = &survey_results->at(x).at(y);
@@ -1022,7 +1038,7 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
 
             end_check_l = static_cast<uint16_t>(features.size());
             for (size_t l = 0; l < end_check_l; l++) {
-                auto feature = features[l];
+                df::world_region_feature* feature = features[l];
 
                 if (feature->feature_idx != -1) {
                     switch (world_data->feature_map[x / 16][y / 16].features->feature_init[x % 16][y % 16][feature->feature_idx]->getType())
@@ -1045,11 +1061,11 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
                 }
                 else if (feature->layer != -1 &&
                     feature->min_z != -30000) {
-                    auto layer = world_data->underground_regions[feature->layer];
+                        df::world_underground_region* layer = world_data->underground_regions[feature->layer];
 
                     layer_bottom[layer->layer_depth] = feature->min_z;
                     layer_top[layer->layer_depth] = feature->max_z;
-                    base_z = std::min((int)base_z, (int)feature->min_z);
+                    base_z = std::min<int>((int)base_z, (int)feature->min_z);
 
                     if (layer->type == df::world_underground_region::MagmaSea) {
                         min_z = feature->min_z;  //  The features are individual per region tile
@@ -1060,16 +1076,16 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
             //  Compute shifts for layers in the stack.
 
             if (max_soil_depth == -1) {  //  Not set to zero by the biome
-                max_soil_depth = std::max((154 - elevation) / 5, 1);
+                max_soil_depth = std::max<int>((154 - elevation) / 5, 1);
             }
 
             soil_erosion = geo_summary->at(world_data->region_map[adjusted.x][adjusted.y].geo_index).soil_size -
-                std::min((int)geo_summary->at(world_data->region_map[adjusted.x][adjusted.y].geo_index).soil_size, (int)max_soil_depth);
+                std::min<int>((int)geo_summary->at(world_data->region_map[adjusted.x][adjusted.y].geo_index).soil_size, (int)max_soil_depth);
             int16_t layer_shift[16];
             int16_t cur_shift = elevation + soil_erosion - 1;
 
             aquifer = false;
-            mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::NA;
+            mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NA;
             mlt->at(i).at(k).clay = false;
             mlt->at(i).at(k).sand = false;
             mlt->at(i).at(k).flux = false;
@@ -1107,7 +1123,7 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
             if (end_check_l > 16) end_check_l = 16;
 
             for (uint16_t l = 0; l < end_check_l; l++) {
-                auto layer = world_data->geo_biomes[world_data->region_map[adjusted.x][adjusted.y].geo_index]->layers[l];
+                df::world_geo_layer* layer = world_data->geo_biomes[world_data->region_map[adjusted.x][adjusted.y].geo_index]->layers[l];
                 layer_shift[l] = cur_shift;
 
                 if (layer->type == df::geo_layer_type::SOIL ||
@@ -1123,7 +1139,7 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
                         cur_shift = cur_shift - soil_erosion;
                     }
 
-                    soil_erosion -= std::min((int)soil_erosion, (int)size);
+                    soil_erosion -= std::min<int>((int)soil_erosion, (int)size);
                 }
             }
 
@@ -1131,9 +1147,9 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
             //  Don't have to set up the end_check as we can reuse the one above.
 
             for (uint16_t l = 0; l < end_check_l; l++) {
-                auto layer = world_data->geo_biomes[world_data->region_map[adjusted.x][adjusted.y].geo_index]->layers[l];
+                df::world_geo_layer* layer = world_data->geo_biomes[world_data->region_map[adjusted.x][adjusted.y].geo_index]->layers[l];
                 top_z = last_bottom - 1;
-                bottom_z = std::max((int)layer->bottom_height + layer_shift[l], (int)min_z);
+                bottom_z = std::max<int>((int)layer->bottom_height + layer_shift[l], (int)min_z);
 
                 if (l == 15) {
                     bottom_z = min_z;  // stretch layer if needed
@@ -1220,13 +1236,13 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
                 }
             }
             if (!aquifer) {
-                mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::None;
+                mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE;
             }
             else if (world_data->region_map[adjusted.x][adjusted.y].drainage % 20 == 7) {
-                mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::Heavy;
+                mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY;
             }
             else {
-                mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::Light;
+                mlt->at(i).at(k).aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT;
             }
 
             mlt->at(i).at(k).trees = tree_level_of(world_data->regions[world_data->region_map[adjusted.x][adjusted.y].region_id]->type,
@@ -1279,7 +1295,7 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
         }
     }
 
-    survey_results->at(x).at(y).aquifer = embark_assist::defs::aquifer_sizes::NA;
+    survey_results->at(x).at(y).aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NA;
     survey_results->at(x).at(y).clay_count = 0;
     survey_results->at(x).at(y).sand_count = 0;
     survey_results->at(x).at(y).flux_count = 0;
@@ -2137,14 +2153,14 @@ uint8_t embark_assist::survey::translate_ew_edge(embark_assist::defs::world_tile
 
 void embark_assist::survey::survey_region_sites(embark_assist::defs::site_lists *site_list) {
     //            color_ostream_proxy out(Core::getInstance().getConsole());
-    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     df::world_data *world_data = world->world_data;
     int8_t index = 0;
 
     site_list->clear();
 
     for (uint32_t i = 0; i < world_data->region_map[screen->location.region_pos.x][screen->location.region_pos.y].sites.size(); i++) {
-        auto site = world_data->region_map[screen->location.region_pos.x][screen->location.region_pos.y].sites[i];
+        df::world_site* site = world_data->region_map[screen->location.region_pos.x][screen->location.region_pos.y].sites[i];
         switch (site->type) {
         case df::world_site_type::PlayerFortress:
         case df::world_site_type::DarkFortress:
@@ -2156,7 +2172,7 @@ void embark_assist::survey::survey_region_sites(embark_assist::defs::site_lists 
 
         case df::world_site_type::Cave:
             if (!world->worldgen.worldgen_parms.all_caves_visible) {
-                site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'c' });  //  Cave
+                site_list->push_back(embark_assist::defs::sites( (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'c' ));  //  Cave
             }
             break;
 
@@ -2167,17 +2183,17 @@ void embark_assist::survey::survey_region_sites(embark_assist::defs::site_lists 
                 break;  //  NONE shouldn't appear, and Tombs are visible already
 
             case df::monument_type::VAULT:
-                site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'V' });
+                site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'V'));
                 break;
 
             default:
-                site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'M' });  //  Any other Monument type. Pyramid?
+                site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'M'));  //  Any other Monument type. Pyramid?
                 break;
             }
             break;
 
         case df::world_site_type::ImportantLocation:
-            site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'i' });  //  Don't really know what that is...
+            site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'i'));  //  Don't really know what that is...
             break;
 
         case df::world_site_type::LairShrine:
@@ -2188,29 +2204,29 @@ void embark_assist::survey::survey_region_sites(embark_assist::defs::site_lists 
             case df::lair_type::SIMPLE_MOUND:
             case df::lair_type::SIMPLE_BURROW:
             case df::lair_type::WILDERNESS_LOCATION:
-                site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'l' });
+                site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'l'));
                 break;
 
             case df::lair_type::LABYRINTH:
-                site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'L' });
+                site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'L'));
                 break;
 
             case df::lair_type::SHRINE:
-                site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'S' });
+                site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'S'));
                 break;
 
             default:
-                site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, '?' });  //  Can these exist?
+                site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, '?'));  //  Can these exist?
                 break;
             }
             break;
 
         case df::world_site_type::Camp:
-            site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'C' });  //  Camp
+            site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, 'C'));  //  Camp
             break;
 
         default:
-            site_list->push_back({ (uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, '!' });  //  Not even in the enum...
+            site_list->push_back(embark_assist::defs::sites((uint8_t)site->rgn_min_x , (uint8_t)site->rgn_min_y, '!'));  //  Not even in the enum...
             break;
         }
     }
@@ -2224,7 +2240,7 @@ void embark_assist::survey::survey_embark(embark_assist::defs::mid_level_tiles *
     bool use_cache) {
 
     //color_ostream_proxy out(Core::getInstance().getConsole());
-    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     int16_t elevation = 0;
     uint16_t x = screen->location.region_pos.x;
     uint16_t y = screen->location.region_pos.y;
@@ -2245,7 +2261,7 @@ void embark_assist::survey::survey_embark(embark_assist::defs::mid_level_tiles *
     state->y = y;
 
     site_info->incursions_processed = true;
-    site_info->aquifer = embark_assist::defs::aquifer_sizes::NA;
+    site_info->aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NA;
     site_info->min_soil = 10;
     site_info->max_soil = 0;
     site_info->flat = true;

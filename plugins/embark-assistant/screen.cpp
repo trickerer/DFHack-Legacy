@@ -6,7 +6,7 @@ namespace embark_assist {
 }
 
 bool embark_assist::screen::paintString(const DFHack::Screen::Pen &pen, int x, int y, const std::string &text, bool map) {
-    auto screen_size = DFHack::Screen::getWindowSize();
+    df::coord2d screen_size = DFHack::Screen::getWindowSize();
 
     if (y < 1 || y + 1 >= screen_size.y || x < 1)
     {

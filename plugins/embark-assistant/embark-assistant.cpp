@@ -49,7 +49,7 @@ namespace embark_assist {
             uint16_t max_inorganic;
         };
 
-        static states *state = nullptr;
+        static states *state = NULL;
 
         void embark_update ();
         void shutdown();
@@ -57,7 +57,7 @@ namespace embark_assist {
         //===============================================================================
 
         void embark_update() {
-            auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+            df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
             embark_assist::defs::mid_level_tiles mlt;
             embark_assist::survey::initiate(&mlt);
 
@@ -90,7 +90,7 @@ namespace embark_assist {
             embark_assist::overlay::match_progress(count, &state->match_results, !state->match_iterator.active);
 
             if (!state->match_iterator.active) {
-                auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+                df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
                 embark_assist::overlay::set_mid_level_tile_match(state->match_results.at(screen->location.region_pos.x).at(screen->location.region_pos.y).mlt_match);
             }
         }
@@ -126,7 +126,7 @@ namespace embark_assist {
             embark_assist::finder_ui::shutdown();
             embark_assist::overlay::shutdown();
             delete state;
-            state = nullptr;
+            state = NULL;
         }
     }
 }
@@ -145,7 +145,7 @@ struct start_site_hook : df::viewscreen_choose_start_sitest {
         INTERPOSE_NEXT(render)();
         if (embark_assist::main::state)
             return;
-        auto dims = Screen::getWindowSize();
+        df::coord2d dims = Screen::getWindowSize();
         int x = 60;
         int y = dims.y - 2;
         OutputString(COLOR_LIGHTRED, x, y, " " + Screen::getKeyDisplay(interface_key::CUSTOM_A));
@@ -265,7 +265,7 @@ command_result embark_assistant(color_ostream &out, std::vector <std::string> & 
 
     CoreSuspender suspend;
 
-    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     if (!screen) {
         out.printerr("This plugin works only in the embark site selection phase.\n");
         return CR_WRONG_USAGE;
@@ -311,16 +311,16 @@ command_result embark_assistant(color_ostream &out, std::vector <std::string> & 
 
         for (uint16_t k = 0; k < world->worldgen.worldgen_parms.dim_y; k++) {
             embark_assist::main::state->survey_results[i][k].surveyed = false;
-            embark_assist::main::state->survey_results[i][k].aquifer = embark_assist::defs::aquifer_sizes::NA;
+            embark_assist::main::state->survey_results[i][k].aquifer = embark_assist::defs::AQUIFER_SIZE_NA;
             embark_assist::main::state->survey_results[i][k].clay_count = 0;
             embark_assist::main::state->survey_results[i][k].sand_count = 0;
             embark_assist::main::state->survey_results[i][k].flux_count = 0;
             embark_assist::main::state->survey_results[i][k].min_region_soil = 10;
             embark_assist::main::state->survey_results[i][k].max_region_soil = 0;
             embark_assist::main::state->survey_results[i][k].max_waterfall = 0;
-            embark_assist::main::state->survey_results[i][k].river_size = embark_assist::defs::river_sizes::None;
-            embark_assist::main::state->survey_results[i][k].min_tree_level = embark_assist::defs::tree_levels::Heavily_Forested;
-            embark_assist::main::state->survey_results[i][k].max_tree_level = embark_assist::defs::tree_levels::None;
+            embark_assist::main::state->survey_results[i][k].river_size = embark_assist::defs::RIVER_SIZE_NONE;
+            embark_assist::main::state->survey_results[i][k].min_tree_level = embark_assist::defs::TREE_LEVEL_HEAVILY_FORESTED;
+            embark_assist::main::state->survey_results[i][k].max_tree_level = embark_assist::defs::TREE_LEVEL_NONE;
 
             for (uint8_t l = 1; l < 10; l++) {
                 embark_assist::main::state->survey_results[i][k].biome_index[l] = -1;

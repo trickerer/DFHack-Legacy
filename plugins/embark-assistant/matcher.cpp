@@ -1,6 +1,6 @@
-#include <Console.h>
+#include "Console.h"
 
-#include <modules/Gui.h>
+#include "modules/Gui.h"
 
 #include "Core.h"
 #include "DataDefs.h"
@@ -27,29 +27,71 @@ namespace embark_assist {
         //=======================================================================================
 
         struct matcher_info {
-            bool savagery_found[3] = { false, false, false };
-            bool evilness_found[3] = { false, false, false };
-            embark_assist::defs::aquifer_sizes aquifer = embark_assist::defs::aquifer_sizes::NA;
-            bool river_found = false;
-            uint8_t max_waterfall = 0;
+            matcher_info() {
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    savagery_found[i] = false;
+                    evilness_found[i] = false;
+                }
+                aquifer = embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NA;
+                river_found = false;
+                max_waterfall = 0;
+                elevation = 0;
+                clay_found = false;
+                sand_found = false;
+                flux_found = false;
+                coal_found = false;
+                max_soil = 0;
+                uneven = false;
+                min_temperature = 0;
+                max_temperature = 0;
+                min_trees_found = embark_assist::defs::tree_levels::TREE_LEVEL_HEAVILY_FORESTED;
+                max_trees_found = embark_assist::defs::tree_levels::TREE_LEVEL_NONE;
+                blood_rain_found = false;
+                permanent_syndrome_rain_found = false;
+                temporary_syndrome_rain_found = false;
+                reanimation_found = false;
+                thralling_found = false;
+                spire_count = 0;
+                magma_level = -1;
+                biome_count = 0;
+                metal_1 = false;
+                metal_2 = false;
+                metal_3 = false;
+                economic_1 = false;
+                economic_2 = false;
+                economic_3 = false;
+                mineral_1 = false;
+                mineral_2 = false;
+                mineral_3 = false;
+                for (uint8 i = 0; i < ENUM_LAST_ITEM(biome_type) + 1; ++i)
+                    biomes[i] = false;
+                for (uint8 i = 0; i < ENUM_LAST_ITEM(world_region_type) + 1; ++i)
+                    region_types[i] = false;
+            }
+            bool savagery_found[3];
+            bool evilness_found[3];
+            embark_assist::defs::aquifer_sizes aquifer;
+            bool river_found;
+            uint8_t max_waterfall;
             uint16_t elevation;
-            bool clay_found = false;
-            bool sand_found = false;
-            bool flux_found = false;
-            bool coal_found = false;
-            uint8_t max_soil = 0;
-            bool uneven = false;
+            bool clay_found;
+            bool sand_found;
+            bool flux_found;
+            bool coal_found;
+            uint8_t max_soil;
+            bool uneven;
             int16_t min_temperature;
             int16_t max_temperature;
-            embark_assist::defs::tree_levels min_trees_found = embark_assist::defs::tree_levels::Heavily_Forested;
-            embark_assist::defs::tree_levels max_trees_found = embark_assist::defs::tree_levels::None;
-            bool blood_rain_found = false;
-            bool permanent_syndrome_rain_found = false;
-            bool temporary_syndrome_rain_found = false;
-            bool reanimation_found = false;
-            bool thralling_found = false;
-            uint8_t spire_count = 0;
-            int8_t magma_level = -1;
+            embark_assist::defs::tree_levels min_trees_found;
+            embark_assist::defs::tree_levels max_trees_found;
+            bool blood_rain_found;
+            bool permanent_syndrome_rain_found;
+            bool temporary_syndrome_rain_found;
+            bool reanimation_found;
+            bool thralling_found;
+            uint8_t spire_count;
+            int8_t magma_level;
             bool biomes[ENUM_LAST_ITEM(biome_type) + 1];
             bool region_types[ENUM_LAST_ITEM(world_region_type) + 1];
             uint8_t biome_count;
@@ -82,18 +124,18 @@ namespace embark_assist {
                     result->savagery_found[mlt->savagery_level] = true;
                     result->evilness_found[mlt->evilness_level] = true;
 
-                    embark_assist::defs::evil_savagery_ranges l = embark_assist::defs::evil_savagery_ranges::Low;
+                    embark_assist::defs::evil_savagery_ranges l = embark_assist::defs::evil_savagery_ranges::EVIL_SAVAGERY_LOW;
                     while (true) {
                         if (mlt->savagery_level == static_cast<uint8_t>(l)) {
                             if (finder->savagery[static_cast <int>(l)] ==
-                                embark_assist::defs::evil_savagery_values::Absent) {
+                                embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT) {
                                 *failed_match = true;
                                 return;
                             }
                         }
                         else {
                             if (finder->savagery[static_cast <int>(l)] ==
-                                embark_assist::defs::evil_savagery_values::All) {
+                                embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL) {
                                 *failed_match = true;
                                 return;
                             }
@@ -101,20 +143,20 @@ namespace embark_assist {
 
                         if (mlt->evilness_level == static_cast<uint8_t>(l)) {
                             if (finder->evilness[static_cast <int>(l)] ==
-                                embark_assist::defs::evil_savagery_values::Absent) {
+                                embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT) {
                                 *failed_match = true;
                                 return;
                             }
                         }
                         else {
                             if (finder->evilness[static_cast <int>(l)] ==
-                                embark_assist::defs::evil_savagery_values::All) {
+                                embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL) {
                                 *failed_match = true;
                                 return;
                             }
                         }
 
-                        if (l == embark_assist::defs::evil_savagery_ranges::High) break;
+                        if (l == embark_assist::defs::evil_savagery_ranges::EVIL_SAVAGERY_HIGH) break;
                         l = static_cast <embark_assist::defs::evil_savagery_ranges>(static_cast<int8_t>(l) + 1);
                     }
                 }
@@ -123,53 +165,53 @@ namespace embark_assist {
                 result->aquifer = static_cast<embark_assist::defs::aquifer_sizes>(static_cast<int8_t>(result->aquifer) | static_cast<int8_t>(mlt->aquifer));
 
                 switch (finder->aquifer) {
-                case embark_assist::defs::aquifer_ranges::NA:
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NA:
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None:
-                    if (result->aquifer != embark_assist::defs::aquifer_sizes::None) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE:
+                    if (result->aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE) {
                         *failed_match = true;
                         return;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::At_Most_Light:
-                case embark_assist::defs::aquifer_ranges::None_Plus_Light:
-                    if (static_cast<int8_t>(result->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Heavy)) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT:
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_LIGHT:
+                    if (static_cast<int8_t>(result->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY)) {
                         *failed_match = true;
                         return;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::Light:
-                    if (result->aquifer != embark_assist::defs::aquifer_sizes::Light) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT:
+                    if (result->aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT) {
                         *failed_match = true;
                         return;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::At_Least_Light:
-                case embark_assist::defs::aquifer_ranges::Light_Plus_Heavy:
-                    if (static_cast<int8_t>(result->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::None)) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_AT_LEAST_LIGHT:
+                case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT_PLUS_HEAVY:
+                    if (static_cast<int8_t>(result->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE)) {
                         *failed_match = true;
                         return;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None_Plus_Heavy:
-                    if (static_cast<int8_t>(result->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Light)) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_HEAVY:
+                    if (static_cast<int8_t>(result->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT)) {
                         *failed_match = true;
                         return;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None_Plus_At_Least_Light:
-                case embark_assist::defs::aquifer_ranges::At_Most_Light_Plus_Heavy:
-                case embark_assist::defs::aquifer_ranges::None_Light_Heavy:
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_AT_LEAST_LIGHT:
+                case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT_PLUS_HEAVY:
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_LIGHT_HEAVY:
                     break;
 
-                case embark_assist::defs::aquifer_ranges::Heavy:
-                    if (result->aquifer != embark_assist::defs::aquifer_sizes::Heavy) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_HEAVY:
+                    if (result->aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY) {
                         *failed_match = true;
                         return;
                     }
@@ -179,7 +221,7 @@ namespace embark_assist {
                 //  River & Waterfall. N/A for incursions.
 
                 //  Flat
-                if (finder->flat == embark_assist::defs::yes_no_ranges::Yes &&
+                if (finder->flat == embark_assist::defs::yes_no_ranges::YES_NO_YES &&
                     result->elevation != mlt->elevation) {
                     *failed_match = true;
                     return;
@@ -187,7 +229,7 @@ namespace embark_assist {
 
                 // Clay
                 if (mlt->clay) {
-                    if (finder->clay == embark_assist::defs::present_absent_ranges::Absent) {
+                    if (finder->clay == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT) {
                         *failed_match = true;
                         return;
                     }
@@ -196,7 +238,7 @@ namespace embark_assist {
 
                 // Sand
                 if (mlt->sand) {
-                    if (finder->sand == embark_assist::defs::present_absent_ranges::Absent) {
+                    if (finder->sand == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT) {
                         *failed_match = true;
                         return;
                     }
@@ -207,9 +249,9 @@ namespace embark_assist {
                 // Coal. N/A for incursions
 
                 //  Min Soil
-                if (finder->soil_min != embark_assist::defs::soil_ranges::NA &&
+                if (finder->soil_min != embark_assist::defs::soil_ranges::SOIL_NA &&
                     mlt->soil_depth < static_cast<uint16_t>(finder->soil_min) &&
-                    finder->soil_min_everywhere == embark_assist::defs::all_present_ranges::All) {
+                    finder->soil_min_everywhere == embark_assist::defs::all_present_ranges::ALL_PRESENT_ALL) {
                     *failed_match = true;
                     return;
                 }
@@ -219,7 +261,7 @@ namespace embark_assist {
                 }
 
                 //  Max Soil
-                if (finder->soil_max != embark_assist::defs::soil_ranges::NA &&
+                if (finder->soil_max != embark_assist::defs::soil_ranges::SOIL_NA &&
                     mlt->soil_depth > static_cast<uint16_t>(finder->soil_max)) {
                     *failed_match = true;
                     return;
@@ -235,13 +277,13 @@ namespace embark_assist {
                 }
 
                 if (result->min_temperature <= 0 &&
-                    finder->freezing == embark_assist::defs::freezing_ranges::Never) {
+                    finder->freezing == embark_assist::defs::freezing_ranges::FREEZING_NEVER) {
                     *failed_match = true;
                     return;
                 }
 
                 if (result->max_temperature > 0 &&
-                    finder->freezing == embark_assist::defs::freezing_ranges::Permanent) {
+                    finder->freezing == embark_assist::defs::freezing_ranges::FREEZING_PERMANENT) {
                     *failed_match = true;
                     return;
                 }
@@ -251,32 +293,32 @@ namespace embark_assist {
                     result->min_trees_found = mlt->trees;
 
                     switch (finder->min_trees) {
-                    case embark_assist::defs::tree_ranges::NA:
-                    case embark_assist::defs::tree_ranges::None:
+                    case embark_assist::defs::tree_ranges::TREE_NA:
+                    case embark_assist::defs::tree_ranges::TREE_NONE:
                         break;
 
-                    case embark_assist::defs::tree_ranges::Very_Scarce:
-                        if (result->min_trees_found < embark_assist::defs::tree_levels::Very_Scarce) {
+                    case embark_assist::defs::tree_ranges::TREE_VERY_SCARCE:
+                        if (result->min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_VERY_SCARCE) {
                             *failed_match = true;
                             return;
                         }
                         break;
 
-                    case embark_assist::defs::tree_ranges::Scarce:
-                        if (result->min_trees_found < embark_assist::defs::tree_levels::Scarce) {
+                    case embark_assist::defs::tree_ranges::TREE_SCARCE:
+                        if (result->min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_SCARCE) {
                             *failed_match = true;
                             return;
                         }
 
-                    case embark_assist::defs::tree_ranges::Woodland:
-                        if (result->min_trees_found < embark_assist::defs::tree_levels::Woodland) {
+                    case embark_assist::defs::tree_ranges::TREE_WOODLAND:
+                        if (result->min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_WOODLAND) {
                             *failed_match = true;
                             return;
                         }
                         break;
 
-                    case embark_assist::defs::tree_ranges::Heavily_Forested:
-                        if (result->min_trees_found < embark_assist::defs::tree_levels::Heavily_Forested) {
+                    case embark_assist::defs::tree_ranges::TREE_HEAVILY_FORESTED:
+                        if (result->min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_HEAVILY_FORESTED) {
                             *failed_match = true;
                             return;
                         }
@@ -288,33 +330,33 @@ namespace embark_assist {
                     result->max_trees_found = mlt->trees;
 
                     switch (finder->max_trees) {
-                    case embark_assist::defs::tree_ranges::NA:
-                    case embark_assist::defs::tree_ranges::Heavily_Forested:
+                    case embark_assist::defs::tree_ranges::TREE_NA:
+                    case embark_assist::defs::tree_ranges::TREE_HEAVILY_FORESTED:
                         break;
 
-                    case embark_assist::defs::tree_ranges::None:
-                        if (result->max_trees_found > embark_assist::defs::tree_levels::None) {
+                    case embark_assist::defs::tree_ranges::TREE_NONE:
+                        if (result->max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_NONE) {
                             *failed_match = true;
                             return;
                         }
                         break;
 
-                    case embark_assist::defs::tree_ranges::Very_Scarce:
-                        if (result->max_trees_found > embark_assist::defs::tree_levels::Very_Scarce) {
+                    case embark_assist::defs::tree_ranges::TREE_VERY_SCARCE:
+                        if (result->max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_VERY_SCARCE) {
                             *failed_match = true;
                             return;
                         }
                         break;
 
-                    case embark_assist::defs::tree_ranges::Scarce:
-                        if (result->max_trees_found > embark_assist::defs::tree_levels::Scarce) {
+                    case embark_assist::defs::tree_ranges::TREE_SCARCE:
+                        if (result->max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_SCARCE) {
                             *failed_match = true;
                             return;
                         }
                         break;
 
-                    case embark_assist::defs::tree_ranges::Woodland:
-                        if (result->max_trees_found > embark_assist::defs::tree_levels::Woodland) {
+                    case embark_assist::defs::tree_ranges::TREE_WOODLAND:
+                        if (result->max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_WOODLAND) {
                             *failed_match = true;
                             return;
                         }
@@ -324,7 +366,7 @@ namespace embark_assist {
 
                 //  Blood Rain
                 if (survey_results->at(x).at(y).blood_rain[mlt->biome_offset]) {
-                    if (finder->blood_rain == embark_assist::defs::yes_no_ranges::No) {
+                    if (finder->blood_rain == embark_assist::defs::yes_no_ranges::YES_NO_NO) {
                         *failed_match = true;
                         return;
                     }
@@ -333,9 +375,9 @@ namespace embark_assist {
 
                 // Syndrome Rain, Permanent
                 if (survey_results->at(x).at(y).permanent_syndrome_rain[mlt->biome_offset]) {
-                    if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Temporary ||
-                        finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Not_Permanent ||
-                        finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::None) {
+                    if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_TEMPORARY ||
+                        finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NOT_PERMANENT ||
+                        finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NONE) {
                         *failed_match = true;
                         return;
                     }
@@ -344,8 +386,8 @@ namespace embark_assist {
 
                 // Syndrome Rain, Temporary
                 if (survey_results->at(x).at(y).temporary_syndrome_rain[mlt->biome_offset]) {
-                    if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Permanent ||
-                        finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::None) {
+                    if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_PERMANENT ||
+                        finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NONE) {
                         *failed_match = true;
                         return;
                     }
@@ -354,8 +396,8 @@ namespace embark_assist {
 
                 //  Reanmation
                 if (survey_results->at(x).at(y).reanimating[mlt->biome_offset]) {
-                    if (finder->reanimation == embark_assist::defs::reanimation_ranges::Thralling ||
-                        finder->reanimation == embark_assist::defs::reanimation_ranges::None) {
+                    if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_THRALLING ||
+                        finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_NONE) {
                         *failed_match = true;
                         return;
                     }
@@ -364,9 +406,9 @@ namespace embark_assist {
 
                 //  Thralling
                 if (survey_results->at(x).at(y).thralling[mlt->biome_offset]) {
-                    if (finder->reanimation == embark_assist::defs::reanimation_ranges::Reanimation ||
-                        finder->reanimation == embark_assist::defs::reanimation_ranges::Not_Thralling ||
-                        finder->reanimation == embark_assist::defs::reanimation_ranges::None) {
+                    if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_REANIMATION ||
+                        finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_NOT_THRALLING ||
+                        finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_NONE) {
                         *failed_match = true;
                         return;
                     }
@@ -619,27 +661,27 @@ namespace embark_assist {
                         result.savagery_found[mlt->at(i).at(k).savagery_level] = true;
                         result.evilness_found[mlt->at(i).at(k).evilness_level] = true;
 
-                        embark_assist::defs::evil_savagery_ranges l = embark_assist::defs::evil_savagery_ranges::Low;
+                        embark_assist::defs::evil_savagery_ranges l = embark_assist::defs::evil_savagery_ranges::EVIL_SAVAGERY_LOW;
                         while (true) {
                             if (mlt->at(i).at(k).savagery_level == static_cast<uint8_t>(l)) {
                                 if (finder->savagery[static_cast <int>(l)] ==
-                                    embark_assist::defs::evil_savagery_values::Absent) return false;
+                                    embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT) return false;
                             }
                             else {
                                 if (finder->savagery[static_cast <int>(l)] ==
-                                    embark_assist::defs::evil_savagery_values::All) return false;
+                                    embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL) return false;
                             }
 
                             if (mlt->at(i).at(k).evilness_level == static_cast<uint8_t>(l)) {
                                 if (finder->evilness[static_cast <int>(l)] ==
-                                    embark_assist::defs::evil_savagery_values::Absent) return false;
+                                    embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT) return false;
                             }
                             else {
                                 if (finder->evilness[static_cast <int>(l)] ==
-                                    embark_assist::defs::evil_savagery_values::All) return false;
+                                    embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL) return false;
                             }
 
-                            if (l == embark_assist::defs::evil_savagery_ranges::High) break;
+                            if (l == embark_assist::defs::evil_savagery_ranges::EVIL_SAVAGERY_HIGH) break;
                             l = static_cast <embark_assist::defs::evil_savagery_ranges>(static_cast<int8_t>(l) + 1);
                         }
                     }
@@ -648,45 +690,45 @@ namespace embark_assist {
                     result.aquifer = static_cast<embark_assist::defs::aquifer_sizes>(static_cast<int8_t>(result.aquifer) | static_cast<int8_t>(mlt->at(i).at(k).aquifer));
 
                     switch (finder->aquifer) {
-                    case embark_assist::defs::aquifer_ranges::NA:
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_NA:
                         break;
 
-                    case embark_assist::defs::aquifer_ranges::None:
-                        if (result.aquifer != embark_assist::defs::aquifer_sizes::None) return false;
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_NONE:
+                        if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE) return false;
                         break;
 
-                    case embark_assist::defs::aquifer_ranges::At_Most_Light:
-                    case embark_assist::defs::aquifer_ranges::None_Plus_Light:
-                        if (static_cast<int8_t>(result.aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Heavy)) return false;
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT:
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_LIGHT:
+                        if (static_cast<int8_t>(result.aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY)) return false;
                         break;
 
-                    case embark_assist::defs::aquifer_ranges::Light:
-                        if (result.aquifer != embark_assist::defs::aquifer_sizes::Light) return false;
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT:
+                        if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT) return false;
                         break;
 
-                    case embark_assist::defs::aquifer_ranges::At_Least_Light:
-                    case embark_assist::defs::aquifer_ranges::Light_Plus_Heavy:
-                        if (static_cast<int8_t>(result.aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::None)) return false;
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_AT_LEAST_LIGHT:
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT_PLUS_HEAVY:
+                        if (static_cast<int8_t>(result.aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE)) return false;
                         break;
 
-                    case embark_assist::defs::aquifer_ranges::None_Plus_Heavy:
-                        if (static_cast<int8_t>(result.aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Light)) return false;
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_HEAVY:
+                        if (static_cast<int8_t>(result.aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT)) return false;
                         break;
 
-                    case embark_assist::defs::aquifer_ranges::None_Plus_At_Least_Light:
-                    case embark_assist::defs::aquifer_ranges::At_Most_Light_Plus_Heavy:
-                    case embark_assist::defs::aquifer_ranges::None_Light_Heavy:
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_AT_LEAST_LIGHT:
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT_PLUS_HEAVY:
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_LIGHT_HEAVY:
                         break;
 
-                    case embark_assist::defs::aquifer_ranges::Heavy:
-                        if (result.aquifer != embark_assist::defs::aquifer_sizes::Heavy) return false;
+                    case embark_assist::defs::aquifer_ranges::AQUIFER_HEAVY:
+                        if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY) return false;
                         break;
                     }
 
                     //  River & Waterfall
                     if (mlt->at(i).at(k).river_present) {
                         //  Actual size values were checked on the world tile level for min rivers
-                        if (finder->max_river != embark_assist::defs::river_ranges::NA &&
+                        if (finder->max_river != embark_assist::defs::river_ranges::RIVER_NA &&
                             finder->max_river < static_cast<embark_assist::defs::river_ranges>(survey_results->at(x).at(y).river_size)) return false;
 
                         if (i < start_x + finder->x_dim - 2 &&
@@ -709,46 +751,46 @@ namespace embark_assist {
                     }
 
                     //  Flat
-                    if (finder->flat == embark_assist::defs::yes_no_ranges::Yes &&
+                    if (finder->flat == embark_assist::defs::yes_no_ranges::YES_NO_YES &&
                         result.elevation != mlt->at(i).at(k).elevation) return false;
 
                     if (result.elevation != mlt->at(i).at(k).elevation) result.uneven = true;
 
                     // Clay
                     if (mlt->at(i).at(k).clay) {
-                        if (finder->clay == embark_assist::defs::present_absent_ranges::Absent) return false;
+                        if (finder->clay == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT) return false;
                         result.clay_found = true;
                     }
 
                     // Sand
                     if (mlt->at(i).at(k).sand) {
-                        if (finder->sand == embark_assist::defs::present_absent_ranges::Absent) return false;
+                        if (finder->sand == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT) return false;
                         result.sand_found = true;
                     }
 
                     // Flux
                     if (mlt->at(i).at(k).flux) {
-                        if (finder->flux == embark_assist::defs::present_absent_ranges::Absent) return false;
+                        if (finder->flux == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT) return false;
                         result.flux_found = true;
                     }
 
                     // Coal
                     if (mlt->at(i).at(k).coal) {
-                        if (finder->coal == embark_assist::defs::present_absent_ranges::Absent) return false;
+                        if (finder->coal == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT) return false;
                         result.coal_found = true;
                     }
 
                     //  Min Soil
-                    if (finder->soil_min != embark_assist::defs::soil_ranges::NA &&
+                    if (finder->soil_min != embark_assist::defs::soil_ranges::SOIL_NA &&
                         mlt->at(i).at(k).soil_depth < static_cast<uint16_t>(finder->soil_min) &&
-                        finder->soil_min_everywhere == embark_assist::defs::all_present_ranges::All) return false;
+                        finder->soil_min_everywhere == embark_assist::defs::all_present_ranges::ALL_PRESENT_ALL) return false;
 
                     if (result.max_soil < mlt->at(i).at(k).soil_depth) {
                         result.max_soil = mlt->at(i).at(k).soil_depth;
                     }
 
                     //  Max Soil
-                    if (finder->soil_max != embark_assist::defs::soil_ranges::NA &&
+                    if (finder->soil_max != embark_assist::defs::soil_ranges::SOIL_NA &&
                         mlt->at(i).at(k).soil_depth > static_cast<uint16_t>(finder->soil_max)) return false;
 
                     //  Freezing
@@ -761,10 +803,10 @@ namespace embark_assist {
                     }
 
                     if (result.min_temperature <= 0 &&
-                        finder->freezing == embark_assist::defs::freezing_ranges::Never) return false;
+                        finder->freezing == embark_assist::defs::freezing_ranges::FREEZING_NEVER) return false;
 
                     if (result.max_temperature > 0 &&
-                        finder->freezing == embark_assist::defs::freezing_ranges::Permanent) return false;
+                        finder->freezing == embark_assist::defs::freezing_ranges::FREEZING_PERMANENT) return false;
 
 
                     // Trees
@@ -772,24 +814,24 @@ namespace embark_assist {
                         result.min_trees_found = mlt->at(i).at(k).trees;
 
                         switch (finder->min_trees) {
-                        case embark_assist::defs::tree_ranges::NA:
-                        case embark_assist::defs::tree_ranges::None:
+                        case embark_assist::defs::tree_ranges::TREE_NA:
+                        case embark_assist::defs::tree_ranges::TREE_NONE:
                             break;
 
-                        case embark_assist::defs::tree_ranges::Very_Scarce:
-                            if (result.min_trees_found < embark_assist::defs::tree_levels::Very_Scarce) return false;
+                        case embark_assist::defs::tree_ranges::TREE_VERY_SCARCE:
+                            if (result.min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_VERY_SCARCE) return false;
                             break;
 
-                        case embark_assist::defs::tree_ranges::Scarce:
-                            if (result.min_trees_found < embark_assist::defs::tree_levels::Scarce) return false;
+                        case embark_assist::defs::tree_ranges::TREE_SCARCE:
+                            if (result.min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_SCARCE) return false;
                             break;
 
-                        case embark_assist::defs::tree_ranges::Woodland:
-                            if (result.min_trees_found < embark_assist::defs::tree_levels::Woodland) return false;
+                        case embark_assist::defs::tree_ranges::TREE_WOODLAND:
+                            if (result.min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_WOODLAND) return false;
                             break;
 
-                        case embark_assist::defs::tree_ranges::Heavily_Forested:
-                            if (result.min_trees_found < embark_assist::defs::tree_levels::Heavily_Forested) return false;
+                        case embark_assist::defs::tree_ranges::TREE_HEAVILY_FORESTED:
+                            if (result.min_trees_found < embark_assist::defs::tree_levels::TREE_LEVEL_HEAVILY_FORESTED) return false;
                             break;
                         }
                     }
@@ -798,61 +840,61 @@ namespace embark_assist {
                         result.max_trees_found = mlt->at(i).at(k).trees;
 
                         switch (finder->max_trees) {
-                        case embark_assist::defs::tree_ranges::NA:
-                        case embark_assist::defs::tree_ranges::Heavily_Forested:
+                        case embark_assist::defs::tree_ranges::TREE_NA:
+                        case embark_assist::defs::tree_ranges::TREE_HEAVILY_FORESTED:
                             break;
 
-                        case embark_assist::defs::tree_ranges::None:
-                            if (result.max_trees_found > embark_assist::defs::tree_levels::None) return false;
+                        case embark_assist::defs::tree_ranges::TREE_NONE:
+                            if (result.max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_NONE) return false;
                             break;
 
-                        case embark_assist::defs::tree_ranges::Very_Scarce:
-                            if (result.max_trees_found > embark_assist::defs::tree_levels::Very_Scarce) return false;
+                        case embark_assist::defs::tree_ranges::TREE_VERY_SCARCE:
+                            if (result.max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_VERY_SCARCE) return false;
                             break;
 
-                        case embark_assist::defs::tree_ranges::Scarce:
-                            if (result.max_trees_found > embark_assist::defs::tree_levels::Scarce) return false;
+                        case embark_assist::defs::tree_ranges::TREE_SCARCE:
+                            if (result.max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_SCARCE) return false;
                             break;
 
-                        case embark_assist::defs::tree_ranges::Woodland:
-                            if (result.max_trees_found > embark_assist::defs::tree_levels::Woodland) return false;
+                        case embark_assist::defs::tree_ranges::TREE_WOODLAND:
+                            if (result.max_trees_found > embark_assist::defs::tree_levels::TREE_LEVEL_WOODLAND) return false;
                             break;
                         }
                     }
 
                     //  Blood Rain
                     if (survey_results->at(x).at(y).blood_rain[mlt->at(i).at(k).biome_offset]) {
-                        if (finder->blood_rain == embark_assist::defs::yes_no_ranges::No) return false;
+                        if (finder->blood_rain == embark_assist::defs::yes_no_ranges::YES_NO_NO) return false;
                         result.blood_rain_found = true;
                     }
 
                     // Syndrome Rain, Permanent
                     if (survey_results->at(x).at(y).permanent_syndrome_rain[mlt->at(i).at(k).biome_offset]) {
-                        if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Temporary ||
-                            finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Not_Permanent ||
-                            finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::None) return false;
+                        if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_TEMPORARY ||
+                            finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NOT_PERMANENT ||
+                            finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NONE) return false;
                         result.permanent_syndrome_rain_found = true;
                     }
 
                     // Syndrome Rain, Temporary
                     if (survey_results->at(x).at(y).temporary_syndrome_rain[mlt->at(i).at(k).biome_offset]) {
-                        if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Permanent ||
-                            finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::None) return false;
+                        if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_PERMANENT ||
+                            finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NONE) return false;
                         result.temporary_syndrome_rain_found = true;
                     }
 
                     //  Reanmation
                     if (survey_results->at(x).at(y).reanimating[mlt->at(i).at(k).biome_offset]) {
-                        if (finder->reanimation == embark_assist::defs::reanimation_ranges::Thralling ||
-                            finder->reanimation == embark_assist::defs::reanimation_ranges::None) return false;
+                        if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_THRALLING ||
+                            finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_NONE) return false;
                         result.reanimation_found = true;
                     }
 
                     //  Thralling
                     if (survey_results->at(x).at(y).thralling[mlt->at(i).at(k).biome_offset]) {
-                        if (finder->reanimation == embark_assist::defs::reanimation_ranges::Reanimation ||
-                            finder->reanimation == embark_assist::defs::reanimation_ranges::Not_Thralling ||
-                            finder->reanimation == embark_assist::defs::reanimation_ranges::None) return false;
+                        if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_REANIMATION ||
+                            finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_NOT_THRALLING ||
+                            finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_NONE) return false;
                         result.thralling_found = true;
                     }
 
@@ -869,7 +911,7 @@ namespace embark_assist {
                         if (mlt->at(i).at(k).magma_level > result.magma_level)
                         {
                             result.magma_level = mlt->at(i).at(k).magma_level;
-                            if (finder->magma_max != embark_assist::defs::magma_ranges::NA &&
+                            if (finder->magma_max != embark_assist::defs::magma_ranges::MAGMA_NA &&
                                 static_cast<int8_t>(finder->magma_max) < result.magma_level) return false;
                         }
                     }
@@ -1196,116 +1238,116 @@ namespace embark_assist {
             //
             // Savagery & Evilness
             {
-                embark_assist::defs::evil_savagery_ranges l = embark_assist::defs::evil_savagery_ranges::Low;
+                embark_assist::defs::evil_savagery_ranges l = embark_assist::defs::evil_savagery_ranges::EVIL_SAVAGERY_LOW;
 
                 while (true) {
                     if (finder->savagery[static_cast <int>(l)] ==
-                        embark_assist::defs::evil_savagery_values::Present &&
+                        embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_PRESENT &&
                         !result.savagery_found[static_cast<int>(l)]) return false;
 
                     if (finder->evilness[static_cast <int>(l)] ==
-                        embark_assist::defs::evil_savagery_values::Present &&
+                        embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_PRESENT &&
                         !result.evilness_found[static_cast<int>(l)]) return false;
 
-                    if (l == embark_assist::defs::evil_savagery_ranges::High) break;
+                    if (l == embark_assist::defs::evil_savagery_ranges::EVIL_SAVAGERY_HIGH) break;
                     l = static_cast <embark_assist::defs::evil_savagery_ranges>(static_cast<int8_t>(l) + 1);
                 }
             }
 
             //  Aquifer
             switch (finder->aquifer) {
-            case embark_assist::defs::aquifer_ranges::NA:
-            case embark_assist::defs::aquifer_ranges::None:          //  Checked above
-            case embark_assist::defs::aquifer_ranges::Light:         //  Ditto
-            case embark_assist::defs::aquifer_ranges::Heavy:         //  Ditto
-            case embark_assist::defs::aquifer_ranges::At_Most_Light: //  Ditto
-            case embark_assist::defs::aquifer_ranges::At_Least_Light://  Ditto
+            case embark_assist::defs::aquifer_ranges::AQUIFER_NA:
+            case embark_assist::defs::aquifer_ranges::AQUIFER_NONE:          //  Checked above
+            case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT:         //  Ditto
+            case embark_assist::defs::aquifer_ranges::AQUIFER_HEAVY:         //  Ditto
+            case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT: //  Ditto
+            case embark_assist::defs::aquifer_ranges::AQUIFER_AT_LEAST_LIGHT://  Ditto
                 break;
 
-            case embark_assist::defs::aquifer_ranges::None_Plus_Light:
-                if (result.aquifer != embark_assist::defs::aquifer_sizes::None_Light) return false;
+            case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_LIGHT:
+                if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_LIGHT) return false;
                 break;
 
-            case embark_assist::defs::aquifer_ranges::None_Plus_At_Least_Light:
-                if (result.aquifer != embark_assist::defs::aquifer_sizes::None_Light &&
-                    result.aquifer != embark_assist::defs::aquifer_sizes::None_Heavy) return false;
+            case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_AT_LEAST_LIGHT:
+                if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_LIGHT &&
+                    result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_HEAVY) return false;
                 break;
 
-            case embark_assist::defs::aquifer_ranges::None_Plus_Heavy:
-                if (result.aquifer != embark_assist::defs::aquifer_sizes::None_Heavy) return false;
+            case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_HEAVY:
+                if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_HEAVY) return false;
                 break;
 
-            case embark_assist::defs::aquifer_ranges::At_Most_Light_Plus_Heavy:
-                if (result.aquifer != embark_assist::defs::aquifer_sizes::None_Heavy &&
-                    result.aquifer != embark_assist::defs::aquifer_sizes::Light_Heavy) return false;
+            case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT_PLUS_HEAVY:
+                if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_HEAVY &&
+                    result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT_HEAVY) return false;
                 break;
 
-            case embark_assist::defs::aquifer_ranges::Light_Plus_Heavy:
-                if (result.aquifer != embark_assist::defs::aquifer_sizes::Light_Heavy) return false;
+            case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT_PLUS_HEAVY:
+                if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT_HEAVY) return false;
                 break;
 
-            case embark_assist::defs::aquifer_ranges::None_Light_Heavy:
-                if (result.aquifer != embark_assist::defs::aquifer_sizes::None_Light_Heavy) return false;
+            case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_LIGHT_HEAVY:
+                if (result.aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_LIGHT_HEAVY) return false;
                 break;
             }
 
             //  River & Waterfall
-            if (!result.river_found && finder->min_river > embark_assist::defs::river_ranges::None) return false;
+            if (!result.river_found && finder->min_river > embark_assist::defs::river_ranges::RIVER_NONE) return false;
             if (result.max_waterfall < finder->min_waterfall) return false;  // N/A = -1 is always smaller, so no additional check needed.
 
             //  Flat
-            if (!result.uneven && finder->flat == embark_assist::defs::yes_no_ranges::No) return false;
+            if (!result.uneven && finder->flat == embark_assist::defs::yes_no_ranges::YES_NO_NO) return false;
 
             //  Clay
-            if (finder->clay == embark_assist::defs::present_absent_ranges::Present && !result.clay_found) return false;
+            if (finder->clay == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT && !result.clay_found) return false;
 
             //  Sand
-            if (finder->sand == embark_assist::defs::present_absent_ranges::Present && !result.sand_found) return false;
+            if (finder->sand == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT && !result.sand_found) return false;
 
             //  Flux
-            if (finder->flux == embark_assist::defs::present_absent_ranges::Present && !result.flux_found) return false;
+            if (finder->flux == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT && !result.flux_found) return false;
 
             //  Coal
-            if (finder->coal == embark_assist::defs::present_absent_ranges::Present && !result.coal_found) return false;
+            if (finder->coal == embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT && !result.coal_found) return false;
 
             //  Min Soil
-            if (finder->soil_min != embark_assist::defs::soil_ranges::NA &&
-                finder->soil_min_everywhere == embark_assist::defs::all_present_ranges::Present &&
+            if (finder->soil_min != embark_assist::defs::soil_ranges::SOIL_NA &&
+                finder->soil_min_everywhere == embark_assist::defs::all_present_ranges::ALL_PRESENT_PRESENT &&
                 result.max_soil < static_cast<uint8_t>(finder->soil_min)) return false;
 
             //  Freezing
-            if (finder->freezing == embark_assist::defs::freezing_ranges::At_Least_Partial &&
+            if (finder->freezing == embark_assist::defs::freezing_ranges::FREEZING_AT_LEAST_PARTIAL &&
                 result.min_temperature > 0) return false;
 
-            if (finder->freezing == embark_assist::defs::freezing_ranges::Partial &&
+            if (finder->freezing == embark_assist::defs::freezing_ranges::FREEZING_PARTIAL &&
                 (result.min_temperature > 0 ||
                     result.max_temperature <= 0)) return false;
 
-            if (finder->freezing == embark_assist::defs::freezing_ranges::At_Most_Partial &&
+            if (finder->freezing == embark_assist::defs::freezing_ranges::FREEZING_AT_MOST_PARTIAL &&
                 result.max_temperature <= 0) return false;
 
             //  Trees. Mismatches already dealt with
 
             //  Blood Rain
-            if (finder->blood_rain == embark_assist::defs::yes_no_ranges::Yes && !result.blood_rain_found) return false;
+            if (finder->blood_rain == embark_assist::defs::yes_no_ranges::YES_NO_YES && !result.blood_rain_found) return false;
 
             //  Syndrome Rain
-            if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Any && !result.permanent_syndrome_rain_found && !result.temporary_syndrome_rain_found) return false;
-            if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Permanent && !result.permanent_syndrome_rain_found) return false;
-            if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::Temporary && !result.temporary_syndrome_rain_found) return false;
+            if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_ANY && !result.permanent_syndrome_rain_found && !result.temporary_syndrome_rain_found) return false;
+            if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_PERMANENT && !result.permanent_syndrome_rain_found) return false;
+            if (finder->syndrome_rain == embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_TEMPORARY && !result.temporary_syndrome_rain_found) return false;
 
             //  Reanimation
-            if (finder->reanimation == embark_assist::defs::reanimation_ranges::Both && !(result.reanimation_found && result.thralling_found)) return false;
-            if (finder->reanimation == embark_assist::defs::reanimation_ranges::Any && !result.reanimation_found && !result.thralling_found) return false;
-            if (finder->reanimation == embark_assist::defs::reanimation_ranges::Thralling && !result.thralling_found) return false;
-            if (finder->reanimation == embark_assist::defs::reanimation_ranges::Reanimation && !result.reanimation_found) return false;
+            if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_BOTH && !(result.reanimation_found && result.thralling_found)) return false;
+            if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_ANY && !result.reanimation_found && !result.thralling_found) return false;
+            if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_THRALLING && !result.thralling_found) return false;
+            if (finder->reanimation == embark_assist::defs::reanimation_ranges::REANIMATION_REANIMATION && !result.reanimation_found) return false;
 
             //  Spires
             if (finder->spire_count_min != -1 && finder->spire_count_min > result.spire_count) return false;
             if (finder->spire_count_max != -1 && finder->spire_count_max < result.spire_count) return false;
 
             //  Magma
-            if (// finder->magma_min != embark_assist::defs::magma_ranges::NA &&  //  This check is redundant.
+            if (// finder->magma_min != embark_assist::defs::magma_ranges::MAGMA_NA &&  //  This check is redundant.
                 finder->magma_min > static_cast<embark_assist::defs::magma_ranges>(result.magma_level)) return false;
 
             //  Biomes
@@ -1374,10 +1416,10 @@ namespace embark_assist {
             //  Specific Neighbors
             for (uint16_t i = 0; i < finder->neighbors.size(); i++) {
                 switch (finder->neighbors[i].present) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                 {
                     bool found = false;
 
@@ -1393,7 +1435,7 @@ namespace embark_assist {
                     break;
                 }
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     for (uint16_t k = 0; k < world_tile->neighbors.size(); k++) {
                         if (finder->neighbors[i].entity_raw == world_tile->neighbors[k]) {
                             world_tile_match = false;
@@ -1439,24 +1481,24 @@ namespace embark_assist {
                 for (uint8_t i = 0; i < 3; i++)
                 {
                     switch (finder->savagery[i]) {
-                    case embark_assist::defs::evil_savagery_values::NA:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_NA:
                         break;  //  No restriction
 
-                    case embark_assist::defs::evil_savagery_values::All:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL:
                         if (tile->savagery_count[i] < embark_size) {
                             if (trace) out.print("matcher::world_tile_match: Savagery All (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Present:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_PRESENT:
                         if (tile->savagery_count[i] == 0) {
                             if (trace) out.print("matcher::world_tile_match: Savagery Present (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Absent:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT:
                         if (tile->savagery_count[i] > 256 - embark_size) {
                             if (trace) out.print("matcher::world_tile_match: Savagery Absent (%i, %i)\n", x, y);
                             return false;
@@ -1469,24 +1511,24 @@ namespace embark_assist {
                 for (uint8_t i = 0; i < 3; i++)
                 {
                     switch (finder->evilness[i]) {
-                    case embark_assist::defs::evil_savagery_values::NA:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_NA:
                         break;  //  No restriction
 
-                    case embark_assist::defs::evil_savagery_values::All:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL:
                         if (tile->evilness_count[i] < embark_size) {
                             if (trace) out.print("matcher::world_tile_match: Evil All (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Present:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_PRESENT:
                         if (tile->evilness_count[i] == 0) {
                             if (trace) out.print("matcher::world_tile_match: Evil Present (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Absent:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT:
                         if (tile->evilness_count[i] > 256 - embark_size) {
                             if (trace) out.print("matcher::world_tile_match: Evil Absent (%i, %i)\n", x, y);
                             return false;
@@ -1497,86 +1539,86 @@ namespace embark_assist {
 
                 // Aquifer
                 switch (finder->aquifer) {
-                case embark_assist::defs::aquifer_ranges::NA:
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NA:
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::None))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer None (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::At_Most_Light:
-                    if (tile->aquifer == embark_assist::defs::aquifer_sizes::Heavy) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT:
+                    if (tile->aquifer == embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer Heavy (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None_Plus_Light:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::None)) ||
-                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Light))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_LIGHT:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE)) ||
+                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer None_Plus_Light (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None_Plus_At_Least_Light:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::None)) ||
-                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Light_Heavy))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_AT_LEAST_LIGHT:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE)) ||
+                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT_HEAVY))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer None_Plus_At_Least_Light (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::Light:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Light))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer Light (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::At_Least_Light:
-                    if (tile->aquifer == embark_assist::defs::aquifer_sizes::None) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_AT_LEAST_LIGHT:
+                    if (tile->aquifer == embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer At_Least_Light (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None_Plus_Heavy:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::None)) ||
-                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Heavy))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_PLUS_HEAVY:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE)) ||
+                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer None_Plus_Heavy (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::At_Most_Light_Plus_Heavy:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Heavy)) ||
-                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::None_Light))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_AT_MOST_LIGHT_PLUS_HEAVY:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY)) ||
+                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_LIGHT))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer At_Most_Light_Plus_Heavy (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::Light_Plus_Heavy:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Light)) ||
-                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Heavy))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_LIGHT_PLUS_HEAVY:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_LIGHT)) ||
+                        !(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer Light_Plus_Heavy (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::None_Light_Heavy:
-                    if (tile->aquifer != embark_assist::defs::aquifer_sizes::None_Light_Heavy) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_NONE_LIGHT_HEAVY:
+                    if (tile->aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE_LIGHT_HEAVY) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer None_Light_Heavy (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::aquifer_ranges::Heavy:
-                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::Heavy))) {
+                case embark_assist::defs::aquifer_ranges::AQUIFER_HEAVY:
+                    if (!(static_cast<int8_t>(tile->aquifer) & static_cast<int8_t>(embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_HEAVY))) {
                         if (trace) out.print("matcher::world_tile_match: Aquifer Heavy (%i, %i)\n", x, y);
                         return false;
                     }
@@ -1585,43 +1627,43 @@ namespace embark_assist {
 
                 // River size. Every tile has riverless tiles, so max rivers has to be checked on the detailed level.
                 switch (tile->river_size) {
-                case embark_assist::defs::river_sizes::None:
-                    if (finder->min_river > embark_assist::defs::river_ranges::None) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_NONE:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_NONE) {
                         if (trace) out.print("matcher::world_tile_match: River_Size None (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Brook:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Brook) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_BROOK:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_BROOK) {
                         if (trace) out.print("matcher::world_tile_match: River_Size Brook (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Stream:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Stream) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_STREAM:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_STREAM) {
                         if (trace) out.print("matcher::world_tile_match: River_Size Stream (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Minor:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Minor) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_MINOR:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_MINOR) {
                         if (trace) out.print("matcher::world_tile_match: River_Size Mino (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Medium:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Medium) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_MEDIUM:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_MEDIUM) {
                         if (trace) out.print("matcher::world_tile_match: River_Size Medium (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Major:
-                    if (finder->max_river != embark_assist::defs::river_ranges::NA) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_MAJOR:
+                    if (finder->max_river != embark_assist::defs::river_ranges::RIVER_NA) {
                         if (trace) out.print("matcher::world_tile_match: River_Size Major (%i, %i)\n", x, y);
                         return false;
                     }
@@ -1644,17 +1686,17 @@ namespace embark_assist {
 
                 //  Clay
                 switch (finder->clay) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->clay_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: Clay Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->clay_count > 256 - embark_size) {
                         if (trace) out.print("matcher::world_tile_match: Clay Absent (%i, %i)\n", x, y);
                         return false;
@@ -1664,17 +1706,17 @@ namespace embark_assist {
 
                 //  Sand
                 switch (finder->sand) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->sand_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: Sand Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->sand_count > 256 - embark_size) {
                         if (trace) out.print("matcher::world_tile_match: Sand Absent (%i, %i)\n", x, y);
                         return false;
@@ -1684,17 +1726,17 @@ namespace embark_assist {
 
                 //  Flux
                 switch (finder->flux) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->flux_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: Flux Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->flux_count > 256 - embark_size) {
                         if (trace) out.print("matcher::world_tile_match: Flux Absent (%i, %i)\n", x, y);
                         return false;
@@ -1704,17 +1746,17 @@ namespace embark_assist {
 
                 //  Coal
                 switch (finder->coal) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->coal_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: Coal Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->coal_count > 256 - embark_size) {
                         if (trace) out.print("matcher::world_tile_match: Coal Absent (%i, %i)\n", x, y);
                         return false;
@@ -1724,32 +1766,32 @@ namespace embark_assist {
 
                 //  Soil Min
                 switch (finder->soil_min) {
-                case embark_assist::defs::soil_ranges::NA:
-                case embark_assist::defs::soil_ranges::None:
+                case embark_assist::defs::soil_ranges::SOIL_NA:
+                case embark_assist::defs::soil_ranges::SOIL_NONE:
                     break;  //  No restriction
 
-                case embark_assist::defs::soil_ranges::Very_Shallow:
+                case embark_assist::defs::soil_ranges::SOIL_VERY_SHALLOW:
                     if (tile->max_region_soil < 1) {
                         if (trace) out.print("matcher::world_tile_match: Soil Min Very Shallow (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Shallow:
+                case embark_assist::defs::soil_ranges::SOIL_SHALLOW:
                     if (tile->max_region_soil < 2) {
                         if (trace) out.print("matcher::world_tile_match: Soil Min Shallow (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Deep:
+                case embark_assist::defs::soil_ranges::SOIL_DEEP:
                     if (tile->max_region_soil < 3) {
                         if (trace) out.print("matcher::world_tile_match: Soil Min Deep (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Very_Deep:
+                case embark_assist::defs::soil_ranges::SOIL_VERY_DEEP:
                     if (tile->max_region_soil < 4) {
                         if (trace) out.print("matcher::world_tile_match: Soil Min Very Deep (%i, %i)\n", x, y);
                         return false;
@@ -1761,32 +1803,32 @@ namespace embark_assist {
 
                 //  Soil Max
                 switch (finder->soil_max) {
-                case embark_assist::defs::soil_ranges::NA:
-                case embark_assist::defs::soil_ranges::Very_Deep:
+                case embark_assist::defs::soil_ranges::SOIL_NA:
+                case embark_assist::defs::soil_ranges::SOIL_VERY_DEEP:
                     break;  //  No restriction
 
-                case embark_assist::defs::soil_ranges::None:
+                case embark_assist::defs::soil_ranges::SOIL_NONE:
                     if (tile->min_region_soil > 0) {
                         if (trace) out.print("matcher::world_tile_match: Soil_Max None (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Very_Shallow:
+                case embark_assist::defs::soil_ranges::SOIL_VERY_SHALLOW:
                     if (tile->min_region_soil > 1) {
                         if (trace) out.print("matcher::world_tile_match: Soil_Max Very_Shallow (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Shallow:
+                case embark_assist::defs::soil_ranges::SOIL_SHALLOW:
                     if (tile->min_region_soil > 2) {
                         if (trace) out.print("matcher::world_tile_match: Soil_Max Shallow (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Deep:
+                case embark_assist::defs::soil_ranges::SOIL_DEEP:
                     if (tile->min_region_soil > 3) {
                         if (trace) out.print("matcher::world_tile_match: Soil_Max Deep (%i, %i)\n", x, y);
                         return false;
@@ -1795,7 +1837,7 @@ namespace embark_assist {
                 }
 
                 //  Freezing
-                if (finder->freezing != embark_assist::defs::freezing_ranges::NA)
+                if (finder->freezing != embark_assist::defs::freezing_ranges::FREEZING_NA)
                 {
                     int16_t max_max_temperature = tile->max_temperature[5];
                     int16_t min_max_temperature = tile->max_temperature[5];
@@ -1823,24 +1865,24 @@ namespace embark_assist {
                     }
 
                     switch (finder->freezing) {
-                    case embark_assist::defs::freezing_ranges::NA:
+                    case embark_assist::defs::freezing_ranges::FREEZING_NA:
                         break;  //  Excluded above, but the Travis complains if it's not here.
 
-                    case embark_assist::defs::freezing_ranges::Permanent:
+                    case embark_assist::defs::freezing_ranges::FREEZING_PERMANENT:
                         if (min_max_temperature > 0) {
                             if (trace) out.print("matcher::world_tile_match: Freezing Permanent (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::freezing_ranges::At_Least_Partial:
+                    case embark_assist::defs::freezing_ranges::FREEZING_AT_LEAST_PARTIAL:
                         if (min_min_temperature > 0) {
                             if (trace) out.print("matcher::world_tile_match: Freezing At_Lest_Partial (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::freezing_ranges::Partial:
+                    case embark_assist::defs::freezing_ranges::FREEZING_PARTIAL:
                         if (min_min_temperature > 0 ||
                             max_max_temperature <= 0) {
                             if (trace) out.print("matcher::world_tile_match: Freezing Partial (%i, %i)\n", x, y);
@@ -1848,14 +1890,14 @@ namespace embark_assist {
                         }
                         break;
 
-                    case embark_assist::defs::freezing_ranges::At_Most_Partial:
+                    case embark_assist::defs::freezing_ranges::FREEZING_AT_MOST_PARTIAL:
                         if (max_max_temperature <= 0) {
                             if (trace) out.print("matcher::world_tile_match: Freezing At Most_Partial (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::freezing_ranges::Never:
+                    case embark_assist::defs::freezing_ranges::FREEZING_NEVER:
                         if (max_min_temperature <= 0) {
                             if (trace) out.print("matcher::world_tile_match: Freezing Never (%i, %i)\n", x, y);
                             return false;
@@ -1866,33 +1908,33 @@ namespace embark_assist {
 
                 //  Trees
                 switch (finder->min_trees) {
-                case embark_assist::defs::tree_ranges::NA:
-                case embark_assist::defs::tree_ranges::None:
+                case embark_assist::defs::tree_ranges::TREE_NA:
+                case embark_assist::defs::tree_ranges::TREE_NONE:
                     break;
  
-                case embark_assist::defs::tree_ranges::Very_Scarce:
-                    if (tile->max_tree_level < embark_assist::defs::tree_levels::Very_Scarce) {
+                case embark_assist::defs::tree_ranges::TREE_VERY_SCARCE:
+                    if (tile->max_tree_level < embark_assist::defs::tree_levels::TREE_LEVEL_VERY_SCARCE) {
                         if (trace) out.print("matcher::world_tile_match: Min_Trees Very_Scarce (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::tree_ranges::Scarce:
-                    if (tile->max_tree_level < embark_assist::defs::tree_levels::Scarce) {
+                case embark_assist::defs::tree_ranges::TREE_SCARCE:
+                    if (tile->max_tree_level < embark_assist::defs::tree_levels::TREE_LEVEL_SCARCE) {
                         if (trace) out.print("matcher::world_tile_match: Min_Trees Scarce (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::tree_ranges::Woodland:
-                    if (tile->max_tree_level < embark_assist::defs::tree_levels::Woodland) {
+                case embark_assist::defs::tree_ranges::TREE_WOODLAND:
+                    if (tile->max_tree_level < embark_assist::defs::tree_levels::TREE_LEVEL_WOODLAND) {
                         if (trace) out.print("matcher::world_tile_match: Min_Trees Woodland (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::tree_ranges::Heavily_Forested:
-                    if (tile->max_tree_level < embark_assist::defs::tree_levels::Heavily_Forested) {
+                case embark_assist::defs::tree_ranges::TREE_HEAVILY_FORESTED:
+                    if (tile->max_tree_level < embark_assist::defs::tree_levels::TREE_LEVEL_HEAVILY_FORESTED) {
                         if (trace) out.print("matcher::world_tile_match: Min_Trees Heavily_Forested (%i, %i)\n", x, y);
                         return false;
                     }
@@ -1900,34 +1942,34 @@ namespace embark_assist {
                 }
 
                 switch (finder->max_trees) {
-                case embark_assist::defs::tree_ranges::NA:
-                case embark_assist::defs::tree_ranges::Heavily_Forested:
+                case embark_assist::defs::tree_ranges::TREE_NA:
+                case embark_assist::defs::tree_ranges::TREE_HEAVILY_FORESTED:
                     break;
 
-                case embark_assist::defs::tree_ranges::None:
-                    if (tile->min_tree_level > embark_assist::defs::tree_levels::None) {
+                case embark_assist::defs::tree_ranges::TREE_NONE:
+                    if (tile->min_tree_level > embark_assist::defs::tree_levels::TREE_LEVEL_NONE) {
                         if (trace) out.print("matcher::world_tile_match: Max_Trees None (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
 
-                case embark_assist::defs::tree_ranges::Very_Scarce:
-                    if (tile->min_tree_level > embark_assist::defs::tree_levels::Very_Scarce) {
+                case embark_assist::defs::tree_ranges::TREE_VERY_SCARCE:
+                    if (tile->min_tree_level > embark_assist::defs::tree_levels::TREE_LEVEL_VERY_SCARCE) {
                         if (trace) out.print("matcher::world_tile_match: Max_Trees Very_Scarce (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::tree_ranges::Scarce:
-                    if (tile->min_tree_level > embark_assist::defs::tree_levels::Scarce) {
+                case embark_assist::defs::tree_ranges::TREE_SCARCE:
+                    if (tile->min_tree_level > embark_assist::defs::tree_levels::TREE_LEVEL_SCARCE) {
                         if (trace) out.print("matcher::world_tile_match: Max_Trees Scarce (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::tree_ranges::Woodland:
-                    if (tile->min_tree_level > embark_assist::defs::tree_levels::Woodland) {
+                case embark_assist::defs::tree_ranges::TREE_WOODLAND:
+                    if (tile->min_tree_level > embark_assist::defs::tree_levels::TREE_LEVEL_WOODLAND) {
                         if (trace) out.print("matcher::world_tile_match: Max_Trees Woodland (%i, %i)\n", x, y);
                         return false;
                     }
@@ -1936,17 +1978,17 @@ namespace embark_assist {
 
                 //  Blood Rain
                 switch (finder->blood_rain) {
-                case embark_assist::defs::yes_no_ranges::NA:
+                case embark_assist::defs::yes_no_ranges::YES_NO_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::yes_no_ranges::Yes:
+                case embark_assist::defs::yes_no_ranges::YES_NO_YES:
                     if (!tile->blood_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: Blood_Rain Yes (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::yes_no_ranges::No:
+                case embark_assist::defs::yes_no_ranges::YES_NO_NO:
                     if (tile->blood_rain_full) {
                         if (trace) out.print("matcher::world_tile_match: Blood_Rain No (%i, %i)\n", x, y);
                         return false;
@@ -1956,38 +1998,38 @@ namespace embark_assist {
 
                 //  Syndrome Rain
                 switch (finder->syndrome_rain) {
-                case embark_assist::defs::syndrome_rain_ranges::NA:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::syndrome_rain_ranges::Any:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_ANY:
                     if (!tile->permanent_syndrome_rain_possible && !tile->temporary_syndrome_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: Syndrome_Rain Any (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::Permanent:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_PERMANENT:
                     if (!tile->permanent_syndrome_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: Syndrome_Rain Permanent (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::Temporary:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_TEMPORARY:
                     if (!tile->temporary_syndrome_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: Syndrome_Rain Temporary (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::Not_Permanent:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NOT_PERMANENT:
                     if (tile->permanent_syndrome_rain_full) {
                         if (trace) out.print("matcher::world_tile_match: Syndrome_Rain Not_Permanent (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::None:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NONE:
                     if (tile->permanent_syndrome_rain_full || tile->temporary_syndrome_rain_full) {
                         if (trace) out.print("matcher::world_tile_match: Syndrome_Rain None (%i, %i)\n", x, y);
                         return false;
@@ -1997,45 +2039,45 @@ namespace embark_assist {
 
                 //  Reanimating
                 switch (finder->reanimation) {
-                case embark_assist::defs::reanimation_ranges::NA:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::reanimation_ranges::Both:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_BOTH:
                     if (!tile->reanimating_possible || !tile->thralling_possible) {
                         if (trace) out.print("matcher::world_tile_match: Reanimation Both (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Any:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_ANY:
                     if (!tile->reanimating_possible && !tile->thralling_possible) {
                         if (trace) out.print("matcher::world_tile_match: Reanimation Any (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Thralling:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_THRALLING:
                     if (!tile->thralling_possible) {
                         if (trace) out.print("matcher::world_tile_match: Reanimation Thralling (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Reanimation:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_REANIMATION:
                     if (!tile->reanimating_possible) {
                         if (trace) out.print("matcher::world_tile_match: Reanimation Reanimation (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Not_Thralling:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_NOT_THRALLING:
                     if (tile->thralling_full) {
                         if (trace) out.print("matcher::world_tile_match: Reanimation Not_Thralling (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::None:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_NONE:
                     if (tile->reanimating_full || tile->thralling_full) {
                         if (trace) out.print("matcher::world_tile_match: Reanimation None (%i, %i)\n", x, y);
                         return false;
@@ -2230,10 +2272,10 @@ namespace embark_assist {
                 //  Specific Neighbors
                 for (uint16_t i = 0; i < finder->neighbors.size(); i++) {
                     switch (finder->neighbors[i].present) {
-                    case embark_assist::defs::present_absent_ranges::NA:
+                    case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                         break;
 
-                    case embark_assist::defs::present_absent_ranges::Present:
+                    case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     {
                         bool found = false;
 
@@ -2252,7 +2294,7 @@ namespace embark_assist {
                         break;
                     }
 
-                    case embark_assist::defs::present_absent_ranges::Absent:
+                    case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                         for (uint16_t k = 0; k < tile->neighbors.size(); k++) {
                             if (finder->neighbors[i].entity_raw == tile->neighbors[k]) {
                                 if (trace) out.print("matcher::world_tile_match: Specific Neighbors Absent (%i, %i)\n", x, y);
@@ -2269,24 +2311,24 @@ namespace embark_assist {
                 for (uint8_t i = 0; i < 3; i++)
                 {
                     switch (finder->savagery[i]) {
-                    case embark_assist::defs::evil_savagery_values::NA:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_NA:
                         break;  //  No restriction
 
-                    case embark_assist::defs::evil_savagery_values::All:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL:
                         if (tile->savagery_count[i] == 0) {
                             if (trace) out.print("matcher::world_tile_match: NS Savagery All (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Present:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_PRESENT:
                         if (tile->savagery_count[i] == 0) {
                             if (trace) out.print("matcher::world_tile_match: NS Savagery Present (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Absent:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT:
                         if (tile->savagery_count[i] == 256) {
                             if (trace) out.print("matcher::world_tile_match: NS Savagery Absent (%i, %i)\n", x, y);
                             return false;
@@ -2299,24 +2341,24 @@ namespace embark_assist {
                 for (uint8_t i = 0; i < 3; i++)
                 {
                     switch (finder->evilness[i]) {
-                    case embark_assist::defs::evil_savagery_values::NA:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_NA:
                         break;  //  No restriction
 
-                    case embark_assist::defs::evil_savagery_values::All:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL:
                         if (tile->evilness_count[i] == 0) {
                             if (trace) out.print("matcher::world_tile_match: NS Evil All (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Present:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_PRESENT:
                         if (tile->evilness_count[i] == 0) {
                             if (trace) out.print("matcher::world_tile_match: NS Evil Present (%i, %i)\n", x, y);
                             return false;
                         }
                         break;
 
-                    case embark_assist::defs::evil_savagery_values::Absent:
+                    case embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ABSENT:
                         if (tile->evilness_count[i] == 256) {
                             if (trace) out.print("matcher::world_tile_match: NS Evil Absent (%i, %i)\n", x, y);
                             return false;
@@ -2329,43 +2371,43 @@ namespace embark_assist {
 
                 // River size
                 switch (tile->river_size) {
-                case embark_assist::defs::river_sizes::None:
-                    if (finder->min_river > embark_assist::defs::river_ranges::None) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_NONE:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_NONE) {
                         if (trace) out.print("matcher::world_tile_match: NS River None (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Brook:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Brook) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_BROOK:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_BROOK) {
                         if (trace) out.print("matcher::world_tile_match: NS River Brook (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Stream:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Stream) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_STREAM:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_STREAM) {
                         if (trace) out.print("matcher::world_tile_match: NS River Stream (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Minor:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Minor) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_MINOR:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_MINOR) {
                         if (trace) out.print("matcher::world_tile_match: NS River Minor (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Medium:
-                    if (finder->min_river > embark_assist::defs::river_ranges::Medium) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_MEDIUM:
+                    if (finder->min_river > embark_assist::defs::river_ranges::RIVER_MEDIUM) {
                         if (trace) out.print("matcher::world_tile_match: NS River Medium (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::river_sizes::Major:
-                    if (finder->max_river != embark_assist::defs::river_ranges::NA) {
+                case embark_assist::defs::river_sizes::RIVER_SIZE_MAJOR:
+                    if (finder->max_river != embark_assist::defs::river_ranges::RIVER_NA) {
                         if (trace) out.print("matcher::world_tile_match: NS River Major (%i, %i)\n", x, y);
                         return false;
                     }
@@ -2374,7 +2416,7 @@ namespace embark_assist {
 
                 //  Waterfall
                 if (finder->min_waterfall > 0 &&
-                    tile->river_size == embark_assist::defs::river_sizes::None) {
+                    tile->river_size == embark_assist::defs::river_sizes::RIVER_SIZE_NONE) {
                     if (trace) out.print("matcher::world_tile_match: NS Waterfall (%i, %i)\n", x, y);
                     return false;
                 }
@@ -2383,17 +2425,17 @@ namespace embark_assist {
 
                 //  Clay
                 switch (finder->clay) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->clay_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: NS Clay Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->clay_count == 256) {
                         if (trace) out.print("matcher::world_tile_match: NS Clay Absent (%i, %i)\n", x, y);
                         return false;
@@ -2403,17 +2445,17 @@ namespace embark_assist {
 
                 //  Sand
                 switch (finder->sand) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->sand_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: NS Sand Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->sand_count == 256) {
                         if (trace) out.print("matcher::world_tile_match: NS Sand Absent (%i, %i)\n", x, y);
                         return false;
@@ -2423,17 +2465,17 @@ namespace embark_assist {
 
                 //  Flux
                 switch (finder->flux) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->flux_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: NS Flux Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->flux_count == 256) {
                         if (trace) out.print("matcher::world_tile_match: NS Flux Absent (%i, %i)\n", x, y);
                         return false;
@@ -2443,17 +2485,17 @@ namespace embark_assist {
 
                 //  Coal
                 switch (finder->coal) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     if (tile->coal_count == 0) {
                         if (trace) out.print("matcher::world_tile_match: NS Coal Present (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     if (tile->coal_count == 256) {
                         if (trace) out.print("matcher::world_tile_match: NS Coal Absent (%i, %i)\n", x, y);
                         return false;
@@ -2463,32 +2505,32 @@ namespace embark_assist {
 
                 //  Soil Min
                 switch (finder->soil_min) {
-                case embark_assist::defs::soil_ranges::NA:
-                case embark_assist::defs::soil_ranges::None:
+                case embark_assist::defs::soil_ranges::SOIL_NA:
+                case embark_assist::defs::soil_ranges::SOIL_NONE:
                     break;  //  No restriction
 
-                case embark_assist::defs::soil_ranges::Very_Shallow:
+                case embark_assist::defs::soil_ranges::SOIL_VERY_SHALLOW:
                     if (tile->max_region_soil < 1) {
                         if (trace) out.print("matcher::world_tile_match: NS Soil_Min Very_Shallow (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Shallow:
+                case embark_assist::defs::soil_ranges::SOIL_SHALLOW:
                     if (tile->max_region_soil < 2) {
                         if (trace) out.print("matcher::world_tile_match: NS Soil_Min Shallow (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Deep:
+                case embark_assist::defs::soil_ranges::SOIL_DEEP:
                     if (tile->max_region_soil < 3) {
                         if (trace) out.print("matcher::world_tile_match: NS Soil_Min Deep (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::soil_ranges::Very_Deep:
+                case embark_assist::defs::soil_ranges::SOIL_VERY_DEEP:
                     if (tile->max_region_soil < 4) {
                         if (trace) out.print("matcher::world_tile_match: NS Soil_Min Very_Deep (%i, %i)\n", x, y);
                         return false;
@@ -2503,17 +2545,17 @@ namespace embark_assist {
 
                 //  Blood Rain
                 switch (finder->blood_rain) {
-                case embark_assist::defs::yes_no_ranges::NA:
+                case embark_assist::defs::yes_no_ranges::YES_NO_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::yes_no_ranges::Yes:
+                case embark_assist::defs::yes_no_ranges::YES_NO_YES:
                     if (!tile->blood_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: NS Blood_Rain Yes (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::yes_no_ranges::No:
+                case embark_assist::defs::yes_no_ranges::YES_NO_NO:
                     if (tile->blood_rain_full) {
                         if (trace) out.print("matcher::world_tile_match: NS Blood_Rain No (%i, %i)\n", x, y);
                         return false;
@@ -2525,38 +2567,38 @@ namespace embark_assist {
 
                 //  Syndrome Rain
                 switch (finder->syndrome_rain) {
-                case embark_assist::defs::syndrome_rain_ranges::NA:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::syndrome_rain_ranges::Any:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_ANY:
                     if (!tile->permanent_syndrome_rain_possible && !tile->temporary_syndrome_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: NS Syndrome_Rain Any (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::Permanent:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_PERMANENT:
                     if (!tile->permanent_syndrome_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: NS Syndrome_Rain Permanent (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::Temporary:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_TEMPORARY:
                     if (!tile->temporary_syndrome_rain_possible) {
                         if (trace) out.print("matcher::world_tile_match: NS Syndrome_Rain Temporary (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::Not_Permanent:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NOT_PERMANENT:
                     if (tile->permanent_syndrome_rain_full) {
                         if (trace) out.print("matcher::world_tile_match: NS Syndrome_Rain Not_Permanent (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::syndrome_rain_ranges::None:
+                case embark_assist::defs::syndrome_rain_ranges::SYNDROME_RAIN_NONE:
                     if (tile->permanent_syndrome_rain_full || tile->temporary_syndrome_rain_full) {
                         if (trace) out.print("matcher::world_tile_match: NS Syndrome_Rain None (%i, %i)\n", x, y);
                         return false;
@@ -2566,45 +2608,45 @@ namespace embark_assist {
 
                 //  Reanimating
                 switch (finder->reanimation) {
-                case embark_assist::defs::reanimation_ranges::NA:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_NA:
                     break;  //  No restriction
 
-                case embark_assist::defs::reanimation_ranges::Both:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_BOTH:
                     if (!tile->reanimating_possible || !tile->thralling_possible) {
                         if (trace) out.print("matcher::world_tile_match: NS Reanimating Both (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Any:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_ANY:
                     if (!tile->reanimating_possible && !tile->thralling_possible) {
                         if (trace) out.print("matcher::world_tile_match: NS Reanimating Any (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Thralling:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_THRALLING:
                     if (!tile->thralling_possible) {
                         if (trace) out.print("matcher::world_tile_match: NS Reanimating Thralling (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Reanimation:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_REANIMATION:
                     if (!tile->reanimating_possible) {
                         if (trace) out.print("matcher::world_tile_match:NS Reanimating Reanimating (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::Not_Thralling:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_NOT_THRALLING:
                     if (tile->thralling_full) {
                         if (trace) out.print("matcher::world_tile_match: NS Reanimating Not_Thralling (%i, %i)\n", x, y);
                         return false;
                     }
                     break;
 
-                case embark_assist::defs::reanimation_ranges::None:
+                case embark_assist::defs::reanimation_ranges::REANIMATION_NONE:
                     if (tile->reanimating_full || tile->thralling_full) {
                         if (trace) out.print("matcher::world_tile_match: NS Reanimating None (%i, %i)\n", x, y);
                         return false;
@@ -2835,7 +2877,7 @@ namespace embark_assist {
 
 void embark_assist::matcher::move_cursor(uint16_t x, uint16_t y) {
     //            color_ostream_proxy out(Core::getInstance().getConsole());
-    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     uint16_t original_x = screen->location.region_pos.x;
     uint16_t original_y = screen->location.region_pos.y;
 
@@ -2927,7 +2969,7 @@ uint16_t embark_assist::matcher::find(embark_assist::defs::match_iterators *iter
     embark_assist::defs::match_results *match_results) {
 
     color_ostream_proxy out(Core::getInstance().getConsole());
-    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     uint16_t x_end;
     uint16_t y_end;
     bool turn = false;
@@ -2941,7 +2983,7 @@ uint16_t embark_assist::matcher::find(embark_assist::defs::match_iterators *iter
         //
         count = 0;
         for (uint8_t i = 0; i < 3; i++) {
-            if (iterator->finder.evilness[i] == embark_assist::defs::evil_savagery_values::All) {
+            if (iterator->finder.evilness[i] == embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL) {
                 count++;
             }
         }
@@ -2953,7 +2995,7 @@ uint16_t embark_assist::matcher::find(embark_assist::defs::match_iterators *iter
 
         count = 0;
         for (uint8_t i = 0; i < 3; i++) {
-            if (iterator->finder.savagery[i] == embark_assist::defs::evil_savagery_values::All) {
+            if (iterator->finder.savagery[i] == embark_assist::defs::evil_savagery_values::EVIL_SAVAGERY_ALL) {
                 count++;
             }
         }
@@ -2964,19 +3006,19 @@ uint16_t embark_assist::matcher::find(embark_assist::defs::match_iterators *iter
         }
 
         if (iterator->finder.max_river < iterator->finder.min_river &&
-            iterator->finder.max_river != embark_assist::defs::river_ranges::NA) {
+            iterator->finder.max_river != embark_assist::defs::river_ranges::RIVER_NA) {
             out.printerr("matcher::find: Will never find any due to max river < min river\n");
             return 0;
         }
 
         if (iterator->finder.min_waterfall > 0 &&
-            iterator->finder.max_river == embark_assist::defs::river_ranges::None) {
+            iterator->finder.max_river == embark_assist::defs::river_ranges::RIVER_NONE) {
             out.printerr("matcher::find: Will never find any waterfalls with None as max river\n");
             return 0;
         }
 
         if (iterator->finder.soil_max < iterator->finder.soil_min &&
-            iterator->finder.soil_max != embark_assist::defs::soil_ranges::NA) {
+            iterator->finder.soil_max != embark_assist::defs::soil_ranges::SOIL_NA) {
             out.printerr("matcher::find: Will never find any matches with max soil < min soil\n");
             return 0;
         }
@@ -2988,7 +3030,7 @@ uint16_t embark_assist::matcher::find(embark_assist::defs::match_iterators *iter
         }
 
         if (iterator->finder.magma_max < iterator->finder.magma_min &&
-            iterator->finder.magma_max != embark_assist::defs::magma_ranges::NA) {
+            iterator->finder.magma_max != embark_assist::defs::magma_ranges::MAGMA_NA) {
             out.printerr("matcher::find: Will never find any matches with max magma < min magma\n");
             return 0;
         }
@@ -3000,7 +3042,7 @@ uint16_t embark_assist::matcher::find(embark_assist::defs::match_iterators *iter
         }
 
         if (iterator->finder.min_trees > iterator->finder.max_trees &&
-            iterator->finder.max_trees != embark_assist::defs::tree_ranges::NA) {
+            iterator->finder.max_trees != embark_assist::defs::tree_ranges::TREE_NA) {
             out.printerr("matcher::find: Will never find any matches with max trees < min trees\n");
             return 0;
         }
@@ -3024,14 +3066,14 @@ uint16_t embark_assist::matcher::find(embark_assist::defs::match_iterators *iter
 
             for (size_t i = 0; i < iterator->finder.neighbors.size(); i++) {
                 switch (iterator->finder.neighbors[i].present) {
-                case embark_assist::defs::present_absent_ranges::NA:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_NA:
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Present:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_PRESENT:
                     present_count++;
                     break;
 
-                case embark_assist::defs::present_absent_ranges::Absent:
+                case embark_assist::defs::present_absent_ranges::PRESENT_ABSENT_ABSENT:
                     absent_count++;
                     break;
                 }
