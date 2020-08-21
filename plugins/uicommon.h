@@ -162,6 +162,10 @@ inline string int_to_string(const int n)
 {
     return static_cast<ostringstream*>( &(ostringstream() << n) )->str();
 }
+inline string uint_to_string(const unsigned int n)
+{
+    return static_cast<ostringstream*>( &(ostringstream() << n) )->str();
+}
 
 static inline void set_to_limit(int &value, const int maximum, const int min = 0)
 {

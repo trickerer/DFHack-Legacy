@@ -10,6 +10,8 @@
 #include "modules/World.h"
 #include "MemAccess.h"
 
+#include "uicommon.h"
+
 //#include "df/world.h"
 
 using namespace DFHack;
@@ -53,7 +55,48 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-std::vector<std::string> descriptors = {
+//std::vector<std::string> descriptors = {
+//    "blob",        "quadruped",       "humanoid",     "silverfish",    "mayfly",        "dragonfly",   "damselfly",    "stonefly",
+//    "earwig",      "grasshopper",     "cricket",      "stick insect",  "cockroach",     "termite",     "mantis",       "louse",
+//    "thrips",      "aphid",           "cicada",       "assassin bug",  "wasp",          "hornet",      "tiger beetle", "ladybug",
+//    "weevil",      "darkling beetle", "click beetle", "firefly",       "scarab beetle", "stag beetle", "dung beetle",  "rhinoceros beetle",
+//    "rove beetle", "snakefly",        "lacewing",     "antlion larva", "mosquito",      "flea",        "scorpionfly",  "caddisfly",
+//    "butterfly",   "moth",            "caterpillar",  "maggot",        "spider",        "tarantula",   "scorpion",     "tick",
+//    "mite",        "shrimp",          "lobster",      "crab",          "nematode",      "snail",       "slug",         "earthworm",
+//    "leech",       "bristleworm",     "ribbon worm",  "flat worm",     "toad",          "frog",        "salamander",   "newt",
+//    "alligator",   "crocodile",       "lizard",       "chameleon",     "iguana",        "gecko",       "skink",        "gila monster",
+//    "monitor",     "serpent",         "viper",        "rattlesnake",   "cobra",         "python",      "anaconda",     "turtle",
+//    "tortoise",    "pterosaur",       "dimetrodon",   "sauropod",      "theropod",      "iguanodont",  "hadrosaurid",  "stegosaurid",
+//    "ceratopsid",  "ankylosaurid",    "duck",         "goose",         "swan",          "turkey",      "grouse",       "chicken",
+//    "quail",       "pheasant",        "gull",         "loon",          "grebe",         "albatross",   "petrel",       "penguin",
+//    "pelican",     "stork",           "vulture",      "flamingo",      "falcon",        "kestrel",     "condor",       "osprey",
+//    "buzzard",     "eagle",           "harrier",      "kite",          "crane",         "dove",        "pigeon",       "parrot",
+//    "cockatoo",    "cuckoo",          "nightjar",     "swift",         "hummingbird",   "kingfisher",  "hornbill",     "quetzal",
+//    "toucan",      "woodpecker",      "lyrebird",     "thornbill",     "honeyeater",    "oriole",      "fantail",      "shrike",
+//    "crow",        "raven",           "magpie",       "kinglet",       "lark",          "swallow",     "martin",       "bushtit",
+//    "warbler",     "thrush",          "oxpecker",     "starling",      "mockingbird",   "wren",        "nuthatch",     "sparrow",
+//    "tanager",     "cardinal",        "bunting",      "finch",         "titmouse",      "chickadee",   "waxwing",      "flycatcher",
+//    "opossum",     "koala",           "wombat",       "kangaroo",      "sloth",         "anteater",    "armadillo",    "squirrel",
+//    "marmot",      "beaver",          "gopher",       "mouse",         "porcupine",     "chinchilla",  "cavy",         "capybara",
+//    "rabbit",      "hare",            "lemur",        "loris",         "monkey",        "hedgehog",    "shrew",        "mole",
+//    "fruit bat",   "wolf",            "coyote",       "jackal",        "raccoon",       "coati",       "weasel",       "otter",
+//    "badger",      "skunk",           "bear",         "panda",         "panther",       "mongoose",    "hyena",        "civet",
+//    "walrus",      "pangolin",        "elephant",     "mammoth",       "horse",         "zebra",       "tapir",        "rhinoceros",
+//    "warthog",     "hippopotamus",    "camel",        "llama",         "giraffe",       "deer",        "moose",        "antelope",
+//    "sheep",       "goat",            "bison",        "buffalo",       "bull",          "ape",         "ant",          "bat",
+//    "owl",         "pig",             "bee",          "fly",           "hawk",          "jay",         "rat",          "fox",
+//    "cat",         "ass",             "elk"
+//};
+
+//std::vector<std::string> prefixes = {
+//    "FORGOTTEN_BEAST_",
+//    "TITAN_",
+//    "DEMON_",
+//    "NIGHT_CREATURE_",
+//    "HF"
+//};
+//
+std::string desc_arr[] = {
     "blob",        "quadruped",       "humanoid",     "silverfish",    "mayfly",        "dragonfly",   "damselfly",    "stonefly",
     "earwig",      "grasshopper",     "cricket",      "stick insect",  "cockroach",     "termite",     "mantis",       "louse",
     "thrips",      "aphid",           "cicada",       "assassin bug",  "wasp",          "hornet",      "tiger beetle", "ladybug",
@@ -85,15 +128,16 @@ std::vector<std::string> descriptors = {
     "owl",         "pig",             "bee",          "fly",           "hawk",          "jay",         "rat",          "fox",
     "cat",         "ass",             "elk"
 };
+std::vector<std::string> descriptors(desc_arr, desc_arr + sizeof(desc_arr)/sizeof(desc_arr[0]));
 
-std::vector<std::string> prefixes = {
+std::string pref_arr[] = {
     "FORGOTTEN_BEAST_",
     "TITAN_",
     "DEMON_",
     "NIGHT_CREATURE_",
     "HF"
 };
-
+std::vector<std::string> prefixes(pref_arr, pref_arr + sizeof(pref_arr)/sizeof(pref_arr[0]));
 
 DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_change_event event)
 {
@@ -107,7 +151,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
     std::vector<int> descriptorCount = std::vector<int>(descriptors.size());
 
-    auto version = World::GetPersistentData("AlreadyRenamedCreatures");
+    PersistentDataItem version = World::GetPersistentData("AlreadyRenamedCreatures");
     if (version.isValid() && version.ival(1) >= RENAMER_VERSION)
     {
         return CR_OK;
@@ -117,7 +161,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
     for (size_t i = 0; i < world->raws.creatures.all.size(); i++)
     {
-        auto creatureRaw = world->raws.creatures.all[i];
+        df::creature_raw* creatureRaw = world->raws.creatures.all[i];
         if (!creatureRaw->flags.is_set(df::enums::creature_raw_flags::GENERATED))
             continue;
         size_t minPos = std::string::npos;
@@ -148,7 +192,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
         if (foundIndex < 0)
             continue; //can't find a match.
 
-        auto descriptor = descriptors[foundIndex];
+        std::string descriptor = descriptors[foundIndex];
 
         for (size_t j = 0; j < descriptor.size(); j++)
         {
@@ -158,7 +202,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
                 descriptor[j] = toupper(descriptor[j]);
         }
 
-        auto prefix = prefixes[prefixIndex];
+        std::string prefix = prefixes[prefixIndex];
         if (prefix[prefix.length() - 1] != '_')
             prefix.append("_");
 
@@ -166,7 +210,8 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
         if (descriptorCount[foundIndex] > 0)
         {
-            creatureRaw->creature_id.append("_" + std::to_string(descriptorCount[foundIndex]));
+            //creatureRaw->creature_id.append("_" + std::to_string(descriptorCount[foundIndex]));
+            creatureRaw->creature_id.append("_" + int_to_string(descriptorCount[foundIndex]));
         }
         descriptorCount[foundIndex]++;
         creatureCount++;
@@ -196,7 +241,7 @@ command_result list_creatures(color_ostream &out, std::vector <std::string> & pa
     CoreSuspender suspend;
     for (size_t i = 0; i < world->raws.creatures.all.size(); i++)
     {
-        auto creatureRaw = world->raws.creatures.all[i];
+        df::creature_raw* creatureRaw = world->raws.creatures.all[i];
         if (!creatureRaw->flags.is_set(df::enums::creature_raw_flags::GENERATED))
             continue;
         out.print("%s",creatureRaw->creature_id.c_str());
@@ -224,7 +269,8 @@ command_result save_generated_raw(color_ostream &out, std::vector <std::string> 
     std::string pageName = "PROCEDURAL_FRIENDLY";
     size_t repeats = 128;
 
-    std::ofstream outputFile(fileName + ".txt", std::ios::out | std::ios::trunc);
+    std::string full_name = fileName + ".txt";
+    std::ofstream outputFile(full_name.c_str(), std::ios::out | std::ios::trunc);
 
     outputFile << fileName << endl << endl;
 
@@ -241,7 +287,7 @@ command_result save_generated_raw(color_ostream &out, std::vector <std::string> 
         {
             for (size_t rep = 0; rep < repeats; rep++)
             {
-                auto descriptor = descriptors[descIndex];
+                std::string descriptor = descriptors[descIndex];
 
                 for (size_t j = 0; j < descriptor.size(); j++)
                 {
@@ -251,13 +297,13 @@ command_result save_generated_raw(color_ostream &out, std::vector <std::string> 
                         descriptor[j] = toupper(descriptor[j]);
                 }
 
-                auto prefix = prefixes[prefIndex];
+                std::string prefix = prefixes[prefIndex];
                 if (prefix[prefix.length() - 1] != '_')
                     prefix.append("_");
 
                 std::string token = prefix + descriptor;
                 if (rep > 0)
-                    token.append("_" + std::to_string(rep));
+                    token.append("_" + uint_to_string(rep));
 
                 outputFile << "[CREATURE_GRAPHICS:" << token << "]" << endl;
                 outputFile << "    [DEFAULT:" << pageName << ":" << descIndex % pageWidth << ":" << descIndex / pageWidth << ":ADD_COLOR]" << endl;
