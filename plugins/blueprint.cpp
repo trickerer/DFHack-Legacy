@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <sstream>
 
-#include <Console.h>
-#include <PluginManager.h>
+#include "Console.h"
+#include "PluginManager.h"
 #include "LuaTools.h"
 
 #include "modules/Buildings.h"
@@ -564,7 +564,7 @@ void init_stream(ofstream &out, std::string basename, std::string target)
 {
     std::ostringstream out_path;
     out_path << basename << "-" << target << ".csv";
-    out.open(out_path.str(), ofstream::trunc);
+    out.open(out_path.str().c_str(), ofstream::trunc);
     out << "#" << target << endl;
 }
 
@@ -583,7 +583,7 @@ command_result do_transform(DFCoord start, DFCoord end, string name, uint32_t ph
     std::string parent_path = basename.substr(0, last_slash);
 
     // create output directory if it doesn't already exist
-    std::error_code ec;
+    //std::error_code ec;
     if (!Filesystem::mkdir_recursive(parent_path))
     {
         err << "could not create output directory: '" << parent_path << "'";
@@ -700,7 +700,7 @@ command_result blueprint(color_ostream &out, vector<string> &parameters)
         return CR_FAILURE;
     }
     DFCoord start (x, y, z);
-    DFCoord end (x + stoi(parameters[0]), y + stoi(parameters[1]), z + stoi(parameters[2]));
+    DFCoord end (x + atoi(parameters[0].c_str()), y + atoi(parameters[1].c_str()), z + atoi(parameters[2].c_str()));
     uint32_t option = 0;
     if (parameters.size() == 4)
     {
