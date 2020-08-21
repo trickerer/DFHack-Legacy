@@ -1,9 +1,9 @@
 
 // some headers required for a plugin. Nothing special, just the basics.
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
 
 #include <map>
 
@@ -83,8 +83,8 @@ struct ClothingRequirement
     std::string Serialize()
     {
         stringstream stream;
-        stream << ENUM_KEY_STR(job_type, jobType) << " ";
-        stream << ENUM_KEY_STR(item_type,itemType) << " ";
+        stream << ENUM_KEY_STR_SIMPLE(job_type, jobType) << " ";
+        stream << ENUM_KEY_STR_SIMPLE(item_type,itemType) << " ";
         stream << item_subtype << " ";
         stream << material_category.whole << " ";
         stream << needed_per_citizen;
@@ -96,9 +96,9 @@ struct ClothingRequirement
         stringstream stream(s);
         std::string loadedJob;
         stream >> loadedJob;
-        FOR_ENUM_ITEMS(job_type, job)
+        FOR_ENUM_ITEMS_SIMPLE(job_type, job)
         {
-            if (ENUM_KEY_STR(job_type, job) == loadedJob)
+            if (ENUM_KEY_STR_SIMPLE(job_type, job) == loadedJob)
             {
                 jobType = job;
                 break;
@@ -106,9 +106,9 @@ struct ClothingRequirement
         }
         std::string loadedItem;
         stream >> loadedItem;
-        FOR_ENUM_ITEMS(item_type, item)
+        FOR_ENUM_ITEMS_SIMPLE(item_type, item)
         {
-            if (ENUM_KEY_STR(item_type, item) == loadedItem)
+            if (ENUM_KEY_STR_SIMPLE(item_type, item) == loadedItem)
             {
                 itemType = item;
                 break;
@@ -252,9 +252,12 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
 
 static bool setItemFromName(std::string name, ClothingRequirement* requirement)
 {
-#define SEARCH_ITEM_RAWS(rawType, job, item) \
-for (auto& itemdef : world->raws.itemdefs.rawType) \
+//for (auto& itemdef : world->raws.itemdefs.rawType)
+#define SEARCH_ITEM_RAWS(rawType, job, item, st) \
+for (std::vector<df::st*>::iterator it = world->raws.itemdefs.rawType.begin(); \
+    it != world->raws.itemdefs.rawType.end(); ++it) \
 { \
+    df::st* itemdef = *it; \
     std::string fullName = itemdef->adjective.empty() ? itemdef->name : itemdef->adjective + " " + itemdef->name; \
     if (fullName == name) \
     { \
@@ -264,11 +267,11 @@ for (auto& itemdef : world->raws.itemdefs.rawType) \
         return true; \
     } \
 }
-    SEARCH_ITEM_RAWS(armor, MakeArmor, ARMOR);
-    SEARCH_ITEM_RAWS(gloves, MakeGloves, GLOVES);
-    SEARCH_ITEM_RAWS(shoes, MakeShoes, SHOES);
-    SEARCH_ITEM_RAWS(helms, MakeHelm, HELM);
-    SEARCH_ITEM_RAWS(pants, MakePants, PANTS);
+    SEARCH_ITEM_RAWS(armor, MakeArmor, ARMOR, itemdef_armorst);
+    SEARCH_ITEM_RAWS(gloves, MakeGloves, GLOVES, itemdef_glovesst);
+    SEARCH_ITEM_RAWS(shoes, MakeShoes, SHOES, itemdef_shoesst);
+    SEARCH_ITEM_RAWS(helms, MakeHelm, HELM, itemdef_helmst);
+    SEARCH_ITEM_RAWS(pants, MakePants, PANTS, itemdef_pantsst);
     return false;
 }
 
@@ -330,7 +333,7 @@ static bool armorFlagsMatch(BitArray<df::armor_general_flags> * flags, df::job_m
 
 static bool validateMaterialCategory(ClothingRequirement * requirement)
 {
-    auto itemDef = getSubtypeDef(requirement->itemType, requirement->item_subtype);
+    df::itemdef* itemDef = getSubtypeDef(requirement->itemType, requirement->item_subtype);
     switch (requirement->itemType)
     {
     case item_type::ARMOR:
@@ -396,7 +399,7 @@ command_result autoclothing(color_ostream &out, std::vector <std::string> & para
     {
         try
         {
-            newRequirement.needed_per_citizen = std::stoi(parameters[2]);
+            newRequirement.needed_per_citizen = atoi(parameters[2].c_str());
         }
         catch (const std::exception&)
         {
@@ -466,21 +469,30 @@ command_result autoclothing(color_ostream &out, std::vector <std::string> & para
 
 static void find_needed_clothing_items()
 {
-    for (auto& unit : world->units.active)
+    //for (auto& unit : world->units.active)
+    std::vector<df::unit*> const& u_vec = world->units.active;
+    for (std::vector<df::unit*>::const_iterator ci = u_vec.begin(); ci != u_vec.end(); ++ci)
     {
+        df::unit* unit = *ci;
         //obviously we don't care about illegal aliens.
         if (!isCitizen(unit))
             continue;
 
         //now check each clothing order to see what the unit might be missing.
-        for (auto& clothingOrder : clothingOrders)
+        //for (auto& clothingOrder : clothingOrders)
+        for (std::vector<ClothingRequirement>::iterator cit = clothingOrders.begin();
+            cit != clothingOrders.end(); ++cit)
         {
+            ClothingRequirement &clothingOrder = *cit;
             int alreadyOwnedAmount = 0;
 
             //looping through the items first, then clothing order might be a little faster, but this way is cleaner.
-            for (auto& ownedItem : unit->owned_items)
+            //for (auto& ownedItem : unit->owned_items)
+            for (std::vector<int32_t>::const_iterator citr = unit->owned_items.begin();
+                citr != unit->owned_items.end(); ++citr)
             {
-                auto item = findItemByID(ownedItem);
+                int32_t ownedItem = *citr;
+                df::item* item = findItemByID(ownedItem);
 
                 if (item->getType() != clothingOrder.itemType)
                     continue;
@@ -508,15 +520,22 @@ static void find_needed_clothing_items()
 
 static void remove_available_clothing()
 {
-    for (auto& item : world->items.all)
+    //for (auto& item : world->items.all)
+    for (std::vector<df::item*>::const_iterator ci = world->items.all.begin(); ci != world->items.all.end(); ++ci)
     {
+        df::item* item = *ci;
+
         //skip any owned items.
         if (getOwner(item))
             continue;
 
         //again, for each item, find if any clothing order matches
-        for (auto& clothingOrder : clothingOrders)
+        //for (auto& clothingOrder : clothingOrders)
+        for (std::vector<ClothingRequirement>::iterator cit = clothingOrders.begin();
+            cit != clothingOrders.end(); ++cit)
         {
+            ClothingRequirement& clothingOrder = *cit;
+
             if (item->getType() != clothingOrder.itemType)
                 continue;
             if (item->getSubtype() != clothingOrder.item_subtype)
@@ -535,20 +554,28 @@ static void remove_available_clothing()
 
 static void add_clothing_orders()
 {
-    for (auto& clothingOrder : clothingOrders)
+    //for (auto& clothingOrder : clothingOrders)
+    for (std::vector<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
     {
-        for (auto& orderNeeded : clothingOrder.total_needed_per_race)
+        ClothingRequirement& clothingOrder = *ci;
+        //for (auto& orderNeeded : clothingOrder.total_needed_per_race)
+        for (std::map<int16_t, int32_t>::iterator cit = clothingOrder.total_needed_per_race.begin();
+            cit != clothingOrder.total_needed_per_race.end(); ++cit)
         {
-            auto race = orderNeeded.first;
-            auto amount = orderNeeded.second;
+            std::map<int16_t, int32_t>::value_type& orderNeeded = *cit;
+            int16 race = orderNeeded.first;
+            int32 amount = orderNeeded.second;
             orderNeeded.second = 0; //once we get what we need, set it back to zero so we don't add it to further counts.
             //Previous operations can easily make this negative. That jus means we have more than we need already.
             if (amount <= 0)
                 continue;
 
             bool orderExistedAlready = false;
-            for (auto& managerOrder : world->manager_orders)
+            //for (auto& managerOrder : world->manager_orders)
+            for (std::vector<df::manager_order*>::const_iterator citr = world->manager_orders.begin();
+                citr != world->manager_orders.end(); ++citr)
             {
+                df::manager_order* managerOrder = *citr;
                 //Annoyingly, the manager orders store the job type for clothing orders, and actual item type is left at -1;
                 if (managerOrder->job_type != clothingOrder.jobType)
                     continue;
@@ -608,7 +635,7 @@ static void cleanup_state(color_ostream &out)
 
 static void init_state(color_ostream &out)
 {
-    auto enabled = World::GetPersistentData("autoclothing/enabled");
+    PersistentDataItem enabled = World::GetPersistentData("autoclothing/enabled");
     if (enabled.isValid() && enabled.ival(0) == 1)
     {
         out << "autoclothing enabled" << endl;
@@ -624,8 +651,10 @@ static void init_state(color_ostream &out)
     std::vector<PersistentDataItem> items;
     World::GetPersistentData(&items, "autoclothing/clothingItems");
 
-    for (auto& item : items)
+    //for (auto& item : items)
+    for (std::vector<PersistentDataItem>::iterator ci = items.begin(); ci != items.end(); ++ci)
     {
+        PersistentDataItem& item = *ci;
         if (!item.isValid())
             continue;
         ClothingRequirement req;
@@ -637,14 +666,16 @@ static void init_state(color_ostream &out)
 
 static void save_state(color_ostream &out)
 {
-    auto enabled = World::GetPersistentData("autoclothing/enabled");
+    PersistentDataItem enabled = World::GetPersistentData("autoclothing/enabled");
     if (!enabled.isValid())
         enabled = World::AddPersistentData("autoclothing/enabled");
     enabled.ival(0) = autoclothing_enabled;
 
-    for (auto& order : clothingOrders)
+    //for (auto& order : clothingOrders)
+    for (std::vector<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
     {
-        auto orderSave = World::AddPersistentData("autoclothing/clothingItems");
+        ClothingRequirement& order = *ci;
+        PersistentDataItem orderSave = World::AddPersistentData("autoclothing/clothingItems");
         orderSave.val() = order.Serialize();
     }
 
@@ -666,7 +697,7 @@ static void save_state(color_ostream &out)
     }
     for (size_t i = items.size(); i < clothingOrders.size(); i++)
     {
-        auto item = World::AddPersistentData("autoclothing/clothingItems");
+        PersistentDataItem item = World::AddPersistentData("autoclothing/clothingItems");
         item.val() = clothingOrders[i].Serialize();
     }
 }
