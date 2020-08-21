@@ -237,8 +237,12 @@ void AnimalHospital::calculateHospital(bool force, color_ostream &out) {
     // then walk the patient array and remark those spots as used.
 
     // If a patient is in an invalid spot, reassign it
-    for (df::building *building : world->buildings.all) {
-
+    std::vector<df::building*> const& ball_vec = world->buildings.all;
+    //for (df::building *building : world->buildings.all)
+    for (std::vector<df::building*>::const_iterator ci = ball_vec.begin(); ci != ball_vec.end(); ++ci)
+    {
+        df::building* building = *ci;
+        
         // Check that we're not comparing ourselves;
         if (building->id == this->id) {
             continue;
@@ -370,10 +374,10 @@ void AnimalHospital::processPatients(color_ostream &out) {
     // Where the magic happens
     for (vector<Patient*>::iterator patient = this->accepted_patients.begin(); patient != this->accepted_patients.end(); patient++) {
         int id = (*patient)->getID();
-        df::unit * real_unit = nullptr;
+        df::unit * real_unit = NULL;
         // Appears the health bits can get freed/realloced too -_-;, Find the unit from the main
         // index and check it there.
-        auto units = world->units.all;
+        std::vector<df::unit*> const& units = world->units.all;
 
         for ( size_t a = 0; a < units.size(); a++ ) {
             real_unit = units[a];
@@ -474,7 +478,8 @@ void tickHandler(color_ostream& out, void* data) {
     CoreSuspender suspend;
     int32_t own_race_id = df::global::ui->race_id;
     int32_t own_civ_id = df::global::ui->civ_id;
-    auto units = world->units.all;
+    //auto units = world->units.all;
+    std::vector<df::unit*> const& units = world->units.all;
 
     /**
      * Generate a list of animal hospitals on the map
@@ -508,7 +513,10 @@ void tickHandler(color_ostream& out, void* data) {
     // It's possible our hospital cache is empty, if so, simply copy it, and jump to the main logic
     if (!hospitals_cached && count_of_hospitals) {
         out.print("Populating hospital cache:\n");
-        for (df::building *current_hospital : hospitals_on_map) {
+        //for (df::building *current_hospital : hospitals_on_map)
+        for (std::vector<df::building*>::const_iterator ci = hospitals_on_map.begin(); ci != hospitals_on_map.end(); ++ci)
+        {
+            df::building *current_hospital = *ci;
             AnimalHospital * hospital = new AnimalHospital(current_hospital, out);
             out.print("  Found animal hospital %d  at x1: %d, y1: %d, z: %d from valid hospital list\n",
                         hospital->getID(),
@@ -735,7 +743,11 @@ processUnits:
                 // The master list handles all patients which are accepted
                 // Check if this is a unit we're already aware of
 
-                for (auto animal_hospital : animal_hospital_zones) {
+                //for (auto animal_hospital : animal_hospital_zones)
+                for (std::vector<AnimalHospital*>::const_iterator ci = animal_hospital_zones.begin();
+                    ci != animal_hospital_zones.end(); ++ci)
+                {
+                    AnimalHospital* animal_hospital = *ci;
                     if (animal_hospital->acceptPatient(unit->id, out)) {
                         out.print("Accepted patient %d at hospital %d\n", unit->id, animal_hospital->getID());
                         tracked_units.push_back(unit->id);
