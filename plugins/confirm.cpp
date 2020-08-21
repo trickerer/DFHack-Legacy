@@ -39,7 +39,8 @@ typedef std::set<df::interface_key> ikey_set;
 command_result df_confirm (color_ostream &out, vector <string> & parameters);
 
 struct conf_wrapper;
-static map<string, conf_wrapper*> confirmations;
+typedef map<string, conf_wrapper*> ConfirmMap;
+static ConfirmMap confirmations;
 string active_id;
 queue<string> cmds;
 
@@ -79,12 +80,13 @@ public:
 protected:
     static confirmation_base *active;
 };
-confirmation_base *confirmation_base::active = nullptr;
+confirmation_base *confirmation_base::active = NULL;
 
+typedef std::set<VMethodInterposeLinkBase*> HooksMap;
 struct conf_wrapper {
 private:
     bool enabled;
-    std::set<VMethodInterposeLinkBase*> hooks;
+    HooksMap hooks;
 public:
     conf_wrapper()
         :enabled(false)
@@ -94,12 +96,14 @@ public:
         if (!hooks.count(hook))
             hooks.insert(hook);
     }
-    bool apply (bool state) {
+    bool apply (bool state)
+    {
         if (state == enabled)
             return true;
-        for (auto hook : hooks)
+        //for (auto hook : hooks)
+        for (HooksMap::const_iterator cit = hooks.begin(); cit != hooks.end(); ++cit)
         {
-            if (!hook->apply(state))
+            if (!(*cit)->apply(state))
                 return false;
         }
         enabled = state;
@@ -111,8 +115,9 @@ public:
 namespace trade {
     static bool goods_selected (const std::vector<char> &selected)
     {
-        for (char c : selected)
-            if (c)
+        //for (char c : selected)
+        for (std::vector<char>::const_iterator c = selected.begin(); c != selected.end(); ++c)
+            if (*c)
                 return true;
         return false;
     }
@@ -136,9 +141,11 @@ namespace trade {
                 // check to see if item is in a container
                 // (if the container is not selected, it will be detected separately)
                 bool in_container = false;
-                for (auto ref : items[i]->general_refs)
+                //for (auto ref : items[i]->general_refs)
+                for (std::vector<df::general_ref*>::const_iterator ci = items[i]->general_refs.begin();
+                    ci != items[i]->general_refs.end(); ++ci)
                 {
-                    if (virtual_cast<df::general_ref_contained_in_itemst>(ref))
+                    if (virtual_cast<df::general_ref_contained_in_itemst>(*ci))
                     {
                         in_container = true;
                         break;
@@ -176,7 +183,7 @@ namespace conf_lua {
         if (out)
         {
             delete out;
-            out = nullptr;
+            out = NULL;
         }
         lua_close(l_state);
     }
@@ -202,20 +209,22 @@ namespace conf_lua {
         int get_ids (lua_State *L)
         {
             lua_newtable(L);
-            for (auto item : confirmations)
-                Lua::TableInsert(L, item.first, true);
+            //for (auto item : confirmations)
+            for (ConfirmMap::const_iterator ci = confirmations.begin(); ci != confirmations.end(); ++ci)
+                Lua::TableInsert(L, ci->first, true);
             return 1;
         }
         int get_conf_data (lua_State *L)
         {
             lua_newtable(L);
             int i = 1;
-            for (auto item : confirmations)
+            //for (auto item : confirmations)
+            for (ConfirmMap::const_iterator ci = confirmations.begin(); ci != confirmations.end(); ++ci)
             {
                 Lua::Push(L, i++);
                 lua_newtable(L);
-                Lua::TableInsert(L, "id", item.first);
-                Lua::TableInsert(L, "enabled", item.second->is_enabled());
+                Lua::TableInsert(L, "id", ci->first);
+                Lua::TableInsert(L, "enabled", ci->second->is_enabled());
                 lua_settable(L, -3);
             }
             return 1;
@@ -271,7 +280,7 @@ public:
         state = s;
         if (s == INACTIVE) {
             active_id = "";
-            confirmation_base::active = nullptr;
+            confirmation_base::active = NULL;
         }
         else {
             active_id = get_id();
@@ -282,8 +291,10 @@ public:
     bool feed (ikey_set *input) {
         if (state == INACTIVE)
         {
-            for (df::interface_key key : *input)
+            //for (df::interface_key key : *input)
+            for (ikey_set::const_iterator ci = input->begin(); ci != input->end(); ++ci)
             {
+                df::interface_key key = *ci;
                 if (intercept_key(key))
                 {
                     if (set_state(ACTIVE))
@@ -325,8 +336,9 @@ public:
         {
             split_string(&lines, get_message(), "\n");
             size_t max_length = 40;
-            for (string line : lines)
-                max_length = std::max(max_length, line.size());
+            //for (string line : lines)
+            for (std::vector<std::string>::const_iterator ci = lines.begin(); ci != lines.end(); ++ci)
+                max_length = std::max<size_t>(max_length, (*ci).size());
             int width = max_length + 4;
             int height = lines.size() + 4;
             int x1 = (gps->dimx / 2) - (width / 2);
@@ -422,8 +434,9 @@ int conf_register(confirmation<T> *c, const vector<VMethodInterposeLinkBase*> &h
 {
     conf_wrapper *w = new conf_wrapper();
     confirmations[c->get_id()] = w;
-    for (auto hook : hooks)
-        w->add_hook(hook);
+    //for (auto hook : hooks)
+    for (vector<VMethodInterposeLinkBase*>::const_iterator ci = hooks.begin(); ci != hooks.end(); ++ci)
+        w->add_hook(*ci);
     return 0;
 }
 
@@ -451,11 +464,19 @@ struct cls##_hooks : cls::screen_type { \
 IMPLEMENT_VMETHOD_INTERPOSE_PRIO(cls##_hooks, feed, prio); \
 IMPLEMENT_VMETHOD_INTERPOSE_PRIO(cls##_hooks, render, prio); \
 IMPLEMENT_VMETHOD_INTERPOSE_PRIO(cls##_hooks, key_conflict, prio); \
-static int conf_register_##cls = conf_register(&cls##_instance, {\
+static VMethodInterposeLinkBase* cls##_link_bases[] = { \
     &INTERPOSE_HOOK(cls##_hooks, feed), \
     &INTERPOSE_HOOK(cls##_hooks, render), \
     &INTERPOSE_HOOK(cls##_hooks, key_conflict), \
-});
+}; \
+static int conf_register_##cls = conf_register(&cls##_instance, \
+    std::vector<VMethodInterposeLinkBase*>(cls##_link_bases, \
+    cls##_link_bases + sizeof(cls##_link_bases)/sizeof(cls##_link_bases[0])));
+//static int conf_register_##cls = conf_register(&cls##_instance, {\
+//    &INTERPOSE_HOOK(cls##_hooks, feed), \
+//    &INTERPOSE_HOOK(cls##_hooks, render), \
+//    &INTERPOSE_HOOK(cls##_hooks, key_conflict), \
+//});
 
 #define DEFINE_CONFIRMATION(cls, screen) \
     class confirmation_##cls : public confirmation<df::screen> { \
@@ -502,9 +523,10 @@ DFhackCExport command_result plugin_enable (color_ostream &out, bool enable)
 {
     if (is_enabled != enable)
     {
-        for (auto c : confirmations)
+        //for (auto c : confirmations)
+        for (ConfirmMap::const_iterator ci = confirmations.begin(); ci != confirmations.end(); ++ci)
         {
-            if (!c.second->apply(enable))
+            if (!ci->second->apply(enable))
                 return CR_FAILURE;
         }
         is_enabled = enable;
@@ -522,9 +544,10 @@ DFhackCExport command_result plugin_shutdown (color_ostream &out)
         return CR_FAILURE;
     conf_lua::cleanup();
 
-    for (auto item : confirmations)
+    //for (auto item : confirmations)
+    for (ConfirmMap::const_iterator ci = confirmations.begin(); ci != confirmations.end(); ++ci)
     {
-        delete item.second;
+        delete ci->second;
     }
     confirmations.clear();
 
@@ -544,12 +567,13 @@ DFhackCExport command_result plugin_onupdate (color_ostream &out)
 bool set_conf_state (string name, bool state)
 {
     bool found = false;
-    for (auto it : confirmations)
+    //for (auto it : confirmations)
+    for (ConfirmMap::const_iterator ci = confirmations.begin(); ci != confirmations.end(); ++ci)
     {
-        if (it.first == name)
+        if (ci->first == name)
         {
             found = true;
-            it.second->apply(state);
+            ci->second->apply(state);
         }
     }
 
@@ -575,20 +599,24 @@ command_result df_confirm (color_ostream &out, vector <string> & parameters)
     if (parameters.empty() || in_vector(parameters, "help") || in_vector(parameters, "status"))
     {
         out << "Available options: \n";
-        for (auto it : confirmations)
-            out.print("  %20s: %s\n", it.first.c_str(), it.second->is_enabled() ? "enabled" : "disabled");
+        //for (auto it : confirmations)
+        for (ConfirmMap::const_iterator ci = confirmations.begin(); ci != confirmations.end(); ++ci)
+            out.print("  %20s: %s\n", ci->first.c_str(), ci->second->is_enabled() ? "enabled" : "disabled");
         return CR_OK;
     }
-    for (string param : parameters)
+    //for (string param : parameters)
+    for (vector<string>::const_iterator cit = parameters.begin(); cit != parameters.end(); ++cit)
     {
+        string param = *cit;
         if (param == "enable")
             state = true;
         else if (param == "disable")
             state = false;
         else if (param == "all")
         {
-            for (auto it : confirmations)
-                it.second->apply(state);
+            //for (auto it : confirmations)
+            for (ConfirmMap::const_iterator ci = confirmations.begin(); ci != confirmations.end(); ++ci)
+                ci->second->apply(state);
         }
         else
             enable_conf(out, param, state);
