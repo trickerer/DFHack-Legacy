@@ -5,9 +5,9 @@
 
 
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
 
 #include <vector>
 #include <algorithm>
@@ -23,7 +23,7 @@
 
 // DF data structure definition headers
 #include "DataDefs.h"
-#include <MiscUtils.h>
+#include "MiscUtils.h"
 
 #include <df/ui.h>
 #include <df/world.h>
@@ -623,7 +623,7 @@ static void init_state()
     std::vector<PersistentDataItem> items;
     World::GetPersistentData(&items, "labormanager/2.0/labors/", true);
 
-    for (auto p = items.begin(); p != items.end(); p++)
+    for (std::vector<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
     {
         string key = p->key();
         df::unit_labor labor = (df::unit_labor) atoi(key.substr(strlen("labormanager/2.0/labors/")).c_str());
@@ -661,7 +661,7 @@ static void generate_labor_to_skill_map()
     for (int i = 0; i <= ENUM_LAST_ITEM(unit_labor); i++)
         labor_to_skill[i] = job_skill::NONE;
 
-    FOR_ENUM_ITEMS(job_skill, skill)
+    FOR_ENUM_ITEMS_SIMPLE(job_skill, skill)
     {
         int labor = ENUM_ATTR(job_skill, labor, skill);
         if (labor != unit_labor::NONE)
@@ -907,7 +907,7 @@ public:
 
     ~AutoLaborManager()
     {
-        for (auto d = dwarf_info.begin(); d != dwarf_info.end(); d++)
+        for (std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
         {
             delete (*d);
         }
@@ -968,7 +968,7 @@ private:
                 debug("WARN(labormanager): Attempted to %s dwarf %s with ineligible labor %s\n",
                     value ? "set" : "unset",
                     dwarf->dwarf->name.first_name.c_str(),
-                    ENUM_KEY_STR(unit_labor, labor).c_str());
+                    ENUM_KEY_STR_SIMPLE(unit_labor, labor).c_str());
                 return;
             }
             bool old = dwarf->dwarf->status.labors[labor];
@@ -992,8 +992,10 @@ private:
         int worker = -1;
         int bld = -1;
 
-        for (auto ref : j->general_refs)
+        //for (auto ref : j->general_refs)
+        for (std::vector<df::general_ref*>::const_iterator ci = j->general_refs.begin(); ci != j->general_refs.end(); ++ci)
         {
+            df::general_ref* ref = *ci;
             if (ref->getType() == df::general_ref_type::UNIT_WORKER)
                 worker = ((df::general_ref_unit_workerst *)ref)->unit_id;
             if (ref->getType() == df::general_ref_type::BUILDING_HOLDER)
@@ -1052,10 +1054,10 @@ private:
         trader_requested = false;
         labors_changed = false;
 
-        for (auto b = world->buildings.all.begin(); b != world->buildings.all.end(); b++)
+        for (std::vector<df::building*>::const_iterator b = world->buildings.all.begin(); b != world->buildings.all.end(); b++)
         {
             df::building *build = *b;
-            auto type = build->getType();
+            df::building_type type = build->getType();
             if (building_type::Workshop == type)
             {
                 df::workshop_type subType = (df::workshop_type)build->getSubtype();
@@ -1147,8 +1149,8 @@ private:
         F(in_building); F(construction);
 #undef F
 
-        auto& v = world->items.all;
-        for (auto i = v.begin(); i != v.end(); i++)
+        std::vector<df::item*> const& v = world->items.all;
+        for (std::vector<df::item*>::const_iterator i = v.begin(); i != v.end(); i++)
         {
             df::item* item = *i;
 
@@ -1189,7 +1191,8 @@ private:
             process_job(j);
         }
 
-        for (auto jp = world->jobs.postings.begin(); jp != world->jobs.postings.end(); jp++)
+        for (std::vector<df::job_handler::T_postings*>::const_iterator jp =
+            world->jobs.postings.begin(); jp != world->jobs.postings.end(); jp++)
         {
             if ((*jp)->flags.bits.dead)
                 continue;
@@ -1204,7 +1207,7 @@ private:
         state_count.clear();
         state_count.resize(NUM_STATE);
 
-        for (auto u = world->units.active.begin(); u != world->units.active.end(); ++u)
+        for (std::vector<df::unit*>::const_iterator u = world->units.active.begin(); u != world->units.active.end(); ++u)
         {
             df::unit* cre = *u;
 
@@ -1280,7 +1283,7 @@ private:
 
                 // check to see if dwarf has minor children
 
-                for (auto u2 = world->units.active.begin(); u2 != world->units.active.end(); ++u2)
+                for (std::vector<df::unit*>::const_iterator u2 = world->units.active.begin(); u2 != world->units.active.end(); ++u2)
                 {
                     if ((*u2)->relationship_ids[df::unit_relationship_type::Mother] == dwarf->dwarf->id &&
                         Units::isActive(*u2) &&
@@ -1324,7 +1327,8 @@ private:
                 bool is_migrant = false;
                 dwarf_state state = OTHER;
 
-                for (auto p = dwarf->dwarf->status.misc_traits.begin(); p < dwarf->dwarf->status.misc_traits.end(); p++)
+                for (std::vector<df::unit_misc_trait*>::const_iterator p =
+                    dwarf->dwarf->status.misc_traits.begin(); p < dwarf->dwarf->status.misc_traits.end(); p++)
                 {
                     if ((*p)->id == misc_trait_type::Migrant)
                         is_migrant = true;
@@ -1400,7 +1404,7 @@ private:
 
                 dwarf->unmanaged_labors_assigned = 0;
 
-                FOR_ENUM_ITEMS(unit_labor, l)
+                FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
                 {
                     if (l == df::unit_labor::NONE)
                         continue;
@@ -1454,7 +1458,7 @@ private:
 
                 int high_skill = 0;
 
-                FOR_ENUM_ITEMS(unit_labor, labor)
+                FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
                 {
                     if (labor == df::unit_labor::NONE || labor_infos[labor].is_unmanaged())
                         continue;
@@ -1462,8 +1466,8 @@ private:
                     df::job_skill skill = labor_to_skill[labor];
                     if (skill != df::job_skill::NONE)
                     {
-                        int    skill_level = Units::getNominalSkill(dwarf->dwarf, skill, false);
-                        high_skill = std::max(high_skill, skill_level);
+                        int skill_level = Units::getNominalSkill(dwarf->dwarf, skill, false);
+                        high_skill = std::max<int>(high_skill, skill_level);
                     }
                 }
 
@@ -1474,7 +1478,7 @@ private:
 
                 if (dwarf->clear_all)
                 {
-                    FOR_ENUM_ITEMS(unit_labor, labor)
+                    FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
                     {
                         if (labor == unit_labor::NONE || labor_infos[labor].is_unmanaged())
                             continue;
@@ -1497,7 +1501,7 @@ private:
     void release_dwarf_list()
     {
         while (!dwarf_info.empty()) {
-            auto d = dwarf_info.begin();
+            std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin();
             delete *d;
             dwarf_info.erase(d);
         }
@@ -1564,7 +1568,8 @@ private:
         if (labor == df::unit_labor::BUTCHER || labor == df::unit_labor::HAUL_ANIMALS || labor == df::unit_labor::CUTWOOD)
         {
             int nature = 0;
-            for (auto i = d->dwarf->status.current_soul->personality.values.begin();
+            for (std::vector<df::unit_personality::T_values*>::const_iterator i =
+                d->dwarf->status.current_soul->personality.values.begin();
                 i != d->dwarf->status.current_soul->personality.values.end();
                 i++)
             {
@@ -1582,9 +1587,9 @@ private:
 
         if (labor == df::unit_labor::CUTWOOD)
         {
-            if (auto culture = df::cultural_identity::find(d->dwarf->cultural_identity))
+            if (df::cultural_identity* culture = df::cultural_identity::find(d->dwarf->cultural_identity))
             {
-                auto ethics = culture->ethic[df::ethic_type::KILL_PLANT];
+                df::ethic_response ethics = culture->ethic[df::ethic_type::KILL_PLANT];
                 if (ethics != df::ethic_response::NOT_APPLICABLE && ethics != df::ethic_response::REQUIRED)
                     score += 10000 * (df::ethic_response::ACCEPTABLE - ethics);
             }
@@ -1618,7 +1623,7 @@ public:
 
         trader_requested = false;
 
-        FOR_ENUM_ITEMS(unit_labor, l)
+        FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
         {
             if (l == df::unit_labor::NONE)
                 continue;
@@ -1696,7 +1701,7 @@ public:
 
         // add entries for vehicle hauling
 
-        for (auto v = world->vehicles.all.begin(); v != world->vehicles.all.end(); v++)
+        for (std::vector<df::vehicle*>::const_iterator v = world->vehicles.all.begin(); v != world->vehicles.all.end(); v++)
             if ((*v)->route_id != -1)
                 labor_needed[df::unit_labor::HANDLE_VEHICLES]++;
 
@@ -1709,7 +1714,8 @@ public:
             (isOptionEnabled(CF_ALLOW_HUNTING) && has_butchers) ? 1 : 0;
 
         /* add animal trainers */
-        for (auto a = df::global::ui->equipment.training_assignments.begin();
+        for (std::vector<df::training_assignment*>::const_iterator a =
+            df::global::ui->equipment.training_assignments.begin();
             a != df::global::ui->equipment.training_assignments.end();
             a++)
         {
@@ -1719,7 +1725,7 @@ public:
 
         /* set requirements to zero for labors with currently idle dwarfs, and remove from requirement dwarfs actually working */
 
-        FOR_ENUM_ITEMS(unit_labor, l) {
+        FOR_ENUM_ITEMS_SIMPLE(unit_labor, l) {
             if (l == df::unit_labor::NONE)
                 continue;
 
@@ -1730,10 +1736,10 @@ public:
                 labor_needed[l] = max(0, labor_needed[l] - labor_in_use[l]);
 
                 if (default_labor_infos[l].tool != TOOL_NONE)
-                    labor_needed[l] = std::min(labor_needed[l], tool_count[default_labor_infos[l].tool] - tool_in_use[default_labor_infos[l].tool]);
+                    labor_needed[l] = std::min<int>(labor_needed[l], tool_count[default_labor_infos[l].tool] - tool_in_use[default_labor_infos[l].tool]);
 
                 if (print_debug && before != labor_needed[l])
-                    out.print("labor %s reduced from %d to %d\n", ENUM_KEY_STR(unit_labor, l).c_str(), before, labor_needed[l]);
+                    out.print("labor %s reduced from %d to %d\n", ENUM_KEY_STR_SIMPLE(unit_labor, l).c_str(), before, labor_needed[l]);
             }
             else
             {
@@ -1775,9 +1781,9 @@ public:
                 if (best_score > INT_MIN)
                 {
                     if (print_debug)
-                        out.print("LABORMANAGER: assign \"%s\" labor %s score=%d (priority food)\n", (*bestdwarf)->dwarf->name.first_name.c_str(), ENUM_KEY_STR(unit_labor, df::unit_labor::HAUL_FOOD).c_str(), best_score);
+                        out.print("LABORMANAGER: assign \"%s\" labor %s score=%d (priority food)\n", (*bestdwarf)->dwarf->name.first_name.c_str(), ENUM_KEY_STR_SIMPLE(unit_labor, df::unit_labor::HAUL_FOOD).c_str(), best_score);
 
-                    FOR_ENUM_ITEMS(unit_labor, l)
+                    FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
                     {
                         if (l == df::unit_labor::NONE)
                             continue;
@@ -1800,9 +1806,9 @@ public:
 
         if (print_debug)
         {
-            for (auto i = labor_needed.begin(); i != labor_needed.end(); i++)
+            for (std::map<df::unit_labor,int>::const_iterator i = labor_needed.begin(); i != labor_needed.end(); i++)
             {
-                out.print("labor_needed [%s] = %d, busy = %d, outside = %d, idle = %d\n", ENUM_KEY_STR(unit_labor, i->first).c_str(), i->second,
+                out.print("labor_needed [%s] = %d, busy = %d, outside = %d, idle = %d\n", ENUM_KEY_STR_SIMPLE(unit_labor, i->first).c_str(), i->second,
                     labor_infos[i->first].busy_dwarfs, labor_outside[i->first], labor_infos[i->first].idle_dwarfs);
             }
         }
@@ -1811,7 +1817,7 @@ public:
         priority_queue<pair<int, df::unit_labor>> pq;
         priority_queue<pair<int, df::unit_labor>> pq2;
 
-        for (auto i = labor_needed.begin(); i != labor_needed.end(); i++)
+        for (std::map<df::unit_labor,int>::iterator i = labor_needed.begin(); i != labor_needed.end(); i++)
         {
             df::unit_labor l = i->first;
             if (l == df::unit_labor::NONE || labor_infos[l].is_unmanaged())
@@ -1855,7 +1861,7 @@ public:
             av--;
 
             if (print_debug)
-                out.print("Will assign: %s priority %d (%d)\n", ENUM_KEY_STR(unit_labor, labor).c_str(), priority, to_assign[labor]);
+                out.print("Will assign: %s priority %d (%d)\n", ENUM_KEY_STR_SIMPLE(unit_labor, labor).c_str(), priority, to_assign[labor]);
 
             if (--labor_needed[labor] > 0)
             {
@@ -1893,7 +1899,7 @@ public:
             int best_score = INT_MIN;
             df::unit_labor best_labor = df::unit_labor::NONE;
 
-            for (auto j = to_assign.begin(); j != to_assign.end(); j++)
+            for (std::map<df::unit_labor,int>::const_iterator j = to_assign.begin(); j != to_assign.end(); j++)
             {
                 if (j->second <= 0)
                     continue;
@@ -1920,9 +1926,9 @@ public:
                 break;
 
             if (print_debug)
-                out.print("assign \"%s\" labor %s score=%d\n", (*bestdwarf)->dwarf->name.first_name.c_str(), ENUM_KEY_STR(unit_labor, best_labor).c_str(), best_score);
+                out.print("assign \"%s\" labor %s score=%d\n", (*bestdwarf)->dwarf->name.first_name.c_str(), ENUM_KEY_STR_SIMPLE(unit_labor, best_labor).c_str(), best_score);
 
-            FOR_ENUM_ITEMS(unit_labor, l)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
             {
                 if (l == df::unit_labor::NONE)
                     continue;
@@ -1943,7 +1949,7 @@ public:
                             j = (*bestdwarf)->dwarf->job.current_job->job_type;
 
                         if (print_debug)
-                            out.print("LABORMANAGER: asking %s to pick up tools, current job %s\n", (*bestdwarf)->dwarf->name.first_name.c_str(), ENUM_KEY_STR(job_type, j).c_str());
+                            out.print("LABORMANAGER: asking %s to pick up tools, current job %s\n", (*bestdwarf)->dwarf->name.first_name.c_str(), ENUM_KEY_STR_SIMPLE(job_type, j).c_str());
 
                         (*bestdwarf)->dwarf->military.pickup_flags.bits.update = true;
                         labors_changed = true;
@@ -1977,11 +1983,11 @@ public:
             available_dwarfs.erase(bestdwarf);
         }
 
-        for (auto d = busy_dwarfs.begin(); d != busy_dwarfs.end(); d++)
+        for (std::list<dwarf_info_t*>::const_iterator d = busy_dwarfs.begin(); d != busy_dwarfs.end(); d++)
         {
             int current_score = score_labor(*d, (*d)->using_labor);
 
-            FOR_ENUM_ITEMS(unit_labor, l)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
             {
                 if (l == df::unit_labor::NONE || labor_infos[l].is_unmanaged())
                     continue;
@@ -2019,7 +2025,7 @@ public:
 
         dwarf_info_t* canary_dwarf = 0;
 
-        for (auto di = busy_dwarfs.begin(); di != busy_dwarfs.end(); di++)
+        for (std::list<dwarf_info_t*>::const_iterator di = busy_dwarfs.begin(); di != busy_dwarfs.end(); di++)
             if (!(*di)->clear_all)
             {
                 canary_dwarf = *di;
@@ -2029,7 +2035,7 @@ public:
         if (canary_dwarf)
         {
 
-            FOR_ENUM_ITEMS(unit_labor, l)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
             {
                 if (l >= df::unit_labor::HAUL_STONE && l <= df::unit_labor::HAUL_ANIMALS &&
                     canary & (1 << l) &&
@@ -2066,9 +2072,9 @@ public:
         if (print_debug)
             out.print("After assignment, %zu dwarfs left over\n", available_dwarfs.size());
 
-        for (auto d = available_dwarfs.begin(); d != available_dwarfs.end(); d++)
+        for (std::list<dwarf_info_t*>::const_iterator d = available_dwarfs.begin(); d != available_dwarfs.end(); d++)
         {
-            FOR_ENUM_ITEMS(unit_labor, l)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
             {
                 if (l == df::unit_labor::NONE || labor_infos[l].is_unmanaged())
                     continue;
@@ -2085,13 +2091,13 @@ public:
         }
 
         /* check for dwarfs assigned no labors and assign them the bucket list if there are */
-        for (auto d = dwarf_info.begin(); d != dwarf_info.end(); d++)
+        for (std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
         {
             if ((*d)->state == CHILD)
                 continue;
 
             bool any = false;
-            FOR_ENUM_ITEMS(unit_labor, l)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
             {
                 if (l == df::unit_labor::NONE)
                     continue;
@@ -2109,7 +2115,7 @@ public:
 
             if (any) continue;
 
-            FOR_ENUM_ITEMS(unit_labor, l)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
             {
                 if (l == df::unit_labor::NONE || labor_infos[l].is_unmanaged())
                     continue;
@@ -2122,7 +2128,7 @@ public:
 
         /* set reequip on any dwarfs who are carrying tools needed by others */
 
-        for (auto d = dwarf_info.begin(); d != dwarf_info.end(); d++)
+        for (std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
         {
             if ((*d)->dwarf->job.current_job && (*d)->dwarf->job.current_job->job_type == df::job_type::PickupEquipment)
                 continue;
@@ -2130,7 +2136,7 @@ public:
             if ((*d)->dwarf->military.pickup_flags.bits.update)
                 continue;
 
-            FOR_ENUM_ITEMS(unit_labor, l)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, l)
             {
                 if (l == df::unit_labor::NONE || labor_infos[l].is_unmanaged())
                     continue;
@@ -2151,7 +2157,7 @@ public:
                         j = (*d)->dwarf->job.current_job->job_type;
 
                     if (print_debug)
-                        out.print("LABORMANAGER: asking %s to %s tools, current job %s, %d %d \n", (*d)->dwarf->name.first_name.c_str(), (has_tool) ? "drop" : "pick up", ENUM_KEY_STR(job_type, j).c_str(), has_tool, needs_tool);
+                        out.print("LABORMANAGER: asking %s to %s tools, current job %s, %d %d \n", (*d)->dwarf->name.first_name.c_str(), (has_tool) ? "drop" : "pick up", ENUM_KEY_STR_SIMPLE(job_type, j).c_str(), has_tool, needs_tool);
 
                     (*d)->dwarf->military.pickup_flags.bits.update = true;
                     labors_changed = true;
@@ -2225,11 +2231,11 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
 
 void print_labor(df::unit_labor labor, color_ostream &out)
 {
-    string labor_name = ENUM_KEY_STR(unit_labor, labor);
+    string labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
     out << labor_name << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
-    const auto& labor_info = labor_infos[labor];
+    labor_info& labor_info = labor_infos[labor];
     if (labor_info.is_unmanaged())
     {
         out << "UNMANAGED";
@@ -2254,9 +2260,9 @@ df::unit_labor lookup_labor_by_name(std::string name)
     // We should accept incorrect casing, there is no ambiguity.
     std::transform(name.begin(), name.end(), name.begin(), ::toupper);
 
-    FOR_ENUM_ITEMS(unit_labor, test_labor)
+    FOR_ENUM_ITEMS_SIMPLE(unit_labor, test_labor)
     {
-        if (name == ENUM_KEY_STR(unit_labor, test_labor))
+        if (name == ENUM_KEY_STR_SIMPLE(unit_labor, test_labor))
         {
             return test_labor;
         }
@@ -2414,7 +2420,7 @@ command_result labormanager(color_ostream &out, std::vector <std::string> & para
 
         if (parameters[0] == "list")
         {
-            FOR_ENUM_ITEMS(unit_labor, labor)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
             {
                 if (labor == unit_labor::NONE)
                     continue;

@@ -186,7 +186,7 @@ static df::unit_labor workshop_build_labor[] =
 
 static df::building* get_building_from_job(df::job* j)
 {
-    for (auto r = j->general_refs.begin(); r != j->general_refs.end(); r++)
+    for (std::vector<df::general_ref*>::const_iterator r = j->general_refs.begin(); r != j->general_refs.end(); r++)
     {
         if ((*r)->getType() == df::general_ref_type::BUILDING_HOLDER)
         {
@@ -209,7 +209,8 @@ static df::unit_labor construction_build_labor(df::building_actual* b)
     // Must check use mode b/c buildings may have items in them that are not part of the building
 
     df::item* i = 0;
-    for (auto p = b->contained_items.begin(); p != b->contained_items.end(); p++)
+    for (std::vector<df::building_actual::T_contained_items*>::const_iterator p =
+        b->contained_items.begin(); p != b->contained_items.end(); p++)
         if ((b->construction_stage > 0 && (*p)->use_mode == 2) ||
             (b->construction_stage == 0 && (*p)->use_mode == 0))
             i = (*p)->item;
@@ -254,7 +255,7 @@ public:
         if (j->job_type == df::job_type::StoreItemInStockpile && j->item_subtype != -1)
             return (df::unit_labor) j->item_subtype;
 
-        for (auto i = j->items.begin(); i != j->items.end(); i++)
+        for (std::vector<df::job_item_ref*>::const_iterator i = j->items.begin(); i != j->items.end(); i++)
         {
             if ((*i)->role == 7)
             {
@@ -265,7 +266,7 @@ public:
 
         if (item && item->flags.bits.container)
         {
-            for (auto a = item->general_refs.begin(); a != item->general_refs.end(); a++)
+            for (std::vector<df::general_ref*>::const_iterator a = item->general_refs.begin(); a != item->general_refs.end(); a++)
             {
                 if ((*a)->getType() == df::general_ref_type::CONTAINS_ITEM)
                 {
@@ -398,7 +399,7 @@ public:
         }
 
         debug("LABORMANAGER: Cannot deduce labor for construct building job of type %s\n",
-            ENUM_KEY_STR(building_type, bld->getType()).c_str());
+            ENUM_KEY_STR_SIMPLE(building_type, bld->getType()).c_str());
         debug_pause();
 
         return df::unit_labor::NONE;
@@ -458,7 +459,7 @@ public:
         case df::building_type::Well:
         case df::building_type::Windmill:
         {
-            auto b = (df::building_actual*) bld;
+            df::building_actual* b = (df::building_actual*) bld;
             return construction_build_labor(b);
         }
         break;
@@ -513,7 +514,7 @@ public:
         }
 
         debug("LABORMANAGER: Cannot deduce labor for destroy building job of type %s\n",
-            ENUM_KEY_STR(building_type, bld->getType()).c_str());
+            ENUM_KEY_STR_SIMPLE(building_type, bld->getType()).c_str());
         debug_pause();
 
         return df::unit_labor::NONE;
@@ -562,7 +563,7 @@ public:
                     return df::unit_labor::LEATHER;
                 default:
                     debug("LABORMANAGER: Cannot deduce labor for make crafts job, item type %s\n",
-                        ENUM_KEY_STR(item_type, jobitem).c_str());
+                        ENUM_KEY_STR_SIMPLE(item_type, jobitem).c_str());
                     debug_pause();
                     return df::unit_labor::NONE;
                 }
@@ -582,7 +583,7 @@ public:
                 return metaltype;
             default:
                 debug("LABORMANAGER: Cannot deduce labor for make job, workshop type %s\n",
-                    ENUM_KEY_STR(workshop_type, type).c_str());
+                    ENUM_KEY_STR_SIMPLE(workshop_type, type).c_str());
                 debug_pause();
                 return df::unit_labor::NONE;
             }
@@ -597,14 +598,14 @@ public:
                 return df::unit_labor::GLASSMAKER;
             default:
                 debug("LABORMANAGER: Cannot deduce labor for make job, furnace type %s\n",
-                    ENUM_KEY_STR(furnace_type, type).c_str());
+                    ENUM_KEY_STR_SIMPLE(furnace_type, type).c_str());
                 debug_pause();
                 return df::unit_labor::NONE;
             }
         }
 
         debug("LABORMANAGER: Cannot deduce labor for make job, building type %s\n",
-            ENUM_KEY_STR(building_type, bld->getType()).c_str());
+            ENUM_KEY_STR_SIMPLE(building_type, bld->getType()).c_str());
         debug_pause();
 
         return df::unit_labor::NONE;
@@ -618,8 +619,11 @@ class jlfunc_custom : public jlfunc
 public:
     df::unit_labor get_labor(df::job* j)
     {
-        for (auto r : df::reaction::get_vector())
+        //for (auto r : df::reaction::get_vector())
+        std::vector<df::reaction*> const& reacVec = df::reaction::get_vector();
+        for (std::vector<df::reaction*>::const_iterator ci = reacVec.begin(); ci != reacVec.end(); ++ci)
         {
+            df::reaction* r = *ci;
             if (r->code == j->reaction_name)
             {
                 df::job_skill skill = r->skill;
@@ -649,7 +653,7 @@ JobLaborMapper::~JobLaborMapper()
 {
     std::set<jlfunc*> log;
 
-    for (auto i = jlf_cache.begin(); i != jlf_cache.end(); i++)
+    for (std::map<df::unit_labor, jlfunc*>::iterator i = jlf_cache.begin(); i != jlf_cache.end(); i++)
     {
         if (!log.count(i->second))
         {
@@ -659,7 +663,7 @@ JobLaborMapper::~JobLaborMapper()
         i->second = 0;
     }
 
-    FOR_ENUM_ITEMS(job_type, j)
+    FOR_ENUM_ITEMS_SIMPLE(job_type, j)
     {
         if (j < 0)
             continue;
@@ -933,8 +937,11 @@ df::unit_labor JobLaborMapper::find_job_labor(df::job* j)
 {
     if (j->job_type == df::job_type::CustomReaction)
     {
-        for (auto r : df::reaction::get_vector())
+        //for (auto r : df::reaction::get_vector())
+        std::vector<df::reaction*> const& reacVec = df::reaction::get_vector();
+        for (std::vector<df::reaction*>::const_iterator ci = reacVec.begin(); ci != reacVec.end(); ++ci)
         {
+            df::reaction* r = *ci;
             if (r->code == j->reaction_name)
             {
                 df::job_skill skill = r->skill;
@@ -948,7 +955,7 @@ df::unit_labor JobLaborMapper::find_job_labor(df::job* j)
     df::unit_labor labor;
     if (job_to_labor_table.count(j->job_type) == 0)
     {
-        debug("LABORMANAGER: job has no job to labor table entry: %s (%d)\n", ENUM_KEY_STR(job_type, j->job_type).c_str(), j->job_type);
+        debug("LABORMANAGER: job has no job to labor table entry: %s (%d)\n", ENUM_KEY_STR_SIMPLE(job_type, j->job_type).c_str(), j->job_type);
         debug_pause();
         labor = df::unit_labor::NONE;
     }
