@@ -1,13 +1,13 @@
 //command-prompt a one line command entry at the top of the screen for quick commands
 
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
-#include <ColorText.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
+#include "ColorText.h"
 
-#include <modules/Screen.h>
-#include <modules/Gui.h>
+#include "modules/Screen.h"
+#include "modules/Gui.h"
 
 #include <set>
 #include <list>
@@ -28,6 +28,8 @@ REQUIRE_GLOBAL(gps);
 REQUIRE_GLOBAL(enabler);
 
 std::vector<std::string> command_history;
+
+typedef std::list<std::pair<color_value,std::string> > ResponseList;
 
 class viewscreen_commandpromptst;
 class prompt_ostream:public buffered_color_ostream
@@ -125,7 +127,7 @@ public:
     }
 
 protected:
-    std::list<std::pair<color_value,std::string> > responses;
+    ResponseList responses;
     int cursor_pos;
     int history_idx;
     bool submitted;
@@ -138,7 +140,7 @@ void prompt_ostream::flush_proxy()
 {
     if (buffer.empty())
         return;
-    for(auto it=buffer.begin();it!=buffer.end();it++)
+    for(std::list<fragment_type>::const_iterator it=buffer.begin();it!=buffer.end();it++)
         parent_->add_response(it->first,it->second);
     buffer.clear();
 }
@@ -152,11 +154,11 @@ void viewscreen_commandpromptst::render()
 
     dfhack_viewscreen::render();
 
-    auto dim = Screen::getWindowSize();
+    df::coord2d dim = Screen::getWindowSize();
     parent->render();
     if(is_response)
     {
-        auto it=responses.begin();
+        ResponseList::const_iterator it=responses.begin();
         for(int i=0;i<dim.y && it!=responses.end();i++,it++)
         {
             Screen::fillRect(Screen::Pen(' ', 7, 0),0,i,dim.x,i);
@@ -237,9 +239,9 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
     }
     if (is_response)
         return;
-    for (auto it = events->begin(); it != events->end(); ++it)
+    for (std::set<df::interface_key>::const_iterator it = events->begin(); it != events->end(); ++it)
     {
-        auto key = *it;
+        df::interface_key key = *it;
         if (key==interface_key::STRING_A000) //delete?
         {
             if(entry.size() && cursor_pos > 0)
@@ -323,7 +325,8 @@ command_result show_prompt(color_ostream &out, std::vector <std::string> & param
     std::string params;
     for(size_t i=0;i<parameters.size();i++)
         params+=parameters[i]+" ";
-    Screen::show(dts::make_unique<viewscreen_commandpromptst>(params), plugin_self);
+    //Screen::show(dts::make_unique<viewscreen_commandpromptst>(params), plugin_self);
+    Screen::show(new viewscreen_commandpromptst(params), NULL, plugin_self);
     return CR_OK;
 }
 bool hotkey_allow_all(df::viewscreen *top)
