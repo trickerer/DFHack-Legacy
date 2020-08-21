@@ -91,7 +91,7 @@ public:
         validate();
         stringstream burrow_ids;
         bool append_started = false;
-        for (auto it = burrows.begin(); it != burrows.end(); it++)
+        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
         {
             if (append_started)
                 burrow_ids << " ";
@@ -132,7 +132,7 @@ public:
         if (!burrows.size())
             return true;
 
-        for (auto it = burrows.begin(); it != burrows.end(); it++)
+        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
         {
             df::burrow *burrow = it->burrow;
             if (Burrows::isAssignedTile(burrow, plant_pos))
@@ -145,7 +145,7 @@ public:
     bool isBurrowWatched(const df::burrow *burrow)
     {
         validate();
-        for (auto it = burrows.begin(); it != burrows.end(); it++)
+        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
         {
             if (it->burrow == burrow)
                 return true;
@@ -167,7 +167,7 @@ private:
 
     void validate()
     {
-        for (auto it = burrows.begin(); it != burrows.end();)
+        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end();)
         {
             if (!isValidBurrow(it->id))
                 it = burrows.erase(it);
@@ -185,7 +185,7 @@ static int string_to_int(string s, int default_ = 0)
 {
     try
     {
-        return std::stoi(s);
+        return atoi(s.c_str());
     }
     catch (std::exception&)
     {
@@ -267,8 +267,11 @@ static bool skip_plant(const df::plant * plant, bool *restricted)
 
     if (skip.food_trees || skip.cook_trees)
     {
-        for (df::material * mat : plant_raw->material)
+        //for (df::material * mat : plant_raw->material)
+        std::vector<df::material*> const& plm_vec = plant_raw->material;
+        for (std::vector<df::material*>::const_iterator ci = plm_vec.begin(); ci != plm_vec.end(); ++ci)
         {
+            df::material* mat = *ci;
             if (skip.food_trees && mat->flags.is_set(material_flags::EDIBLE_RAW))
             {
                 if (restricted)
@@ -288,7 +291,7 @@ static bool skip_plant(const df::plant * plant, bool *restricted)
     return false;
 }
 
-static int do_chop_designation(bool chop, bool count_only, int *skipped = nullptr)
+static int do_chop_designation(bool chop, bool count_only, int *skipped = NULL)
 {
     int count = 0;
     if (skipped)
@@ -470,15 +473,17 @@ public:
     {
         selected_column = 0;
 
-        auto last_selected_index = burrows_column.highlighted_index;
+        int last_selected_index = burrows_column.highlighted_index;
         burrows_column.clear();
 
-        for (df::burrow *burrow : ui->burrows.list)
+        //for (df::burrow *burrow : ui->burrows.list)
+        for (std::vector<df::burrow*>::const_iterator ci = ui->burrows.list.begin(); ci != ui->burrows.list.end(); ++ci)
         {
+            df::burrow* burrow = *ci;
             string name = burrow->name;
             if (name.empty())
                 name = "Burrow " + int_to_string(burrow->id + 1);
-            auto elem = ListEntry<df::burrow *>(name, burrow);
+            ListEntry<df::burrow *> elem = ListEntry<df::burrow *>(name, burrow);
             elem.selected = watchedBurrows.isBurrowWatched(burrow);
             burrows_column.add(elem);
         }
@@ -520,9 +525,9 @@ public:
             if (input->count(interface_key::LEAVESCREEN) || input->count(interface_key::SELECT))
             {
                 if (edit_mode == EDIT_MIN)
-                    max_logs = std::max(min_logs, max_logs);
+                    max_logs = std::max<int>(min_logs, max_logs);
                 else if (edit_mode == EDIT_MAX)
-                    min_logs = std::min(min_logs, max_logs);
+                    min_logs = std::min<int>(min_logs, max_logs);
                 edit_mode = EDIT_NONE;
             }
             else if (input->count(interface_key::STRING_A000))
@@ -532,7 +537,7 @@ public:
             }
             else if (entry.size() < 5)
             {
-                for (auto k = input->begin(); k != input->end(); ++k)
+                for (set<df::interface_key>::const_iterator k = input->begin(); k != input->end(); ++k)
                 {
                     char ch = char(Screen::keyToChar(*k));
                     if (ch >= '0' && ch <= '9')
@@ -724,20 +729,20 @@ public:
             };
             for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); ++i)
             {
-                auto row = rows[i];
-                OutputHotkeyString(x, y, row.caption, row.key);
-                auto prev_x = x;
-                if (row.in_edit)
-                    OutputString(COLOR_LIGHTCYAN, x, y, int_to_string(row.count) + "_");
-                else if (row.count <= LOG_CAP_MAX)
-                    OutputString(COLOR_LIGHTGREEN, x, y, int_to_string(row.count));
+                //auto row = rows[i];
+                OutputHotkeyString(x, y, rows[i].caption, rows[i].key);
+                int32 prev_x = x;
+                if (rows[i].in_edit)
+                    OutputString(COLOR_LIGHTCYAN, x, y, int_to_string(rows[i].count) + "_");
+                else if (rows[i].count <= LOG_CAP_MAX)
+                    OutputString(COLOR_LIGHTGREEN, x, y, int_to_string(rows[i].count));
                 else
                     OutputString(COLOR_LIGHTBLUE, x, y, "Unlimited");
                 if (edit_mode == EDIT_NONE)
                 {
-                    x = std::max(x, prev_x + 10);
-                    for (size_t j = 0; j < sizeof(row.skeys) / sizeof(row.skeys[0]); ++j)
-                        OutputString(COLOR_LIGHTGREEN, x, y, DFHack::Screen::getKeyDisplay(row.skeys[j]));
+                    x = std::max<int32>(x, prev_x + 10);
+                    for (size_t j = 0; j < sizeof(rows[i].skeys) / sizeof(rows[i].skeys[0]); ++j)
+                        OutputString(COLOR_LIGHTGREEN, x, y, DFHack::Screen::getKeyDisplay(rows[i].skeys[j]));
                     OutputString(COLOR_WHITE, x, y, ": Step");
                 }
                 OutputString(COLOR_WHITE, x, y, "", true, left_margin);
@@ -758,11 +763,17 @@ public:
 
     std::string getFocusString() { return "autochop"; }
 
+    static void addToWatchedBurrows(df::burrow *b)
+    {
+        watchedBurrows.add(b->id);
+    }
+
     void updateAutochopBurrows()
     {
         watchedBurrows.clear();
         vector<df::burrow *> v = burrows_column.getSelectedElems();
-        for_each_<df::burrow *>(v, [] (df::burrow *b) { watchedBurrows.add(b->id); });
+        //for_each_<df::burrow *>(v, [] (df::burrow *b) { watchedBurrows.add(b->id); });
+        for_each_<df::burrow *>(v, &ViewscreenAutochop::addToWatchedBurrows);
     }
 
 private:
@@ -809,7 +820,8 @@ struct autochop_hook : public df::viewscreen_dwarfmodest
         if (isInDesignationMenu() && input->count(interface_key::CUSTOM_C))
         {
             sendKey(interface_key::LEAVESCREEN);
-            Screen::show(dts::make_unique<ViewscreenAutochop>(), plugin_self);
+            //Screen::show(dts::make_unique<ViewscreenAutochop>(), plugin_self);
+            Screen::show(new ViewscreenAutochop(), NULL, plugin_self);
         }
         else
         {
@@ -821,7 +833,7 @@ struct autochop_hook : public df::viewscreen_dwarfmodest
     {
         INTERPOSE_NEXT(render)();
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         if (dims.menu_x1 <= 0)
             return;
 
@@ -852,7 +864,7 @@ command_result df_autochop (color_ostream &out, vector <string> & parameters)
             return CR_WRONG_USAGE;
     }
     if (Maps::IsValid())
-        Screen::show(dts::make_unique<ViewscreenAutochop>(), plugin_self);
+        Screen::show(new ViewscreenAutochop(), NULL, plugin_self);
     return CR_OK;
 }
 
