@@ -135,7 +135,7 @@ static void detect_burrow_renames(color_ostream &out)
     }
     else if (name_burrow_id >= 0)
     {
-        auto burrow = df::burrow::find(name_burrow_id);
+        df::burrow* burrow = df::burrow::find(name_burrow_id);
         name_burrow_id = -1;
         if (burrow)
             onBurrowRename(out, burrow);
@@ -160,9 +160,9 @@ DEFINE_LUA_EVENT_5(onDigComplete, handle_dig_complete,
 
 static void detect_digging(color_ostream &out)
 {
-    for (auto it = diggers.begin(); it != diggers.end();)
+    for (std::map<int,DigJob>::const_iterator it = diggers.begin(); it != diggers.end();)
     {
-        auto worker = df::unit::find(it->first);
+        df::unit* worker = df::unit::find(it->first);
 
         if (!worker || !worker->job.current_job ||
             worker->job.current_job->id != it->second.id)
@@ -171,7 +171,7 @@ static void detect_digging(color_ostream &out)
 
             df::coord pos = it->second.pos;
 
-            if (auto block = Maps::getTileBlock(pos))
+            if (df::map_block* block = Maps::getTileBlock(pos))
             {
                 df::tiletype new_tile = block->tiletype[pos.x&15][pos.y&15];
 
@@ -183,7 +183,7 @@ static void detect_digging(color_ostream &out)
                 }
             }
 
-            auto cur = it; ++it; diggers.erase(cur);
+            std::map<int,DigJob>::const_iterator cur = it; ++it; diggers.erase(cur);
         }
         else
             ++it;
@@ -195,21 +195,21 @@ static void detect_digging(color_ostream &out)
     {
         for (size_t i = 0; i < jvec.size(); i++)
         {
-            auto job = jvec[i];
-            auto type = ENUM_ATTR(job_type, type, job->job_type);
+            df::job* job = jvec[i];
+            const df::job_type_class type = ENUM_ATTR(job_type, type, job->job_type);
             if (type != job_type_class::Digging)
                 continue;
 
-            auto worker = Job::getWorker(job);
+            df::unit* worker = Job::getWorker(job);
             if (!worker)
                 continue;
 
             df::coord pos = job->pos;
-            auto block = Maps::getTileBlock(pos);
+            df::map_block* block = Maps::getTileBlock(pos);
             if (!block)
                 continue;
 
-            auto &info = diggers[worker->id];
+            DigJob &info = diggers[worker->id];
 
             //out.print("New dig job %d.\n", job->id);
 
@@ -247,14 +247,14 @@ static std::map<std::string,int> name_lookup;
 
 static void parse_names()
 {
-    auto &list = ui->burrows.list;
+    std::vector<df::burrow*> const &list = ui->burrows.list;
 
     grow_burrows.clear();
     name_lookup.clear();
 
     for (size_t i = 0; i < list.size(); i++)
     {
-        auto burrow = list[i];
+        df::burrow* burrow = list[i];
 
         std::string name = burrow->name;
 
@@ -282,7 +282,7 @@ static void reset_tracking()
 
 static void init_map(color_ostream &out)
 {
-    auto config = World::GetPersistentData("burrows/config");
+    PersistentDataItem config = World::GetPersistentData("burrows/config");
     if (config.isValid())
     {
         auto_grow = !!(config.ival(0) & 1);
@@ -308,7 +308,7 @@ static void deinit_map(color_ostream &out)
 static PersistentDataItem create_config(color_ostream &out)
 {
     bool created;
-    auto rv = World::GetPersistentData("burrows/config", &created);
+    PersistentDataItem rv = World::GetPersistentData("burrows/config", &created);
     if (created && rv.isValid())
         rv.ival(0) = 0;
     if (!rv.isValid())
@@ -321,7 +321,7 @@ static void enable_auto_grow(color_ostream &out, bool enable)
     if (enable == auto_grow)
         return;
 
-    auto config = create_config(out);
+    PersistentDataItem config = create_config(out);
     if (!config.isValid())
         return;
 
@@ -358,7 +358,7 @@ static void add_walls_to_burrows(color_ostream &out, std::vector<df::burrow*> &b
             {
                 df::coord pos(x,y,z);
 
-                auto tile = mc.tiletypeAt(pos);
+                df::tiletype tile = mc.tiletypeAt(pos);
 
                 if (isWallTerrain(tile))
                     add_to_burrows(burrows, pos);
@@ -377,7 +377,7 @@ static void handle_dig_complete(color_ostream &out, df::job_type job, df::coord 
 
     for (size_t i = 0; i < grow_burrows.size(); i++)
     {
-        auto b = df::burrow::find(grow_burrows[i]);
+        df::burrow* b = df::burrow::find(grow_burrows[i]);
         if (b && Burrows::isAssignedTile(b, pos))
             to_grow.push_back(b);
     }
@@ -437,7 +437,7 @@ static df::burrow *findByName(color_ostream &out, std::string name, bool silent 
     int id = -1;
     if (name_lookup.count(name))
         id = name_lookup[name];
-    auto rv = df::burrow::find(id);
+    df::burrow* rv = df::burrow::find(id);
     if (!rv && !silent)
         out.printerr("Burrow not found: '%s'\n", name.c_str());
     return rv;
@@ -458,7 +458,7 @@ static void copyUnits(df::burrow *target, df::burrow *source, bool enable)
 
     for (size_t i = 0; i < source->units.size(); i++)
     {
-        auto unit = df::unit::find(source->units[i]);
+        df::unit* unit = df::unit::find(source->units[i]);
 
         if (unit)
             Burrows::setAssignedUnit(target, unit, enable);
@@ -483,12 +483,12 @@ static void copyTiles(df::burrow *target, df::burrow *source, bool enable)
 
     for (size_t i = 0; i < pvec.size(); i++)
     {
-        auto block = pvec[i];
-        auto smask = Burrows::getBlockMask(source, block);
+        df::map_block* block = pvec[i];
+        df::block_burrow* smask = Burrows::getBlockMask(source, block);
         if (!smask)
             continue;
 
-        auto tmask = Burrows::getBlockMask(target, block, enable);
+        df::block_burrow* tmask = Burrows::getBlockMask(target, block, enable);
         if (!tmask)
             continue;
 
@@ -513,11 +513,11 @@ static void setTilesByDesignation(df::burrow *target, df::tile_designation d_mas
 {
     CHECK_NULL_POINTER(target);
 
-    auto &blocks = world->map.map_blocks;
+    std::vector<df::map_block*> const &blocks = world->map.map_blocks;
 
     for (size_t i = 0; i < blocks.size(); i++)
     {
-        auto block = blocks[i];
+        df::map_block* block = blocks[i];
         df::block_burrow *mask = NULL;
 
         for (int x = 0; x < 16; x++)
@@ -626,7 +626,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
 
         for (size_t i = 1; i < parameters.size(); i++)
         {
-            auto target = findByName(out, parameters[i]);
+            df::burrow* target = findByName(out, parameters[i]);
             if (!target)
                 return CR_WRONG_USAGE;
 
@@ -638,7 +638,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
         if (parameters.size() < 3)
             return CR_WRONG_USAGE;
 
-        auto target = findByName(out, parameters[1]);
+        df::burrow* target = findByName(out, parameters[1]);
         if (!target)
             return CR_WRONG_USAGE;
 
@@ -649,7 +649,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
 
         for (size_t i = 2; i < parameters.size(); i++)
         {
-            auto source = findByName(out, parameters[i]);
+            df::burrow* source = findByName(out, parameters[i]);
             if (!source)
                 return CR_WRONG_USAGE;
 
@@ -663,7 +663,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
 
         for (size_t i = 1; i < parameters.size(); i++)
         {
-            auto target = findByName(out, parameters[i]);
+            df::burrow* target = findByName(out, parameters[i]);
             if (!target)
                 return CR_WRONG_USAGE;
 
@@ -675,7 +675,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
         if (parameters.size() < 3)
             return CR_WRONG_USAGE;
 
-        auto target = findByName(out, parameters[1]);
+        df::burrow* target = findByName(out, parameters[1]);
         if (!target)
             return CR_WRONG_USAGE;
 
@@ -689,7 +689,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
             if (setTilesByKeyword(target, parameters[i], enable))
                 continue;
 
-            auto source = findByName(out, parameters[i]);
+            df::burrow* source = findByName(out, parameters[i]);
             if (!source)
                 return CR_WRONG_USAGE;
 
