@@ -111,7 +111,7 @@ bool dig (MapExtras::MapCache & MCache,
     )
 {
     DFCoord at (x,y,z);
-    auto b = MCache.BlockAt(at/16);
+    MapExtras::Block* b = MCache.BlockAt(at/16);
     if(!b || !b->is_valid())
         return false;
     if(x == 0 || x == x_max * 16 - 1)
@@ -222,20 +222,20 @@ int32_t parse_priority(color_ostream &out, vector<string> &parameters)
 {
     int32_t default_priority = ui_sidebar_menus->designation.priority;
 
-    for (auto it = parameters.begin(); it != parameters.end(); ++it)
+    for (vector<string>::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
     {
         const string &s = *it;
         if (s.substr(0, 2) == "p=" || s.substr(0, 2) == "-p")
         {
             if (s.size() >= 3)
             {
-                auto priority = int32_t(1000 * atof(s.c_str() + 2));
+                int32_t priority = int32_t(1000 * atof(s.c_str() + 2));
                 parameters.erase(it);
                 return priority;
             }
             else if (it + 1 != parameters.end())
             {
-                auto priority = int32_t(1000 * atof((*(it + 1)).c_str()));
+                int32_t priority = int32_t(1000 * atof((*(it + 1)).c_str()));
                 parameters.erase(it, it + 2);
                 return priority;
             }
@@ -261,7 +261,7 @@ command_result digcircle (color_ostream &out, vector <string> & parameters)
     static circle_what what = circle_set;
     static df::tile_dig_designation type = tile_dig_designation::Default;
     static int diameter = 0;
-    auto saved_d = diameter;
+    int saved_d = diameter;
     bool force_help = false;
     int32_t priority = parse_priority(out, parameters);
 
@@ -1056,7 +1056,7 @@ command_result digv (color_ostream &out, vector <string> & parameters)
             return CR_WRONG_USAGE;
     }
 
-    auto &con = out;
+    color_ostream &con = out;
 
     if (!Maps::IsValid())
     {
@@ -1243,7 +1243,7 @@ command_result digl (color_ostream &out, vector <string> & parameters)
             return CR_WRONG_USAGE;
     }
 
-    auto &con = out;
+    color_ostream &con = out;
 
     if (!Maps::IsValid())
     {
