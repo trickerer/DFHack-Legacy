@@ -1,12 +1,12 @@
 //most of the code is shamelessly stolen from steam-engine.cpp
 #include "Core.h"
 #include "Error.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
 
 #include "LuaTools.h"
-#include <VTableInterpose.h>
+#include "VTableInterpose.h"
 #include "MiscUtils.h"
 
 #include "df/building_doorst.h"
@@ -71,7 +71,7 @@ struct work_hook : df::building_workshopst{
     {
         if (type == workshop_type::Custom)
         {
-            auto it=hacked_workshops.find(this->getCustomType());
+            workshops_data_t::iterator it=hacked_workshops.find(this->getCustomType());
             if(it!=hacked_workshops.end())
                 return &(it->second);
         }
@@ -131,7 +131,7 @@ struct work_hook : df::building_workshopst{
     }
     DEFINE_VMETHOD_INTERPOSE(uint32_t,getImpassableOccupancy,())
     {
-        if(auto def = find_def())
+        if(workshop_hack_data* def = find_def())
         {
             if(def->impassible_fix)
                 return tile_building_occ::Impassable;
@@ -141,7 +141,7 @@ struct work_hook : df::building_workshopst{
 
     DEFINE_VMETHOD_INTERPOSE(void, getPowerInfo, (df::power_info *info))
     {
-        if (auto def = find_def())
+        if (workshop_hack_data* def = find_def())
         {
             df::power_info power;
             get_current_power(info);
@@ -170,7 +170,7 @@ struct work_hook : df::building_workshopst{
     {
         if (find_def())
         {
-            auto &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             insert_into_vector(vec, &df::building::id, (df::building*)this);
         }
 
@@ -181,7 +181,7 @@ struct work_hook : df::building_workshopst{
     {
         if (find_def())
         {
-            auto &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             erase_from_vector(vec, &df::building::id, id);
         }
 
@@ -189,7 +189,7 @@ struct work_hook : df::building_workshopst{
     }
     DEFINE_VMETHOD_INTERPOSE(bool, canConnectToMachine, (df::machine_tile_set *info))
     {
-        if (auto def = find_def())
+        if (workshop_hack_data* def = find_def())
         {
             int real_cx = centerx, real_cy = centery;
             bool ok = false;
@@ -215,7 +215,7 @@ struct work_hook : df::building_workshopst{
     }
     DEFINE_VMETHOD_INTERPOSE(bool, isUnpowered, ())
     {
-        if (auto def = find_def())
+        if (workshop_hack_data* def = find_def())
         {
             if (!def->needs_power)
                 return false;
@@ -235,7 +235,7 @@ struct work_hook : df::building_workshopst{
     }
     DEFINE_VMETHOD_INTERPOSE(bool, canBeRoomSubset, ())
     {
-        if(auto def = find_def())
+        if(workshop_hack_data* def = find_def())
         {
             if(def->room_subset==0)
                 return false;
@@ -246,7 +246,7 @@ struct work_hook : df::building_workshopst{
     }
     DEFINE_VMETHOD_INTERPOSE(void, updateAction, ())
     {
-        if(auto def = find_def())
+        if(workshop_hack_data* def = find_def())
         {
             if(def->skip_updates!=0 && is_fully_built())
             {
@@ -264,7 +264,7 @@ struct work_hook : df::building_workshopst{
     {
         INTERPOSE_NEXT(drawBuilding)(db, unk);
 
-        if (auto def = find_def())
+        if (workshop_hack_data* def = find_def())
         {
             if (!is_fully_built() || def->frames.size()==0)
                 return;
@@ -427,7 +427,7 @@ static void setPower(df::building_workshopst* workshop, int power_produced, int 
 }
 static int getPower(lua_State*L)
 {
-    auto workshop = Lua::CheckDFObject<df::building_workshopst>(L, 1);
+    df::building_workshopst* workshop = Lua::CheckDFObject<df::building_workshopst>(L, 1);
     work_hook* ptr = static_cast<work_hook*>(workshop);
     if (!ptr)
         return 0;
