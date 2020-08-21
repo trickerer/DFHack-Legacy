@@ -11,7 +11,7 @@
 #include <map>
 #include <set>
 
-#include <VTableInterpose.h>
+#include "VTableInterpose.h"
 #include "ColorText.h"
 #include "uicommon.h"
 #include "df/viewscreen_choose_start_sitest.h"
@@ -24,7 +24,7 @@ using df::global::gps;
 DFHACK_PLUGIN("embark-tools");
 DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
-#define FOR_ITER_TOOLS(iter) for(auto iter = tools.begin(); iter != tools.end(); iter++)
+#define FOR_ITER_TOOLS(iter) for(std::map<std::string, EmbarkTool*>::iterator iter = tools.begin(); iter != tools.end(); iter++)
 
 void update_embark_sidebar (df::viewscreen_choose_start_sitest * screen)
 {
@@ -116,7 +116,7 @@ public:
     virtual df::interface_key getToggleKey() { return df::interface_key::CUSTOM_A; }
     virtual void after_render(start_sitest* screen)
     {
-        auto dim = Screen::getWindowSize();
+        df::coord2d dim = Screen::getWindowSize();
         int x = 20, y = dim.y - 2;
         if (screen->page >= 0 && screen->page <= 4)
         {
@@ -143,9 +143,9 @@ protected:
         CoreSuspendClaimer suspend;
         buffered_color_ostream out;
         Core::getInstance().runCommand(out, "prospect");
-        auto fragments = out.fragments();
+        std::list<buffered_color_ostream::fragment_type> const& fragments = out.fragments();
         indicator = "";
-        for (auto iter = fragments.begin(); iter != fragments.end(); iter++)
+        for (std::list<buffered_color_ostream::fragment_type>::const_iterator iter = fragments.begin(); iter != fragments.end(); iter++)
         {
             std::string fragment = iter->second;
             if (fragment.find("SAND_") != std::string::npos)
@@ -175,7 +175,7 @@ public:
     {
         if (dirty)
             update_indicator();
-        auto dim = Screen::getWindowSize();
+        df::coord2d dim = Screen::getWindowSize();
         int x = dim.x - 28,
             y = 13;
         if (screen->page == start_sitest::T_page::Biome && (
@@ -243,7 +243,7 @@ public:
         }
     }
     virtual void before_feed(start_sitest* screen, ikey_set* input, bool &cancel) {
-        for (auto iter = input->begin(); iter != input->end(); iter++)
+        for (std::set<df::interface_key>::iterator iter = input->begin(); iter != input->end(); iter++)
         {
             df::interface_key key = *iter;
             bool is_motion = false;
@@ -369,8 +369,8 @@ protected:
         }
         if (in_local_corner_resize)
         {
-            x = std::max(0, std::min(15, x));
-            y = std::max(0, std::min(15, y));
+            x = std::max<int>(0, std::min<int>(15, x));
+            y = std::max<int>(0, std::min<int>(15, y));
             if (base_max_x)
                 x2 = x;
             else
@@ -392,7 +392,7 @@ protected:
         }
         else if (in_local_edge_resize_x)
         {
-            x = std::max(0, std::min(15, x));
+            x = std::max<int>(0, std::min<int>(15, x));
             if (base_max_x)
                 x2 = x;
             else
@@ -405,7 +405,7 @@ protected:
         }
         else if (in_local_edge_resize_y)
         {
-            y = std::max(0, std::min(15, y));
+            y = std::max<int>(0, std::min<int>(15, y));
             if (base_max_y)
                 y2 = y;
             else
@@ -579,7 +579,7 @@ public:
     {
         parent->render();
         int x, y;
-        auto dim = Screen::getWindowSize();
+        df::coord2d dim = Screen::getWindowSize();
         int width = 50,
             height = 4 + 1 + tools.size(),  // Padding + lower row
             min_x = (dim.x - width) / 2,
@@ -615,7 +615,7 @@ public:
             Screen::dismiss(this);
             return;
         }
-        for (auto iter = input->begin(); iter != input->end(); iter++)
+        for (std::set<df::interface_key>::const_iterator iter = input->begin(); iter != input->end(); iter++)
         {
             df::interface_key key = *iter;
             FOR_ITER_TOOLS(iter)
@@ -668,7 +668,7 @@ struct choose_start_site_hook : df::viewscreen_choose_start_sitest
 
     void display_tool_status()
     {
-        auto dim = Screen::getWindowSize();
+        df::coord2d dim = Screen::getWindowSize();
         int x = 1,
             y = dim.y - 5;
         OutputString(COLOR_LIGHTRED, x, y, Screen::getKeyDisplay(df::interface_key::CUSTOM_S));
@@ -696,7 +696,8 @@ struct choose_start_site_hook : df::viewscreen_choose_start_sitest
 
     void display_settings()
     {
-        Screen::show(dts::make_unique<embark_tools_settings>(), plugin_self);
+        //Screen::show(dts::make_unique<embark_tools_settings>(), plugin_self);
+        Screen::show(new embark_tools_settings(), NULL, plugin_self);
     }
 
     inline bool is_valid_page()
@@ -798,8 +799,8 @@ DFhackCExport command_result plugin_onstatechange (color_ostream &out, state_cha
 DFhackCExport command_result plugin_onupdate (color_ostream &out)
 {
     static int8_t mask = 0;
-    static decltype(gps->mouse_x) prev_x = -1;
-    static decltype(gps->mouse_y) prev_y = -1;
+    static int32_t prev_x = -1;
+    static int32_t prev_y = -1;
     df::viewscreen* parent = DFHack::Gui::getCurViewscreen();
     VIRTUAL_CAST_VAR(screen, df::viewscreen_choose_start_sitest, parent);
     if (!screen)
