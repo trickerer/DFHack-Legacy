@@ -311,9 +311,9 @@ command_result setAllMatching(color_ostream &out, checkTile checkProc,
     uint32_t ty_max = y_max * 16;
 
     //Ensure maximum coordinate is within map.  Truncate to map edge.
-    maxCoord.x = std::min((uint32_t) maxCoord.x, tx_max);
-    maxCoord.y = std::min((uint32_t) maxCoord.y, ty_max);
-    maxCoord.z = std::min((uint32_t) maxCoord.z,  z_max);
+    maxCoord.x = std::min<uint32_t>((uint32_t) maxCoord.x, tx_max);
+    maxCoord.y = std::min<uint32_t>((uint32_t) maxCoord.y, ty_max);
+    maxCoord.z = std::min<uint32_t>((uint32_t) maxCoord.z,  z_max);
 
     //Check minimum co-ordinates against maximum map size
     if (minCoord.x > maxCoord.x)
