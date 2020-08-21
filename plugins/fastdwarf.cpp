@@ -75,8 +75,8 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
             }
 
             // make sure source and dest map blocks are valid
-            auto old_occ = Maps::getTileOccupancy(unit->pos);
-            auto new_occ = Maps::getTileOccupancy(unit->path.dest);
+            df::tile_occupancy* old_occ = Maps::getTileOccupancy(unit->pos);
+            df::tile_occupancy* new_occ = Maps::getTileOccupancy(unit->path.dest);
             if (!old_occ || !new_occ)
                 break;
 
