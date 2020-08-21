@@ -60,11 +60,12 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <cinttypes>
+//#include <hash_map>
+//#include <hash_set>
+//#include <cinttypes>
 
 using namespace std;
+using namespace stdext;
 
 using namespace DFHack;
 using namespace df::enums;
@@ -86,10 +87,12 @@ static int32_t lastInvasionDigger = -1;
 static int32_t edgesPerTick = 100;
 //static EventManager::EventHandler jobCompleteHandler(watchForJobComplete, 5);
 static bool activeDigging=false;
-static unordered_set<string> diggingRaces;
-static unordered_set<int32_t> invaderJobs;
+static hash_set<string> diggingRaces;
+static hash_set<int32_t> invaderJobs;
 static df::coord lastDebugEdgeCostPoint;
-unordered_map<string, DigAbilities> digAbilities;
+hash_map<string, DigAbilities> digAbilities;
+
+typedef hash_map<df::coord, cost_t, PointHash> PointCostMap;
 
 static cost_t costWeightDefault[] = {
 //Distance
@@ -191,19 +194,19 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-df::coord getRoot(df::coord point, unordered_map<df::coord, df::coord>& rootMap);
+df::coord getRoot(df::coord point, hash_map<df::coord, df::coord>& rootMap);
 
 class PointComp {
 public:
-    unordered_map<df::coord, cost_t, PointHash> *pointCost;
-    PointComp(unordered_map<df::coord, cost_t, PointHash> *p): pointCost(p) {
+    PointCostMap *pointCost;
+    PointComp(hash_map<df::coord, cost_t, PointHash> *p): pointCost(p) {
 
     }
 
     int32_t operator()(df::coord p1, df::coord p2) const {
         if ( p1 == p2 ) return 0;
-        auto i1 = pointCost->find(p1);
-        auto i2 = pointCost->find(p2);
+        PointCostMap::const_iterator i1 = pointCost->find(p1);
+        PointCostMap::const_iterator i2 = pointCost->find(p2);
         if ( i1 == pointCost->end() && i2 == pointCost->end() )
             return p1 < p2;
         if ( i1 == pointCost->end() )
@@ -302,7 +305,7 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector<std::strin
             DigAbilities& abilities = digAbilities[raceString];
 
             df::coord bob = Gui::getCursorPos();
-            out.print("(%d,%d,%d), (%d,%d,%d): cost = %" PRId64 "\n", lastDebugEdgeCostPoint.x, lastDebugEdgeCostPoint.y, lastDebugEdgeCostPoint.z, bob.x, bob.y, bob.z, getEdgeCost(out, lastDebugEdgeCostPoint, bob, abilities));
+            out.print("(%d,%d,%d), (%d,%d,%d): cost = %d\n", lastDebugEdgeCostPoint.x, lastDebugEdgeCostPoint.y, lastDebugEdgeCostPoint.z, bob.x, bob.y, bob.z, int32(getEdgeCost(out, lastDebugEdgeCostPoint, bob, abilities)));
             lastDebugEdgeCostPoint = bob;
             a++;
         } else if ( parameters[a] == "now" ) {
@@ -333,18 +336,18 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector<std::strin
 /////////////////////////////////////////////////////////////////////////////////////////
 //dijkstra globals
 vector<int32_t> invaders;
-unordered_set<df::coord, PointHash> invaderPts;
-unordered_set<df::coord, PointHash> localPts;
-unordered_map<df::coord,df::coord,PointHash> parentMap;
-unordered_map<df::coord,cost_t,PointHash> costMap;
+hash_set<df::coord, PointHash> invaderPts;
+hash_set<df::coord, PointHash> localPts;
+hash_map<df::coord,df::coord,PointHash> parentMap;
+hash_map<df::coord,cost_t,PointHash> costMap;
 
 PointComp comp(&costMap);
 set<df::coord, PointComp> fringe(comp);
 EventManager::EventHandler findJobTickHandler(findAndAssignInvasionJob, 1);
 
 int32_t localPtsFound = 0;
-unordered_set<df::coord,PointHash> closedSet;
-unordered_map<df::coord,int32_t,PointHash> workNeeded; //non-walking work needed to get there
+hash_set<df::coord,PointHash> closedSet;
+hash_map<df::coord,int32_t,PointHash> workNeeded; //non-walking work needed to get there
 bool foundTarget = false;
 int32_t edgeCount = 0;
 
@@ -384,8 +387,8 @@ void findAndAssignInvasionJob(color_ostream& out, void* tickTime) {
         lastInvasionDigger = lastInvasionJob = -1;
 
         clearDijkstra();
-        unordered_set<uint16_t> invaderConnectivity;
-        unordered_set<uint16_t> localConnectivity;
+        hash_set<uint16_t> invaderConnectivity;
+        hash_set<uint16_t> localConnectivity;
 
         //find all locals and invaders
         for ( size_t a = 0; a < world->units.all.size(); a++ ) {
@@ -435,7 +438,8 @@ void findAndAssignInvasionJob(color_ostream& out, void* tickTime) {
 
         //if local connectivity is not disjoint from invader connectivity, no digging required
         bool overlap = false;
-        for ( auto a = localConnectivity.begin(); a != localConnectivity.end(); a++ ) {
+        for (hash_set<uint16_t>::const_iterator a = localConnectivity.begin(); a != localConnectivity.end(); a++ )
+        {
             uint16_t conn = *a;
             if ( invaderConnectivity.find(conn) == invaderConnectivity.end() )
                 continue;
@@ -504,7 +508,7 @@ void findAndAssignInvasionJob(color_ostream& out, void* tickTime) {
         clock_t edgeTime = clock();
         vector<Edge>* myEdges = getEdgeSet(out, pt, cache, xMax, yMax, zMax, abilities);
         totalEdgeTime += (clock() - edgeTime);
-        for ( auto a = myEdges->begin(); a != myEdges->end(); a++ ) {
+        for (vector<Edge>::iterator a = myEdges->begin(); a != myEdges->end(); a++ ) {
             Edge &e = *a;
             if ( e.p1 == df::coord() )
                 break;
@@ -514,7 +518,7 @@ void findAndAssignInvasionJob(color_ostream& out, void* tickTime) {
                 other = e.p2;
             //if ( closedSet.find(other) != closedSet.end() )
             //    continue;
-            auto i = costMap.find(other);
+            PointCostMap::const_iterator i = costMap.find(other);
             if ( i != costMap.end() ) {
                 cost_t cost = (*i).second;
                 if ( cost <= myCost + e.cost ) {
@@ -536,15 +540,15 @@ void findAndAssignInvasionJob(color_ostream& out, void* tickTime) {
     if ( !foundTarget )
         return;
 
-    unordered_set<df::coord, PointHash> requiresZNeg;
-    unordered_set<df::coord, PointHash> requiresZPos;
+    hash_set<df::coord, PointHash> requiresZNeg;
+    hash_set<df::coord, PointHash> requiresZPos;
 
     //find important edges
     Edge firstImportantEdge(df::coord(), df::coord(), -1);
     //df::coord closest;
     //cost_t closestCostEstimate=0;
     //cost_t closestCostActual=0;
-    for ( auto i = localPts.begin(); i != localPts.end(); i++ ) {
+    for (hash_set<df::coord, PointHash>::const_iterator i = localPts.begin(); i != localPts.end(); i++ ) {
         df::coord pt = *i;
         if ( costMap.find(pt) == costMap.end() )
             continue;

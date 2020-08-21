@@ -52,7 +52,8 @@ void getRidOfOldJob(df::unit* unit) {
     //delete job;
 }
 
-int32_t assignJob(color_ostream& out, Edge firstImportantEdge, unordered_map<df::coord,df::coord,PointHash> parentMap, unordered_map<df::coord,cost_t,PointHash>& costMap, vector<int32_t>& invaders, unordered_set<df::coord,PointHash>& requiresZNeg, unordered_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities ) {
+//int32_t assignJob(color_ostream& out, Edge firstImportantEdge, unordered_map<df::coord,df::coord,PointHash> parentMap, unordered_map<df::coord,cost_t,PointHash>& costMap, vector<int32_t>& invaders, unordered_set<df::coord,PointHash>& requiresZNeg, unordered_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities ) {
+int32_t assignJob(color_ostream& out, Edge firstImportantEdge, Points parentMap, Costs& costMap, vector<int32_t>& invaders, hash_set<df::coord,PointHash>& requiresZNeg, hash_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities) {
     df::unit* firstInvader = df::unit::find(invaders[0]);
     if ( !firstInvader ) {
         return -1;
@@ -61,7 +62,7 @@ int32_t assignJob(color_ostream& out, Edge firstImportantEdge, unordered_map<df:
     //do whatever you need to do at the first important edge
     df::coord pt1 = firstImportantEdge.p1;
     df::coord pt2 = firstImportantEdge.p2;
-    if ( costMap[pt1] > costMap[pt2] ) {
+    if ( !(costMap[pt1] < costMap[pt2]) ) {
         df::coord temp = pt1;
         pt1 = pt2;
         pt2 = temp;

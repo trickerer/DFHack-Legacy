@@ -9,8 +9,10 @@
 
 #include "df/coord.h"
 
-#include <unordered_map>
+//#include <unordered_map>
 #include <vector>
+
+#include <hash_map>
 
 //cost is [path cost, building destruction cost, dig cost, construct cost]. Minimize constructions, then minimize dig cost, then minimize path cost.
 enum CostDimension {
@@ -32,7 +34,7 @@ struct DigAbilities {
 
 //extern cost_t costWeight[costDim];
 //extern int32_t jobDelay[costDim];
-extern std::unordered_map<std::string, DigAbilities> digAbilities;
+extern stdext::hash_map<std::string, DigAbilities> digAbilities;
 /*
 const cost_t costWeight[] = {
 //Distance
@@ -91,6 +93,15 @@ struct PointHash {
     size_t operator()(const df::coord c) const {
         return c.x * 65537 + c.y * 17 + c.z;
     }
+
+    bool operator()(const df::coord& c1, const df::coord& c2) const
+    {
+        return (c1.x == c2.x && c1.y == c2.y);
+    }
+
+	enum {
+	    bucket_size = 4,
+	    min_buckets = 8};
 };
 
 cost_t getEdgeCost(DFHack::color_ostream& out, df::coord pt1, df::coord pt2, DigAbilities& abilities);

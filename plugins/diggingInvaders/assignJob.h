@@ -5,10 +5,17 @@
 #include "ColorText.h"
 #include "modules/MapCache.h"
 
-#include <unordered_map>
-#include <unordered_set>
+//#include <unordered_map>
+//#include <unordered_set>
+
+#include <hash_map>
+#include <hash_set>
 
 using namespace std;
+using namespace stdext;
 
-int32_t assignJob(DFHack::color_ostream& out, Edge firstImportantEdge, unordered_map<df::coord,df::coord,PointHash> parentMap, unordered_map<df::coord,cost_t,PointHash>& costMap, vector<int32_t>& invaders, unordered_set<df::coord,PointHash>& requiresZNeg, unordered_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities);
+typedef hash_map<df::coord,df::coord,PointHash> Points;
+typedef hash_map<df::coord,cost_t,PointHash> Costs;
+
+int32_t assignJob(DFHack::color_ostream& out, Edge firstImportantEdge, Points parentMap, Costs& costMap, vector<int32_t>& invaders, hash_set<df::coord,PointHash>& requiresZNeg, hash_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities);
 
