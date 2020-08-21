@@ -588,7 +588,7 @@ static void init_state()
 
     // First get the frame skip from persistent data, or create the item
     // if not present
-    auto cfg_frameskip = World::GetPersistentData("autohauler/frameskip");
+    PersistentDataItem cfg_frameskip = World::GetPersistentData("autohauler/frameskip");
     if (cfg_frameskip.isValid())
     {
         frame_skip = cfg_frameskip.ival(0);
@@ -615,7 +615,7 @@ static void init_state()
     labor_infos.resize(ARRAY_COUNT(default_labor_infos));
 
     // For every persistent data item...
-    for (auto p = items.begin(); p != items.end(); p++)
+    for (std::vector<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
     {
         // Load as a string the key associated with the persistent data item
         string key = p->key();
@@ -842,7 +842,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
         // Scan every labor. If a labor that disallows hauling is present
         // for the dwarf, the dwarf is hauling exempt
-        FOR_ENUM_ITEMS(unit_labor, labor)
+        FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
         {
             if (!(labor == unit_labor::NONE))
             {
@@ -856,7 +856,8 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
         // Scan a dwarf's miscellaneous traits for on break or migrant status.
         // If either of these are present, disable hauling because we want them
         // to try to find real jobs first
-        for (auto p = dwarfs[dwarf]->status.misc_traits.begin(); p < dwarfs[dwarf]->status.misc_traits.end(); p++)
+        for (std::vector<df::unit_misc_trait*>::const_iterator p = dwarfs[dwarf]->status.misc_traits.begin();
+            p < dwarfs[dwarf]->status.misc_traits.end(); p++)
         {
             if ((*p)->id == misc_trait_type::Migrant)
                 is_migrant = true;
@@ -919,7 +920,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     std::vector<df::unit_labor> labors;
 
     // For every labor...
-    FOR_ENUM_ITEMS(unit_labor, labor)
+    FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
     {
         // Ignore all nonexistent labors
         if (labor == unit_labor::NONE)
@@ -946,7 +947,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
     // Equivalent of Java for(unit_labor : labor)
     // For every labor...
-    FOR_ENUM_ITEMS(unit_labor, labor)
+    FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
     {
         // If this is a non-labor continue to next item
         if (labor == unit_labor::NONE)
@@ -1023,7 +1024,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable )
  */
 void print_labor (df::unit_labor labor, color_ostream &out)
 {
-    string labor_name = ENUM_KEY_STR(unit_labor, labor);
+    string labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
     out << labor_name << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
@@ -1061,7 +1062,7 @@ command_result autohauler (color_ostream &out, std::vector <std::string> & param
     }
     else if (parameters.size() == 2 && parameters[0] == "frameskip")
     {
-        auto cfg_frameskip = World::GetPersistentData("autohauler/frameskip");
+        PersistentDataItem cfg_frameskip = World::GetPersistentData("autohauler/frameskip");
         if(cfg_frameskip.isValid())
         {
             int newValue = atoi(parameters[1].c_str());
@@ -1086,9 +1087,9 @@ command_result autohauler (color_ostream &out, std::vector <std::string> & param
 
         df::unit_labor labor = unit_labor::NONE;
 
-        FOR_ENUM_ITEMS(unit_labor, test_labor)
+        FOR_ENUM_ITEMS_SIMPLE(unit_labor, test_labor)
         {
-            if (parameters[0] == ENUM_KEY_STR(unit_labor, test_labor))
+            if (parameters[0] == ENUM_KEY_STR_SIMPLE(unit_labor, test_labor))
                 labor = test_labor;
         }
 
@@ -1166,7 +1167,7 @@ command_result autohauler (color_ostream &out, std::vector <std::string> & param
 
         if (parameters[0] == "list")
         {
-            FOR_ENUM_ITEMS(unit_labor, labor)
+            FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
             {
                 if (labor == unit_labor::NONE)
                     continue;
