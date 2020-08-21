@@ -37,12 +37,20 @@ REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cur_year);
 REQUIRE_GLOBAL(cur_year_tick);
 
-enum class selectability {
-    Selectable,
-    Grass,
-    Nonselectable,
-    OutOfSeason,
-    Unselected
+//enum class selectability {
+//    Selectable,
+//    Grass,
+//    Nonselectable,
+//    OutOfSeason,
+//    Unselected
+//};
+
+enum PlantSelectability {
+    PLANT_SELECTABLE,
+    PLANT_GRASS,
+    PLANT_NONSELECTABLE,
+    PLANT_OUTOFSEASON,
+    PLANT_UNSELECTED
 };
 
 //  Determination of whether seeds can be collected is somewhat messy:
@@ -74,34 +82,34 @@ enum class selectability {
 //  is one of the issues in bug 6940 on the bug tracker (the others cases are detected and
 //  result in the plants not being usable for farming or even collectable at all).
 
-//selectability selectablePlant(color_ostream &out, const df::plant_raw *plant, bool farming)
-selectability selectablePlant(const df::plant_raw *plant, bool farming)
+//PlantSelectability selectablePlant(color_ostream &out, const df::plant_raw *plant, bool farming)
+PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
 {
     const DFHack::MaterialInfo basic_mat = DFHack::MaterialInfo(plant->material_defs.type[plant_material_def::basic_mat], plant->material_defs.idx[plant_material_def::basic_mat]);
     bool outOfSeason = false;
-    selectability result = selectability::Nonselectable;
+    PlantSelectability result = PLANT_NONSELECTABLE;
 
     if (plant->flags.is_set(plant_raw_flags::TREE))
     {
 //        out.print("%s is a selectable tree\n", plant->id.c_str());
         if (farming)
         {
-            return selectability::Nonselectable;
+            return PLANT_NONSELECTABLE;
         }
         else
         {
-            return selectability::Selectable;
+            return PLANT_SELECTABLE;
         }
     }
     else if (plant->flags.is_set(plant_raw_flags::GRASS))
     {
 //        out.print("%s is a non selectable Grass\n", plant->id.c_str());
-        return selectability::Grass;
+        return PLANT_GRASS;
     }
 
     if (farming && plant->material_defs.type[plant_material_def::seed] == -1)
     {
-        return selectability::Nonselectable;
+        return PLANT_NONSELECTABLE;
     }
 
     if (basic_mat.material->flags.is_set(material_flags::EDIBLE_RAW) ||
@@ -112,12 +120,12 @@ selectability selectablePlant(const df::plant_raw *plant, bool farming)
         {
             if (basic_mat.material->flags.is_set(material_flags::EDIBLE_RAW))
             {
-                result = selectability::Selectable;
+                result = PLANT_SELECTABLE;
             }
         }
         else
         {
-            return selectability::Selectable;
+            return PLANT_SELECTABLE;
         }
     }
 
@@ -130,11 +138,11 @@ selectability selectablePlant(const df::plant_raw *plant, bool farming)
 //        out.print("%s is thread/mill/extract\n", plant->id.c_str());
         if (farming)
         {
-            result = selectability::Selectable;
+            result = PLANT_SELECTABLE;
         }
         else
         {
-            return selectability::Selectable;
+            return PLANT_SELECTABLE;
         }
     }
 
@@ -144,11 +152,11 @@ selectability selectablePlant(const df::plant_raw *plant, bool farming)
 //        out.print("%s has a reaction\n", plant->id.c_str());
         if (farming)
         {
-            result = selectability::Selectable;
+            result = PLANT_SELECTABLE;
         }
         else
         {
-            return selectability::Selectable;
+            return PLANT_SELECTABLE;
         }
     }
 
@@ -186,7 +194,7 @@ selectability selectablePlant(const df::plant_raw *plant, bool farming)
 //                     out.print("%s has an edible seed or a stockpile growth\n", plant->id.c_str());
                     if (!farming || seedSource)
                     {
-                        return selectability::Selectable;
+                        return PLANT_SELECTABLE;
                     }
                 }
                 else
@@ -209,7 +217,7 @@ selectability selectablePlant(const df::plant_raw *plant, bool farming)
                         (plant->growths[i]->timing_2 == -1 ||
                             *cur_year_tick <= plant->growths[i]->timing_2))
                     {
-                        return selectability::Selectable;
+                        return PLANT_SELECTABLE;
                     }
                     else
                     {
@@ -222,7 +230,7 @@ selectability selectablePlant(const df::plant_raw *plant, bool farming)
     if (outOfSeason)
     {
 //        out.print("%s has an out of season growth\n", plant->id.c_str());
-        return selectability::OutOfSeason;
+        return PLANT_OUTOFSEASON;
     }
     else
     {
@@ -334,7 +342,7 @@ bool designate(const df::plant *plant, bool farming) {
 command_result df_getplants (color_ostream &out, vector <string> & parameters)
 {
     string plantMatStr = "";
-    std::vector<selectability> plantSelections;
+    std::vector<PlantSelectability> plantSelections;
     std::vector<size_t> collectionCount;
     set<string> plantNames;
     bool deselect = false, exclude = false, treesonly = false, shrubsonly = false, all = false, verbose = false, farming = false;
@@ -346,7 +354,7 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
 
     for (size_t i = 0; i < plantSelections.size(); i++)
     {
-        plantSelections[i] = selectability::Unselected;
+        plantSelections[i] = PLANT_UNSELECTED;
         collectionCount[i] = 0;
     }
 
@@ -432,11 +440,11 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
             plantSelections[i] = selectablePlant(plant, farming);
             switch (plantSelections[i])
             {
-            case selectability::Grass:
+            case PLANT_GRASS:
                 out.printerr("%s is a grass and cannot be gathered\n", plant->id.c_str());
                 break;
 
-            case selectability::Nonselectable:
+            case PLANT_NONSELECTABLE:
                 if (farming)
                 {
                     out.printerr("%s does not have any parts that can be gathered for seeds for farming\n", plant->id.c_str());
@@ -447,14 +455,14 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
                 }
                 break;
 
-            case selectability::OutOfSeason:
+            case PLANT_OUTOFSEASON:
                 out.printerr("%s is out of season, with nothing that can be gathered now\n", plant->id.c_str());
                 break;
 
-            case selectability::Selectable:
+            case PLANT_SELECTABLE:
                 break;
 
-            case selectability::Unselected:
+            case PLANT_UNSELECTED:
                 break;  //  We won't get to this option
             }
         }
@@ -470,8 +478,8 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
 
     for (size_t i = 0; i < plantSelections.size(); i++)
     {
-        if (plantSelections[i] == selectability::OutOfSeason ||
-            plantSelections[i] == selectability::Selectable)
+        if (plantSelections[i] == PLANT_OUTOFSEASON ||
+            plantSelections[i] == PLANT_SELECTABLE)
         {
             anyPlantsSelected = true;
             break;
@@ -487,11 +495,11 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
 //            switch (selectablePlant(out, plant, farming))
             switch (selectablePlant(plant, farming))
                 {
-            case selectability::Grass:
-            case selectability::Nonselectable:
+            case PLANT_GRASS:
+            case PLANT_NONSELECTABLE:
                 continue;
 
-            case selectability::OutOfSeason:
+            case PLANT_OUTOFSEASON:
             {
                 if (!treesonly)
                 {
@@ -500,7 +508,7 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
                 break;
             }
 
-            case selectability::Selectable:
+            case PLANT_SELECTABLE:
             {
                 if ((treesonly && plant->flags.is_set(plant_raw_flags::TREE)) ||
                     (shrubsonly && !plant->flags.is_set(plant_raw_flags::TREE)) ||
@@ -511,7 +519,7 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
                 break;
             }
 
-            case selectability::Unselected:  //  Should never get this alternative
+            case PLANT_UNSELECTED:  //  Should never get this alternative
                 break;
             }
         }
@@ -527,11 +535,11 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
 
         int x = plant->pos.x % 16;
         int y = plant->pos.y % 16;
-        if (plantSelections[plant->material] == selectability::OutOfSeason ||
-            plantSelections[plant->material] == selectability::Selectable)
+        if (plantSelections[plant->material] == PLANT_OUTOFSEASON ||
+            plantSelections[plant->material] == PLANT_SELECTABLE)
         {
             if (exclude ||
-                plantSelections[plant->material] == selectability::OutOfSeason)
+                plantSelections[plant->material] == PLANT_OUTOFSEASON)
                 continue;
         }
         else
