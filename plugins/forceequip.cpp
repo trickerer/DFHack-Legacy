@@ -358,8 +358,11 @@ static bool moveToInventory(MapExtras::MapCache &mc, df::item *item, df::unit *u
         {
             confirmedBodyPart = currPart;        // Assume that the bodypart is valid; we'll invalidate it if we detect too many collisions while looping
             int collisions = 0;
-            for (df::unit_inventory_item * currInvItem : unit->inventory)
+            //for (df::unit_inventory_item * currInvItem : unit->inventory)
+            for (std::vector<df::unit_inventory_item*>::const_iterator ci =
+                unit->inventory.begin(); ci != unit->inventory.end(); ++ci)
             {
+                df::unit_inventory_item* currInvItem = *ci;
                 if (currInvItem->body_part_id == int32_t(bpIndex))
                 {
                     // Collision detected; have we reached the limit?
@@ -512,7 +515,7 @@ command_result df_forceequip(color_ostream &out, vector <string> & parameters)
     pos_cursor = DFCoord(cx,cy,cz);
 
     // Iterate over all units, process the first one whose pos == pos_cursor
-    df::unit * targetUnit = nullptr;
+    df::unit * targetUnit = NULL;
     size_t numUnits = world->units.all.size();
     for(size_t i=0; i< numUnits; i++)
     {
@@ -522,7 +525,7 @@ command_result df_forceequip(color_ostream &out, vector <string> & parameters)
         if (pos_unit == pos_cursor)
             break;
 
-        targetUnit = nullptr;
+        targetUnit = NULL;
     }
 
     if (!targetUnit)
