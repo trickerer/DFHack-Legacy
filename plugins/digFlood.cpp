@@ -207,7 +207,7 @@ command_result digFlood (color_ostream &out, std::vector <std::string> & paramet
     }
 
     autodigMaterials.insert(toAdd.begin(), toAdd.end());
-    for ( auto a = toRemove.begin(); a != toRemove.end(); a++ )
+    for (std::set<std::string>::const_iterator a = toRemove.begin(); a != toRemove.end(); a++ )
         autodigMaterials.erase(*a);
 
     return CR_OK;
