@@ -307,7 +307,7 @@ command_result changeitem_execute(
         sub_old.decode(item);
     if(change_subtype)
     {
-        string new_type = ENUM_KEY_STR(item_type, item->getType()) + ":" + new_subtype;
+        string new_type = ENUM_KEY_STR_SIMPLE(item_type, item->getType()) + ":" + new_subtype;
         if (new_subtype == "NONE")
             new_subtype_id = -1;
         else if (sub_new.find(new_type))
@@ -323,7 +323,7 @@ command_result changeitem_execute(
     if(info)
     {
         out << "Item info: " << endl;
-        out << "  type:    " << ENUM_KEY_STR(item_type, item->getType()) << endl;
+        out << "  type:    " << ENUM_KEY_STR_SIMPLE(item_type, item->getType()) << endl;
         out << "  subtype: " << (sub_old.custom ? sub_old.custom->id : "NONE") << endl;
         out << "  quality: " << describeQuality(item->getQuality()) << endl;
         //if(item->isImproved())
