@@ -145,7 +145,7 @@ static command_result job_material_in_job(color_ostream &out, MaterialInfo &new_
     if (new_mat.getCraftClass() != old_class)
     {
         out.printerr("New material %s does not satisfy requirement: %s\n",
-                     new_mat.toString().c_str(), ENUM_KEY_STR(craft_material_class, old_class).c_str());
+                     new_mat.toString().c_str(), ENUM_KEY_STR_SIMPLE(craft_material_class, old_class).c_str());
         return CR_FAILURE;
     }
 
@@ -181,7 +181,7 @@ static command_result job_material_in_job(color_ostream &out, MaterialInfo &new_
     }
 
     out << "Applied material '" << new_mat.toString()
-        << "' to job " << ENUM_KEY_STR(job_type,job->job_type) << endl;
+        << "' to job " << ENUM_KEY_STR_SIMPLE(job_type,job->job_type) << endl;
     return CR_OK;
 }
 
@@ -276,7 +276,7 @@ static command_result job_duplicate(color_ostream &out, vector <string> & parame
          job->job_type != job_type::CollectSand &&
          job->job_type != job_type::CollectClay))
     {
-        out.printerr("Cannot duplicate job %s\n", ENUM_KEY_STR(job_type,job->job_type).c_str());
+        out.printerr("Cannot duplicate job %s\n", ENUM_KEY_STR_SIMPLE(job_type,job->job_type).c_str());
         return CR_FAILURE;
     }
 
