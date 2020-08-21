@@ -34,7 +34,7 @@ static int mark_item(df::item *item, df::item_flags bad_flags, int32_t stockpile
         size_t marked_count = 0;
         std::vector<df::item*> contents;
         Items::getContainedItems(item, &contents);
-        for (auto child = contents.begin(); child != contents.end(); child++)
+        for (std::vector<df::item*>::const_iterator child = contents.begin(); child != contents.end(); child++)
         {
             marked_count += mark_item(*child, bad_flags, stockpile_id);
         }
@@ -67,12 +67,12 @@ static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
 #undef F
 
     size_t marked_count = 0;
-    for (auto it = stockpiles.begin(); it != stockpiles.end(); it++)
+    for (vector<PersistentStockpileInfo>::iterator it = stockpiles.begin(); it != stockpiles.end(); it++)
     {
         if (!it->isValid())
             continue;
 
-        auto spid = it->getId();
+        int32 spid = it->getId();
         Buildings::StockpileIterator stored;
         for (stored.begin(it->getStockpile()); !stored.done(); ++stored)
         {
@@ -93,7 +93,7 @@ class StockpileMonitor
 public:
     bool isMonitored(df::building_stockpilest *sp)
     {
-        for (auto it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
+        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
                 return true;
@@ -104,7 +104,7 @@ public:
 
     void add(df::building_stockpilest *sp)
     {
-        auto pile = PersistentStockpileInfo(sp, PERSISTENCE_KEY);
+        PersistentStockpileInfo pile = PersistentStockpileInfo(sp, PERSISTENCE_KEY);
         if (pile.isValid())
         {
             monitored_stockpiles.push_back(PersistentStockpileInfo(pile));
@@ -114,7 +114,7 @@ public:
 
     void remove(df::building_stockpilest *sp)
     {
-        for (auto it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
+        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
             {
@@ -127,7 +127,7 @@ public:
 
     void doCycle()
     {
-        for (auto it = monitored_stockpiles.begin(); it != monitored_stockpiles.end();)
+        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end();)
         {
             if (!it->isValid())
                 it = monitored_stockpiles.erase(it);
@@ -144,9 +144,9 @@ public:
         std::vector<PersistentDataItem> items;
         DFHack::World::GetPersistentData(&items, PERSISTENCE_KEY);
 
-        for (auto i = items.begin(); i != items.end(); i++)
+        for (std::vector<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
         {
-            auto pile = PersistentStockpileInfo(*i, PERSISTENCE_KEY);
+            PersistentStockpileInfo pile = PersistentStockpileInfo(*i, PERSISTENCE_KEY);
             if (pile.load())
                 monitored_stockpiles.push_back(PersistentStockpileInfo(pile));
             else
@@ -222,7 +222,7 @@ struct melt_hook : public df::viewscreen_dwarfmodest
         if (!sp)
             return;
 
-        auto dims = Gui::getDwarfmodeViewDims();
+        Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = dims.y2 - 6;
