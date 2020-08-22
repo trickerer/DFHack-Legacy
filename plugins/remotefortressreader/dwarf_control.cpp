@@ -151,8 +151,8 @@ command_result SendDigCommand(color_ostream &stream, const DigCommand *in)
 
     for (int i = 0; i < in->locations_size(); i++)
     {
-        auto pos = in->locations(i);
-        auto des = mc.designationAt(DFCoord(pos.x(), pos.y(), pos.z()));
+        RemoteFortressReader::Coord pos = in->locations(i);
+        df::tile_designation des = mc.designationAt(DFCoord(pos.x(), pos.y(), pos.z()));
         switch (in->designation())
         {
         case NO_DIG:
@@ -187,7 +187,7 @@ command_result SendDigCommand(color_ostream &stream, const DigCommand *in)
         {
             if (listing->item == NULL)
                 continue;
-            auto type = listing->item->job_type;
+            df::job_type type = listing->item->job_type;
             switch (type)
             {
             case job_type::CarveFortification:
@@ -232,17 +232,17 @@ command_result SetPauseState(color_ostream &stream, const SingleBool *in)
 
 void CopyBuildMenu(DwarfControl::SidebarState * out)
 {
-    auto menus = df::global::ui_sidebar_menus;
-    auto build_selector = df::global::ui_build_selector;
+    df::ui_sidebar_menus* menus = df::global::ui_sidebar_menus;
+    df::ui_build_selector* build_selector = df::global::ui_build_selector;
     if (build_selector->building_type == -1)
         for (size_t i = 0; i < menus->building.choices_visible.size(); i++)
         {
-            auto menu_item = menus->building.choices_visible[i];
-            auto send_item = out->add_menu_items();
+            df::interface_button_constructionst* menu_item = menus->building.choices_visible[i];
+            DwarfControl::MenuItem* send_item = out->add_menu_items();
             STRICT_VIRTUAL_CAST_VAR(building, df::interface_button_construction_building_selectorst, menu_item);
             if (building)
             {
-                auto send_bld = send_item->mutable_building_type();
+                RemoteFortressReader::BuildingType* send_bld = send_item->mutable_building_type();
                 send_bld->set_building_type(building->building_type);
                 send_bld->set_building_subtype(building->building_subtype);
                 send_bld->set_building_custom(building->custom_type);
@@ -256,8 +256,8 @@ void CopyBuildMenu(DwarfControl::SidebarState * out)
         }
     else
     {
-        auto send_selector = out->mutable_build_selector();
-        auto send_bld = send_selector->mutable_building_type();
+        DwarfControl::BuildSelector* send_selector = out->mutable_build_selector();
+        RemoteFortressReader::BuildingType* send_bld = send_selector->mutable_building_type();
         send_bld->set_building_type(build_selector->building_type);
         send_bld->set_building_subtype(build_selector->building_subtype);
         send_bld->set_building_custom(build_selector->custom_type);
@@ -269,8 +269,8 @@ void CopyBuildMenu(DwarfControl::SidebarState * out)
         }
         for (size_t i = 0; i < build_selector->choices.size(); i++)
         {
-            auto choice = build_selector->choices[i];
-            auto send_choice = send_selector->add_choices();
+            df::build_req_choicest* choice = build_selector->choices[i];
+            DwarfControl::BuiildReqChoice* send_choice = send_selector->add_choices();
             send_choice->set_distance(choice->distance);
             std::string name;
             choice->getName(&name);
@@ -286,7 +286,7 @@ void CopyBuildMenu(DwarfControl::SidebarState * out)
         send_selector->set_radius_y_high(y_high);
         if (build_selector->stage >= 1)
         {
-            auto send_cursor = send_selector->mutable_cursor();
+            RemoteFortressReader::Coord* send_cursor = send_selector->mutable_cursor();
             send_cursor->set_x(cursor->x);
             send_cursor->set_y(cursor->y);
             send_cursor->set_z(cursor->z);
@@ -302,9 +302,9 @@ void CopyBuildMenu(DwarfControl::SidebarState * out)
 
 command_result GetSideMenu(DFHack::color_ostream &stream, const dfproto::EmptyMessage *in, DwarfControl::SidebarState *out)
 {
-    auto ui = df::global::ui;
+    df::ui* ui = df::global::ui;
     out->set_mode((proto::enums::ui_sidebar_mode::ui_sidebar_mode)ui->main.mode);
-    auto mode = ui->main.mode;
+    df::ui_sidebar_mode mode = ui->main.mode;
     switch (mode)
     {
     case ui_sidebar_mode::Default:
@@ -426,7 +426,7 @@ command_result GetSideMenu(DFHack::color_ostream &stream, const dfproto::EmptyMe
 
 command_result SetSideMenu(DFHack::color_ostream &stream, const DwarfControl::SidebarCommand *in)
 {
-    auto ui = df::global::ui;
+    df::ui* ui = df::global::ui;
     if (in->has_mode())
     {
         ui_sidebar_mode::ui_sidebar_mode set_mode = (ui_sidebar_mode::ui_sidebar_mode)in->mode();
@@ -474,7 +474,7 @@ command_result SetSideMenu(DFHack::color_ostream &stream, const DwarfControl::Si
     default:
         break;
     }
-    auto viewScreen = getCurViewscreen();
+    df::viewscreen* viewScreen = getCurViewscreen();
     if (in->has_action())
     {
         switch (in->action())

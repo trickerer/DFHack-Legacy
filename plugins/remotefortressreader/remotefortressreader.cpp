@@ -204,7 +204,7 @@ command_result loadArtImageChunk(color_ostream &out, vector <string> & parameter
     if (GetArtImageChunk)
     {
         int index = atoi(parameters[0].c_str());
-        auto chunk = GetArtImageChunk(&(world->art_image_chunks), index);
+        df::art_image_chunk* chunk = GetArtImageChunk(&(world->art_image_chunks), index);
         out.print("Loaded chunk id: %d\n", chunk->id);
     }
     return CR_OK;
@@ -320,7 +320,7 @@ void ConvertDfColor(int16_t index, RemoteFortressReader::ColorDefinition * out)
     if (!df::global::enabler)
         return;
 
-    auto enabler = df::global::enabler;
+    df::enabler* enabler = df::global::enabler;
 
     out->set_red((int)(enabler->ccolor[index][0] * 255));
     out->set_green((int)(enabler->ccolor[index][1] * 255));
@@ -684,7 +684,7 @@ bool IsBuildingChanged(DFCoord pos)
     for (int x = 0; x < 16; x++)
         for (int y = 0; y < 16; y++)
         {
-            auto bld = block->occupancy[x][y].bits.building;
+            df::tile_building_occ bld = block->occupancy[x][y].bits.building;
             if (buildingHashes[pos] != bld)
             {
                 buildingHashes[pos] = bld;
@@ -714,13 +714,13 @@ bool IsspatterChanged(DFCoord pos)
 
     for (size_t i = 0; i < materials.size(); i++)
     {
-        auto mat = materials[i];
+        df::block_square_event_material_spatterst* mat = materials[i];
         hash ^= fletcher16((uint8_t*)mat, sizeof(df::block_square_event_material_spatterst));
     }
 #if DF_VERSION_INT > 34011
     for (size_t i = 0; i < items.size(); i++)
     {
-        auto item = items[i];
+        df::block_square_event_item_spatterst* item = items[i];
         hash ^= fletcher16((uint8_t*)item, sizeof(df::block_square_event_item_spatterst));
     }
 #endif
@@ -737,7 +737,7 @@ map<int, uint16_t> itemHashes;
 bool isItemChanged(int i)
 {
     uint16_t hash = 0;
-    auto item = df::item::find(i);
+    df::item* item = df::item::find(i);
     if (item)
     {
         hash = fletcher16((uint8_t*)item, sizeof(df::item));
@@ -1080,7 +1080,7 @@ void CopyDesignation(df::map_block * DfBlock, RemoteFortressReader::MapBlock * N
             NetBlock->add_water_stagnant(designation.bits.water_stagnant);
             if (gamemode && (*gamemode == game_mode::ADVENTURE))
             {
-                auto fog_of_war = DfBlock->fog_of_war[xx][yy];
+                uint8 fog_of_war = DfBlock->fog_of_war[xx][yy];
                 NetBlock->add_hidden(designation.bits.dig == TileDigDesignation::NO_DIG || designation.bits.hidden);
                 NetBlock->add_tile_dig_designation(TileDigDesignation::NO_DIG);
                 NetBlock->add_tile_dig_designation_marker(false);
@@ -1125,8 +1125,8 @@ void CopyDesignation(df::map_block * DfBlock, RemoteFortressReader::MapBlock * N
 #if DF_VERSION_INT > 34011
     for (size_t i = 0; i < world->jobs.postings.size(); i++)
     {
-        auto job = world->jobs.postings[i]->job;
-        if (job == nullptr)
+        df::job* job = world->jobs.postings[i]->job;
+        if (job == NULL)
             continue;
         if (
             job->pos.z > DfBlock->map_pos.z
@@ -1175,12 +1175,12 @@ void CopyDesignation(df::map_block * DfBlock, RemoteFortressReader::MapBlock * N
 
 void CopyProjectiles(RemoteFortressReader::MapBlock * NetBlock)
 {
-    for (auto proj = world->proj_list.next; proj != NULL; proj = proj->next)
+    for (df::proj_list_link* proj = world->proj_list.next; proj != NULL; proj = proj->next)
     {
         STRICT_VIRTUAL_CAST_VAR(projectile, df::proj_itemst, proj->item);
         if (projectile == NULL)
             continue;
-        auto NetItem = NetBlock->add_items();
+        RemoteFortressReader::Item* NetItem = NetBlock->add_items();
         CopyItem(NetItem, projectile->item);
         NetItem->set_projectile(true);
         if (projectile->flags.bits.parabolic)
@@ -1207,8 +1207,8 @@ void CopyProjectiles(RemoteFortressReader::MapBlock * NetBlock)
     for (size_t i = 0; i < world->vehicles.active.size(); i++)
     {
         bool isProj = false;
-        auto vehicle = world->vehicles.active[i];
-        for (auto proj = world->proj_list.next; proj != NULL; proj = proj->next)
+        df::vehicle* vehicle = world->vehicles.active[i];
+        for (df::proj_list_link* proj = world->proj_list.next; proj != NULL; proj = proj->next)
         {
             STRICT_VIRTUAL_CAST_VAR(projectile, df::proj_itemst, proj->item);
             if (!projectile)
@@ -1222,10 +1222,10 @@ void CopyProjectiles(RemoteFortressReader::MapBlock * NetBlock)
         if (isProj)
             continue;
 
-        auto item = Items::findItemByID(vehicle->item_id);
+        df::item* item = Items::findItemByID(vehicle->item_id);
         if (!item)
             continue;
-        auto NetItem = NetBlock->add_items();
+        RemoteFortressReader::Item* NetItem = NetBlock->add_items();
         CopyItem(NetItem, item);
         NetItem->set_subpos_x(vehicle->offset_x / 100000.0);
         NetItem->set_subpos_y(vehicle->offset_y / 100000.0);
@@ -1245,7 +1245,7 @@ void CopyBuildings(DFCoord min, DFCoord max, RemoteFortressReader::MapBlock * Ne
         df::building * bld = df::global::world->buildings.all[i];
         if (bld->x1 >= max.x || bld->y1 >= max.y || bld->x2 < min.x || bld->y2 < min.y)
         {
-            auto out_bld = NetBlock->add_buildings();
+            RemoteFortressReader::BuildingInstance* out_bld = NetBlock->add_buildings();
             out_bld->set_index(bld->id);
             continue;
         }
@@ -1262,18 +1262,18 @@ void CopyBuildings(DFCoord min, DFCoord max, RemoteFortressReader::MapBlock * Ne
         }
         if (bld->z < min.z || z2 >= max.z)
         {
-            auto out_bld = NetBlock->add_buildings();
+            RemoteFortressReader::BuildingInstance* out_bld = NetBlock->add_buildings();
             out_bld->set_index(bld->id);
             continue;
         }
-        auto out_bld = NetBlock->add_buildings();
+        RemoteFortressReader::BuildingInstance* out_bld = NetBlock->add_buildings();
         CopyBuilding(i, out_bld);
         df::building_actual* actualBuilding = virtual_cast<df::building_actual>(bld);
         if (actualBuilding)
         {
             for (size_t i = 0; i < actualBuilding->contained_items.size(); i++)
             {
-                auto buildingItem = out_bld->add_items();
+                RemoteFortressReader::BuildingItem* buildingItem = out_bld->add_items();
                 buildingItem->set_mode(actualBuilding->contained_items[i]->use_mode);
                 CopyItem(buildingItem->mutable_item(), actualBuilding->contained_items[i]->item);
             }
@@ -1299,13 +1299,13 @@ void Copyspatters(df::map_block * DfBlock, RemoteFortressReader::MapBlock * NetB
     for (int yy = 0; yy < 16; yy++)
         for (int xx = 0; xx < 16; xx++)
         {
-            auto send_pile = NetBlock->add_spatterpile();
+            RemoteFortressReader::SpatterPile* send_pile = NetBlock->add_spatterpile();
             for (size_t i = 0; i < materials.size(); i++)
             {
-                auto mat = materials[i];
+                df::block_square_event_material_spatterst* mat = materials[i];
                 if (mat->amount[xx][yy] == 0)
                     continue;
-                auto send_spat = send_pile->add_spatters();
+                RemoteFortressReader::Spatter* send_spat = send_pile->add_spatters();
                 send_spat->set_state((MatterState)mat->mat_state);
                 CopyMat(send_spat->mutable_material(), mat->mat_type, mat->mat_index);
                 send_spat->set_amount(mat->amount[xx][yy]);
@@ -1313,20 +1313,20 @@ void Copyspatters(df::map_block * DfBlock, RemoteFortressReader::MapBlock * NetB
 #if DF_VERSION_INT > 34011
             for (size_t i = 0; i < items.size(); i++)
             {
-                auto item = items[i];
+                df::block_square_event_item_spatterst* item = items[i];
                 if (item->amount[xx][yy] == 0)
                     continue;
-                auto send_spat = send_pile->add_spatters();
+                RemoteFortressReader::Spatter* send_spat = send_pile->add_spatters();
                 CopyMat(send_spat->mutable_material(), item->mattype, item->matindex);
                 send_spat->set_amount(item->amount[xx][yy]);
-                auto send_item = send_spat->mutable_item();
+                RemoteFortressReader::MatPair* send_item = send_spat->mutable_item();
                 send_item->set_mat_type(item->item_type);
                 send_item->set_mat_index(item->item_subtype);
             }
             int grassPercent = 0;
             for (size_t i = 0; i < grasses.size(); i++)
             {
-                auto grass = grasses[i];
+                df::block_square_event_grassst* grass = grasses[i];
                 if (grass->amount[xx][yy] > grassPercent)
                     grassPercent = grass->amount[xx][yy];
             }
@@ -1344,7 +1344,7 @@ void CopyItems(df::map_block * DfBlock, RemoteFortressReader::MapBlock * NetBloc
     {
         int id = DfBlock->items[i];
 
-        auto item = df::item::find(id);
+        df::item* item = df::item::find(id);
         if (item)
             CopyItem(NetBlock->add_items(), item);
     }
@@ -1359,12 +1359,12 @@ void CopyFlow(df::flow_info * localFlow, RemoteFortressReader::FlowInfo * netFlo
     netFlow->set_expanding(localFlow->expanding);
     netFlow->set_reuse(localFlow->reuse);
     netFlow->set_guide_id(localFlow->guide_id);
-    auto mat = netFlow->mutable_material();
+    RemoteFortressReader::MatPair* mat = netFlow->mutable_material();
     mat->set_mat_index(localFlow->mat_index);
     mat->set_mat_type(localFlow->mat_type);
     if (localFlow->guide_id >= 0 && localFlow->type == flow_type::ItemCloud)
     {
-        auto guide = df::flow_guide::find(localFlow->guide_id);
+        df::flow_guide* guide = df::flow_guide::find(localFlow->guide_id);
         if (guide)
         {
             VIRTUAL_CAST_VAR(cloud, df::flow_guide_item_cloudst, guide);
@@ -1372,7 +1372,7 @@ void CopyFlow(df::flow_info * localFlow, RemoteFortressReader::FlowInfo * netFlo
             {
                 mat->set_mat_index(cloud->matindex);
                 mat->set_mat_type(cloud->mattype);
-                auto item = netFlow->mutable_item();
+                RemoteFortressReader::MatPair* item = netFlow->mutable_item();
                 item->set_mat_index(cloud->item_subtype);
                 item->set_mat_type(cloud->item_type);
             }
@@ -1460,7 +1460,7 @@ static command_result GetBlockList(color_ostream &stream, const BlockRequest *in
                         bool spatterChanged = IsspatterChanged(pos);
                         bool itemsChanged = block->items.size() > 0;
                         bool flows = block->flows.size() > 0;
-                        RemoteFortressReader::MapBlock *net_block = nullptr;
+                        RemoteFortressReader::MapBlock *net_block = NULL;
                         if (tileChanged || desChanged || spatterChanged || firstBlock || itemsChanged || flows)
                         {
                             net_block = out->add_map_blocks();
@@ -1519,7 +1519,7 @@ static command_result GetBlockList(color_ostream &stream, const BlockRequest *in
 
     for (size_t i = 0; i < world->engravings.size(); i++)
     {
-        auto engraving = world->engravings[i];
+        df::engraving* engraving = world->engravings[i];
         if (engraving->pos.x < (min_x * 16) || engraving->pos.x >(max_x * 16))
             continue;
         if (engraving->pos.y < (min_y * 16) || engraving->pos.y >(max_y * 16))
@@ -1548,7 +1548,7 @@ static command_result GetBlockList(color_ostream &stream, const BlockRequest *in
             engravingIsNotNew(i);
             continue;
         }
-        auto netEngraving = out->add_engravings();
+        RemoteFortressReader::Engraving* netEngraving = out->add_engravings();
         ConvertDFCoord(engraving->pos, netEngraving->mutable_pos());
         netEngraving->set_quality(engraving->quality);
         netEngraving->set_tile(engraving->tile);
@@ -1566,8 +1566,8 @@ static command_result GetBlockList(color_ostream &stream, const BlockRequest *in
     }
     for (size_t i = 0; i < world->ocean_waves.size(); i++)
     {
-        auto wave = world->ocean_waves[i];
-        auto netWave = out->add_ocean_waves();
+        df::ocean_wave* wave = world->ocean_waves[i];
+        RemoteFortressReader::Wave* netWave = out->add_ocean_waves();
         ConvertDFCoord(wave->x1, wave->y1, wave->z, netWave->mutable_dest());
         ConvertDFCoord(wave->x2, wave->y2, wave->z, netWave->mutable_pos());
     }
@@ -1578,11 +1578,11 @@ static command_result GetBlockList(color_ostream &stream, const BlockRequest *in
 static command_result GetTiletypeList(color_ostream &stream, const EmptyMessage *in, TiletypeList *out)
 {
     int count = 0;
-    FOR_ENUM_ITEMS(tiletype, tt)
+    FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
     {
         Tiletype * type = out->add_tiletype_list();
         type->set_id(tt);
-        type->set_name(ENUM_KEY_STR(tiletype, tt));
+        type->set_name(ENUM_KEY_STR_SIMPLE(tiletype, tt));
         const char * name = tileName(tt);
         if (name != NULL && name[0] != 0)
             type->set_caption(name);
@@ -1660,8 +1660,8 @@ void GetWounds(df::unit_wound * wound, UnitWound * send_wound)
 {
     for (size_t i = 0; i < wound->parts.size(); i++)
     {
-        auto part = wound->parts[i];
-        auto send_part = send_wound->add_parts();
+        df::unit_wound::T_parts* part = wound->parts[i];
+        RemoteFortressReader::WoundPart* send_part = send_wound->add_parts();
         send_part->set_global_layer_idx(part->global_layer_idx);
         send_part->set_body_part_id(part->body_part_id);
         send_part->set_layer_idx(part->layer_idx);
@@ -1671,11 +1671,11 @@ void GetWounds(df::unit_wound * wound, UnitWound * send_wound)
 
 static command_result GetUnitListInside(color_ostream &stream, const BlockRequest *in, UnitList *out)
 {
-    auto world = df::global::world;
+    df::world* world = df::global::world;
     for (size_t i = 0; i < world->units.active.size(); i++)
     {
         df::unit * unit = world->units.active[i];
-        auto send_unit = out->add_creature_list();
+        RemoteFortressReader::UnitDefinition* send_unit = out->add_creature_list();
         send_unit->set_id(unit->id);
         send_unit->set_pos_x(unit->pos.x);
         send_unit->set_pos_y(unit->pos.y);
@@ -1702,7 +1702,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
         send_unit->set_flags2(unit->flags2.whole);
         send_unit->set_flags3(unit->flags3.whole);
         send_unit->set_is_soldier(ENUM_ATTR(profession, military, unit->profession));
-        auto size_info = send_unit->mutable_size_info();
+        RemoteFortressReader::BodySizeInfo* size_info = send_unit->mutable_size_info();
         size_info->set_size_cur(unit->body.size_info.size_cur);
         size_info->set_size_base(unit->body.size_info.size_base);
         size_info->set_area_cur(unit->body.size_info.area_cur);
@@ -1714,7 +1714,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
             send_unit->set_name(DF2UTF(Translation::TranslateName(Units::getVisibleName(unit))));
         }
 
-        auto appearance = send_unit->mutable_appearance();
+        RemoteFortressReader::UnitAppearance* appearance = send_unit->mutable_appearance();
         for (size_t j = 0; j < unit->appearance.body_modifiers.size(); j++)
             appearance->add_body_modifiers(unit->appearance.body_modifiers[j]);
         for (size_t j = 0; j < unit->appearance.bp_modifiers.size(); j++)
@@ -1733,44 +1733,44 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
         {
             for (size_t j = 0; j < pvec.size(); j++)
             {
-                auto noble_positon = pvec[j];
+                Units::NoblePosition noble_positon = pvec[j];
                 send_unit->add_noble_positions(noble_positon.position->code);
             }
         }
 
         send_unit->set_rider_id(unit->relationship_ids[df::unit_relationship_type::RiderMount]);
 
-        auto creatureRaw = world->raws.creatures.all[unit->race];
-        auto casteRaw = creatureRaw->caste[unit->caste];
+        df::creature_raw* creatureRaw = world->raws.creatures.all[unit->race];
+        df::caste_raw* casteRaw = creatureRaw->caste[unit->caste];
 
         for (size_t j = 0; j < unit->appearance.tissue_style_type.size(); j++)
         {
-            auto type = unit->appearance.tissue_style_type[j];
+            int32 type = unit->appearance.tissue_style_type[j];
             if (type < 0)
                 continue;
             int style_raw_index = binsearch_index(casteRaw->tissue_styles, &df::tissue_style_raw::id, type);
-            auto styleRaw = casteRaw->tissue_styles[style_raw_index];
+            df::tissue_style_raw* styleRaw = casteRaw->tissue_styles[style_raw_index];
             if (styleRaw->token == "HAIR")
             {
-                auto send_style = appearance->mutable_hair();
+                RemoteFortressReader::Hair* send_style = appearance->mutable_hair();
                 send_style->set_length(unit->appearance.tissue_length[j]);
                 send_style->set_style((HairStyle)unit->appearance.tissue_style[j]);
             }
             else if (styleRaw->token == "BEARD")
             {
-                auto send_style = appearance->mutable_beard();
+                RemoteFortressReader::Hair* send_style = appearance->mutable_beard();
                 send_style->set_length(unit->appearance.tissue_length[j]);
                 send_style->set_style((HairStyle)unit->appearance.tissue_style[j]);
             }
             else if (styleRaw->token == "MOUSTACHE")
             {
-                auto send_style = appearance->mutable_moustache();
+                RemoteFortressReader::Hair* send_style = appearance->mutable_moustache();
                 send_style->set_length(unit->appearance.tissue_length[j]);
                 send_style->set_style((HairStyle)unit->appearance.tissue_style[j]);
             }
             else if (styleRaw->token == "SIDEBURNS")
             {
-                auto send_style = appearance->mutable_sideburns();
+                RemoteFortressReader::Hair* send_style = appearance->mutable_sideburns();
                 send_style->set_length(unit->appearance.tissue_length[j]);
                 send_style->set_style((HairStyle)unit->appearance.tissue_style[j]);
             }
@@ -1778,8 +1778,8 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
 
         for (size_t j = 0; j < unit->inventory.size(); j++)
         {
-            auto inventory_item = unit->inventory[j];
-            auto sent_item = send_unit->add_inventory();
+            df::unit_inventory_item* inventory_item = unit->inventory[j];
+            RemoteFortressReader::InventoryItem* sent_item = send_unit->add_inventory();
             sent_item->set_mode((InventoryMode)inventory_item->mode);
             sent_item->set_body_part_id(inventory_item->body_part_id);
             CopyItem(sent_item->mutable_item(), inventory_item->item);
@@ -1787,7 +1787,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
 
         if (unit->flags1.bits.projectile)
         {
-            for (auto proj = world->proj_list.next; proj != NULL; proj = proj->next)
+            for (df::proj_list_link* proj = world->proj_list.next; proj != NULL; proj = proj->next)
             {
                 STRICT_VIRTUAL_CAST_VAR(item, df::proj_unitst, proj->item);
                 if (item == NULL)
@@ -1797,7 +1797,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
                 send_unit->set_subpos_x(item->pos_x / 100000.0);
                 send_unit->set_subpos_y(item->pos_y / 100000.0);
                 send_unit->set_subpos_z(item->pos_z / 140000.0);
-                auto facing = send_unit->mutable_facing();
+                RemoteFortressReader::Coord* facing = send_unit->mutable_facing();
                 facing->set_x(item->speed_x);
                 facing->set_y(item->speed_x);
                 facing->set_z(item->speed_x);
@@ -1808,7 +1808,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
         {
             for (size_t i = 0; i < unit->actions.size(); i++)
             {
-                auto action = unit->actions[i];
+                df::unit_action* action = unit->actions[i];
                 switch (action->type)
                 {
                 case unit_action_type::Move:
@@ -1821,7 +1821,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
                     break;
                 case unit_action_type::Job:
                     {
-                    auto facing = send_unit->mutable_facing();
+                    RemoteFortressReader::Coord* facing = send_unit->mutable_facing();
                     facing->set_x(action->data.job.x - unit->pos.x);
                     facing->set_y(action->data.job.y - unit->pos.y);
                     facing->set_z(action->data.job.z - unit->pos.z);
@@ -1832,7 +1832,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
             }
             if (unit->path.path.x.size() > 0)
             {
-                auto facing = send_unit->mutable_facing();
+                RemoteFortressReader::Coord* facing = send_unit->mutable_facing();
                 facing->set_x(unit->path.path.x[0] - unit->pos.x);
                 facing->set_y(unit->path.path.y[0] - unit->pos.y);
                 facing->set_z(unit->path.path.z[0] - unit->pos.z);
@@ -1854,7 +1854,7 @@ static command_result GetViewInfo(color_ostream &stream, const EmptyMessage *in,
     Gui::getCursorCoords(cx, cy, cz);
 
 #if DF_VERSION_INT > 34011
-    auto embark = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* embark = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     if (embark)
     {
         df::embark_location location = embark->location;
@@ -1866,7 +1866,7 @@ static command_result GetViewInfo(color_ostream &stream, const EmptyMessage *in,
     }
 #endif
 
-    auto dims = Gui::getDwarfmodeViewDims();
+    Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
 
     x += dims.map_x1;
     y += dims.map_y1;
@@ -1915,7 +1915,7 @@ DFCoord GetMapCenter()
 {
     DFCoord output;
 #if DF_VERSION_INT > 34011
-    auto embark = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    df::viewscreen_choose_start_sitest* embark = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
     if (embark)
     {
         df::embark_location location = embark->location;
@@ -1997,7 +1997,7 @@ static command_result GetWorldMap(color_ostream &stream, const EmptyMessage *in,
     out->set_world_height(height);
     out->set_name(Translation::TranslateName(&(data->name), false));
     out->set_name_english(Translation::TranslateName(&(data->name), true));
-    auto poles = data->flip_latitude;
+    df::world_data::T_flip_latitude poles = data->flip_latitude;
 #if DF_VERSION_INT > 34011
     switch (poles)
     {
@@ -2033,7 +2033,7 @@ static command_result GetWorldMap(color_ostream &stream, const EmptyMessage *in,
             out->add_volcanism(map_entry->volcanism);
             out->add_savagery(map_entry->savagery);
             out->add_salinity(map_entry->salinity);
-            auto clouds = out->add_clouds();
+            RemoteFortressReader::Cloud* clouds = out->add_clouds();
 #if DF_VERSION_INT > 34011
             clouds->set_cirrus(map_entry->clouds.bits.cirrus);
             clouds->set_cumulus((RemoteFortressReader::CumulusType)map_entry->clouds.bits.cumulus);
@@ -2084,7 +2084,7 @@ static void SetRegionTile(RegionTile * out, df::region_map_entry * e1)
     int topLayer = 0;
     for (size_t i = 0; i < geoBiome->layers.size(); i++)
     {
-        auto layer = geoBiome->layers[i];
+        df::world_geo_layer* layer = geoBiome->layers[i];
         if (layer->top_height == 0)
         {
             topLayer = layer->mat_index;
@@ -2093,28 +2093,28 @@ static void SetRegionTile(RegionTile * out, df::region_map_entry * e1)
             && layer->type != geo_layer_type::SOIL_OCEAN
             && layer->type != geo_layer_type::SOIL_SAND)
         {
-            auto mat = out->add_stone_materials();
+            RemoteFortressReader::MatPair* mat = out->add_stone_materials();
             mat->set_mat_index(layer->mat_index);
             mat->set_mat_type(0);
         }
     }
-    auto surfaceMat = out->mutable_surface_material();
+    RemoteFortressReader::MatPair* surfaceMat = out->mutable_surface_material();
     surfaceMat->set_mat_index(topLayer);
     surfaceMat->set_mat_type(0);
 
     for (size_t i = 0; i < region->population.size(); i++)
     {
-        auto pop = region->population[i];
+        df::world_population* pop = region->population[i];
         if (pop->type == world_population_type::Grass)
         {
-            auto plantMat = out->add_plant_materials();
+            RemoteFortressReader::MatPair* plantMat = out->add_plant_materials();
 
             plantMat->set_mat_index(pop->plant);
             plantMat->set_mat_type(419);
         }
         else if (pop->type == world_population_type::Tree)
         {
-            auto plantMat = out->add_tree_materials();
+            RemoteFortressReader::MatPair* plantMat = out->add_tree_materials();
 
             plantMat->set_mat_index(pop->plant);
             plantMat->set_mat_type(419);
@@ -2147,7 +2147,7 @@ static command_result GetWorldMapNew(color_ostream &stream, const EmptyMessage *
     out->set_name(Translation::TranslateName(&(data->name), false));
     out->set_name_english(Translation::TranslateName(&(data->name), true));
 #if DF_VERSION_INT > 34011
-    auto poles = data->flip_latitude;
+    df::world_data::T_flip_latitude poles = data->flip_latitude;
     switch (poles)
     {
     case df::world_data::None:
@@ -2174,10 +2174,10 @@ static command_result GetWorldMapNew(color_ostream &stream, const EmptyMessage *
             df::region_map_entry * map_entry = &data->region_map[xx][yy];
             df::world_region * region = data->regions[map_entry->region_id];
 
-            auto regionTile = out->add_region_tiles();
+            RemoteFortressReader::RegionTile* regionTile = out->add_region_tiles();
             regionTile->set_elevation(map_entry->elevation);
             SetRegionTile(regionTile, map_entry);
-            auto clouds = out->add_clouds();
+            RemoteFortressReader::Cloud* clouds = out->add_clouds();
 #if DF_VERSION_INT > 34011
             clouds->set_cirrus(map_entry->clouds.bits.cirrus);
             clouds->set_cumulus((RemoteFortressReader::CumulusType)map_entry->clouds.bits.cumulus);
@@ -2286,7 +2286,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
     out->set_name_english(name);
     out->set_name(name);
 #if DF_VERSION_INT > 34011
-    auto poles = worldData->flip_latitude;
+    df::world_data::T_flip_latitude poles = worldData->flip_latitude;
     switch (poles)
     {
     case df::world_data::None:
@@ -2314,7 +2314,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
 
     for (size_t i = 0; i < worldData->region_details.size(); i++)
     {
-        auto region = worldData->region_details[i];
+        df::world_region_details* region = worldData->region_details[i];
         if (region->pos.x == pos_x + 1 && region->pos.y == pos_y + 1)
             southEast = region;
         else if (region->pos.x == pos_x + 1 && region->pos.y == pos_y)
@@ -2354,11 +2354,11 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
             }
             else
             {
-                auto riverTile = out->add_river_tiles();
-                auto east = riverTile->mutable_east();
-                auto north = riverTile->mutable_north();
-                auto south = riverTile->mutable_south();
-                auto west = riverTile->mutable_west();
+                RemoteFortressReader::RiverTile* riverTile = out->add_river_tiles();
+                RemoteFortressReader::RiverEdge* east = riverTile->mutable_east();
+                RemoteFortressReader::RiverEdge* north = riverTile->mutable_north();
+                RemoteFortressReader::RiverEdge* south = riverTile->mutable_south();
+                RemoteFortressReader::RiverEdge* west = riverTile->mutable_west();
 
                 north->set_active(worldRegionDetails->rivers_vertical.active[xx][yy]);
                 north->set_elevation(worldRegionDetails->rivers_vertical.elevation[xx][yy]);
@@ -2401,7 +2401,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
 
     for (size_t i = 0; i < worldData->region_details.size(); i++)
     {
-        auto region = worldData->region_details[i];
+        df::world_region_details* region = worldData->region_details[i];
         if (region->pos.x == pos_x + 1 && region->pos.y == pos_y + 1)
             southEast = region;
         else if (region->pos.x == pos_x + 1 && region->pos.y == pos_y)
@@ -2415,7 +2415,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
     for (int yy = 0; yy < 17; yy++)
         for (int xx = 0; xx < 17; xx++)
         {
-            auto tile = out->add_tiles();
+            RemoteFortressReader::RegionTile* tile = out->add_tiles();
             outputTiles[xx][yy] = tile;
             //This is because the bottom row doesn't line up.
             if (xx == 16 && yy == 16 && southEast != NULL)
@@ -2439,11 +2439,11 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
                 AddRegionTiles(tile, ShiftCoords(df::coord2d(pos_x, pos_y), (worldRegionDetails->biome[xx][yy])), worldData);
             }
 
-            auto riverTile = tile->mutable_river_tiles();
-            auto east = riverTile->mutable_east();
-            auto north = riverTile->mutable_north();
-            auto south = riverTile->mutable_south();
-            auto west = riverTile->mutable_west();
+            RemoteFortressReader::RiverTile* riverTile = tile->mutable_river_tiles();
+            RemoteFortressReader::RiverEdge* east = riverTile->mutable_east();
+            RemoteFortressReader::RiverEdge* north = riverTile->mutable_north();
+            RemoteFortressReader::RiverEdge* south = riverTile->mutable_south();
+            RemoteFortressReader::RiverEdge* west = riverTile->mutable_west();
 
             if (xx < 16)
             {
@@ -2506,7 +2506,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
             }
         }
 
-    auto regionMap = worldData->region_map[pos_x][pos_y];
+    df::region_map_entry const& regionMap = worldData->region_map[pos_x][pos_y];
 
     for (size_t i = 0; i < worldData->sites.size(); i++)
     {
@@ -2526,7 +2526,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
         if (site->realization == NULL)
             continue;
 
-        auto realization = site->realization;
+        df::world_site_realization* realization = site->realization;
         for (int site_x = 0; site_x < 17; site_x++)
             for (int site_y = 0; site_y < 17; site_y++)
             {
@@ -2538,8 +2538,8 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
 
                 for (size_t j = 0; j < realization->building_map[site_x][site_y].buildings.size(); j++)
                 {
-                    auto in_building = realization->building_map[site_x][site_y].buildings[j];
-                    auto out_building = outputTiles[region_x][region_y]->add_buildings();
+                    df::site_realization_building* in_building = realization->building_map[site_x][site_y].buildings[j];
+                    RemoteFortressReader::SiteRealizationBuilding* out_building = outputTiles[region_x][region_y]->add_buildings();
 
                     out_building->set_id(in_building->id);
 #if DF_VERSION_INT > 34011
@@ -2558,7 +2558,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
                     {
                         CopyMat(out_building->mutable_material(), tower_info->wall_item.mat_type, tower_info->wall_item.mat_index);
 
-                        auto out_tower = out_building->mutable_tower_info();
+                        RemoteFortressReader::SiteRealizationBuildingTower* out_tower = out_building->mutable_tower_info();
                         out_tower->set_roof_z(tower_info->roof_z);
                         out_tower->set_round(tower_info->shape.bits.round);
                         out_tower->set_goblin(tower_info->shape.bits.goblin);
@@ -2568,7 +2568,7 @@ static void CopyLocalMap(df::world_data * worldData, df::world_region_details* w
                     {
                         CopyMat(out_building->mutable_material(), wall_info->wall_item.mat_type, wall_info->wall_item.mat_index);
 
-                        auto out_wall = out_building->mutable_wall_info();
+                        RemoteFortressReader::SiteRealizationBuildingWall* out_wall = out_building->mutable_wall_info();
 
                         out_wall->set_start_x(wall_info->start_x - (site_x * 48));
                         out_wall->set_start_y(wall_info->start_y - (site_y * 48));
@@ -2635,7 +2635,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
     int list_start = 0;
     int list_end = world->raws.creatures.all.size();
 
-    if (in != nullptr)
+    if (in != NULL)
     {
         list_start = in->list_start();
         if (in->list_end() < list_end)
@@ -2646,7 +2646,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
     {
         df::creature_raw * orig_creature = world->raws.creatures.all[i];
 
-        auto send_creature = out->add_creature_raws();
+        RemoteFortressReader::CreatureRaw* send_creature = out->add_creature_raws();
 
         send_creature->set_index(i);
         send_creature->set_creature_id(orig_creature->creature_id);
@@ -2669,10 +2669,10 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
         for (size_t j = 0; j < orig_creature->caste.size(); j++)
         {
-            auto orig_caste = orig_creature->caste[j];
+            df::caste_raw* orig_caste = orig_creature->caste[j];
             if (!orig_caste)
                 continue;
-            auto send_caste = send_creature->add_caste();
+            RemoteFortressReader::CasteRaw* send_caste = send_creature->add_caste();
 
             send_caste->set_index(j);
 
@@ -2691,10 +2691,10 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
             for (size_t partIndex = 0; partIndex < orig_caste->body_info.body_parts.size(); partIndex++)
             {
-                auto orig_part = orig_caste->body_info.body_parts[partIndex];
+                df::body_part_raw* orig_part = orig_caste->body_info.body_parts[partIndex];
                 if (!orig_part)
                     continue;
-                auto send_part = send_caste->add_body_parts();
+                RemoteFortressReader::BodyPartRaw* send_part = send_caste->add_body_parts();
 
                 send_part->set_token(orig_part->token);
                 send_part->set_category(orig_part->category);
@@ -2707,10 +2707,10 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
                 for (size_t layerIndex = 0; layerIndex < orig_part->layers.size(); layerIndex++)
                 {
-                    auto orig_layer = orig_part->layers[layerIndex];
+                    df::body_part_layer_raw* orig_layer = orig_part->layers[layerIndex];
                     if (!orig_layer)
                         continue;
-                    auto send_layer = send_part->add_layers();
+                    RemoteFortressReader::BodyPartLayerRaw* send_layer = send_part->add_layers();
 
                     send_layer->set_layer_name(orig_layer->layer_name);
                     send_layer->set_tissue_id(orig_layer->tissue_id);
@@ -2728,9 +2728,9 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
             for (size_t k = 0; k < orig_caste->bp_appearance.modifiers.size(); k++)
             {
-                auto send_mod = send_caste->add_modifiers();
-                auto orig_mod = orig_caste->bp_appearance.modifiers[k];
-                send_mod->set_type(ENUM_KEY_STR(appearance_modifier_type, orig_mod->type));
+                RemoteFortressReader::BpAppearanceModifier* send_mod = send_caste->add_modifiers();
+                df::bp_appearance_modifier* orig_mod = orig_caste->bp_appearance.modifiers[k];
+                send_mod->set_type(ENUM_KEY_STR_SIMPLE(appearance_modifier_type, orig_mod->type));
 
 #if DF_VERSION_INT > 34011
                 if (orig_mod->growth_rate > 0)
@@ -2754,10 +2754,10 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
             }
             for (size_t k = 0; k < orig_caste->body_appearance_modifiers.size(); k++)
             {
-                auto send_mod = send_caste->add_body_appearance_modifiers();
-                auto orig_mod = orig_caste->body_appearance_modifiers[k];
+                RemoteFortressReader::BpAppearanceModifier* send_mod = send_caste->add_body_appearance_modifiers();
+                df::body_appearance_modifier* orig_mod = orig_caste->body_appearance_modifiers[k];
 
-                send_mod->set_type(ENUM_KEY_STR(appearance_modifier_type, orig_mod->type));
+                send_mod->set_type(ENUM_KEY_STR_SIMPLE(appearance_modifier_type, orig_mod->type));
 
 #if DF_VERSION_INT > 34011
                 if (orig_mod->growth_rate > 0)
@@ -2774,18 +2774,18 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
             }
             for (size_t k = 0; k < orig_caste->color_modifiers.size(); k++)
             {
-                auto send_mod = send_caste->add_color_modifiers();
-                auto orig_mod = orig_caste->color_modifiers[k];
+                RemoteFortressReader::ColorModifierRaw* send_mod = send_caste->add_color_modifiers();
+                df::color_modifier_raw* orig_mod = orig_caste->color_modifiers[k];
 
                 for (size_t l = 0; l < orig_mod->pattern_index.size(); l++)
                 {
-                    auto orig_pattern = world->raws.descriptors.patterns[orig_mod->pattern_index[l]];
-                    auto send_pattern = send_mod->add_patterns();
+                    df::descriptor_pattern* orig_pattern = world->raws.descriptors.patterns[orig_mod->pattern_index[l]];
+                    RemoteFortressReader::PatternDescriptor* send_pattern = send_mod->add_patterns();
 
                     for (size_t m = 0; m < orig_pattern->colors.size(); m++)
                     {
-                        auto send_color = send_pattern->add_colors();
-                        auto orig_color = world->raws.descriptors.colors[orig_pattern->colors[m]];
+                        RemoteFortressReader::ColorDefinition* send_color = send_pattern->add_colors();
+                        df::descriptor_color* orig_color = world->raws.descriptors.colors[orig_pattern->colors[m]];
                         send_color->set_red(orig_color->red * 255.0);
                         send_color->set_green(orig_color->green * 255.0);
                         send_color->set_blue(orig_color->blue * 255.0);
@@ -2811,8 +2811,8 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
         for (size_t j = 0; j < orig_creature->tissue.size(); j++)
         {
-            auto orig_tissue = orig_creature->tissue[j];
-            auto send_tissue = send_creature->add_tissues();
+            df::tissue* orig_tissue = orig_creature->tissue[j];
+            RemoteFortressReader::TissueRaw* send_tissue = send_creature->add_tissues();
 
             send_tissue->set_id(orig_tissue->id);
             send_tissue->set_name(orig_tissue->tissue_name_singular);
@@ -2820,7 +2820,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
             CopyMat(send_tissue->mutable_material(), orig_tissue->mat_type, orig_tissue->mat_index);
         }
-        FOR_ENUM_ITEMS(creature_raw_flags, flag)
+        FOR_ENUM_ITEMS_SIMPLE(creature_raw_flags, flag)
         {
             send_creature->add_flags(orig_creature->flags.is_set(flag));
         }
@@ -2831,7 +2831,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
 static command_result GetPlantRaws(color_ostream &stream, const EmptyMessage *in, PlantRawList *out)
 {
-    GetPartialPlantRaws(stream, nullptr, out);
+    GetPartialPlantRaws(stream, NULL, out);
     return CR_OK;
 }
 
@@ -2900,7 +2900,7 @@ static command_result CopyScreen(color_ostream &stream, const EmptyMessage *in, 
     for (int i = 0; i < (gps->dimx * gps->dimy); i++)
     {
         int index = i * 4;
-        auto tile = out->add_tiles();
+        RemoteFortressReader::ScreenTile* tile = out->add_tiles();
         tile->set_character(gps->screen[index]);
         tile->set_foreground(gps->screen[index + 1] | (gps->screen[index + 3] * 8));
         tile->set_background(gps->screen[index + 2]);
@@ -2932,7 +2932,7 @@ static command_result GetPauseState(color_ostream &stream, const EmptyMessage *i
 
 static command_result GetGameValidity(color_ostream &stream, const EmptyMessage * in, SingleBool *out)
 {
-    auto viewScreen = Gui::getCurViewscreen();
+    df::viewscreen* viewScreen = Gui::getCurViewscreen();
     if (strict_virtual_cast<df::viewscreen_loadgamest>(viewScreen))
     {
         out->set_value(false);
@@ -2967,7 +2967,7 @@ static command_result GetReports(color_ostream & stream, const EmptyMessage * in
     int lastSentIndex = -1;
     for (int i = world->status.reports.size() - 1; i >= 0; i--)
     {
-        auto local_rep = world->status.reports[i];
+        df::report* local_rep = world->status.reports[i];
         if (local_rep->id <= lastSentReportID)
         {
             lastSentIndex = i;
@@ -2976,10 +2976,10 @@ static command_result GetReports(color_ostream & stream, const EmptyMessage * in
     }
     for (size_t i = lastSentIndex + 1; i < world->status.reports.size(); i++)
     {
-        auto local_rep = world->status.reports[i];
+        df::report* local_rep = world->status.reports[i];
         if (!local_rep)
             continue;
-        auto send_rep = out->add_reports();
+        RemoteFortressReader::Report* send_rep = out->add_reports();
         send_rep->set_type(local_rep->type);
         send_rep->set_text(DF2UTF(local_rep->text));
         ConvertDfColor(local_rep->color | (local_rep->bright ? 8 : 0), send_rep->mutable_color());
@@ -3004,8 +3004,8 @@ static command_result GetLanguage(color_ostream & stream, const EmptyMessage * i
 
     for (size_t i = 0; i < world->raws.descriptors.shapes.size(); i++)
     {
-        auto shape = world->raws.descriptors.shapes[i];
-        auto netShape = out->add_shapes();
+        df::descriptor_shape* shape = world->raws.descriptors.shapes[i];
+        RemoteFortressReader::ShapeDescriptior* netShape = out->add_shapes();
         netShape->set_id(shape->id);
         netShape->set_tile(shape->tile);
     }

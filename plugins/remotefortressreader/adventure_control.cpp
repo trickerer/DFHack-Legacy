@@ -39,12 +39,12 @@ void SetCoord(df::coord in, RemoteFortressReader::Coord *out)
 
 command_result MoveCommand(DFHack::color_ostream &stream, const MoveCommandParams *in)
 {
-    auto viewScreen = getCurViewscreen();
+    df::viewscreen* viewScreen = getCurViewscreen();
     if (!in->has_direction())
         return CR_WRONG_USAGE;
     if (!df::global::ui_advmode->menu == ui_advmode_menu::Default)
         return CR_OK;
-    auto dir = in->direction();
+    RemoteFortressReader::Coord dir = in->direction();
     switch (dir.x())
     {
     case -1:
@@ -195,7 +195,7 @@ command_result JumpCommand(DFHack::color_ostream &stream, const MoveCommandParam
         return CR_WRONG_USAGE;
     if (!df::global::ui_advmode->menu == ui_advmode_menu::Default)
         return CR_OK;
-    auto dir = in->direction();
+    RemoteFortressReader::Coord dir = in->direction();
     keyQueue.push(interface_key::A_JUMP);
     int x = dir.x();
     int y = dir.y();
@@ -233,7 +233,7 @@ command_result JumpCommand(DFHack::color_ostream &stream, const MoveCommandParam
 
 command_result MenuQuery(DFHack::color_ostream &stream, const EmptyMessage *in, MenuContents *out)
 {
-    auto advUi = df::global::ui_advmode;
+    df::ui_advmode* advUi = df::global::ui_advmode;
 
     if (advUi == NULL)
         return CR_FAILURE;
@@ -251,8 +251,8 @@ command_result MenuQuery(DFHack::color_ostream &stream, const EmptyMessage *in, 
     case ui_advmode_menu::MoveCarefully:
         for (size_t i = 0; i < advUi->movements.size(); i++)
         {
-            auto movement = advUi->movements[i];
-            auto send_movement = out->add_movements();
+            df::adventure_movement_optionst* movement = advUi->movements[i];
+            AdventureControl::MovementOption* send_movement = out->add_movements();
             SetCoord(movement->source, send_movement->mutable_source());
             SetCoord(movement->dest, send_movement->mutable_dest());
 
@@ -296,7 +296,7 @@ command_result MiscMoveCommand(DFHack::color_ostream &stream, const MiscMovePara
     if (!df::global::ui_advmode->menu == ui_advmode_menu::Default)
         return CR_OK;
 
-    auto type = in->type();
+    AdventureControl::MiscMoveType type = in->type();
 
     switch (type)
     {

@@ -64,14 +64,14 @@ using namespace df::global;
 
 void CopyImage(const df::art_image * image, ArtImage * netImage)
 {
-    auto id = netImage->mutable_id();
+    RemoteFortressReader::MatPair* id = netImage->mutable_id();
     id->set_mat_type(image->id);
     id->set_mat_index(image->subid);
     for (size_t i = 0; i < image->elements.size(); i++)
     {
-        auto element = image->elements[i];
-        auto netElement = netImage->add_elements();
-        auto elementType = element->getType();
+        df::art_image_element* element = image->elements[i];
+        RemoteFortressReader::ArtImageElement* netElement = netImage->add_elements();
+        df::art_image_element_type elementType = element->getType();
         netElement->set_type((ArtImageElementType)elementType);
 
         netElement->set_count(element->count);
@@ -81,7 +81,7 @@ void CopyImage(const df::art_image * image, ArtImage * netImage)
         case df::enums::art_image_element_type::CREATURE:
         {
             VIRTUAL_CAST_VAR(creature, df::art_image_element_creaturest, element);
-            auto cret = netElement->mutable_creature_item();
+            RemoteFortressReader::MatPair* cret = netElement->mutable_creature_item();
             cret->set_mat_type(creature->race);
             cret->set_mat_index(creature->caste);
             break;
@@ -107,7 +107,7 @@ void CopyImage(const df::art_image * image, ArtImage * netImage)
         case df::enums::art_image_element_type::ITEM:
         {
             VIRTUAL_CAST_VAR(item, df::art_image_element_itemst, element);
-            auto it = netElement->mutable_creature_item();
+            RemoteFortressReader::MatPair* it = netElement->mutable_creature_item();
             it->set_mat_type(item->item_type);
             it->set_mat_index(item->item_subtype);
             netElement->set_id(item->item_id);
@@ -118,7 +118,7 @@ void CopyImage(const df::art_image * image, ArtImage * netImage)
             default:
                 break;
             }
-            auto mat = netElement->mutable_material();
+            RemoteFortressReader::MatPair* mat = netElement->mutable_material();
             mat->set_mat_type(item->mat_type);
             mat->set_mat_index(item->mat_index);
             break;
@@ -129,9 +129,9 @@ void CopyImage(const df::art_image * image, ArtImage * netImage)
     }
     for (size_t i = 0; i < image->properties.size(); i++)
     {
-        auto dfProperty = image->properties[i];
-        auto netProperty = netImage->add_properties();
-        auto propertyType = dfProperty->getType();
+        df::art_image_property* dfProperty = image->properties[i];
+        RemoteFortressReader::ArtImageProperty* netProperty = netImage->add_properties();
+        df::art_image_property_type propertyType = dfProperty->getType();
 
         netProperty->set_type((ArtImagePropertyType)propertyType);
 
@@ -163,14 +163,14 @@ void CopyItem(RemoteFortressReader::Item * NetItem, df::item * DfItem)
     NetItem->set_id(DfItem->id);
     NetItem->set_flags1(DfItem->flags.whole);
     NetItem->set_flags2(DfItem->flags2.whole);
-    auto pos = NetItem->mutable_pos();
+    RemoteFortressReader::Coord* pos = NetItem->mutable_pos();
     pos->set_x(DfItem->pos.x);
     pos->set_y(DfItem->pos.y);
     pos->set_z(DfItem->pos.z);
-    auto mat = NetItem->mutable_material();
+    RemoteFortressReader::MatPair* mat = NetItem->mutable_material();
     mat->set_mat_index(DfItem->getMaterialIndex());
     mat->set_mat_type(DfItem->getMaterial());
-    auto type = NetItem->mutable_type();
+    RemoteFortressReader::MatPair* type = NetItem->mutable_type();
     type->set_mat_type(DfItem->getType());
     type->set_mat_index(DfItem->getSubtype());
 
@@ -406,7 +406,7 @@ void CopyItem(RemoteFortressReader::Item * NetItem, df::item * DfItem)
             VIRTUAL_CAST_VAR(tool, df::item_toolst, DfItem);
             if (tool)
             {
-                auto vehicle = binsearch_in_vector(world->vehicles.active, tool->vehicle_id);
+                df::vehicle* vehicle = binsearch_in_vector(world->vehicles.active, tool->vehicle_id);
                 if (vehicle)
                 {
                     NetItem->set_subpos_x(vehicle->offset_x / 100000.0);
@@ -441,18 +441,18 @@ void CopyItem(RemoteFortressReader::Item * NetItem, df::item * DfItem)
     {
         for (size_t i = 0; i < constructed_item->improvements.size(); i++)
         {
-            auto improvement = constructed_item->improvements[i];
+            df::itemimprovement* improvement = constructed_item->improvements[i];
 
             if (!improvement)
                 continue;
 
             improvement_type::improvement_type impType = improvement->getType();
 
-            auto netImp = NetItem->add_improvements();
+            RemoteFortressReader::ItemImprovement* netImp = NetItem->add_improvements();
 
             netImp->set_type(impType);
 
-            auto mat = netImp->mutable_material();
+            RemoteFortressReader::MatPair* mat = netImp->mutable_material();
             mat->set_mat_type(improvement->mat_type);
             mat->set_mat_index(improvement->mat_index);
 
@@ -523,12 +523,12 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
         //out->set_available(false);
         return CR_OK;
     }
-    FOR_ENUM_ITEMS(item_type, it)
+    FOR_ENUM_ITEMS_SIMPLE(item_type, it)
     {
         MaterialDefinition *mat_def = out->add_material_list();
         mat_def->mutable_mat_pair()->set_mat_type((int)it);
         mat_def->mutable_mat_pair()->set_mat_index(-1);
-        mat_def->set_id(ENUM_KEY_STR(item_type, it));
+        mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it));
         switch (it)
         {
         case df::enums::item_type::GEM:
@@ -536,13 +536,13 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
         {
             for (size_t i = 0; i < world->raws.descriptors.shapes.size(); i++)
             {
-                auto shape = world->raws.descriptors.shapes[i];
+                df::descriptor_shape* shape = world->raws.descriptors.shapes[i];
                 if (shape->gems_use.whole == 0)
                     continue;
                 mat_def = out->add_material_list();
                 mat_def->mutable_mat_pair()->set_mat_type((int)it);
                 mat_def->mutable_mat_pair()->set_mat_index(i);
-                mat_def->set_id(ENUM_KEY_STR(item_type, it) + "/" + shape->id);
+                mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + shape->id);
             }
             break;
         }
@@ -550,11 +550,11 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
         {
             for (size_t i = 0; i < world->raws.plants.all.size(); i++)
             {
-                auto plantRaw = world->raws.plants.all[i];
+                df::plant_raw* plantRaw = world->raws.plants.all[i];
                 mat_def = out->add_material_list();
                 mat_def->mutable_mat_pair()->set_mat_type((int)it);
                 mat_def->mutable_mat_pair()->set_mat_index(plantRaw->index);
-                mat_def->set_id(ENUM_KEY_STR(item_type, it) + "/" + plantRaw->id);
+                mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + plantRaw->id);
             }
             break;
         }
@@ -594,15 +594,15 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                 mat_def->mutable_mat_pair()->set_mat_type((int)it);
                 mat_def->mutable_mat_pair()->set_mat_index(i);
                 df::itemdef * item = Items::getSubtypeDef(it, i);
-                mat_def->set_id(ENUM_KEY_STR(item_type, it) + "/" + item->id);
+                mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + item->id);
                 switch (it)
                 {
                 case df::enums::item_type::INSTRUMENT:
                 {
                     VIRTUAL_CAST_VAR(instrument, df::itemdef_instrumentst, item);
                     mat_def->set_name(DF2UTF(instrument->name));
-                    auto send_instrument = mat_def->mutable_instrument();
-                    auto flags = send_instrument->mutable_flags();
+                    ItemdefInstrument::InstrumentDef* send_instrument = mat_def->mutable_instrument();
+                    ItemdefInstrument::InstrumentFlags* flags = send_instrument->mutable_flags();
                     flags->set_indefinite_pitch(instrument->flags.is_set(instrument_flags::INDEFINITE_PITCH));
                     flags->set_placed_as_building(instrument->flags.is_set(instrument_flags::PLACED_AS_BUILDING));
                     flags->set_metal_mat(instrument->flags.is_set(instrument_flags::METAL_MAT));
@@ -617,7 +617,7 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                     send_instrument->set_material_size(instrument->material_size);
                     for (size_t j = 0; j < instrument->pieces.size(); j++)
                     {
-                        auto piece = send_instrument->add_pieces();
+                        ItemdefInstrument::InstrumentPiece* piece = send_instrument->add_pieces();
                         piece->set_type(instrument->pieces[j]->type);
                         piece->set_id(instrument->pieces[j]->id);
                         piece->set_name(DF2UTF(instrument->pieces[j]->name));
@@ -659,7 +659,7 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                     }
                     for (size_t j = 0; j < instrument->registers.size(); j++)
                     {
-                        auto reg = send_instrument->add_registers();
+                        ItemdefInstrument::InstrumentRegister* reg = send_instrument->add_registers();
                         reg->set_pitch_range_min(instrument->registers[j]->pitch_range_min);
                         reg->set_pitch_range_max(instrument->registers[j]->pitch_range_max);
                     }
