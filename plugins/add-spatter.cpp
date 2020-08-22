@@ -1,14 +1,15 @@
 #include "Core.h"
-#include <Console.h>
-#include <Export.h>
-#include <PluginManager.h>
-#include <modules/Gui.h>
-#include <modules/Screen.h>
-#include <modules/Maps.h>
-#include <modules/Job.h>
-#include <modules/Items.h>
-#include <modules/Units.h>
-#include <TileTypes.h>
+#include "Console.h"
+#include "Export.h"
+#include "PluginManager.h"
+#include "modules/Gui.h"
+#include "modules/Screen.h"
+#include "modules/Maps.h"
+#include "modules/Job.h"
+#include "modules/Items.h"
+#include "modules/Units.h"
+#include "TileTypes.h"
+
 #include <vector>
 #include <cstdio>
 #include <stack>
@@ -16,7 +17,7 @@
 #include <cmath>
 #include <string.h>
 
-#include <VTableInterpose.h>
+#include "VTableInterpose.h"
 #include "df/item_liquid_miscst.h"
 #include "df/item_constructed.h"
 #include "df/builtin_mats.h"
@@ -83,12 +84,14 @@ struct ReactionInfo {
     std::vector<ProductInfo> products;
 };
 
-static std::map<std::string, ReactionInfo> reactions;
-static std::map<df::reaction_product*, ProductInfo*> products;
+typedef std::map<std::string, ReactionInfo> ReactionInfoMap;
+typedef std::map<df::reaction_product*, ProductInfo*> PruductInfoMap;
+static ReactionInfoMap reactions;
+static PruductInfoMap products;
 
 static ReactionInfo *find_reaction(const std::string &name)
 {
-    auto it = reactions.find(name);
+    ReactionInfoMap::iterator it = reactions.find(name);
     return (it != reactions.end()) ? &it->second : NULL;
 }
 
@@ -124,7 +127,7 @@ static void find_material(int *type, int *index, df::item *input, MaterialSource
 
 static int has_contaminant(df::item_actual *item, int type, int index)
 {
-    auto cont = item->contaminants;
+    std::vector<df::spatter*> const* cont = item->contaminants;
     if (!cont)
         return 0;
 
@@ -132,7 +135,7 @@ static int has_contaminant(df::item_actual *item, int type, int index)
 
     for (size_t i = 0; i < cont->size(); i++)
     {
-        auto cur = (*cont)[i];
+        df::spatter* cur = (*cont)[i];
         if (cur->mat_type == type && cur->mat_index == index)
             size += cur->size;
     }
@@ -150,9 +153,9 @@ static void index_items(item_table &table, df::job *job, ReactionInfo *info)
 {
     for (int i = job->items.size()-1; i >= 0; i--)
     {
-        auto iref = job->items[i];
+        df::job_item_ref* iref = job->items[i];
         if (iref->job_item_idx < 0) continue;
-        auto iitem = job->job_items[iref->job_item_idx];
+        df::job_item* iitem = job->job_items[iref->job_item_idx];
 
         if (iitem->contains.empty())
         {
@@ -168,7 +171,7 @@ static void index_items(item_table &table, df::job *job, ReactionInfo *info)
                 for (int k = iitem->contains.size()-1; k >= 0; k--)
                 {
                     int ridx = iitem->contains[k];
-                    auto reag = info->react->reagents[ridx];
+                    df::reaction_reagent* reag = info->react->reagents[ridx];
 
                     if (reag->matchesChild(contents[j], info->react, iitem->reaction_id))
                         table[ridx].push_back(contents[j]);
@@ -205,10 +208,10 @@ struct item_hook : df::item_constructed {
 
             for (size_t i = 0; i < info->products.size(); i++)
             {
-                auto &product = info->products[i];
+                ProductInfo &product = info->products[i];
 
                 int mattype, matindex;
-                auto material = find_item(info->products[i].material, table);
+                df::item* material = find_item(info->products[i].material, table);
 
                 find_material(&mattype, &matindex, material, product.material);
 
@@ -251,10 +254,10 @@ struct product_hook : improvement_product {
          int32_t quantity, df::job_skill skill,
          int32_t quality, df::historical_entity *entity, df::world_site *site, std::vector<void *> *unk2)
     ) {
-        if (auto product = products[this])
+        if (ProductInfo* product = products[this])
         {
-            auto object = find_item(product->object, in_reag, in_items);
-            auto material = find_item(product->material, in_reag, in_items);
+            df::item* object = find_item(product->object, in_reag, in_items);
+            df::item* material = find_item(product->material, in_reag, in_items);
 
             if (object && (material || !product->material.reagent))
             {
@@ -331,7 +334,7 @@ static void parse_product(
 
     find_reagent(out, info.object, react, prod->target_reagent);
 
-    auto ritem = strict_virtual_cast<df::reaction_reagent_itemst>(info.object.reagent);
+    df::reaction_reagent_itemst* ritem = strict_virtual_cast<df::reaction_reagent_itemst>(info.object.reagent);
     if (ritem)
         ritem->flags1.bits.improvable = true;
 
@@ -356,7 +359,7 @@ static bool find_reactions(color_ostream &out)
     reactions.clear();
     products.clear();
 
-    auto &rlist = df::reaction::get_vector();
+    std::vector<df::reaction*> &rlist = df::reaction::get_vector();
 
     for (size_t i = 0; i < rlist.size(); i++)
     {
@@ -366,14 +369,14 @@ static bool find_reactions(color_ostream &out)
         reactions[rlist[i]->code].react = rlist[i];
     }
 
-    for (auto it = reactions.begin(); it != reactions.end(); ++it)
+    for (ReactionInfoMap::iterator it = reactions.begin(); it != reactions.end(); ++it)
     {
-        auto &prod = it->second.react->products;
-        auto &out_prod = it->second.products;
+        std::vector<df::reaction_product*> const &prod = it->second.react->products;
+        std::vector<ProductInfo> &out_prod = it->second.products;
 
         for (size_t i = 0; i < prod.size(); i++)
         {
-            auto itprod = strict_virtual_cast<improvement_product>(prod[i]);
+            improvement_product* itprod = strict_virtual_cast<improvement_product>(prod[i]);
             if (!itprod) continue;
 
             out_prod.push_back(ProductInfo());
