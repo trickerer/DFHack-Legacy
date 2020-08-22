@@ -18,6 +18,7 @@ build/VC2010
 build/build/
 *.patch
 *.diff
+install/
 
 # Sphinx generated documentation
 docs/_*

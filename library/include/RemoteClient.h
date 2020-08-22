@@ -27,6 +27,8 @@ distribution.
 #include "Export.h"
 #include "ColorText.h"
 
+#include "common.h"
+
 class CPassiveSocket;
 class CActiveSocket;
 class CSimpleSocket;

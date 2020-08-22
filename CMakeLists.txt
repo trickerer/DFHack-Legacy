@@ -18,16 +18,16 @@ endif()
 
 # Set up build types
 if(CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_CONFIGURATION_TYPES "Release" CACHE STRING "List of supported configuration types" FORCE)
+    set(CMAKE_CONFIGURATION_TYPES "Release;RelWithDebInfo" CACHE STRING "List of supported configuration types" FORCE)
 else(CMAKE_CONFIGURATION_TYPES)
-    set(DFHACK_TYPE_HELP "Type of build: Release")
+    set(DFHACK_TYPE_HELP "Choose the type of build, options are: Release and RelWithDebInfo")
     # Prevent cmake C module attempts to overwrite our help string
     if(NOT CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE "Release" CACHE STRING "${DFHACK_TYPE_HELP}")
     else(NOT CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "${DFHACK_TYPE_HELP}")
     endif(NOT CMAKE_BUILD_TYPE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Release")
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Release;RelWithDebInfo")
 endif(CMAKE_CONFIGURATION_TYPES)
 
 option(BUILD_DOCS "Choose whether to build the documentation (requires python and Sphinx)." OFF)

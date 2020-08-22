@@ -399,10 +399,10 @@ namespace DFHack
         //CoreSuspender(Core* core, bool) : CoreSuspender(core) { }
         //CoreSuspender(Core* core, std::defer_lock_t) : CoreSuspenderBase{core, std::defer_lock} {}
 
-        CoreSuspender() : CoreSuspenderBase(&Core::getInstance()) {lock(); }
-        CoreSuspender(bool) : CoreSuspenderBase(&Core::getInstance()) {lock(); }
+        CoreSuspender() : CoreSuspenderBase(&Core::getInstance()) { lock(); }
+        CoreSuspender(bool) : CoreSuspenderBase(&Core::getInstance()) { lock(); }
         CoreSuspender(Core* core) : CoreSuspenderBase(core) { lock(); }
-        CoreSuspender(Core* core, bool) : CoreSuspenderBase(core) {lock(); }
+        CoreSuspender(Core* core, bool) : CoreSuspenderBase(core) { lock(); }
 
         void lock()
         {
