@@ -1,11 +1,12 @@
 
 #include "modules/Once.h"
 //#include <unordered_set>
-#include <set>
+#include <hash_set>
 
 using namespace std;
+using namespace stdext;
 
-static set<string> thingsDone;
+static hash_set<string> thingsDone;
 
 bool DFHack::Once::alreadyDone(string& bob) {
     return thingsDone.find(bob) != thingsDone.end();

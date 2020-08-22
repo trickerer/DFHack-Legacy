@@ -39,8 +39,8 @@
 #include <ctime>
 #include <cstdio>
 //#include <cstdint>
-#include <set>
 #include <hash_map>
+#include <hash_set>
 #include "common.h"
 
 #include "Core.h"
@@ -88,6 +88,7 @@ using std::string;
 using std::vector;
 
 #define UNORDERED_MAP stdext::hash_map
+#define UNORDERED_SET stdext::hash_set
 
 using namespace DFHack;
 using namespace DFHack::Units;
@@ -1354,7 +1355,7 @@ bool hasName(df::unit *unit)
     return unit->name.has_name;
 }
 
-bool isAssignedToBuildingOrZone(df::unit *unit, std::set<int32_t>* assigned_unit_ids)
+bool isAssignedToBuildingOrZone(df::unit *unit, UNORDERED_SET<int32_t>* assigned_unit_ids)
 {
     return assigned_unit_ids->count(unit->id) == 1;
 }
@@ -1415,7 +1416,7 @@ public:
         : _inv(false), _ft(ft), _eq(eq), intval(_age) {}
     UnitFilter(FilterFunctionType ft, Equality eq, char* _age)
         : _inv(false), _ft(ft), _eq(eq), strval(_age) {}
-    UnitFilter(FilterFunctionType ft, Equality eq, std::set<int32_t>* _set_32i)
+    UnitFilter(FilterFunctionType ft, Equality eq, UNORDERED_SET<int32_t>* _set_32i)
         : _inv(false), _ft(ft), _eq(eq), set_32i(_set_32i) {}
 
     void InvertResult()
@@ -1481,7 +1482,7 @@ private:
     bool _inv;
 
     union {
-        std::set<int32_t>* set_32i;
+        UNORDERED_SET<int32_t>* set_32i;
         char* strval;
         int intval;
     };
@@ -2137,7 +2138,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
     if (building_unassign)
     {
         // filter for units in the building
-        std::set<int32_t> assigned_unit_ids;
+        UNORDERED_SET<int32_t> assigned_unit_ids;
         if(isActivityZone(target_building))
         {
             df::building_civzonest *civz = (df::building_civzonest *) target_building;

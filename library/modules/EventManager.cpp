@@ -40,9 +40,10 @@
 #include <map>
 #include <string>
 //#include <UNORDERED_MAP>
-//#include <set>
+//#include <unordered_set>
 #include <hash_map>
-#include <set>
+#include <hash_set>
+//#include <set>
 
 using namespace std;
 //using namespace stdext;
@@ -57,6 +58,7 @@ using namespace df::enums;
  **/
 
 #define UNORDERED_MAP stdext::hash_map
+#define UNORDERED_SET stdext::hash_set
 
 typedef multimap<int32_t, EventHandler> TickQueue;
 static TickQueue tickQueue;
@@ -178,14 +180,14 @@ static int32_t lastJobId = -1;
 static UNORDERED_MAP<int32_t, df::job*> prevJobs;
 
 //unit death
-static set<int32_t> livingUnits;
+static UNORDERED_SET<int32_t> livingUnits;
 
 //item creation
 static int32_t nextItem;
 
 //building
 static int32_t nextBuilding;
-static set<int32_t> buildings;
+static UNORDERED_SET<int32_t> buildings;
 
 //construction
 struct CoordHash
@@ -205,6 +207,23 @@ struct CoordHash
     };
 };
 
+//construction
+struct EventHandlerHash
+{
+    size_t operator()(const EventHandler& h) const
+    {
+        return stdext::hash_value(h.freq);
+    }
+	bool operator()(const EventHandler& h1, const EventHandler& h2) const
+	{
+	    return h1 == h2;
+	}
+	enum
+	{
+	    bucket_size = 4,
+	    min_buckets = 8
+    };
+};
 typedef UNORDERED_MAP<df::coord, df::construction, CoordHash> ConstructionsMap;
 static ConstructionsMap constructions;
 static bool gameLoaded;
@@ -377,7 +396,7 @@ void DFHack::EventManager::manageEvents(color_ostream& out) {
 static void manageTickEvent(color_ostream& out) {
     if (!df::global::world)
         return;
-    std::set<EventHandler> toRemove;
+    UNORDERED_SET<EventHandler, EventHandlerHash> toRemove;
     int32_t tick = df::global::world->frame_counter;
     while ( !tickQueue.empty() ) {
         if ( tick < (*tickQueue.begin()).first )
@@ -651,7 +670,7 @@ static void manageBuildingEvent(color_ostream& out) {
     nextBuilding = *df::global::building_next_id;
 
     //now alert people about destroyed buildings
-    for (set<int32_t>::const_iterator a = buildings.begin(); a != buildings.end(); ) {
+    for (UNORDERED_SET<int32_t>::const_iterator a = buildings.begin(); a != buildings.end(); ) {
         int32_t id = *a;
         int32_t index = df::building::binsearch_index(df::global::world->buildings.all,id);
         if ( index != -1 ) {
@@ -670,7 +689,7 @@ static void manageBuildingEvent(color_ostream& out) {
 static void manageConstructionEvent(color_ostream& out) {
     if (!df::global::world)
         return;
-    //set<df::construction*> constructionsNow(df::global::world->constructions.begin(), df::global::world->constructions.end());
+    UNORDERED_SET<df::construction*> constructionsNow(df::global::world->constructions.begin(), df::global::world->constructions.end());
 
     multimap<Plugin*,EventHandler> copy(handlers[EventType::CONSTRUCTION].begin(), handlers[EventType::CONSTRUCTION].end());
     for (ConstructionsMap::iterator a = constructions.begin(); a != constructions.end(); ) {
@@ -688,8 +707,7 @@ static void manageConstructionEvent(color_ostream& out) {
         a = constructions.erase(a);
     }
 
-    //for ( auto a = constructionsNow.begin(); a != constructionsNow.end(); a++ ) {
-    for (std::vector<df::construction*>::const_iterator a = df::global::world->constructions.begin(); a != df::global::world->constructions.end(); a++ ) {
+    for (UNORDERED_SET<df::construction*>::const_iterator a = constructionsNow.begin(); a != constructionsNow.end(); a++ ) {
         df::construction* construction = *a;
         bool b = constructions.find(construction->pos) != constructions.end();
         constructions[construction->pos] = *construction;
@@ -754,7 +772,7 @@ static void manageEquipmentEvent(color_ostream& out) {
     multimap<Plugin*,EventHandler> copy(handlers[EventType::INVENTORY_CHANGE].begin(), handlers[EventType::INVENTORY_CHANGE].end());
 
     UNORDERED_MAP<int32_t, InventoryItem> itemIdToInventoryItem;
-    set<int32_t> currentlyEquipped;
+    UNORDERED_SET<int32_t> currentlyEquipped;
     for (std::vector<df::unit*>::const_iterator a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
         itemIdToInventoryItem.clear();
         currentlyEquipped.clear();
@@ -1152,7 +1170,7 @@ static vector<df::unit*> gatherRelevantUnits(color_ostream& out, df::report* r1,
     if ( r1 ) reports.push_back(r1);
     if ( r2 ) reports.push_back(r2);
     vector<df::unit*> result;
-    set<int32_t> ids;
+    UNORDERED_SET<int32_t> ids;
 //out.print("%s,%d\n",__FILE__,__LINE__);
     for ( size_t a = 0; a < reports.size(); a++ ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
@@ -1187,7 +1205,7 @@ static void manageInteractionEvent(color_ostream& out) {
     df::report* lastAttackEvent = NULL;
     df::unit* lastAttacker = NULL;
     //df::unit* lastDefender = NULL;
-    UNORDERED_MAP<int32_t,set<int32_t> > history;
+    UNORDERED_MAP<int32_t,UNORDERED_SET<int32_t> > history;
     for ( ; a < reports.size(); a++ ) {
         df::report* report = reports[a];
         lastReportInteraction = report->id;
@@ -1222,13 +1240,13 @@ static void manageInteractionEvent(color_ostream& out) {
         {
 #define HISTORY_ITEM 1
 #if HISTORY_ITEM
-            set<int32_t>& b = history[data.attacker];
+            UNORDERED_SET<int32_t>& b = history[data.attacker];
             if ( b.find(data.defender) != b.end() )
                 continue;
             history[data.attacker].insert(data.defender);
             //b.insert(data.defender);
 #else
-            set<int32_t>& b = history[data.attackReport];
+            UNORDERED_SET<int32_t>& b = history[data.attackReport];
             if ( b.find(data.defendReport) != b.end() )
                 continue;
             history[data.attackReport].insert(data.defendReport);
