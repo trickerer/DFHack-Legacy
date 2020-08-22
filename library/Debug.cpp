@@ -124,8 +124,9 @@ static color_value selectColor(const DebugCategory::level msgLevel)
 namespace {
 //static std::atomic<uint32_t> nextId{0};
 //static EXEC_ATTR thread_local uint32_t thread_id{nextId.fetch_add(1)+1};
-static tthread::atomic<uint32_t> nextId(1);
-static EXEC_ATTR thread_local uint32_t thread_id = 1;
+//static tthread::atomic<uint32_t> nextId(1);
+//static EXEC_ATTR thread_local uint32_t thread_id = 1;
+#define this_thread_id tthread::this_thread::get_id().get()
 }
 
 DebugCategory::ostream_proxy_prefix::ostream_proxy_prefix(
@@ -134,27 +135,19 @@ DebugCategory::ostream_proxy_prefix::ostream_proxy_prefix(
 {
     color(selectColor(msgLevel));
     //auto now = std::chrono::system_clock::now();
-    time_t now_c = time_t();
-    tm local;
     time_t ms = 0;
-    //! \todo c++ 2020 will have std::chrono::to_stream(fmt, system_clock::now())
-    //! but none implements it yet.
-    //std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-    //auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-    //time_t ms = now % 1000;
     // Output time in format %02H:%02M:%02S.%03ms
-#if __GNUC__ < 5
-    // Fallback for gcc 4
     char buffer[32];
-    size_t sz = strftime(buffer, sizeof(buffer)/sizeof(buffer[0]), "%T.", localtime_r(&now_c, &local));
+    time_t now_c;
+    tm local;
+    time(&now_c);
+    size_t sz = strftime(buffer, sizeof(buffer)/sizeof(buffer[0]), "%H:%M:%S.", localtime_r(&now_c, &local));
     *this << (sz > 0 ? buffer : "HH:MM:SS.")
-#else
-    *this << std::put_time(localtime_r(&now_c, &local),"%T.")
-#endif
         << std::setfill('0') << std::setw(3) << uint32(ms)
         // Thread id is allocated in the thread creation order to a thread_local
         // variable
-        << ":t" << thread_id
+        //<< ":t" << thread_id
+        << ":t" << this_thread_id
         // Output plugin and category names to make it easier to locate where
         // the message is coming. It would be easy replaces these with __FILE__
         // and __LINE__ passed from the macro if that would be preferred prefix.
