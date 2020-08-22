@@ -14,4 +14,4 @@ set_source_files_properties(${PROJECT_HDRS} PROPERTIES HEADER_FILE_ONLY TRUE)
 # mash them together (headers are marked as headers and nothing will try to compile them)
 list(APPEND PROJECT_SRCS ${PROJECT_HDRS})
 
-dfhack_plugin(labormanager ${PROJECT_SRCS})
+dfhack_plugin(labormanager ${PROJECT_SRCS} LINK_LIBRARIES dfhack-tinythread)
