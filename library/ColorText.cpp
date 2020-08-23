@@ -61,11 +61,11 @@ bool color_ostream::log_errors_to_stderr = false;
 
 void color_ostream::flush_buffer(bool flush)
 {
-    color_ostream::buffer* buffer = buf();
-    //std::string str = buffer->str();
+    buffer* buffer = buf();
+    std::string str = buffer->str();
 
-    if (!buffer->str().empty()) {
-        add_text(cur_color, buffer->str());
+    if (!str.empty()) {
+        add_text(cur_color, str);
         buffer->str(std::string());
     }
 
@@ -178,7 +178,7 @@ void buffered_color_ostream::add_text(color_value color, const std::string &text
     }
     else
     {
-        buffered_color_ostream::fragment_type &back = buffer.back();
+        fragment_type &back = buffer.back();
 
         if (back.first != color || std::max<size_t>(back.second.size(), text.size()) > 128)
             buffer.push_back(fragment_type(color, text));

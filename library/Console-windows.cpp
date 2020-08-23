@@ -424,13 +424,14 @@ namespace DFHack
 
 Console::Console()
 {
-    d = 0;
-    wlock = 0;
+    d = NULL;
+    wlock = new tthread::recursive_mutex();
     inited = false;
 }
 
 Console::~Console()
 {
+    delete wlock;
 }
 /*
 // DOESN'T WORK - locks up DF!
@@ -482,7 +483,7 @@ bool Console::init(bool)
     // Allocate a console!
     AllocConsole();
     d->ConsoleWindow = GetConsoleWindow();
-    wlock = new recursive_mutex();
+    //wlock = new recursive_mutex();
     HMENU  hm = GetSystemMenu(d->ConsoleWindow,false);
     DeleteMenu(hm, SC_CLOSE, MF_BYCOMMAND);
 
