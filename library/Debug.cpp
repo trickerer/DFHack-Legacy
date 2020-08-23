@@ -186,6 +186,7 @@ DebugCategory::cstring_ref DebugCategory::plugin() const
     return plugin_;
 }
 
+/*
 #if __cplusplus < 201703L && __cpp_lib_atomic_is_always_lock_free < 201603
 //! C++17 has std::atomic::is_always_lock_free for static_assert. Older
 //! standards only provide runtime checks if an atomic type is lock free
@@ -202,5 +203,6 @@ struct failIfEnumAtomicIsNotLockFree
     }
 } failIfEnumAtomicIsNotLockFree;
 #endif
+*/
 
 }
