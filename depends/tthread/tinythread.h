@@ -203,7 +203,7 @@ class mutex {
     {
 #if defined(_TTHREAD_WIN32_)
       EnterCriticalSection(&mHandle);
-      while(mAlreadyLocked) Sleep(50); // Simulate deadlock...
+      while(mAlreadyLocked) Sleep(1000); // Simulate deadlock...
       mAlreadyLocked = true;
 #else
       pthread_mutex_lock(&mHandle);
@@ -267,74 +267,67 @@ class recursive_mutex {
     /// Constructor.
     recursive_mutex()
     {
-#if defined(_TTHREAD_WIN32_)
       InitializeCriticalSection(&mHandle);
-#else
-      pthread_mutexattr_t attr;
-      pthread_mutexattr_init(&attr);
-      pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-      pthread_mutex_init(&mHandle, &attr);
-#endif
     }
-
-    /// Destructor.
     ~recursive_mutex()
     {
-#if defined(_TTHREAD_WIN32_)
       DeleteCriticalSection(&mHandle);
-#else
-      pthread_mutex_destroy(&mHandle);
-#endif
     }
-
-    /// Lock the mutex.
-    /// The method will block the calling thread until a lock on the mutex can
-    /// be obtained. The mutex remains locked until @c unlock() is called.
-    /// @see lock_guard
     inline void lock()
     {
-#if defined(_TTHREAD_WIN32_)
       EnterCriticalSection(&mHandle);
-#else
-      pthread_mutex_lock(&mHandle);
-#endif
     }
-
-    /// Try to lock the mutex.
-    /// The method will try to lock the mutex. If it fails, the function will
-    /// return immediately (non-blocking).
-    /// @return @c true if the lock was acquired, or @c false if the lock could
-    /// not be acquired.
     inline bool try_lock()
     {
-#if defined(_TTHREAD_WIN32_)
       return TryEnterCriticalSection(&mHandle) ? true : false;
-#else
-      return (pthread_mutex_trylock(&mHandle) == 0) ? true : false;
-#endif
     }
-
-    /// Unlock the mutex.
-    /// If any threads are waiting for the lock on this mutex, one of them will
-    /// be unblocked.
     inline void unlock()
     {
-#if defined(_TTHREAD_WIN32_)
       LeaveCriticalSection(&mHandle);
-#else
-      pthread_mutex_unlock(&mHandle);
-#endif
     }
-
+    inline bool is_locked()
+    {
+        return mHandle.RecursionCount > 0;
+    }
+    inline int get_recursion()
+    {
+        return mHandle.RecursionCount;
+    }
     _TTHREAD_DISABLE_ASSIGNMENT(recursive_mutex)
-
   private:
-#if defined(_TTHREAD_WIN32_)
     CRITICAL_SECTION mHandle;
-#else
-    pthread_mutex_t mHandle;
-#endif
+    friend class condition_variable;
+};
 
+class shared_recursive_mutex {
+  public:
+    shared_recursive_mutex()
+    {
+      _depth = 0;
+      InitializeCriticalSection(&mHandle);
+    }
+    ~shared_recursive_mutex()
+    {
+      DeleteCriticalSection(&mHandle);
+    }
+    inline void lock()
+    {
+      if (_depth > 0) { ++ _depth; }
+      else { _depth = 1; EnterCriticalSection(&mHandle); }
+    }
+    inline void unlock()
+    {
+      if (_depth > 1) { -- _depth; }
+      else { _depth = 0; LeaveCriticalSection(&mHandle); }
+    }
+    bool is_locked() const
+    {
+      return _depth > 0;
+    }
+    _TTHREAD_DISABLE_ASSIGNMENT(shared_recursive_mutex)
+  private:
+    int _depth;
+    CRITICAL_SECTION mHandle;
     friend class condition_variable;
 };
 
@@ -388,42 +381,64 @@ class defer_lock_guard {
   public:
     typedef T mutex_type;
 
-    /// The constructor locks the mutex.
     explicit defer_lock_guard(mutex_type &aMutex)
     {
       mMutex = &aMutex;
-      _locked = false;
     }
-
     void lock()
     {
-      mMutex->try_lock();
+      mMutex->lock();
     }
-
     void unlock()
     {
-      mMutex->try_lock();
       mMutex->unlock();
     }
-    /// The destructor unlocks the mutex.
     ~defer_lock_guard()
     {
-      unlock();
+      if (is_locked())
+      {
+        unlock();
+      }
     }
-
     bool is_locked() const
     {
-        return _locked;
+      return mMutex->is_locked();
     }
-
-    //mutex_type& getMutex() const
-    //{
-    //    return *mMutex;
-    //}
-
+    inline int get_recursion() const
+    {
+        return mMutex->get_recursion();
+    }
   private:
     mutex_type * mMutex;
-    bool _locked;
+};
+
+template <>
+class defer_lock_guard<shared_recursive_mutex>
+{
+  public:
+    typedef shared_recursive_mutex mutex_type;
+    explicit defer_lock_guard(mutex_type &aMutex)
+    {
+      mMutex = &aMutex;
+    }
+    void lock()
+    {
+      mMutex->lock();
+    }
+    void unlock()
+    {
+      mMutex->unlock();
+    }
+    ~defer_lock_guard()
+    {
+      //unlock();
+    }
+    bool is_locked() const
+    {
+      return mMutex->is_locked();
+    }
+  private:
+    mutex_type * mMutex;
 };
 
 /// Condition variable class.
