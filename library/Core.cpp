@@ -115,33 +115,41 @@ public:
         tthread::lock_guard<tthread::mutex> suspender_creation_lock(suspender_creation_mutex);
         if (threadLockHolders[this_thread_id] == NULL)
         {
+            Core::getInstance().getConsole().
+                printerr("\nCoreSuspenderBase& suspend(): ctor for thread %u\n", this_thread_id);
             threadLockHolders[this_thread_id] = new CoreSuspenderBase(&Core::getInstance());
         }
         return *(threadLockHolders[this_thread_id]);
 
         //static thread_local CoreSuspenderBase lock(&Core::getInstance());
         //return lock;
+        //static thread_local CoreSuspenderBase lock(std::defer_lock);
+        //return lock;
     }
 };
 }
 
-CoreSuspendReleaseMain::CoreSuspendReleaseMain()
-{
-    MainThread::suspend().unlock();
-}
-
-CoreSuspendReleaseMain::~CoreSuspendReleaseMain()
-{
-    MainThread::suspend().lock();
-}
+//CoreSuspendReleaseMain::CoreSuspendReleaseMain()
+//{
+//    cerr << "\nCoreSuspendReleaseMain(): unlock";
+//    MainThread::suspend().unlock();
+//}
+//
+//CoreSuspendReleaseMain::~CoreSuspendReleaseMain()
+//{
+//    cerr << "\nCoreSuspendReleaseMain(): lock";
+//    MainThread::suspend().lock();
+//}
 
 CoreSuspendClaimMain::CoreSuspendClaimMain()
 {
+    cerr << "\nCoreSuspendClaimMain(): lock";
     MainThread::suspend().lock();
 }
 
 CoreSuspendClaimMain::~CoreSuspendClaimMain()
 {
+    cerr << "\nCoreSuspendClaimMain(): unlock";
     MainThread::suspend().unlock();
 }
 
@@ -866,6 +874,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
         }
         else if( builtin == "enable" || builtin == "disable" )
         {
+            cerr << "enable/disable suspend";
             CoreSuspender suspend;
             bool enable = (builtin == "enable");
 
@@ -1468,10 +1477,11 @@ bool Core::loadScriptFile(color_ostream &out, string fname, bool silent)
 
 static void run_dfhack_init(color_ostream &out, Core *core)
 {
+    cerr << "\nrun_dfhack_init suspend";
     CoreSuspender lock;
     if (!df::global::world || !df::global::ui || !df::global::gview)
     {
-        out.printerr("Key globals are missing, skipping loading dfhack.init.\n");
+        core->getConsole().printerr("Key globals are missing, skipping loading dfhack.init.\n");
         return;
     }
 
@@ -1482,6 +1492,7 @@ static void run_dfhack_init(color_ostream &out, Core *core)
         core->runCommand(out, "gui/no-dfhack-init");
         core->loadScriptFile(out, "dfhack.init-example", true);
     }
+    cerr << "\nrun_dfhack_init unsuspend";
 }
 
 // Load dfhack.init in a dedicated thread (non-interactive console mode)
@@ -1513,7 +1524,7 @@ void fIOthread(void * iodata)
 
     run_dfhack_init(con, core);
 
-    con.print("DFHack is ready. Have a nice day!\n"
+    con.printerr("DFHack is ready. Have a nice day!\n"
               "DFHack version %s\n"
               "Type in '?' or 'help' for general help, 'ls' to see all commands.\n",
               dfhack_version_desc().c_str());
@@ -1574,9 +1585,9 @@ Core::Core() :
     started(false),
     misc_data_mutex(),
     CoreSuspendMutex(),
-    CoreWakeup(),
-    ownerThread(tthread::this_thread::get_id()),
-    toolCount(0)
+    //CoreWakeup(),
+    //toolCount(0),
+    ownerThread(tthread::this_thread::get_id())
 {
     // init the console. This must be always the first step!
     plug_mgr = NULL;
@@ -1643,7 +1654,8 @@ bool Core::Init()
 
     // Lock the CoreSuspendMutex until the thread exits or call Core::Shutdown
     // Core::Update will temporary unlock when there is any commands queued
-    MainThread::suspend().lock();
+    //cerr << "Core::Init() lock";
+    //CoreSuspendClaimMain CoreInitLock;
 
     // Re-route stdout and stderr again - DF seems to set up stdout and
     // stderr.txt on Windows as of 0.43.05. Also, log before switching files to
@@ -1655,6 +1667,9 @@ bool Core::Init()
         freopen("stdout.log", "w", stdout);
         freopen("stderr.log", "w", stderr);
     #endif
+
+    cerr << "Core::Init() lock";
+    CoreSuspendClaimMain CoreInitLock;
 
     fprintf(stderr, "DFHack build: %s\n", Version::git_description());
 
@@ -1839,7 +1854,7 @@ bool Core::Init()
     // create plugin manager
     plug_mgr = new PluginManager(this);
     plug_mgr->init();
-    cerr << "Starting the TCP listener.\n";
+    //cerr << "Starting the TCP listener.\n";
     //std::future<bool> listen = ServerMain::listen(RemoteClient::GetDefaultPort());
     IODATA *temp = new IODATA;
     temp->core = this;
@@ -1850,13 +1865,11 @@ bool Core::Init()
         cerr << "Starting IO thread.\n";
         // create IO thread
         d->iothread = new tthread::thread(&fIOthread, (void*)temp);
-        (void)d->iothread;
     }
     else
     {
         std::cerr << "Starting dfhack.init thread.\n";
         d->iothread = new tthread::thread(&fInitthread, (void*)temp);
-        (void)d->iothread;
     }
 
     cerr << "Starting DF input capture thread.\n";
@@ -2148,14 +2161,31 @@ int Core::Update()
     // Let all commands run that require CoreSuspender
     //CoreWakeup.wait(MainThread::suspend(),
     //        [this]() -> bool {return this->toolCount.load() == 0;});
-    Core::getInstance().CoreSuspendMutex.lock();
-    while (this->toolCount.load() != 0)
-        CoreWakeup.wait(Core::getInstance().CoreSuspendMutex);
-    Core::getInstance().CoreSuspendMutex.unlock();
+
+    //Core::getInstance().getConsole().printerr("\nCore::Update lock");
+    //Core::getInstance().CoreSuspendMutex.lock();
+    //while (this->toolCount.load() != 0)
+    //{
+    //    Core::getInstance().getConsole().printerr("\nCore::Update wait for %u tools", uint32(this->toolCount.load()));
+    //    CoreWakeup.wait(Core::getInstance().CoreSuspendMutex);
+    //}
+    //Core::getInstance().getConsole().printerr("\nCore::Update: unlock");
+    //Core::getInstance().CoreSuspendMutex.unlock();
+
+    //keep this last
+    cerr << "\nCore::Update waiting for other threads";
+    CoreSuspendClaimMain waitForOtherThreadsToFinishUpdate;
+    cerr << "\nCore::Update: unlock";
 
     return 0;
 };
-
+void CoreSuspenderBase::lock()
+{
+    cerr <<  "\nCoreSuspenderBase::lock\nold tid " << uint32(tid.get())
+        << "\nnew tid " << uint32(tthread::this_thread::get_id().get());
+    lock_type::lock();
+    tid = Core::getInstance().ownerThread.exchange(tthread::this_thread::get_id(), tthread::memory_order_acquire);
+}
 extern bool buildings_do_onupdate;
 void buildings_onStateChange(color_ostream &out, state_change_event event);
 void buildings_onUpdate(color_ostream &out);
@@ -2393,8 +2423,12 @@ int Core::Shutdown ( void )
     errorstate = 1;
 
     // Make sure we release main thread if this is called from main thread
-    if (MainThread::suspend().owns_lock())
+    cerr << "\nCore::Shutdown checklock";
+    while (MainThread::suspend().owns_lock())
+    {
+        cerr << "\nCore::Shutdown unlock";
         MainThread::suspend().unlock();
+    }
 
     // Make sure the console thread shutdowns before clean up to avoid any
     // unlikely data races.
@@ -2415,7 +2449,7 @@ int Core::Shutdown ( void )
     d->hotkeythread->join();
     d->iothread->join();
 
-    CoreSuspendClaimer suspend;
+    CoreSuspender suspend;
     if(plug_mgr)
     {
         delete plug_mgr;

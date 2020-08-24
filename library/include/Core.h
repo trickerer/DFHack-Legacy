@@ -309,9 +309,9 @@ namespace DFHack
          * \{
          */
         tthread::recursive_mutex CoreSuspendMutex;
-        tthread::condition_variable CoreWakeup;
+        //tthread::condition_variable CoreWakeup;
+        //tthread::atomic<size_t> toolCount;
         tthread::atomic<tthread::thread::id> ownerThread;
-        tthread::atomic<size_t> toolCount;
         //! \}
 
         friend class CoreService;
@@ -319,31 +319,18 @@ namespace DFHack
         friend class CoreSuspender;
         friend class CoreSuspenderBase;
         friend struct CoreSuspendClaimMain;
-        friend struct CoreSuspendReleaseMain;
+        //friend struct CoreSuspendReleaseMain;
     };
 
     typedef tthread::defer_lock_guard<tthread::recursive_mutex> lock_type;
-    class CoreSuspenderBase  : public lock_type {
+    class CoreSuspenderBase  : protected lock_type {
     protected:
-        //using parent_t = std::unique_lock<std::recursive_mutex>;
-        //#define parent_t_csb lock_type
         tthread::thread::id tid;
 
-        //CoreSuspenderBase(std::defer_lock_t d) : CoreSuspenderBase{&Core::getInstance(), d} {}
+        explicit CoreSuspenderBase(Core* core) : lock_type(core->CoreSuspendMutex), tid() {}
 
-        explicit CoreSuspenderBase(Core* core) :
-            /* Lock the core */
-            lock_type(core->CoreSuspendMutex),
-            /* Mark this thread to be the core owner */
-            tid()
-        {}
     public:
-        void lock()
-        {
-            Core& core = Core::getInstance();
-            lock_type::lock();
-            tid = core.ownerThread.exchange(tthread::this_thread::get_id(), tthread::memory_order_acquire);
-        }
+        void lock();
 
         void unlock()
         {
@@ -360,9 +347,16 @@ namespace DFHack
             return lock_type::is_locked();
         }
 
-        ~CoreSuspenderBase() {
-            if (owns_lock())
-                unlock();
+        int get_recursion() const
+        {
+            return lock_type::get_recursion();
+        }
+
+        ~CoreSuspenderBase()
+        {
+            //this is done in parent
+            //if (owns_lock())
+            //    unlock();
         }
         friend class MainThread;
     };
@@ -400,14 +394,14 @@ namespace DFHack
         //CoreSuspender(Core* core, std::defer_lock_t) : CoreSuspenderBase{core, std::defer_lock} {}
 
         CoreSuspender() : CoreSuspenderBase(&Core::getInstance()) { lock(); }
-        CoreSuspender(bool) : CoreSuspenderBase(&Core::getInstance()) { lock(); }
-        CoreSuspender(Core* core) : CoreSuspenderBase(core) { lock(); }
-        CoreSuspender(Core* core, bool) : CoreSuspenderBase(core) { lock(); }
+        //CoreSuspender(bool) : CoreSuspenderBase(&Core::getInstance()) { lock(); }
+        //CoreSuspender(Core* core) : CoreSuspenderBase(core) { lock(); }
+        //CoreSuspender(Core* core, bool) : CoreSuspenderBase(core) { lock(); }
 
         void lock()
         {
             Core& core = Core::getInstance();
-            core.toolCount.fetch_add(1, tthread::memory_order_relaxed);
+            //core.toolCount.fetch_add(1, tthread::memory_order_relaxed);
             CoreSuspenderBase::lock();
         }
 
@@ -420,13 +414,17 @@ namespace DFHack
              * 1+ = There are tools waiting core access
              * fetch_add returns old value before subtraction
              */
-            if (core.toolCount.fetch_add(-1, tthread::memory_order_relaxed) == 1)
-                core.CoreWakeup.notify_one();
+            //if (core.toolCount.fetch_add(-1, tthread::memory_order_relaxed) == 1)
+            //    core.CoreWakeup.notify_one();
         }
 
-        ~CoreSuspender() {
-            if (owns_lock())
-                unlock();
+        ~CoreSuspender()
+        {
+            //this is done in parent
+            //if (owns_lock())
+            //    unlock();
+            if (int a = get_recursion())
+                std::cerr << "\n~CoreSusp(): cur recursion '" << a << "'";
         }
     };
 
@@ -434,10 +432,10 @@ namespace DFHack
      * Temporary release main thread ownership to allow alternative thread
      * implement DF logic thread loop
      */
-    struct DFHACK_EXPORT CoreSuspendReleaseMain {
-        CoreSuspendReleaseMain();
-        ~CoreSuspendReleaseMain();
-    };
+    //struct DFHACK_EXPORT CoreSuspendReleaseMain {
+    //    CoreSuspendReleaseMain();
+    //    ~CoreSuspendReleaseMain();
+    //};
 
     /*!
      * Temporary claim main thread ownership. This allows caller to call
@@ -451,5 +449,5 @@ namespace DFHack
     };
 
     //using CoreSuspendClaimer = CoreSuspender;
-    typedef CoreSuspender CoreSuspendClaimer;
+    //typedef CoreSuspender CoreSuspendClaimer;
 }

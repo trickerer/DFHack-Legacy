@@ -358,6 +358,7 @@ void ServerConnection::threadFn()
                 }
                 else
                 {
+                    std::cerr << "ServerConn::threadFn suspend";
                     CoreSuspender suspend;
                     res = fn->execute(stream);
                 }

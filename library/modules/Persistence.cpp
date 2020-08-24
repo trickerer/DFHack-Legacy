@@ -123,6 +123,7 @@ bool PersistentDataItem::isValid() const
     if (data == NULL)
         return false;
 
+    std::cerr << "PersistentDataItem::isValid suspend";
     CoreSuspender suspend;
 
     if (legacy_data.size() <= index)
@@ -133,6 +134,7 @@ bool PersistentDataItem::isValid() const
 
 void Persistence::Internal::clear()
 {
+    std::cerr << "Persistence::Internal::clear suspend";
     CoreSuspender suspend;
 
     legacy_data.clear();
@@ -141,6 +143,7 @@ void Persistence::Internal::clear()
 
 void Persistence::Internal::save()
 {
+    std::cerr << "Persistence::Internal::save suspend";
     CoreSuspender suspend;
 
     Json::Value json(Json::arrayValue);
@@ -206,6 +209,7 @@ static void convertHFigs()
 
 void Persistence::Internal::load()
 {
+    std::cerr << "Persistence::Internal::load suspend";
     CoreSuspender suspend;
 
     clear();
@@ -251,6 +255,7 @@ PersistentDataItem Persistence::addItem(const std::string &key)
     if (key.empty() || !Core::getInstance().isWorldLoaded())
         return PersistentDataItem();
 
+    std::cerr << "Persistence::addItem suspend";
     CoreSuspender suspend;
 
     size_t index = 0;
@@ -277,6 +282,7 @@ PersistentDataItem Persistence::addItem(const std::string &key)
 
 PersistentDataItem Persistence::getByKey(const std::string &key, bool *added)
 {
+    std::cerr << "Persistence::getByKey suspend";
     CoreSuspender suspend;
 
     std::multimap<std::string, size_t>::iterator it = index_cache.find(key);
@@ -301,6 +307,7 @@ PersistentDataItem Persistence::getByKey(const std::string &key, bool *added)
 
 PersistentDataItem Persistence::getByIndex(size_t index)
 {
+    std::cerr << "Persistence::getByIndex suspend";
     CoreSuspender suspend;
 
     if (index < legacy_data.size() && legacy_data.at(index) != NULL)
@@ -313,6 +320,7 @@ PersistentDataItem Persistence::getByIndex(size_t index)
 
 bool Persistence::deleteItem(const PersistentDataItem &item)
 {
+    std::cerr << "Persistence::deleteItem suspend";
     CoreSuspender suspend;
 
     if (!item.isValid())
@@ -341,6 +349,7 @@ void Persistence::getAll(std::vector<PersistentDataItem> &vec)
 {
     vec.clear();
 
+    std::cerr << "Persistence::getAll suspend";
     CoreSuspender suspend;
 
     for (size_t i = 0; i < legacy_data.size(); i++)
@@ -356,6 +365,7 @@ void Persistence::getAllByKeyRange(std::vector<PersistentDataItem> &vec, const s
 {
     vec.clear();
 
+    std::cerr << "Persistence::getAllByKeyRange suspend";
     CoreSuspender suspend;
 
     std::multimap<std::string, size_t>::iterator begin = index_cache.lower_bound(min);
@@ -370,6 +380,7 @@ void Persistence::getAllByKey(std::vector<PersistentDataItem> &vec, const std::s
 {
     vec.clear();
 
+    std::cerr << "Persistence::getAllByKey suspend";
     CoreSuspender suspend;
 
     std::pair<std::multimap<std::string, size_t>::iterator, std::multimap<std::string, size_t>::iterator> range =

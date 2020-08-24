@@ -369,6 +369,7 @@ void DFHack::EventManager::manageEvents(color_ostream& out) {
     if (!df::global::world)
         return;
 
+    cerr << "manageEnvents suspend";
     CoreSuspender suspender;
 
     int32_t tick = df::global::world->frame_counter;
