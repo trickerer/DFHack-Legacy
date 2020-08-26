@@ -24,6 +24,10 @@ freely, subject to the following restrictions:
 #ifndef _TINYTHREAD_H_
 #define _TINYTHREAD_H_
 
+#ifdef _MSC_VER
+#pragma warning(disable:4800) //int to bool assignment (W3 before VS2017)
+#endif
+
 /// @file
 /// @mainpage TinyThread++ API Reference
 ///
@@ -1126,5 +1130,9 @@ namespace this_thread {
 
 // Define/macro cleanup
 #undef _TTHREAD_DISABLE_ASSIGNMENT
+
+#ifdef _MSC_VER
+#pragma warning(default:4800)
+#endif
 
 #endif // _TINYTHREAD_H_
