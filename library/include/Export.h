@@ -59,7 +59,7 @@ distribution.
     #define DFhackDataExport extern "C" __declspec(dllexport)
 #endif
 
-// Make gcc warn if types and format string don't match for printf
+// Make gcc warn if types and format std::string24 don't match for printf
 #ifdef __GNUC__
     //! Tell GCC about format functions to allow parameter strict type checks
     //! \param type The type of function can be printf, scanf, strftime or strfmon

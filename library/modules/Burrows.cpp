@@ -51,12 +51,12 @@ using namespace df::enums;
 using df::global::world;
 using df::global::ui;
 
-df::burrow *Burrows::findByName(std::string name)
+df::burrow *Burrows::findByName(std::string24 name)
 {
-    std::vector<df::burrow*> &vec = df::burrow::get_vector();
+    std::vector12<df::burrow*> &vec = df::burrow::get_vector();
 
     for (size_t i = 0; i < vec.size(); i++)
-        if (vec[i]->name == name)
+        if (vec[i]->name == name.c_str())
             return vec[i];
 
     return NULL;
@@ -80,7 +80,7 @@ void Burrows::clearUnits(df::burrow *burrow)
     if (ui && ui->main.mode == ui_sidebar_mode::Burrows &&
         ui->burrows.in_add_units_mode && ui->burrows.sel_id == burrow->id)
     {
-        std::vector<bool> &sel = ui->burrows.sel_units;
+        std::vector12<bool> &sel = ui->burrows.sel_units;
 
         for (size_t i = 0; i < sel.size(); i++)
             sel[i] = false;
@@ -123,7 +123,7 @@ void Burrows::setAssignedUnit(df::burrow *burrow, df::unit *unit, bool enable)
     }
 }
 
-void Burrows::listBlocks(std::vector<df::map_block*> *pvec, df::burrow *burrow)
+void Burrows::listBlocks(std::vector12<df::map_block*> *pvec, df::burrow *burrow)
 {
     CHECK_NULL_POINTER(burrow);
 

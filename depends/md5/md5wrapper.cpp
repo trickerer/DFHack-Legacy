@@ -88,9 +88,9 @@ md5wrapper::~md5wrapper()
  * "text" and returns it as
  * string
  */
-std::string md5wrapper::getHashFromString(std::string text)
+std::string24 md5wrapper::getHashFromString(std::string24 text)
 {
-	return this->hashit((unsigned char*)text.data(), text.length());
+	return this->hashit((unsigned char*)text.data(), text.length()).c_str();
 }
 
 /*

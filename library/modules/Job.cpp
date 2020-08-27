@@ -168,7 +168,7 @@ void DFHack::Job::printItemDetails(color_ostream &out, df::job_item *item, int i
     CHECK_NULL_POINTER(item);
 
     ItemTypeInfo info(item);
-    out << "  Input Item " << (idx+1) << ": " << info.toString();
+    out << "  Input Item " << (idx+1) << ": " << info.toString().c_str();
 
     if (item->quantity != 1)
         out << "; quantity=" << item->quantity;
@@ -178,25 +178,25 @@ void DFHack::Job::printItemDetails(color_ostream &out, df::job_item *item, int i
 
     MaterialInfo mat(item);
     if (mat.isValid() || item->metal_ore >= 0) {
-        out << "    material: " << mat.toString();
+        out << "    material: " << mat.toString().c_str();
         if (item->metal_ore >= 0)
-            out << "; ore of " << MaterialInfo(0,item->metal_ore).toString();
+            out << "; ore of " << MaterialInfo(0,item->metal_ore).toString().c_str();
         out << endl;
     }
 
     if (item->flags1.whole)
-        out << "    flags1: " << bitfield_to_string(item->flags1) << endl;
+        out << "    flags1: " << bitfield_to_string(item->flags1).c_str() << endl;
     if (item->flags2.whole)
-        out << "    flags2: " << bitfield_to_string(item->flags2) << endl;
+        out << "    flags2: " << bitfield_to_string(item->flags2).c_str() << endl;
     if (item->flags3.whole)
-        out << "    flags3: " << bitfield_to_string(item->flags3) << endl;
+        out << "    flags3: " << bitfield_to_string(item->flags3).c_str() << endl;
 
     if (!item->reaction_class.empty())
-        out << "    reaction class: " << item->reaction_class << endl;
+        out << "    reaction class: " << item->reaction_class.c_str() << endl;
     if (!item->has_material_reaction_product.empty())
-        out << "    reaction product: " << item->has_material_reaction_product << endl;
+        out << "    reaction product: " << item->has_material_reaction_product.c_str() << endl;
     if (item->has_tool_use >= (df::tool_uses)0)
-        out << "    tool use: " << ENUM_KEY_STR_SIMPLE(tool_uses, item->has_tool_use) << endl;
+        out << "    tool use: " << ENUM_KEY_STR_SIMPLE(tool_uses, item->has_tool_use).c_str() << endl;
 }
 
 void DFHack::Job::printJobDetails(color_ostream &out, df::job *job)
@@ -204,9 +204,9 @@ void DFHack::Job::printJobDetails(color_ostream &out, df::job *job)
     CHECK_NULL_POINTER(job);
 
     out.color(job->flags.bits.suspend ? COLOR_DARKGREY : COLOR_GREY);
-    out << "Job " << job->id << ": " << ENUM_KEY_STR_SIMPLE(job_type,job->job_type);
+    out << "Job " << job->id << ": " << ENUM_KEY_STR_SIMPLE(job_type,job->job_type).c_str();
     if (job->flags.whole)
-        out << " (" << bitfield_to_string(job->flags) << ")";
+        out << " (" << bitfield_to_string(job->flags).c_str() << ")";
     out << endl;
     out.reset_color();
 
@@ -218,9 +218,9 @@ void DFHack::Job::printJobDetails(color_ostream &out, df::job *job)
 
     if (mat.isValid() || job->material_category.whole)
     {
-        out << "    material: " << mat.toString();
+        out << "    material: " << mat.toString().c_str();
         if (job->material_category.whole)
-            out << " (" << bitfield_to_string(job->material_category) << ")";
+            out << " (" << bitfield_to_string(job->material_category).c_str() << ")";
         out << endl;
     }
 
@@ -228,15 +228,15 @@ void DFHack::Job::printJobDetails(color_ostream &out, df::job *job)
     {
         ItemTypeInfo iinfo(itype, job->item_subtype);
 
-        out << "    item: " << iinfo.toString()
-               << " (" << bitfield_to_string(job->item_category) << ")" << endl;
+        out << "    item: " << iinfo.toString().c_str()
+               << " (" << bitfield_to_string(job->item_category).c_str() << ")" << endl;
     }
 
     if (job->hist_figure_id >= 0)
         out << "    figure: " << job->hist_figure_id << endl;
 
     if (!job->reaction_name.empty())
-        out << "    reaction: " << job->reaction_name << endl;
+        out << "    reaction: " << job->reaction_name.c_str() << endl;
 
     for (size_t i = 0; i < job->job_items.size(); i++)
         printItemDetails(out, job->job_items[i], i);
@@ -369,7 +369,7 @@ bool DFHack::Job::removeJob(df::job *job) {
     if (job->specific_refs.size() > 0)
         return false;
 
-    for (std::vector<df::general_ref*>::const_iterator gritr = job->general_refs.begin(); gritr != job->general_refs.end(); ++gritr)
+    for (std::vector12<df::general_ref*>::const_iterator gritr = job->general_refs.begin(); gritr != job->general_refs.end(); ++gritr)
     {
         df::general_ref* ref = *gritr;
         if (ref != NULL && (ref->getType() != general_ref_type::BUILDING_HOLDER && ref->getType() != general_ref_type::UNIT_WORKER))
@@ -517,7 +517,7 @@ bool DFHack::Job::removePostings(df::job *job, bool remove_all)
     }
     else
     {
-        for (std::vector<df::job_handler::T_postings*>::const_iterator it = world->jobs.postings.begin(); it != world->jobs.postings.end(); ++it)
+        for (std::vector12<df::job_handler::T_postings*>::const_iterator it = world->jobs.postings.begin(); it != world->jobs.postings.end(); ++it)
         {
             if ((**it).job == job)
             {
@@ -531,7 +531,7 @@ bool DFHack::Job::removePostings(df::job *job, bool remove_all)
     return removed;
 }
 
-bool DFHack::Job::listNewlyCreated(std::vector<df::job*> *pvec, int *id_var)
+bool DFHack::Job::listNewlyCreated(std::vector12<df::job*> *pvec, int *id_var)
 {
     using df::global::world;
     using df::global::job_next_id;
@@ -622,11 +622,11 @@ bool Job::isSuitableMaterial(df::job_item *item, int mat_type, int mat_index)
     return minfo.isValid() && iinfo.matches(*item, &minfo);
 }
 
-std::string Job::getName(df::job *job)
+std::string24 Job::getName(df::job *job)
 {
     CHECK_NULL_POINTER(job);
 
-    std::string desc;
+    std::string24 desc;
     df::interface_button_building_new_jobst* button = df::allocate<df::interface_button_building_new_jobst>();
     button->reaction_name = job->reaction_name;
     button->hist_figure_id = job->hist_figure_id;

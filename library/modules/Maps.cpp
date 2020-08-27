@@ -345,7 +345,7 @@ df::feature_init *Maps::getLocalInitFeature(df::coord2d rgn_pos, int32_t index)
 
     df::coord2d sub = rgn_pos & 15;
 
-    vector <df::feature_init *> &features = fptr->feature_init[sub.x][sub.y];
+    std::vector12 <df::feature_init *> &features = fptr->feature_init[sub.x][sub.y];
 
     return vector_get(features, index);
 }
@@ -397,14 +397,14 @@ bool Maps::ReadFeatures(df::map_block * block, t_feature * local, t_feature * gl
  * Block events
  */
 bool Maps::SortBlockEvents(df::map_block *block,
-    vector <df::block_square_event_mineralst *>* veins,
-    vector <df::block_square_event_frozen_liquidst *>* ices,
-    vector <df::block_square_event_material_spatterst *> *materials,
-    vector <df::block_square_event_grassst *> *grasses,
-    vector <df::block_square_event_world_constructionst *> *constructions,
-    vector <df::block_square_event_spoorst *> *spoors,
-    vector <df::block_square_event_item_spatterst *> *items,
-    vector <df::block_square_event_designation_priorityst *> *priorities)
+    std::vector12 <df::block_square_event_mineralst *>* veins,
+    std::vector12 <df::block_square_event_frozen_liquidst *>* ices,
+    std::vector12 <df::block_square_event_material_spatterst *> *materials,
+    std::vector12 <df::block_square_event_grassst *> *grasses,
+    std::vector12 <df::block_square_event_world_constructionst *> *constructions,
+    std::vector12 <df::block_square_event_spoorst *> *spoors,
+    std::vector12 <df::block_square_event_item_spatterst *> *items,
+    std::vector12 <df::block_square_event_designation_priorityst *> *priorities)
 {
     if (veins)
         veins->clear();
@@ -520,7 +520,7 @@ df::coord2d Maps::getBlockTileBiomeRgn(df::map_block *block, df::coord2d pos)
 /*
 * Layer geology
 */
-bool Maps::ReadGeology(vector<vector<int16_t> > *layer_mats, vector<df::coord2d> *geoidx)
+bool Maps::ReadGeology(std::vector12<std::vector12<int16_t> > *layer_mats, std::vector12<df::coord2d> *geoidx)
 {
     if (!world->world_data)
         return false;
@@ -549,17 +549,17 @@ bool Maps::ReadGeology(vector<vector<int16_t> > *layer_mats, vector<df::coord2d>
         if (!biome)
             continue;
 
-        // get index into geoblock vector
+        // get index into geoblock std::vector12
         int16_t geoindex = biome->geo_index;
 
-        /// geology blocks have a vector of layer descriptors
-        // get the vector with pointer to layers
+        /// geology blocks have a std::vector12 of layer descriptors
+        // get the std::vector12 with pointer to layers
         df::world_geo_biome *geo_biome = df::world_geo_biome::find(geoindex);
         if (!geo_biome)
             continue;
 
-        std::vector<df::world_geo_layer*> &geolayers = geo_biome->layers;
-        vector<int16_t> &matvec = (*layer_mats)[i];
+        std::vector12<df::world_geo_layer*> &geolayers = geo_biome->layers;
+        std::vector12<int16_t> &matvec = (*layer_mats)[i];
 
         /// layer descriptor has a field that determines the type of stone/soil
         matvec.resize(geolayers.size());

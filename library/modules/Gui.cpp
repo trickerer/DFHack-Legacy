@@ -127,33 +127,33 @@ static df::layer_object_listst *getLayerList(df::viewscreen_layer *layer, int id
     return virtual_cast<df::layer_object_listst>(vector_get(layer->layer_objects,idx));
 }
 
-static std::string getNameChunk(virtual_identity *id, int start, int end)
+static std::string24 getNameChunk(virtual_identity *id, int start, int end)
 {
     if (!id)
         return "UNKNOWN";
     const char *name = id->getName();
     int len = strlen(name);
     if (len > start + end)
-        return std::string(name+start, len-start-end);
+        return std::string24(name+start, len-start-end);
     else
         return name;
 }
 
 /*
- * Classifying focus context by means of a string path.
+ * Classifying focus context by means of a std::string24 path.
  */
 
-typedef void (*getFocusStringHandler)(std::string &str, df::viewscreen *screen);
+typedef void (*getFocusStringHandler)(std::string24 &str, df::viewscreen *screen);
 static std::map<virtual_identity*, getFocusStringHandler> getFocusStringHandlers;
 
 #define VIEWSCREEN(name) df::viewscreen_##name##st
 #define DEFINE_GET_FOCUS_STRING_HANDLER(screen_type) \
-    static void getFocusString_##screen_type(std::string &focus, VIEWSCREEN(screen_type) *screen);\
+    static void getFocusString_##screen_type(std::string24 &focus, VIEWSCREEN(screen_type) *screen);\
     DFHACK_STATIC_ADD_TO_MAP(\
         &getFocusStringHandlers, &VIEWSCREEN(screen_type)::_identity, \
         (getFocusStringHandler)getFocusString_##screen_type \
     ); \
-    static void getFocusString_##screen_type(std::string &focus, VIEWSCREEN(screen_type) *screen)
+    static void getFocusString_##screen_type(std::string24 &focus, VIEWSCREEN(screen_type) *screen)
 
 DEFINE_GET_FOCUS_STRING_HANDLER(dwarfmode)
 {
@@ -333,14 +333,14 @@ DEFINE_GET_FOCUS_STRING_HANDLER(dwarfmode)
         if (ui->hauling.in_assign_vehicle)
         {
             df::vehicle* vehicle = vector_get(ui->hauling.vehicles, ui->hauling.cursor_vehicle);
-            focus += "/AssignVehicle/" + std::string(vehicle ? "Some" : "None");
+            focus += "/AssignVehicle/" + std::string24(vehicle ? "Some" : "None");
         }
         else
         {
             int idx = ui->hauling.cursor_top;
             df::hauling_route* route = vector_get(ui->hauling.view_routes, idx);
             df::hauling_stop* stop = vector_get(ui->hauling.view_stops, idx);
-            std::string tag = stop ? "Stop" : (route ? "Route" : "None");
+            std::string24 tag = stop ? "Stop" : (route ? "Route" : "None");
 
             if (ui->hauling.in_name)
                 focus += "/Rename/" + tag;
@@ -586,21 +586,21 @@ DEFINE_GET_FOCUS_STRING_HANDLER(workquota_condition)
         focus += "/EditCount";
 }
 
-std::string Gui::getFocusString(df::viewscreen *top)
+std::string24 Gui::getFocusString(df::viewscreen *top)
 {
     if (!top)
         return "";
 
     if (dfhack_viewscreen::is_instance(top))
     {
-        std::string name = static_cast<dfhack_viewscreen*>(top)->getFocusString();
+        std::string24 name = static_cast<dfhack_viewscreen*>(top)->getFocusString();
         return name.empty() ? "dfhack" : "dfhack/"+name;
     }
     else if (virtual_identity *id = virtual_identity::get(top))
     {
-        std::string name = getNameChunk(id, 11, 2);
+        std::string24 name = getNameChunk(id, 11, 2);
 
-        void (*handler)(std::string &,df::viewscreen *) = map_find(getFocusStringHandlers, id);
+        void (*handler)(std::string24 &,df::viewscreen *) = map_find(getFocusStringHandlers, id);
         if (handler)
             handler(name, top);
 
@@ -609,7 +609,7 @@ std::string Gui::getFocusString(df::viewscreen *top)
     else
     {
         Core &core = Core::getInstance();
-        std::string name = core.proc->readClassName(*(void**)top);
+        std::string24 name = core.proc->readClassName(*(void**)top);
         return name.substr(11, name.size()-11-2);
     }
 }
@@ -961,14 +961,14 @@ df::unit *Gui::getAnyUnit(df::viewscreen *top)
             if (report)
             {
                 //for (df::unit *unit : world->units.all)
-                for (std::vector<df::unit*>::const_iterator it = world->units.all.begin(); it != world->units.all.end(); ++it)
+                for (std::vector12<df::unit*>::const_iterator it = world->units.all.begin(); it != world->units.all.end(); ++it)
                 {
                     df::unit *unit = *it;
                     if (unit && screen->report_type >= 0 && screen->report_type < 3
                         && unit != screen->unit) // find 'other' unit related to this report
                     {
-                        std::vector<int32> const &rep_vec = unit->reports.log[screen->report_type];
-                        for (std::vector<int32>::const_iterator itr = rep_vec.begin(); itr != rep_vec.end(); ++itr)
+                        std::vector12<int32> const &rep_vec = unit->reports.log[screen->report_type];
+                        for (std::vector12<int32>::const_iterator itr = rep_vec.begin(); itr != rep_vec.end(); ++itr)
                         {
                             if (*itr == report->id)
                                 return unit;
@@ -1143,7 +1143,7 @@ df::item *Gui::getAnyItem(df::viewscreen *top)
             return NULL;
 
         int list_idx = vector_get(screen->visible_lists, list1->cursor, (int16_t)-1);
-        unsigned num_lists = sizeof(screen->lists)/sizeof(std::vector<int32_t>);
+        unsigned num_lists = sizeof(screen->lists)/sizeof(std::vector12<int32_t>);
         if (unsigned(list_idx) >= num_lists)
             return NULL;
 
@@ -1324,7 +1324,7 @@ df::plant *Gui::getAnyPlant(df::viewscreen *top)
         if (ui->main.mode == ui_sidebar_mode::LookAround)
         {
             //for (df::plant *plant : world->plants.all)
-            for (std::vector<df::plant*>::const_iterator it = world->plants.all.begin(); it != world->plants.all.end(); ++it)
+            for (std::vector12<df::plant*>::const_iterator it = world->plants.all.begin(); it != world->plants.all.end(); ++it)
             {
                 df::plant* plant = *it;
                 if (plant->pos.x == cursor->x && plant->pos.y == cursor->y && plant->pos.z == cursor->z)
@@ -1355,18 +1355,18 @@ df::plant *Gui::getSelectedPlant(color_ostream &out, bool quiet)
 
 //
 
-DFHACK_EXPORT void Gui::writeToGamelog(std::string message)
+DFHACK_EXPORT void Gui::writeToGamelog(std::string24 message)
 {
     if (message.empty())
         return;
 
     std::ofstream fseed("gamelog.txt", std::ios::out | std::ios::app);
     if(fseed.is_open())
-        fseed << message << std::endl;
+        fseed << message.c_str() << std::endl;
     fseed.close();
 }
 
-DFHACK_EXPORT int Gui::makeAnnouncement(df::announcement_type type, df::announcement_flags flags, df::coord pos, std::string message, int color, bool bright)
+DFHACK_EXPORT int Gui::makeAnnouncement(df::announcement_type type, df::announcement_flags flags, df::coord pos, std::string24 message, int color, bool bright)
 {
     using df::global::world;
     using df::global::cur_year;
@@ -1391,7 +1391,7 @@ DFHACK_EXPORT int Gui::makeAnnouncement(df::announcement_type type, df::announce
     }
 
     // Apply the requested effects
-    writeToGamelog(message);
+    writeToGamelog(message.c_str());
 
     if (flags.bits.DO_MEGA || flags.bits.PAUSE || flags.bits.RECENTER)
     {
@@ -1401,7 +1401,7 @@ DFHACK_EXPORT int Gui::makeAnnouncement(df::announcement_type type, df::announce
             revealInDwarfmodeMap(pos, true);
 
         if (flags.bits.DO_MEGA)
-            showPopupAnnouncement(message, color, bright);
+            showPopupAnnouncement(message.c_str(), color, bright);
     }
 
     bool display = false;
@@ -1460,14 +1460,14 @@ bool Gui::addCombatReport(df::unit *unit, df::unit_report_type slot, int report_
 
     CHECK_INVALID_ARGUMENT(is_valid_enum_item_simple(slot));
 
-    std::vector<df::report*> &vec = world->status.reports;
+    std::vector12<df::report*> &vec = world->status.reports;
     df::report* report = vector_get(vec, report_index);
 
     if (!unit || !report)
         return false;
 
     // Check that it is a new report
-    std::vector<int32> &rvec = unit->reports.log[slot];
+    std::vector12<int32> &rvec = unit->reports.log[slot];
     if (!rvec.empty() && rvec.back() >= report->id)
         return false;
 
@@ -1500,7 +1500,7 @@ bool Gui::addCombatReportAuto(df::unit *unit, df::announcement_flags mode, int r
 {
     using df::global::world;
 
-    std::vector<df::report*> &vec = world->status.reports;
+    std::vector12<df::report*> &vec = world->status.reports;
     df::report* report = vector_get(vec, report_index);
 
     if (!unit || !report)
@@ -1534,7 +1534,7 @@ bool Gui::addCombatReportAuto(df::unit *unit, df::announcement_flags mode, int r
     return ok;
 }
 
-void Gui::showAnnouncement(std::string message, int color, bool bright)
+void Gui::showAnnouncement(std::string24 message, int color, bool bright)
 {
     df::announcement_flags mode;
     mode.bits.D_DISPLAY = mode.bits.A_DISPLAY = true;
@@ -1543,7 +1543,7 @@ void Gui::showAnnouncement(std::string message, int color, bool bright)
 }
 
 void Gui::showZoomAnnouncement(
-    df::announcement_type type, df::coord pos, std::string message, int color, bool bright
+    df::announcement_type type, df::coord pos, std::string24 message, int color, bool bright
 ) {
     df::announcement_flags mode;
     mode.bits.D_DISPLAY = mode.bits.A_DISPLAY = true;
@@ -1551,7 +1551,7 @@ void Gui::showZoomAnnouncement(
     makeAnnouncement(type, mode, pos, message, color, bright);
 }
 
-void Gui::showPopupAnnouncement(std::string message, int color, bool bright)
+void Gui::showPopupAnnouncement(std::string24 message, int color, bool bright)
 {
     using df::global::world;
 
@@ -1563,7 +1563,7 @@ void Gui::showPopupAnnouncement(std::string message, int color, bool bright)
 }
 
 void Gui::showAutoAnnouncement(
-    df::announcement_type type, df::coord pos, std::string message, int color, bool bright,
+    df::announcement_type type, df::coord pos, std::string24 message, int color, bool bright,
     df::unit *unit1, df::unit *unit2
 ) {
     using df::global::d_init;

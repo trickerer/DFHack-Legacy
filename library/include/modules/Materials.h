@@ -123,21 +123,21 @@ namespace DFHack
             return ptr ? decode(ptr->mat_type, ptr->mat_index) : decode(-1);
         }
 
-        bool find(const std::string &token);
-        bool find(const std::vector<std::string> &tokens);
+        bool find(const std::string24 &token);
+        bool find(const std::vector12<std::string24> &tokens);
 
-        bool findBuiltin(const std::string &token);
-        bool findInorganic(const std::string &token);
-        bool findPlant(const std::string &token, const std::string &subtoken);
-        bool findCreature(const std::string &token, const std::string &subtoken);
+        bool findBuiltin(const std::string24 &token);
+        bool findInorganic(const std::string24 &token);
+        bool findPlant(const std::string24 &token, const std::string24 &subtoken);
+        bool findCreature(const std::string24 &token, const std::string24 &subtoken);
 
-        bool findProduct(df::material *material, const std::string &name);
-        bool findProduct(const MaterialInfo &info, const std::string &name) {
+        bool findProduct(df::material *material, const std::string24 &name);
+        bool findProduct(const MaterialInfo &info, const std::string24 &name) {
             return findProduct(info.material, name);
         }
 
-        std::string getToken();
-        std::string toString(uint16_t temp = 10015, bool named = true);
+        std::string24 getToken();
+        std::string24 toString(uint16_t temp = 10015, bool named = true);
 
         bool isAnyCloth();
 
@@ -159,8 +159,8 @@ namespace DFHack
         bool matches(const df::job_item &item);
     };
 
-    DFHACK_EXPORT bool parseJobMaterialCategory(df::job_material_category *cat, const std::string &token);
-    DFHACK_EXPORT bool parseJobMaterialCategory(df::dfhack_material_category *cat, const std::string &token);
+    DFHACK_EXPORT bool parseJobMaterialCategory(df::job_material_category *cat, const std::string24 &token);
+    DFHACK_EXPORT bool parseJobMaterialCategory(df::dfhack_material_category *cat, const std::string24 &token);
 
     inline bool operator== (const MaterialInfo &a, const MaterialInfo &b) {
         return a.type == b.type && a.index == b.index;
@@ -182,8 +182,8 @@ namespace DFHack
     class DFHACK_EXPORT t_matgloss
     {
     public:
-        std::string id; // raw name
-        std::string name; // a sensible human-readable name
+        std::string24 id; // raw name
+        std::string24 name; // a sensible human-readable name
         uint8_t fore;
         uint8_t back;
         uint8_t bright;
@@ -204,20 +204,20 @@ namespace DFHack
     {
     public:
         // Types of metals the ore will produce when smelted.  Each number
-        // is an index into the inorganic matglass vector.
-        std::vector<int16_t> ore_types;
+        // is an index into the inorganic matglass std::vector12.
+        std::vector12<int16_t> ore_types;
 
         // Percent chance that the ore will produce each type of metal
         // when smelted.
-        std::vector<int16_t> ore_chances;
+        std::vector12<int16_t> ore_chances;
 
         // Types of metals the ore will produce from strand extraction.
-        // Each number is an index into the inorganic matglass vector.
-        std::vector<int16_t> strand_types;
+        // Each number is an index into the inorganic matglass std::vector12.
+        std::vector12<int16_t> strand_types;
 
         // Percent chance that the ore will produce each type of metal
         // fram strand extraction.
-        std::vector<int16_t> strand_chances;
+        std::vector12<int16_t> strand_chances;
 
     public:
         //t_matglossInorganic();
@@ -231,8 +231,8 @@ namespace DFHack
      */
     struct t_descriptor_color
     {
-        std::string id;
-        std::string name;
+        std::string24 id;
+        std::string24 name;
         float red;
         float green;
         float blue;
@@ -242,32 +242,32 @@ namespace DFHack
      */
     struct t_matglossPlant
     {
-        std::string id;
-        std::string name;
+        std::string24 id;
+        std::string24 name;
         uint8_t fore;
         uint8_t back;
         uint8_t bright;
-        std::string drink_name;
-        std::string food_name;
-        std::string extract_name;
+        std::string24 drink_name;
+        std::string24 food_name;
+        std::string24 extract_name;
     };
     /**
      * \ingroup grp_materials
      */
     struct t_bodypart
     {
-        std::string id;
-        std::string category;
-        std::string singular;
-        std::string plural;
+        std::string24 id;
+        std::string24 category;
+        std::string24 singular;
+        std::string24 plural;
     };
     /**
      * \ingroup grp_materials
      */
     struct t_colormodifier
     {
-        std::string part;
-        std::vector<uint32_t> colorlist;
+        std::string24 part;
+        std::vector12<uint32_t> colorlist;
         uint32_t startdate; /* in days */
         uint32_t enddate; /* in days */
     };
@@ -276,12 +276,12 @@ namespace DFHack
      */
     struct t_creaturecaste
     {
-        std::string id;
-        std::string singular;
-        std::string plural;
-        std::string adjective;
-        std::vector<t_colormodifier> ColorModifier;
-        std::vector<t_bodypart> bodypart;
+        std::string24 id;
+        std::string24 singular;
+        std::string24 plural;
+        std::string24 adjective;
+        std::vector12<t_colormodifier> ColorModifier;
+        std::vector12<t_bodypart> bodypart;
 
         int32_t strength[7];
         int32_t agility[7];
@@ -309,23 +309,23 @@ namespace DFHack
      */
     struct t_matglossOther
     {
-        std::string id;
+        std::string24 id;
     };
     /**
      * \ingroup grp_materials
      */
     struct t_creatureextract
     {
-        std::string id;
+        std::string24 id;
     };
     /**
      * \ingroup grp_materials
      */
     struct t_creaturetype
     {
-        std::string id;
-        std::vector <t_creaturecaste> castes;
-        std::vector <t_creatureextract> extract;
+        std::string24 id;
+        std::vector12 <t_creaturecaste> castes;
+        std::vector12 <t_creatureextract> extract;
         uint8_t tile_character;
         struct
         {
@@ -359,16 +359,16 @@ namespace DFHack
         ~Materials();
         bool Finish();
 
-        std::vector<t_matgloss> race;
-        std::vector<t_creaturetype> raceEx;
-        std::vector<t_descriptor_color> color;
-        std::vector<t_matglossOther> other;
-        std::vector<t_matgloss> alldesc;
+        std::vector12<t_matgloss> race;
+        std::vector12<t_creaturetype> raceEx;
+        std::vector12<t_descriptor_color> color;
+        std::vector12<t_matglossOther> other;
+        std::vector12<t_matgloss> alldesc;
 
-        bool CopyInorganicMaterials (std::vector<t_matglossInorganic> & inorganic);
-        bool CopyOrganicMaterials (std::vector<t_matgloss> & organic);
-        bool CopyWoodMaterials (std::vector<t_matgloss> & tree);
-        bool CopyPlantMaterials (std::vector<t_matgloss> & plant);
+        bool CopyInorganicMaterials (std::vector12<t_matglossInorganic> & inorganic);
+        bool CopyOrganicMaterials (std::vector12<t_matgloss> & organic);
+        bool CopyWoodMaterials (std::vector12<t_matgloss> & tree);
+        bool CopyPlantMaterials (std::vector12<t_matgloss> & plant);
 
         bool ReadCreatureTypes (void);
         bool ReadCreatureTypesEx (void);
@@ -377,8 +377,8 @@ namespace DFHack
 
         bool ReadAllMaterials(void);
 
-        std::string getType(const t_material & mat);
-        std::string getDescription(const t_material & mat);
+        std::string24 getType(const t_material & mat);
+        std::string24 getDescription(const t_material & mat);
     };
 }
 #endif

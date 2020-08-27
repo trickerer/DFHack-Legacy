@@ -55,16 +55,16 @@ VersionInfoFactory::~VersionInfoFactory()
 
 void VersionInfoFactory::clear()
 {
-    for (std::vector<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
+    for (std::vector12<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
         delete *it;
     versions.clear();
     error = false;
 }
 
-VersionInfo const* VersionInfoFactory::getVersionInfoByMD5(string hash) const
+VersionInfo const* VersionInfoFactory::getVersionInfoByMD5(std::string24 hash) const
 {
     //for (const auto& version : versions)
-    for (std::vector<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
+    for (std::vector12<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
     {
         if((*it)->hasMD5(hash))
             return (*it);
@@ -75,7 +75,7 @@ VersionInfo const* VersionInfoFactory::getVersionInfoByMD5(string hash) const
 VersionInfo const* VersionInfoFactory::getVersionInfoByPETimestamp(uintptr_t timestamp) const
 {
     //for (const auto& version : versions)
-    for (std::vector<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
+    for (std::vector12<VersionInfo const*>::const_iterator it = versions.begin(); it != versions.end(); ++it)
     {
         if((*it)->hasPE(timestamp))
             return (*it);
@@ -96,7 +96,7 @@ void VersionInfoFactory::ParseVersion (TiXmlElement* entry, VersionInfo* mem)
     if (!cstr_os)
         throw Error::SymbolsXmlBadAttribute("os-type");
 
-    string os = cstr_os;
+    std::string24 os = cstr_os;
     mem->setVersion(cstr_name);
 
     if(os == "windows")
@@ -126,7 +126,7 @@ void VersionInfoFactory::ParseVersion (TiXmlElement* entry, VersionInfo* mem)
     pMemEntry = entry->FirstChildElement()->ToElement();
     for(;pMemEntry;pMemEntry=pMemEntry->NextSiblingElement())
     {
-        string type, name, value;
+        std::string24 type, name, value;
         const char *cstr_type = pMemEntry->Value();
         type = cstr_type;
         bool is_vtable = (type == "vtable-address");
@@ -185,10 +185,10 @@ void VersionInfoFactory::ParseVersion (TiXmlElement* entry, VersionInfo* mem)
 } // method
 
 // load the XML file with offsets
-bool VersionInfoFactory::loadFile(string path_to_xml)
+bool VersionInfoFactory::loadFile(std::string24 path_to_xml)
 {
     TiXmlDocument doc( path_to_xml.c_str() );
-    std::cerr << "Loading " << path_to_xml << " ... ";
+    std::cerr << "Loading " << path_to_xml.c_str() << " ... ";
     //bool loadOkay = doc.LoadFile();
     if (!doc.LoadFile())
     {
@@ -213,7 +213,7 @@ bool VersionInfoFactory::loadFile(string path_to_xml)
             error = true;
             throw Error::SymbolsXmlNoRoot();
         }
-        string m_name=pElem->Value();
+        std::string24 m_name=pElem->Value();
         if(m_name != "data-definition")
         {
             error = true;

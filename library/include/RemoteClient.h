@@ -153,11 +153,11 @@ namespace  DFHack
 
     class DFHACK_EXPORT RemoteFunctionBase : public RPCFunctionBase {
     public:
-        bool bind(RemoteClient *client, const std::string &name,
-                  const std::string &plugin = std::string());
+        bool bind(RemoteClient *client, const std::string24 &name,
+                  const std::string24 &plugin = std::string24());
         bool bind(color_ostream &out,
-                  RemoteClient *client, const std::string &name,
-                  const std::string &plugin = std::string());
+                  RemoteClient *client, const std::string24 &name,
+                  const std::string24 &plugin = std::string24());
 
         bool isValid() { return (id >= 0); }
 
@@ -171,7 +171,7 @@ namespace  DFHack
         inline color_ostream &default_ostream();
         command_result execute(color_ostream &out, const message_type *input, message_type *output);
 
-        std::string name, plugin;
+        std::string24 name, plugin;
         RemoteClient *p_client;
         int16_t id;
     };
@@ -231,7 +231,7 @@ namespace  DFHack
         friend class RemoteFunctionBase;
 
         bool bind(color_ostream &out, RemoteFunctionBase *function,
-                  const std::string &name, const std::string &plugin);
+                  const std::string24 &name, const std::string24 &plugin);
 
     public:
         RemoteClient(color_ostream *default_output = NULL);
@@ -245,11 +245,11 @@ namespace  DFHack
         bool connect(int port = -1);
         void disconnect();
 
-        command_result run_command(const std::string &cmd, const std::vector<std::string> &args) {
+        command_result run_command(const std::string24 &cmd, const std::vector12<std::string24> &args) {
             return run_command(default_output(), cmd, args);
         }
-        command_result run_command(color_ostream &out, const std::string &cmd,
-                                   const std::vector<std::string> &args);
+        command_result run_command(color_ostream &out, const std::string24 &cmd,
+                                   const std::vector12<std::string24> &args);
 
         // For executing multiple calls in rapid succession.
         // Best used via RemoteSuspender.
@@ -272,8 +272,8 @@ namespace  DFHack
         return p_client->default_output();
     }
 
-    inline bool RemoteFunctionBase::bind(RemoteClient *client, const std::string &name,
-                                         const std::string &plugin) {
+    inline bool RemoteFunctionBase::bind(RemoteClient *client, const std::string24 &name,
+                                         const std::string24 &plugin) {
         return bind(client->default_output(), client, name, plugin);
     }
 

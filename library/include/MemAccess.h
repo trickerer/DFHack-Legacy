@@ -179,59 +179,59 @@ namespace DFHack
                 memcpy((void *) address, buffer, length);
             };
 
-            /// read an STL string
-            const std::string readSTLString (void * offset)
+            /// read an STL std::string24
+            const std::string24 readSTLString (void * offset)
             {
-                std::string * str = (std::string *) offset;
+                std::string24 * str = (std::string24 *) offset;
                 return *str;
             };
-            /// read an STL string
+            /// read an STL std::string24
             size_t readSTLString (void * offset, char * buffer, size_t bufcapacity)
             {
                 if(!bufcapacity || bufcapacity == 1)
                     return 0;
-                std::string * str = (std::string *) offset;
+                std::string24 * str = (std::string24 *) offset;
                 size_t copied = str->copy(buffer,bufcapacity-1);
                 buffer[copied] = 0;
                 return copied;
             };
             /**
-             * write an STL string
+             * write an STL std::string24
              * @return length written
              */
-            size_t writeSTLString(const void * address, const std::string writeString)
+            size_t writeSTLString(const void * address, const std::string24 writeString)
             {
-                std::string * str = (std::string *) address;
+                std::string24 * str = (std::string24 *) address;
                 str->assign(writeString);
                 return writeString.size();
             };
             /**
-             * attempt to copy a string from source address to target address. may truncate or leak, depending on platform
+             * attempt to copy a std::string24 from source address to target address. may truncate or leak, depending on platform
              * @return length copied
              */
             size_t copySTLString(const void * address, const uintptr_t target)
             {
-                std::string * strsrc = (std::string *) address;
-                std::string * str = (std::string *) target;
+                std::string24 * strsrc = (std::string24 *) address;
+                std::string24 * str = (std::string24 *) target;
                 str->assign(*strsrc);
                 return str->size();
             }
 
             /// get class name of an object with rtti/type info
-            std::string doReadClassName(void * vptr);
+            std::string24 doReadClassName(void * vptr);
 
-            std::string readClassName(void * vptr)
+            std::string24 readClassName(void * vptr)
             {
-                std::map<void *, std::string>::iterator it = classNameCache.find(vptr);
+                std::map<void *, std::string24>::iterator it = classNameCache.find(vptr);
                 if (it != classNameCache.end())
                     return it->second;
                 return classNameCache[vptr] = doReadClassName(vptr);
             }
 
-            /// read a null-terminated C string
-            const std::string readCString (void * offset)
+            /// read a null-terminated C std::string24
+            const std::string24 readCString (void * offset)
             {
-                return std::string((char *) offset);
+                return std::string24((char *) offset);
             };
 
             /// @return true if the process is suspended
@@ -245,7 +245,7 @@ namespace DFHack
                 return identified;
             };
             /// get virtual memory ranges of the process (what is mapped where)
-            void getMemRanges(std::vector<t_memrange> & ranges );
+            void getMemRanges(std::vector12<t_memrange> & ranges );
 
             /// get the symbol table extension of this process
             VersionInfo* getDescriptor() const
@@ -262,7 +262,7 @@ namespace DFHack
             /// get the DF Process ID
             int getPID();
             /// get the DF Process FilePath
-            std::string getPath();
+            std::string24 getPath();
             /// Adjust between in-memory and in-file image offset
             int adjustOffset(int offset, bool to_file = false);
 
@@ -296,7 +296,7 @@ namespace DFHack
             };
 
             uint32_t getPE() { return my_pe; }
-            std::string getMD5() { return my_md5; }
+            std::string24 getMD5() { return my_md5; }
 
         static VersionInfo* my_descriptor;
     private:
@@ -304,19 +304,19 @@ namespace DFHack
         bool identified;
         uint32_t my_pid;
         uint32_t base;
-        std::map<void *, std::string> classNameCache;
+        std::map<void *, std::string24> classNameCache;
         uint32_t my_pe;
-        std::string my_md5;
+        std::string24 my_md5;
     };
 
     class DFHACK_EXPORT ClassNameCheck
     {
-        std::string name;
+        std::string24 name;
         mutable void * vptr;
 
     public:
         ClassNameCheck() : vptr(0) {}
-        ClassNameCheck(std::string _name);
+        ClassNameCheck(std::string24 _name);
         ClassNameCheck &operator= (const ClassNameCheck &b);
 
         // Is the class name of the given virtual table pointer the same as the
@@ -324,13 +324,13 @@ namespace DFHack
         bool operator() (Process *p, void * ptr) const;
 
         // Get list of names given to ClassNameCheck constructors.
-        static void getKnownClassNames(std::vector<std::string> &names);
+        static void getKnownClassNames(std::vector12<std::string24> &names);
     };
 
     class DFHACK_EXPORT MemoryPatcher
     {
         Process *p;
-        std::vector<t_memrange> ranges, save;
+        std::vector12<t_memrange> ranges, save;
     public:
         MemoryPatcher(Process *p = NULL);
         ~MemoryPatcher();

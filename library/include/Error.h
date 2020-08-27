@@ -54,8 +54,8 @@ namespace DFHack
     class DFHACK_EXPORT All : public std::exception
     {
     public:
-        const std::string full;
-        All(const std::string &full)
+        const std::string24 full;
+        All(const std::string24 &full)
             :full(full)
         {}
         virtual const char *what() const
@@ -95,7 +95,7 @@ namespace DFHack
         class DFHACK_EXPORT AllSymbols : public All
         {
         public:
-            AllSymbols(const std::string &full)
+            AllSymbols(const std::string24 &full)
                 :All(full)
             {}
         };
@@ -104,7 +104,7 @@ namespace DFHack
         {
         public:
             SymbolsXmlParse(const char* desc, int id, int row, int col);
-            const std::string desc;
+            const std::string24 desc;
             const int id;
             const int row;
             const int col;
@@ -114,7 +114,7 @@ namespace DFHack
         {
         public:
             SymbolsXmlBadAttribute(const char* attr);
-            std::string attr;
+            std::string24 attr;
         };
 
         class DFHACK_EXPORT SymbolsXmlNoRoot : public AllSymbols
@@ -127,7 +127,7 @@ namespace DFHack
         {
         public:
             SymbolsXmlUnderspecifiedEntry(const char *where);
-            std::string where;
+            std::string24 where;
         };
     }
 }

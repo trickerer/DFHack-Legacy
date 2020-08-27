@@ -66,7 +66,7 @@ namespace DFHack {namespace Lua {
      * Load a module using require(). Leaves the stack as is.
      */
     DFHACK_EXPORT bool Require(color_ostream &out, lua_State *state,
-                               const std::string &module, bool setglobal = false);
+                               const std::string24 &module, bool setglobal = false);
 
     /**
      * Push the module table, loading it using require() if necessary.
@@ -235,10 +235,10 @@ namespace DFHack {namespace Lua {
     DFHACK_EXPORT int SafeResume(color_ostream &out, lua_State *from, int nargs, int nres, bool perr = true);
 
     /**
-     * Parse code from string with debug_tag and env_idx, then call it using SafeCall.
+     * Parse code from std::string24 with debug_tag and env_idx, then call it using SafeCall.
      * In case of error, it is either left on the stack, or printed like SafeCall does.
      */
-    DFHACK_EXPORT bool SafeCallString(color_ostream &out, lua_State *state, const std::string &code,
+    DFHACK_EXPORT bool SafeCallString(color_ostream &out, lua_State *state, const std::string24 &code,
                                       int nargs, int nres, bool perr = true,
                                       const char *debug_tag = NULL, int env_idx = 0);
 
@@ -322,7 +322,7 @@ namespace DFHack {namespace Lua {
     inline void Push(lua_State *state, const char *str) {
         lua_pushstring(state, str);
     }
-    inline void Push(lua_State *state, const std::string &str) {
+    inline void Push(lua_State *state, const std::string24 &str) {
         lua_pushlstring(state, str.data(), str.size());
     }
     DFHACK_EXPORT void Push(lua_State *state, df::coord obj);

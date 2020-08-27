@@ -69,7 +69,7 @@ using namespace DFHack::LuaWrapper;
 
 lua_State *DFHack::Lua::Core::State = NULL;
 
-void dfhack_printerr(lua_State *S, const std::string &str);
+void dfhack_printerr(lua_State *S, const std::string24 &str);
 
 inline bool is_null_userdata(lua_State *L, int idx)
 {
@@ -110,8 +110,8 @@ static void signal_typeid_error(color_ostream *out, lua_State *state,
                                 type_identity *type, const char *msg,
                                 int val_index, bool perr, bool signal)
 {
-    std::string typestr = type ? type->getFullName() : "any pointer";
-    std::string error = stl_sprintf(msg, typestr.c_str());
+    std::string24 typestr = type ? type->getFullName() : "any pointer";
+    std::string24 error = stl_sprintf(msg, typestr.c_str());
 
     if (signal)
     {
@@ -200,7 +200,7 @@ static Console *get_console(lua_State *state)
 
 static int DFHACK_TOSTRING_TOKEN = 0;
 
-static std::string lua_print_fmt(lua_State *L)
+static std::string24 lua_print_fmt(lua_State *L)
 {
     /* Copied from lua source to fully replicate builtin print */
     int n = lua_gettop(L);  /* number of arguments */
@@ -221,12 +221,12 @@ static std::string lua_print_fmt(lua_State *L)
         lua_pop(L, 1);  /* pop result */
     }
 
-    return ss.str();
+    return ss.str().c_str();
 }
 
 static int lua_dfhack_print(lua_State *S)
 {
-    std::string str = lua_print_fmt(S);
+    std::string24 str = lua_print_fmt(S);
     if (color_ostream *out = Lua::GetOutput(S))
         out->print("%s", str.c_str());//*out << str;
     else
@@ -236,15 +236,15 @@ static int lua_dfhack_print(lua_State *S)
 
 static int lua_dfhack_println(lua_State *S)
 {
-    std::string str = lua_print_fmt(S);
+    std::string24 str = lua_print_fmt(S);
     if (color_ostream *out = Lua::GetOutput(S))
-        *out << str << std::endl;
+        *out << str.c_str() << std::endl;
     else
         Core::print("%s\n", str.c_str());
     return 0;
 }
 
-void dfhack_printerr(lua_State *S, const std::string &str)
+void dfhack_printerr(lua_State *S, const std::string24 &str)
 {
     if (color_ostream *out = Lua::GetOutput(S))
         out->printerr("%s\n", str.c_str());
@@ -254,7 +254,7 @@ void dfhack_printerr(lua_State *S, const std::string &str)
 
 static int lua_dfhack_printerr(lua_State *S)
 {
-    std::string str = lua_print_fmt(S);
+    std::string24 str = lua_print_fmt(S);
     dfhack_printerr(S, str);
     return 0;
 }
@@ -290,11 +290,11 @@ static int dfhack_lineedit_sync(lua_State *S, Console *pstream)
     if (hfile)
         hist.load(hfile);
 
-    std::string ret;
+    std::string24 ret;
     int rv = pstream->lineedit(prompt, ret, hist);
 
     if (rv == Console::RETRY)
-        rv = 0; /* return empty string to lua */
+        rv = 0; /* return empty std::string24 to lua */
 
     if (rv < 0)
     {
@@ -406,7 +406,7 @@ static void error_tostring(lua_State *L, bool keep_old = false)
     const char *msg = lua_tostring(L, -1);
     if (!msg)
     {
-        msg = "tostring didn't return a string";
+        msg = "tostring didn't return a std::string24";
         ok = false;
     }
 
@@ -586,7 +586,7 @@ static int dfhack_exception_tostring(lua_State *L)
     if (!lua_isstring(L, -1))
     {
         lua_pop(L, 1);
-        lua_pushstring(L, "(error message is not a string)");
+        lua_pushstring(L, "(error message is not a std::string24)");
     }
 
     if (verbose)
@@ -870,7 +870,7 @@ bool DFHack::Lua::PushModulePublic(color_ostream &out, lua_State *state,
 }
 
 bool DFHack::Lua::Require(color_ostream &out, lua_State *state,
-                          const std::string &module, bool setglobal)
+                          const std::string24 &module, bool setglobal)
 {
     if (!PushModule(out, state, module.c_str()))
         return false;
@@ -947,7 +947,7 @@ void DFHack::Lua::CheckDFAssign(lua_State *state, type_identity *type,
     doAssignDFObject(NULL, state, type, target, val_index, exact_type, false, true);
 }
 
-bool DFHack::Lua::SafeCallString(color_ostream &out, lua_State *state, const std::string &code,
+bool DFHack::Lua::SafeCallString(color_ostream &out, lua_State *state, const std::string24 &code,
                                  int nargs, int nres, bool perr,
                                  const char *debug_tag, int env_idx)
 {
@@ -990,7 +990,7 @@ bool DFHack::Lua::SafeCallString(color_ostream &out, lua_State *state, const std
 
 static int resume_query_loop(color_ostream &out,
                              lua_State *thread, lua_State *state, int nargs,
-                             std::string &prompt, std::string &histfile)
+                             std::string24 &prompt, std::string24 &histfile)
 {
     int rv = Lua::SafeResume(out, state, thread, nargs, 2);
 
@@ -1013,11 +1013,11 @@ bool DFHack::Lua::RunCoreQueryLoop(color_ostream &out, lua_State *state,
 
     lua_State *thread;
     int rv;
-    std::string prompt;
-    std::string histfile;
+    std::string24 prompt;
+    std::string24 histfile;
 
     DFHack::CommandHistory hist;
-    std::string histname;
+    std::string24 histname;
 
     {
         DFHack::Core::getInstance().getConsole().printerr("RunCoreQueryLoop1 suspend");
@@ -1064,7 +1064,7 @@ bool DFHack::Lua::RunCoreQueryLoop(color_ostream &out, lua_State *state,
         if (prompt.empty())
             prompt = ">> ";
 
-        std::string curline;
+        std::string24 curline;
         while((rv = con.lineedit(prompt,curline,hist)) == Console::RETRY);
         if (rv <= Console::FAILURE) {
             rv = rv == Console::SHUTDOWN ? LUA_OK : LUA_ERRRUN;

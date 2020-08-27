@@ -47,12 +47,12 @@ distribution.
 #include <map>
 
 
-int DFHack::getdir(std::string dir, std::vector<std::string> &files)
+int DFHack::getdir(std::string24 dir, std::vector12<std::string24> &files)
 {
     return DFHack::Filesystem::listdir(dir, files);
 }
 
-bool DFHack::hasEnding (std::string const &fullString, std::string const &ending)
+bool DFHack::hasEnding (std::string24 const &fullString, std::string24 const &ending)
 {
     if (fullString.length() > ending.length())
     {
@@ -64,7 +64,7 @@ bool DFHack::hasEnding (std::string const &fullString, std::string const &ending
     }
 }
 
-df::general_ref *DFHack::findRef(std::vector<df::general_ref*> &vec, df::general_ref_type type)
+df::general_ref *DFHack::findRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type)
 {
     for (int i = vec.size()-1; i >= 0; i--)
     {
@@ -76,7 +76,7 @@ df::general_ref *DFHack::findRef(std::vector<df::general_ref*> &vec, df::general
     return NULL;
 }
 
-bool DFHack::removeRef(std::vector<df::general_ref*> &vec, df::general_ref_type type, int id)
+bool DFHack::removeRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type, int id)
 {
     for (int i = vec.size()-1; i >= 0; i--)
     {
@@ -92,25 +92,25 @@ bool DFHack::removeRef(std::vector<df::general_ref*> &vec, df::general_ref_type 
     return false;
 }
 
-df::item *DFHack::findItemRef(std::vector<df::general_ref*> &vec, df::general_ref_type type)
+df::item *DFHack::findItemRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type)
 {
     df::general_ref* ref = findRef(vec, type);
     return ref ? ref->getItem() : NULL;
 }
 
-df::building *DFHack::findBuildingRef(std::vector<df::general_ref*> &vec, df::general_ref_type type)
+df::building *DFHack::findBuildingRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type)
 {
     df::general_ref* ref = findRef(vec, type);
     return ref ? ref->getBuilding() : NULL;
 }
 
-df::unit *DFHack::findUnitRef(std::vector<df::general_ref*> &vec, df::general_ref_type type)
+df::unit *DFHack::findUnitRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type)
 {
     df::general_ref* ref = findRef(vec, type);
     return ref ? ref->getUnit() : NULL;
 }
 
-df::specific_ref *DFHack::findRef(std::vector<df::specific_ref*> &vec, df::specific_ref_type type)
+df::specific_ref *DFHack::findRef(std::vector12<df::specific_ref*> &vec, df::specific_ref_type type)
 {
     for (int i = vec.size()-1; i >= 0; i--)
     {
@@ -122,7 +122,7 @@ df::specific_ref *DFHack::findRef(std::vector<df::specific_ref*> &vec, df::speci
     return NULL;
 }
 
-bool DFHack::removeRef(std::vector<df::specific_ref*> &vec, df::specific_ref_type type, void *ptr)
+bool DFHack::removeRef(std::vector12<df::specific_ref*> &vec, df::specific_ref_type type, void *ptr)
 {
     for (int i = vec.size()-1; i >= 0; i--)
     {

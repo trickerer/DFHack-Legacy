@@ -106,7 +106,7 @@ public:
     static void SquashVeins(df::map_block *mb, t_blockmaterials & materials, t_veintype &veintype);
     static void SquashFrozenLiquids (df::map_block *mb, tiletypes40d & frozen);
     static void SquashRocks (df::map_block *mb, t_blockmaterials & materials,
-                             std::vector< std::vector <int16_t> > * layerassign);
+                             std::vector12< std::vector12 <int16_t> > * layerassign);
     static void SquashGrass(df::map_block *mb, t_blockmaterials &materials);
 };
 
@@ -640,7 +640,7 @@ private:
     uint32_t x_tmax;
     uint32_t y_tmax;
     uint32_t z_max;
-    std::vector<BiomeInfo> biomes;
+    std::vector12<BiomeInfo> biomes;
     std::map<df::coord2d, df::world_region_details*> region_details;
     std::map<DFCoord, Block *> blocks;
 };

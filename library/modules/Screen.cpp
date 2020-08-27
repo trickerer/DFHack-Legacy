@@ -69,7 +69,7 @@ using df::global::enabler;
 using Screen::Pen;
 using Screen::PenArray;
 
-using std::string;
+using std::string24;
 
 /*
  * Screen painting API.
@@ -182,7 +182,7 @@ Pen Screen::readTile(int x, int y, bool map)
     return doGetTile(x, y, map);
 }
 
-bool Screen::paintString(const Pen &pen, int x, int y, const std::string &text, bool map)
+bool Screen::paintString(const Pen &pen, int x, int y, const std::string24 &text, bool map)
 {
     df::coord2d dim = getWindowSize();
     if (!gps || y < 0 || y >= dim.y) return false;
@@ -224,7 +224,7 @@ bool Screen::fillRect(const Pen &pen, int x1, int y1, int x2, int y2, bool map)
     return true;
 }
 
-bool Screen::drawBorder(const std::string &title)
+bool Screen::drawBorder(const std::string24 &title)
 {
     if (!gps) return false;
 
@@ -268,7 +268,7 @@ bool Screen::invalidate()
 const Pen Screen::Painter::default_pen(0,COLOR_GREY,0);
 const Pen Screen::Painter::default_key_pen(0,COLOR_LIGHTGREEN,0);
 
-void Screen::Painter::do_paint_string(const std::string &str, const Pen &pen, bool map)
+void Screen::Painter::do_paint_string(const std::string24 &str, const Pen &pen, bool map)
 {
     if (gcursor.y < clip.first.y || gcursor.y > clip.second.y)
         return;
@@ -280,7 +280,7 @@ void Screen::Painter::do_paint_string(const std::string &str, const Pen &pen, bo
         paintString(pen, gcursor.x + dx, gcursor.y, str.substr(dx, len-dx), map);
 }
 
-bool Screen::findGraphicsTile(const std::string &pagename, int x, int y, int *ptile, int *pgs)
+bool Screen::findGraphicsTile(const std::string24 &pagename, int x, int y, int *ptile, int *pgs)
 {
     if (!gps || !texture || x < 0 || y < 0) return false;
 
@@ -425,7 +425,7 @@ void Hide::merge(df::viewscreen* a)
 }
 } }
 
-string Screen::getKeyDisplay(df::interface_key key)
+string24 Screen::getKeyDisplay(df::interface_key key)
 {
     if (enabler)
         return enabler->GetKeyDisplay(key);

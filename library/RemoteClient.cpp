@@ -83,7 +83,7 @@ void color_ostream_proxy::decode(CoreTextNotification *data)
             CoreTextFragment const &frag = data->fragments(i);
 
             color_value color = frag.has_color() ? color_value(frag.color()) : COLOR_RESET;
-            target->add_text(color, frag.text());
+            target->add_text(color, frag.text().c_str());
         }
 
         target->end_batch();
@@ -241,7 +241,7 @@ void RemoteClient::disconnect()
 }
 
 bool RemoteClient::bind(color_ostream &out, RemoteFunctionBase *function,
-                        const std::string &name, const std::string &plugin)
+                        const std::string24 &name, const std::string24 &plugin)
 {
     if (!active || !socket->IsSocketValid())
         return false;
@@ -251,9 +251,9 @@ bool RemoteClient::bind(color_ostream &out, RemoteFunctionBase *function,
     {
         CoreBindRequest* in = bind_call.in();
 
-        in->set_method(name);
+        in->set_method(name.c_str());
         if (!plugin.empty())
-            in->set_plugin(plugin);
+            in->set_plugin(plugin.c_str());
         in->set_input_msg(function->p_in_template->GetTypeName());
         in->set_output_msg(function->p_out_template->GetTypeName());
     }
@@ -266,8 +266,8 @@ bool RemoteClient::bind(color_ostream &out, RemoteFunctionBase *function,
     return true;
 }
 
-command_result RemoteClient::run_command(color_ostream &out, const std::string &cmd,
-                                         const std::vector<std::string> &args)
+command_result RemoteClient::run_command(color_ostream &out, const std::string24 &cmd,
+                                         const std::vector12<std::string24> &args)
 {
     if (!active || !socket->IsSocketValid())
     {
@@ -277,9 +277,9 @@ command_result RemoteClient::run_command(color_ostream &out, const std::string &
 
     runcmd_call.reset();
 
-    runcmd_call.in()->set_command(cmd);
+    runcmd_call.in()->set_command(cmd.c_str());
     for (size_t i = 0; i < args.size(); i++)
-        runcmd_call.in()->add_arguments(args[i]);
+        runcmd_call.in()->add_arguments(args[i].c_str());
 
     return runcmd_call(out);
 }
@@ -331,7 +331,7 @@ void RPCFunctionBase::reset(bool free)
 }
 
 bool RemoteFunctionBase::bind(color_ostream &out, RemoteClient *client,
-                              const std::string &name, const std::string &plugin)
+                              const std::string24 &name, const std::string24 &plugin)
 {
     if (isValid())
     {

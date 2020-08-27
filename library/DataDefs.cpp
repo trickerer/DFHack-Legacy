@@ -93,7 +93,7 @@ void *enum_identity::do_allocate() {
  * initialized by the loader in the initial mmap.
  */
 compound_identity *compound_identity::list = NULL;
-std::vector<compound_identity*> compound_identity::top_scope;
+std::vector12<compound_identity*> compound_identity::top_scope;
 
 compound_identity::compound_identity(size_t size, TAllocateFn alloc,
                                      compound_identity *scope_parent, const char *dfhack_name)
@@ -110,7 +110,7 @@ void compound_identity::doInit(Core *)
         top_scope.push_back(this);
 }
 
-std::string compound_identity::getFullName()
+std::string24 compound_identity::getFullName()
 {
     if (scope_parent)
         return scope_parent->getFullName() + "." + getName();
@@ -159,11 +159,11 @@ enum_identity::enum_identity(size_t size,
     }
 }
 
-enum_identity::ComplexData::ComplexData(std::vector<int64_t> values)
+enum_identity::ComplexData::ComplexData(std::vector12<int64_t> values)
 {
     size_t i = 0;
     //for (int64_t value : values)
-    for (std::vector<int64_t>::const_iterator ci = values.begin(); ci != values.end(); ++ci)
+    for (std::vector12<int64_t>::const_iterator ci = values.begin(); ci != values.end(); ++ci)
     {
         value_index_map[*ci] = i;
         index_value_map.push_back(*ci);
@@ -200,30 +200,30 @@ bool struct_identity::is_subclass(struct_identity *actual)
     return false;
 }
 
-std::string pointer_identity::getFullName()
+std::string24 pointer_identity::getFullName()
 {
-    return (target ? target->getFullName() : std::string("void")) + "*";
+    return (target ? target->getFullName() : std::string24("void")) + "*";
 }
 
-std::string container_identity::getFullName(type_identity *item)
+std::string24 container_identity::getFullName(type_identity *item)
 {
-    return "<" + (item ? item->getFullName() : std::string("void")) + ">";
+    return "<" + (item ? item->getFullName() : std::string24("void")) + ">";
 }
 
-std::string ptr_container_identity::getFullName(type_identity *item)
+std::string24 ptr_container_identity::getFullName(type_identity *item)
 {
-    return "<" + (item ? item->getFullName() : std::string("void")) + "*>";
+    return "<" + (item ? item->getFullName() : std::string24("void")) + "*>";
 }
 
-std::string bit_container_identity::getFullName(type_identity *)
+std::string24 bit_container_identity::getFullName(type_identity *)
 {
     return "<bool>";
 }
 
-std::string df::buffer_container_identity::getFullName(type_identity *item)
+std::string24 df::buffer_container_identity::getFullName(type_identity *item)
 {
-    return (item ? item->getFullName() : std::string("void")) +
-           (size > 0 ? stl_sprintf("[%d]", size) : std::string("[]"));
+    return (item ? item->getFullName() : std::string24("void")) +
+           (size > 0 ? stl_sprintf("[%d]", size) : std::string24("[]"));
 }
 
 union_identity::union_identity(size_t size, TAllocateFn alloc,
@@ -248,7 +248,7 @@ virtual_identity::virtual_identity(size_t size, TAllocateFn alloc,
 }
 
 /* Vtable name to identity lookup. */
-static std::map<std::string, virtual_identity*> name_lookup;
+static std::map<std::string24, virtual_identity*> name_lookup;
 
 /* Vtable pointer to identity lookup. */
 std::map<void*, virtual_identity*> virtual_identity::known;
@@ -283,9 +283,9 @@ void virtual_identity::doInit(Core *core)
         known[vtable_ptr] = this;
 }
 
-virtual_identity *virtual_identity::find(const std::string &name)
+virtual_identity *virtual_identity::find(const std::string24 &name)
 {
-    std::map<std::string, virtual_identity*>::const_iterator name_it = name_lookup.find(name);
+    std::map<std::string24, virtual_identity*>::const_iterator name_it = name_lookup.find(name);
 
     return (name_it != name_lookup.end()) ? name_it->second : NULL;
 }
@@ -313,9 +313,9 @@ virtual_identity *virtual_identity::find(void *vtable)
 
     // If using a reader/writer lock, re-grab as write here, and recheck
     Core &core = Core::getInstance();
-    std::string name = core.proc->doReadClassName(vtable);
+    std::string24 name = core.proc->doReadClassName(vtable);
 
-    std::map<std::string, virtual_identity*>::const_iterator name_it = name_lookup.find(name);
+    std::map<std::string24, virtual_identity*>::const_iterator name_it = name_lookup.find(name);
     if (name_it != name_lookup.end()) {
         virtual_identity *p = name_it->second;
 
@@ -336,7 +336,7 @@ virtual_identity *virtual_identity::find(void *vtable)
         return p;
     }
 
-    std::cerr << "Class not in symbols.xml: '" << name << "': vtable = 0x"
+    std::cerr << "Class not in symbols.xml: '" << name.c_str() << "': vtable = 0x"
               << std::hex << uintptr_t(vtable) << std::dec << std::endl;
 
     known[vtable] = NULL;
@@ -367,7 +367,7 @@ virtual_ptr virtual_identity::clone(virtual_ptr obj)
     return copy;
 }
 
-bool DFHack::findBitfieldField(unsigned *idx, const std::string &name,
+bool DFHack::findBitfieldField(unsigned *idx, const std::string24 &name,
                                unsigned size, const bitfield_item_info *items)
 {
     for (unsigned i = 0; i < size; i++) {
@@ -412,14 +412,14 @@ int DFHack::getBitfieldField(const void *p, unsigned idx, unsigned size)
 #undef ACCESS
 }
 
-void DFHack::bitfieldToString(std::vector<std::string> *pvec, const void *p, unsigned size, const bitfield_item_info *items)
+void DFHack::bitfieldToString(std::vector12<std::string24> *pvec, const void *p, unsigned size, const bitfield_item_info *items)
 {
     for (unsigned i = 0; i < size; i++)
     {
         int value = getBitfieldField(p, i, std::max<int>(1,items[i].size));
 
         if (value) {
-            std::string name = format_key(items[i].name, i);
+            std::string24 name = format_key(items[i].name, i).c_str();
 
             if (items[i].size > 1)
                 name += stl_sprintf("=%u", value);
@@ -432,7 +432,7 @@ void DFHack::bitfieldToString(std::vector<std::string> *pvec, const void *p, uns
     }
 }
 
-int DFHack::findEnumItem(const std::string &name, int size, const char *const *items)
+int DFHack::findEnumItem(const std::string24 &name, int size, const char *const *items)
 {
     for (int i = 0; i < size; i++) {
         if (items[i] && items[i] == name)
@@ -442,7 +442,7 @@ int DFHack::findEnumItem(const std::string &name, int size, const char *const *i
     return -1;
 }
 
-void DFHack::flagarrayToString(std::vector<std::string> *pvec, const void *p,
+void DFHack::flagarrayToString(std::vector12<std::string24> *pvec, const void *p,
                                int bytes, int base, int size, const char *const *items)
 {
     for (int i = 0; i < bytes*8; i++) {
@@ -472,7 +472,7 @@ static const struct_field_info *find_union_tag_candidate(const struct_field_info
         return NULL;
     }
 
-    std::string name(union_field->name);
+    std::string24 name(union_field->name);
     if (name.length() >= 4 && name.substr(name.length() - 4) == "data")
     {
         name.erase(name.length() - 4, 4);
@@ -525,7 +525,7 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
             !union_field->type ||
             union_field->type->type() != IDTYPE_CONTAINER)
     {
-        // not a union field or a vector; bail
+        // not a union field or a std::vector12; bail
         return NULL;
     }
 
@@ -534,7 +534,7 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
             !container_type->getItemType() ||
             container_type->getItemType()->type() != IDTYPE_UNION)
     {
-        // not a vector of unions
+        // not a std::vector12 of unions
         return NULL;
     }
 
@@ -542,7 +542,7 @@ const struct_field_info *DFHack::find_union_tag(const struct_field_info *fields,
             !tag_candidate->type ||
             tag_candidate->type->type() != IDTYPE_CONTAINER)
     {
-        // candidate is not a vector
+        // candidate is not a std::vector12
         return NULL;
     }
 

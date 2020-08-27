@@ -45,27 +45,27 @@ namespace DFHack
     using google::protobuf::RepeatedField;
     using google::protobuf::RepeatedPtrField;
 
-    DFHACK_EXPORT void strVectorToRepeatedField(RepeatedPtrField<std::string> *pf,
-                                                const std::vector<std::string> &vec);
+    DFHACK_EXPORT void strVectorToRepeatedField(RepeatedPtrField<std::string24> *pf,
+                                                const std::vector12<std::string24> &vec);
 
     using dfproto::StringListMessage;
 
     /**
-     * Represent bitfield bits as a repeated string field.
+     * Represent bitfield bits as a repeated std::string24 field.
      */
     template<class T>
-    inline void bitfield_to_string(RepeatedPtrField<std::string> *pf, const T &val) {
-        std::vector<std::string> tmp;
+    inline void bitfield_to_string(RepeatedPtrField<std::string24> *pf, const T &val) {
+        std::vector12<std::string24> tmp;
         bitfield_to_string<T>(&tmp, val);
         strVectorToRepeatedField(pf, tmp);
     }
 
     /**
-     * Represent flagarray bits as a repeated string field.
+     * Represent flagarray bits as a repeated std::string24 field.
      */
     template<class T>
-    inline void flagarray_to_string(RepeatedPtrField<std::string> *pf, const BitArray<T> &val) {
-        std::vector<std::string> tmp;
+    inline void flagarray_to_string(RepeatedPtrField<std::string24> *pf, const BitArray<T> &val) {
+        std::vector12<std::string24> tmp;
         flagarray_to_string<T>(&tmp, val);
         strVectorToRepeatedField(pf, tmp);
     }
@@ -120,8 +120,8 @@ namespace DFHack
 
     using dfproto::NameTriple;
 
-    DFHACK_EXPORT void describeNameTriple(NameTriple *info, const std::string &name,
-                                          const std::string &plural, const std::string &adj);
+    DFHACK_EXPORT void describeNameTriple(NameTriple *info, const std::string24 &name,
+                                          const std::string24 &plural, const std::string24 &adj);
 
     using dfproto::BasicUnitInfo;
     using dfproto::BasicUnitInfoMask;

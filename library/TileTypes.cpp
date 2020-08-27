@@ -36,7 +36,7 @@ const int NUM_MATERIALS = 1+(int)ENUM_LAST_ITEM(tiletype_material);
 const int NUM_CVTABLES = 1+(int)tiletype_material::CONSTRUCTION;
 
 typedef std::map<df::tiletype_variant, df::tiletype> T_VariantMap;
-typedef std::map<std::string, T_VariantMap> T_DirectionMap;
+typedef std::map<std::string24, T_VariantMap> T_DirectionMap;
 typedef std::map<df::tiletype_special, T_DirectionMap> T_SpecialMap;
 typedef std::map<df::tiletype_shape, T_SpecialMap> T_ShapeMap;
 typedef T_ShapeMap T_MaterialMap[NUM_MATERIALS];
@@ -47,7 +47,7 @@ static df::tiletype tile_to_mat[NUM_CVTABLES][NUM_TILETYPES];
 
 static df::tiletype find_match(
     df::tiletype_material mat, df::tiletype_shape shape, df::tiletype_special special,
-    std::string dir, df::tiletype_variant variant, bool warn
+    std::string24 dir, df::tiletype_variant variant, bool warn
 ) {
     using namespace df::enums::tiletype_shape;
     using namespace df::enums::tiletype_special;
@@ -364,7 +364,7 @@ namespace DFHack
     {
         if (tileVariant(tile) == tiletype_variant::NONE)
             return tile;
-        std::vector<df::tiletype> matches;
+        std::vector12<df::tiletype> matches;
         FOR_ENUM_ITEMS_SIMPLE(tiletype, tt)
         {
             if (tileShape(tt) == tileShape(tile) &&

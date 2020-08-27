@@ -33,7 +33,7 @@ distribution.
 #include "common.h"
 #include "Export.h"
 #include "Module.h"
-#include <vector>
+//#include <vector>
 
 namespace DFHack
 {
@@ -81,7 +81,7 @@ namespace DFHack
             DFTileSurface* Call(int x, int y);
 
         private:
-            std::vector<DFTileSurface* (*)(int, int)> funcs;
+            std::vector12<DFTileSurface* (*)(int, int)> funcs;
     };
 
 }

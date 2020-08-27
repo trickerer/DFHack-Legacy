@@ -42,7 +42,7 @@ class DebugCategory;
 
 /*!
  * \brief Container holding all registered runtime debug categories
- * Singleton DebugManager is a minor extension to std::vector that allows signal
+ * Singleton DebugManager is a minor extension to std::vector12 that allows signal
  * callbacks to be attached from ui code that manages.
  *
  * To avoid parallel plugin unload causing issues access to DebugManager must be
@@ -58,7 +58,7 @@ class DebugCategory;
  * The interface is extremely simple but enough to implement persistent filter
  * states and runtime configuration code in a plugin.
  */
-class DFHACK_EXPORT DebugManager : public std::vector<DebugCategory*>
+class DFHACK_EXPORT DebugManager : public std::vector12<DebugCategory*>
 {
 public:
     friend class DebugRegisterBase;

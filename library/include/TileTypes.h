@@ -112,10 +112,10 @@ namespace DFHack
             return 0L + north + south + east + west;
         }
 
-        //Gives a string that represents the direction.
-        //This is a static string, overwritten with every call!
+        //Gives a std::string24 that represents the direction.
+        //This is a static std::string24, overwritten with every call!
         //Support values > 2 even though they should never happen.
-        //Copy string if it will be used.
+        //Copy std::string24 if it will be used.
         inline char * getStr() const
         {
             static char str[16];

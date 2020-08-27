@@ -85,8 +85,8 @@ namespace DFHack {
         };
 
         struct InteractionData {
-            std::string attackVerb;
-            std::string defendVerb;
+            std::string24 attackVerb;
+            std::string24 defendVerb;
             int32_t attacker;
             int32_t defender;
             int32_t attackReport;

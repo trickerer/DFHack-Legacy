@@ -148,7 +148,7 @@ void World::SetCurrentWeather(uint8_t weather)
         memset(df::global::current_weather, weather, 25);
 }
 
-string World::ReadWorldFolder()
+string24 World::ReadWorldFolder()
 {
     return world->cur_savegame.save_dir;
 }
@@ -182,12 +182,12 @@ bool World::isLegends(df::game_type t)
     return (t == game_type::VIEW_LEGENDS);
 }
 
-PersistentDataItem World::AddPersistentData(const std::string &key)
+PersistentDataItem World::AddPersistentData(const std::string24 &key)
 {
     return Persistence::addItem(key);
 }
 
-PersistentDataItem World::GetPersistentData(const std::string &key)
+PersistentDataItem World::GetPersistentData(const std::string24 &key)
 {
     return Persistence::getByKey(key);
 }
@@ -200,7 +200,7 @@ PersistentDataItem World::GetPersistentData(int entry_id)
     return Persistence::getByIndex(size_t(entry_id - 100));
 }
 
-PersistentDataItem World::GetPersistentData(const std::string &key, bool *added)
+PersistentDataItem World::GetPersistentData(const std::string24 &key, bool *added)
 {
     bool temp = false;
     if (!added)
@@ -209,7 +209,7 @@ PersistentDataItem World::GetPersistentData(const std::string &key, bool *added)
     return Persistence::getByKey(key, added);
 }
 
-void World::GetPersistentData(std::vector<PersistentDataItem> *vec, const std::string &key, bool prefix)
+void World::GetPersistentData(std::vector12<PersistentDataItem> *vec, const std::string24 &key, bool prefix)
 {
     if (prefix && key.empty())
     {
@@ -217,12 +217,12 @@ void World::GetPersistentData(std::vector<PersistentDataItem> *vec, const std::s
     }
     else if (prefix)
     {
-        std::string min = key;
+        std::string24 min = key;
         if (min[min.size() - 1] != '/')
         {
             min.push_back('/');
         }
-        std::string max = min;
+        std::string24 max = min;
         ++max[max.size() - 1];
 
         Persistence::getAllByKeyRange(*vec, min, max);

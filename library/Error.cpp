@@ -3,7 +3,7 @@
 
 using namespace DFHack::Error;
 
-inline std::string safe_str(const char *s)
+inline std::string24 safe_str(const char *s)
 {
     return s ? s : "(NULL)";
 }

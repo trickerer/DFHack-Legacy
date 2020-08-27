@@ -173,9 +173,9 @@ bool ItemTypeInfo::decode(df::item *ptr)
         return decode(ptr->getType(), ptr->getSubtype());
 }
 
-std::string ItemTypeInfo::getToken()
+std::string24 ItemTypeInfo::getToken()
 {
-    std::string rv = ENUM_KEY_STR_SIMPLE(item_type, type);
+    std::string24 rv = ENUM_KEY_STR_SIMPLE(item_type, type);
     if (custom)
         rv += ":" + custom->id;
     else if (subtype != -1)
@@ -183,7 +183,7 @@ std::string ItemTypeInfo::getToken()
     return rv;
 }
 
-std::string ItemTypeInfo::toString()
+std::string24 ItemTypeInfo::toString()
 {
     using namespace df::enums::item_type;
 
@@ -206,11 +206,11 @@ ITEMDEF_VECTORS
     return toLower(ENUM_KEY_STR_SIMPLE(item_type, type));
 }
 
-bool ItemTypeInfo::find(const std::string &token)
+bool ItemTypeInfo::find(const std::string24 &token)
 {
     using namespace df::enums::item_type;
 
-    std::vector<std::string> items;
+    std::vector12<std::string24> items;
     split_string(&items, token, ":");
 
     type = NONE;
@@ -593,7 +593,7 @@ df::item *Items::getContainer(df::item * item)
     return ref ? ref->getItem() : NULL;
 }
 
-void Items::getContainedItems(df::item *item, std::vector<df::item*> *items)
+void Items::getContainedItems(df::item *item, std::vector12<df::item*> *items)
 {
     CHECK_NULL_POINTER(item);
 
@@ -684,7 +684,7 @@ df::coord Items::getPosition(df::item *item)
 
 static char quality_table[] = { 0, '-', '+', '*', '=', '@' };
 
-static void addQuality(std::string &tmp, int quality)
+static void addQuality(std::string24 &tmp, int quality)
 {
     if (quality > 0 && quality <= 5) {
         char c = quality_table[quality];
@@ -693,11 +693,11 @@ static void addQuality(std::string &tmp, int quality)
 }
 
 //  It's not impossible the functionality of this operation is provided by one of the unmapped item functions.
-std::string Items::getBookTitle(df::item *item)
+std::string24 Items::getBookTitle(df::item *item)
 {
     CHECK_NULL_POINTER(item);
 
-    std::string tmp;
+    //std::string24 tmp;
 
     if (item->getType() == df::item_type::BOOK)
     {
@@ -705,7 +705,7 @@ std::string Items::getBookTitle(df::item *item)
 
         if (book->title != "")
         {
-            return book->title;
+            return book->title.c_str();
         }
         else
         {
@@ -718,7 +718,7 @@ std::string Items::getBookTitle(df::item *item)
                         df::written_content *contents = world->written_contents.all[page->contents[k]];
                         if (contents->title != "")
                         {
-                            return contents->title;
+                            return contents->title.c_str();
                         }
                     }
                 }
@@ -729,7 +729,7 @@ std::string Items::getBookTitle(df::item *item)
                         df::written_content *contents = world->written_contents.all[writing->contents[k]];
                         if (contents->title != "")
                         {
-                            return contents->title;
+                            return contents->title.c_str();
                         }
                     }
                 }
@@ -751,7 +751,7 @@ std::string Items::getBookTitle(df::item *item)
                         df::written_content *contents = world->written_contents.all[page->contents[k]];
                         if (contents->title != "")
                         {
-                            return contents->title;
+                            return contents->title.c_str();
                         }
                     }
                 }
@@ -762,7 +762,7 @@ std::string Items::getBookTitle(df::item *item)
                         df::written_content *contents = world->written_contents.all[writing->contents[k]];
                         if (contents->title != "")
                         {
-                            return contents->title;
+                            return contents->title.c_str();
                         }
                     }
                 }
@@ -773,11 +773,11 @@ std::string Items::getBookTitle(df::item *item)
     return "";
 }
 
-std::string Items::getDescription(df::item *item, int type, bool decorate)
+std::string24 Items::getDescription(df::item *item, int type, bool decorate)
 {
     CHECK_NULL_POINTER(item);
 
-    std::string tmp;
+    std::string24 tmp;
     item->getItemDescription(&tmp, type);
 
     if (decorate) {
@@ -1476,10 +1476,10 @@ int32_t Items::createItem(df::item_type item_type, int16_t item_subtype, int16_t
     }
 
     //makeItem
-    vector<df::reaction_product*> out_products;
-    vector<df::item*> out_items;
-    vector<df::reaction_reagent*> in_reag;
-    vector<df::item*> in_items;
+    std::vector12<df::reaction_product*> out_products;
+    std::vector12<df::item*> out_items;
+    std::vector12<df::reaction_reagent*> in_reag;
+    std::vector12<df::item*> in_items;
 
     df::enums::game_type::game_type type = *df::global::gametype;
     prod->produce(unit, &out_products, &out_items, &in_reag, &in_items, 1, job_skill::NONE,
@@ -1505,7 +1505,7 @@ bool Items::checkMandates(df::item *item)
     CHECK_NULL_POINTER(item);
 
     //for (df::mandate *mandate : world->mandates)
-    for (std::vector<df::mandate*>::const_iterator it = world->mandates.begin(); it != world->mandates.end(); ++it)
+    for (std::vector12<df::mandate*>::const_iterator it = world->mandates.begin(); it != world->mandates.end(); ++it)
     {
         df::mandate* mandate = *it;
 
@@ -1536,7 +1536,7 @@ bool Items::canTrade(df::item *item)
         return false;
 
     //for (df::general_ref *ref : item->general_refs)
-    for (std::vector<df::general_ref*>::const_iterator it = item->general_refs.begin(); it != item->general_refs.end(); ++it)
+    for (std::vector12<df::general_ref*>::const_iterator it = item->general_refs.begin(); it != item->general_refs.end(); ++it)
     {
         switch ((*it)->getType())
         {
@@ -1552,7 +1552,7 @@ bool Items::canTrade(df::item *item)
     }
 
     //for (df::specific_ref *ref : item->specific_refs)
-    for (std::vector<df::specific_ref*>::const_iterator it = item->specific_refs.begin(); it != item->specific_refs.end(); ++it)
+    for (std::vector12<df::specific_ref*>::const_iterator it = item->specific_refs.begin(); it != item->specific_refs.end(); ++it)
     {
         if ((*it)->type == specific_ref_type::JOB)
         {
@@ -1574,10 +1574,10 @@ bool Items::canTradeWithContents(df::item *item)
     if (!canTrade(item))
         return false;
 
-    vector<df::item*> contained_items;
+    std::vector12<df::item*> contained_items;
     getContainedItems(item, &contained_items);
     //for (df::item *cit : contained_items)
-    for (vector<df::item*>::const_iterator it = contained_items.begin(); it != contained_items.end(); ++it)
+    for (std::vector12<df::item*>::const_iterator it = contained_items.begin(); it != contained_items.end(); ++it)
     {
         if (!canTrade(*it))
             return false;
@@ -1602,6 +1602,6 @@ bool Items::isSquadEquipment(df::item *item)
     if (!ui)
         return false;
 
-    std::vector<df::item*> &vec = ui->equipment.items_assigned[item->getType()];
+    std::vector12<df::item*> &vec = ui->equipment.items_assigned[item->getType()];
     return binsearch_index(vec, &df::item::id, item->id) >= 0;
 }

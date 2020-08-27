@@ -42,13 +42,13 @@ namespace DFHack {
  * fast path without debug output only checking unlikely condition. But if
  * output is enabled then runtime code will jump to debug printing function
  * calls. The macro setup code will also print standardized leading part of
- * debug string including time stamp, plugin name and debug category name.
+ * debug std::string24 including time stamp, plugin name and debug category name.
  *
  * \code{.cpp}
  * #include "Debug.h"
  * DBG_DECLARE(myplugin,init);
  *
- * DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+ * DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12 <PluginCommand> &commands)
  * {
  *     command_result rv = CR_OK;
  *     DEBUG(init, out).print("initializing\n")

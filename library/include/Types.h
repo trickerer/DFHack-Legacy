@@ -85,7 +85,7 @@ namespace DFHack
     struct t_level
     {
         uint32_t level;
-        std::string name;
+        std::string24 name;
         uint32_t xpNxtLvl;
     };
 
@@ -111,16 +111,16 @@ namespace DFHack
         return rect.second - rect.first + df::coord2d(1,1);
     }
 
-    DFHACK_EXPORT int getdir(std::string dir, std::vector<std::string> &files);
-    DFHACK_EXPORT bool hasEnding (std::string const &fullString, std::string const &ending);
+    DFHACK_EXPORT int getdir(std::string24 dir, std::vector12<std::string24> &files);
+    DFHACK_EXPORT bool hasEnding (std::string24 const &fullString, std::string24 const &ending);
 
-    DFHACK_EXPORT df::general_ref *findRef(std::vector<df::general_ref*> &vec, df::general_ref_type type);
-    DFHACK_EXPORT bool removeRef(std::vector<df::general_ref*> &vec, df::general_ref_type type, int id);
+    DFHACK_EXPORT df::general_ref *findRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type);
+    DFHACK_EXPORT bool removeRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type, int id);
 
-    DFHACK_EXPORT df::item *findItemRef(std::vector<df::general_ref*> &vec, df::general_ref_type type);
-    DFHACK_EXPORT df::building *findBuildingRef(std::vector<df::general_ref*> &vec, df::general_ref_type type);
-    DFHACK_EXPORT df::unit *findUnitRef(std::vector<df::general_ref*> &vec, df::general_ref_type type);
+    DFHACK_EXPORT df::item *findItemRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type);
+    DFHACK_EXPORT df::building *findBuildingRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type);
+    DFHACK_EXPORT df::unit *findUnitRef(std::vector12<df::general_ref*> &vec, df::general_ref_type type);
 
-    DFHACK_EXPORT df::specific_ref *findRef(std::vector<df::specific_ref*> &vec, df::specific_ref_type type);
-    DFHACK_EXPORT bool removeRef(std::vector<df::specific_ref*> &vec, df::specific_ref_type type, void *ptr);
+    DFHACK_EXPORT df::specific_ref *findRef(std::vector12<df::specific_ref*> &vec, df::specific_ref_type type);
+    DFHACK_EXPORT bool removeRef(std::vector12<df::specific_ref*> &vec, df::specific_ref_type type, void *ptr);
 }// namespace DFHack

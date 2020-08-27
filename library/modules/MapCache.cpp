@@ -276,7 +276,7 @@ bool MapExtras::Block::setTiletypeAt(df::coord2d pos, df::tiletype tt, bool forc
 
 static df::block_square_event_designation_priorityst *getPriorityEvent(df::map_block *block, bool write)
 {
-    vector<df::block_square_event_designation_priorityst*> events;
+    std::vector12<df::block_square_event_designation_priorityst*> events;
     Maps::SortBlockEvents(block, 0, 0, 0, 0, 0, 0, 0, &events);
     if (events.empty())
     {
@@ -989,7 +989,7 @@ void MapExtras::BlockInfo::setVeinType(DFVeinFlags &info, df::inclusion_type typ
 
 void MapExtras::BlockInfo::SquashVeins(df::map_block *mb, t_blockmaterials & materials, t_veintype &veintype)
 {
-    std::vector <df::block_square_event_mineralst *> veins;
+    std::vector12 <df::block_square_event_mineralst *> veins;
     Maps::SortBlockEvents(mb,&veins);
     memset(materials,-1,sizeof(materials));
     memset(veintype, 0, sizeof(t_veintype));
@@ -1009,7 +1009,7 @@ void MapExtras::BlockInfo::SquashVeins(df::map_block *mb, t_blockmaterials & mat
 
 void MapExtras::BlockInfo::SquashFrozenLiquids(df::map_block *mb, tiletypes40d & frozen)
 {
-    std::vector <df::block_square_event_frozen_liquidst *> ices;
+    std::vector12 <df::block_square_event_frozen_liquidst *> ices;
     Maps::SortBlockEvents(mb,NULL,&ices);
     memset(frozen,0,sizeof(frozen));
     for (uint32_t x = 0; x < 16; x++) for (uint32_t y = 0; y < 16; y++)
@@ -1027,7 +1027,7 @@ void MapExtras::BlockInfo::SquashFrozenLiquids(df::map_block *mb, tiletypes40d &
 }
 
 void MapExtras::BlockInfo::SquashRocks (df::map_block *mb, t_blockmaterials & materials,
-                                   std::vector< std::vector <int16_t> > * layerassign)
+                                   std::vector12< std::vector12 <int16_t> > * layerassign)
 {
     // get the layer materials
     for (uint32_t x = 0; x < 16; x++) for (uint32_t y = 0; y < 16; y++)
@@ -1044,7 +1044,7 @@ void MapExtras::BlockInfo::SquashRocks (df::map_block *mb, t_blockmaterials & ma
 
 void MapExtras::BlockInfo::SquashGrass(df::map_block *mb, t_blockmaterials &materials)
 {
-    std::vector<df::block_square_event_grassst*> grasses;
+    std::vector12<df::block_square_event_grassst*> grasses;
     Maps::SortBlockEvents(mb, NULL, NULL, NULL, &grasses);
     memset(materials,-1,sizeof(materials));
     for (uint32_t x = 0; x < 16; x++) for (uint32_t y = 0; y < 16; y++)
@@ -1199,8 +1199,8 @@ MapExtras::MapCache::MapCache()
     valid = 0;
     Maps::getSize(x_bmax, y_bmax, z_max);
     x_tmax = x_bmax*16; y_tmax = y_bmax*16;
-    std::vector<df::coord2d> geoidx;
-    std::vector<std::vector<int16_t> > layer_mats;
+    std::vector12<df::coord2d> geoidx;
+    std::vector12<std::vector12<int16_t> > layer_mats;
     validgeo = Maps::ReadGeology(&layer_mats, &geoidx);
     valid = true;
 

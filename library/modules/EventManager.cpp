@@ -235,8 +235,8 @@ static int32_t lastSyndromeTime;
 static int32_t nextInvasion;
 
 //equipment change
-//static unordered_map<int32_t, vector<df::unit_inventory_item> > equipmentLog;
-typedef UNORDERED_MAP<int32_t, vector<InventoryItem> > EquipmentLog;
+//static unordered_map<int32_t, std::vector12<df::unit_inventory_item> > equipmentLog;
+typedef UNORDERED_MAP<int32_t, std::vector12<InventoryItem> > EquipmentLog;
 static EquipmentLog equipmentLog;
 
 //report
@@ -244,7 +244,7 @@ static int32_t lastReport;
 
 //unit attack
 static int32_t lastReportUnitAttack;
-static std::map<int32_t,std::vector<int32_t> > reportToRelevantUnits;
+static std::map<int32_t,std::vector12<int32_t> > reportToRelevantUnits;
 static int32_t reportToRelevantUnitsTime = -1;
 
 //interaction
@@ -252,7 +252,7 @@ static int32_t lastReportInteraction;
 
 void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event event) {
     static bool doOnce = false;
-//    const string eventNames[] = {"world loaded", "world unloaded", "map loaded", "map unloaded", "viewscreen changed", "core initialized", "begin unload", "paused", "unpaused"};
+//    const std::string24 eventNames[] = {"world loaded", "world unloaded", "map loaded", "map unloaded", "viewscreen changed", "core initialized", "begin unload", "paused", "unpaused"};
 //    out.print("%s,%d: onStateChange %d: \"%s\"\n", __FILE__, __LINE__, (int32_t)event, eventNames[event].c_str());
     if ( !doOnce ) {
         //TODO: put this somewhere else
@@ -311,7 +311,7 @@ void DFHack::EventManager::onStateChange(color_ostream& out, state_change_event 
         lastJobId = -1 + *df::global::job_next_id;
 
         constructions.clear();
-        for (std::vector<df::construction* >::const_iterator i = df::global::world->constructions.begin(); i != df::global::world->constructions.end(); i++ ) {
+        for (std::vector12<df::construction* >::const_iterator i = df::global::world->constructions.begin(); i != df::global::world->constructions.end(); i++ ) {
             df::construction* constr = *i;
             if ( !constr ) {
                 if ( Once::doOnce("EventManager.onLoad null constr") ) {
@@ -728,7 +728,7 @@ static void manageSyndromeEvent(color_ostream& out) {
         return;
     multimap<Plugin*,EventHandler> copy(handlers[EventType::SYNDROME].begin(), handlers[EventType::SYNDROME].end());
     int32_t highestTime = -1;
-    for (std::vector<df::unit*>::const_iterator a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
+    for (std::vector12<df::unit*>::const_iterator a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
         df::unit* unit = *a;
 /*
         if ( unit->flags1.bits.inactive )
@@ -774,7 +774,7 @@ static void manageEquipmentEvent(color_ostream& out) {
 
     UNORDERED_MAP<int32_t, InventoryItem> itemIdToInventoryItem;
     UNORDERED_SET<int32_t> currentlyEquipped;
-    for (std::vector<df::unit*>::const_iterator a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
+    for (std::vector12<df::unit*>::const_iterator a = df::global::world->units.all.begin(); a != df::global::world->units.all.end(); a++ ) {
         itemIdToInventoryItem.clear();
         currentlyEquipped.clear();
         df::unit* unit = *a;
@@ -784,15 +784,15 @@ static void manageEquipmentEvent(color_ostream& out) {
 
         EquipmentLog::iterator oldEquipment = equipmentLog.find(unit->id);
         bool hadEquipment = oldEquipment != equipmentLog.end();
-        vector<InventoryItem>* temp;
+        std::vector12<InventoryItem>* temp;
         if ( hadEquipment ) {
             temp = &((*oldEquipment).second);
         } else {
-            temp = new vector<InventoryItem>;
+            temp = new std::vector12<InventoryItem>;
         }
         //vector<InventoryItem>& v = (*oldEquipment).second;
-        vector<InventoryItem>& v = *temp;
-        for (vector<InventoryItem>::iterator b = v.begin(); b != v.end(); b++ ) {
+        std::vector12<InventoryItem>& v = *temp;
+        for (std::vector12<InventoryItem>::iterator b = v.begin(); b != v.end(); b++ ) {
             InventoryItem& i = *b;
             itemIdToInventoryItem[i.itemId] = i;
         }
@@ -825,7 +825,7 @@ static void manageEquipmentEvent(color_ostream& out) {
             }
         }
         //check for dropped items
-        for (vector<InventoryItem>::const_iterator b = v.begin(); b != v.end(); b++ ) {
+        for (std::vector12<InventoryItem>::const_iterator b = v.begin(); b != v.end(); b++ ) {
             InventoryItem i = *b;
             if ( currentlyEquipped.find(i.itemId) != currentlyEquipped.end() )
                 continue;
@@ -840,7 +840,7 @@ static void manageEquipmentEvent(color_ostream& out) {
             delete temp;
 
         //update equipment
-        vector<InventoryItem>& equipment = equipmentLog[unit->id];
+        std::vector12<InventoryItem>& equipment = equipmentLog[unit->id];
         equipment.clear();
         for ( size_t b = 0; b < unit->inventory.size(); b++ ) {
             df::unit_inventory_item* dfitem = unit->inventory[b];
@@ -876,7 +876,7 @@ static void manageReportEvent(color_ostream& out) {
     if (!df::global::world)
         return;
     multimap<Plugin*,EventHandler> copy(handlers[EventType::REPORT].begin(), handlers[EventType::REPORT].end());
-    std::vector<df::report*>& reports = df::global::world->status.reports;
+    std::vector12<df::report*>& reports = df::global::world->status.reports;
     size_t a = df::report::binsearch_index(reports, lastReport, false);
     //this may or may not be needed: I don't know if binsearch_index goes earlier or later if it can't hit the target exactly
     while (a < reports.size() && reports[a]->id <= lastReport) {
@@ -906,7 +906,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
     if (!df::global::world)
         return;
     multimap<Plugin*,EventHandler> copy(handlers[EventType::UNIT_ATTACK].begin(), handlers[EventType::UNIT_ATTACK].end());
-    std::vector<df::report*>& reports = df::global::world->status.reports;
+    std::vector12<df::report*>& reports = df::global::world->status.reports;
     size_t a = df::report::binsearch_index(reports, lastReportUnitAttack, false);
     //this may or may not be needed: I don't know if binsearch_index goes earlier or later if it can't hit the target exactly
     while (a < reports.size() && reports[a]->id <= lastReportUnitAttack) {
@@ -933,7 +933,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
         df::report* report = df::report::find(reportId);
         if ( !report )
             continue; //TODO: error
-        std::string reportStr = report->text;
+        std::string24 reportStr = report->text;
         for ( int32_t b = reportId+1; ; b++ ) {
             df::report* report2 = df::report::find(b);
             if ( !report2 )
@@ -945,7 +945,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
             reportStr = reportStr + report2->text;
         }
 
-        std::vector<int32_t>& relevantUnits = reportToRelevantUnits[report->id];
+        std::vector12<int32_t>& relevantUnits = reportToRelevantUnits[report->id];
         if ( relevantUnits.size() != 2 ) {
             continue;
         }
@@ -1018,9 +1018,9 @@ static void manageUnitAttackEvent(color_ostream& out) {
     }
 }
 
-static std::string getVerb(df::unit* unit, std::string reportStr) {
-    std::string result(reportStr);
-    std::string name = unit->name.first_name + " ";
+static std::string24 getVerb(df::unit* unit, std::string24 reportStr) {
+    std::string24 result(reportStr);
+    std::string24 name = unit->name.first_name + " ";
     bool match = strncmp(result.c_str(), name.c_str(), name.length()) == 0;
     if ( match ) {
         result = result.substr(name.length());
@@ -1040,7 +1040,7 @@ static std::string getVerb(df::unit* unit, std::string reportStr) {
         return "";
     }
 
-    std::string you = "You ";
+    std::string24 you = "You ";
     match = strncmp(result.c_str(), name.c_str(), name.length()) == 0;
     if ( match ) {
         result = result.substr(name.length());
@@ -1050,15 +1050,15 @@ static std::string getVerb(df::unit* unit, std::string reportStr) {
     return "";
 }
 
-static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, df::unit* lastAttacker, df::report* defendEvent, vector<df::unit*>& relevantUnits) {
-    vector<df::unit*> attackers = relevantUnits;
-    vector<df::unit*> defenders = relevantUnits;
+static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, df::unit* lastAttacker, df::report* defendEvent, std::vector12<df::unit*>& relevantUnits) {
+    std::vector12<df::unit*> attackers = relevantUnits;
+    std::vector12<df::unit*> defenders = relevantUnits;
 
     //find valid interactions: TODO
     /*map<int32_t,vector<df::interaction*> > validInteractions;
     for ( size_t a = 0; a < relevantUnits.size(); a++ ) {
         df::unit* unit = relevantUnits[a];
-        vector<df::interaction*>& interactions = validInteractions[unit->id];
+        std::vector12<df::interaction*>& interactions = validInteractions[unit->id];
         for ( size_t b = 0; b < unit->body.
     }*/
 
@@ -1066,7 +1066,7 @@ static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, 
     //  attacker must be same location
     //  attacker name must start attack str
     //  attack verb must match valid interaction of this attacker
-    std::string attackVerb;
+    std::string24 attackVerb;
     if ( attackEvent ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
         for ( size_t a = 0; a < attackers.size(); a++ ) {
@@ -1081,7 +1081,7 @@ static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, 
                 continue;
             }
 
-            std::string verbC = getVerb(attackers[a], attackEvent->text);
+            std::string24 verbC = getVerb(attackers[a], attackEvent->text);
             if ( verbC.length() == 0 ) {
                 attackers.erase(attackers.begin()+a);
                 a--;
@@ -1095,7 +1095,7 @@ static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, 
     //  defender must be same location
     //  defender name must start defend str
     //  defend verb must match valid interaction of some attacker
-    std::string defendVerb;
+    std::string24 defendVerb;
     if ( defendEvent ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
         for ( size_t a = 0; a < defenders.size(); a++ ) {
@@ -1104,7 +1104,7 @@ static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, 
                 a--;
                 continue;
             }
-            std::string verbC = getVerb(defenders[a], defendEvent->text);
+            std::string24 verbC = getVerb(defenders[a], defendEvent->text);
             if ( verbC.length() == 0 ) {
                 defenders.erase(defenders.begin()+a);
                 a--;
@@ -1120,20 +1120,20 @@ static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, 
     } else {
         if ( defenders.size() == 1 ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
-            std::vector<df::unit*>::const_iterator a = std::find(attackers.begin(),attackers.end(),defenders[0]);
+            std::vector12<df::unit*>::const_iterator a = std::find(attackers.begin(),attackers.end(),defenders[0]);
             if ( a != attackers.end() )
                 attackers.erase(a);
         }
         if ( attackers.size() == 1 ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
-            std::vector<df::unit*>::const_iterator a = std::find(defenders.begin(),defenders.end(),attackers[0]);
+            std::vector12<df::unit*>::const_iterator a = std::find(defenders.begin(),defenders.end(),attackers[0]);
             if ( a != defenders.end() )
                 defenders.erase(a);
         }
     }
 
     //if trying attack-defend pair and it fails to find attacker, try defend only
-    InteractionData result = /*(InteractionData)*/ { std::string(), std::string(), -1, -1, -1, -1 };
+    InteractionData result = /*(InteractionData)*/ { std::string24(), std::string24(), -1, -1, -1, -1 };
     if ( attackers.size() > 1 ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
         if ( Once::doOnce("EventManager interaction ambiguous attacker") ) {
@@ -1165,17 +1165,17 @@ static InteractionData getAttacker(color_ostream& out, df::report* attackEvent, 
     return result;
 }
 
-static vector<df::unit*> gatherRelevantUnits(color_ostream& out, df::report* r1, df::report* r2) {
-    vector<df::report*> reports;
+static std::vector12<df::unit*> gatherRelevantUnits(color_ostream& out, df::report* r1, df::report* r2) {
+    std::vector12<df::report*> reports;
     if ( r1 == r2 ) r2 = NULL;
     if ( r1 ) reports.push_back(r1);
     if ( r2 ) reports.push_back(r2);
-    vector<df::unit*> result;
+    std::vector12<df::unit*> result;
     UNORDERED_SET<int32_t> ids;
 //out.print("%s,%d\n",__FILE__,__LINE__);
     for ( size_t a = 0; a < reports.size(); a++ ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
-        vector<int32_t>& units = reportToRelevantUnits[reports[a]->id];
+        std::vector12<int32_t>& units = reportToRelevantUnits[reports[a]->id];
         if ( units.size() > 2 ) {
             if ( Once::doOnce("EventManager interaction too many relevant units") ) {
                 out.print("%s,%d: too many relevant units. On report\n \'%s\'\n", __FILE__, __LINE__, reports[a]->text.c_str());
@@ -1195,7 +1195,7 @@ static void manageInteractionEvent(color_ostream& out) {
     if (!df::global::world)
         return;
     multimap<Plugin*,EventHandler> copy(handlers[EventType::INTERACTION].begin(), handlers[EventType::INTERACTION].end());
-    std::vector<df::report*>& reports = df::global::world->status.reports;
+    std::vector12<df::report*>& reports = df::global::world->status.reports;
     size_t a = df::report::binsearch_index(reports, lastReportInteraction, false);
     while (a < reports.size() && reports[a]->id <= lastReportInteraction) {
         a++;
@@ -1221,7 +1221,7 @@ static void manageInteractionEvent(color_ostream& out) {
             lastAttacker = NULL;
             //lastDefender = NULL;
         }
-        vector<df::unit*> relevantUnits = gatherRelevantUnits(out, lastAttackEvent, report);
+        std::vector12<df::unit*> relevantUnits = gatherRelevantUnits(out, lastAttackEvent, report);
         InteractionData data = getAttacker(out, lastAttackEvent, lastAttacker, attack ? NULL : report, relevantUnits);
         if ( data.attacker < 0 )
             continue;
@@ -1230,7 +1230,7 @@ static void manageInteractionEvent(color_ostream& out) {
         //    continue; //lazy way of preventing duplicates
         if ( attack && a+1 < reports.size() && reports[a+1]->type == df::announcement_type::INTERACTION_TARGET ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);
-            vector<df::unit*> relevants = gatherRelevantUnits(out, lastAttackEvent, reports[a+1]);
+            std::vector12<df::unit*> relevants = gatherRelevantUnits(out, lastAttackEvent, reports[a+1]);
             InteractionData data2 = getAttacker(out, lastAttackEvent, lastAttacker, reports[a+1], relevants);
             if ( data.attacker == data2.attacker && (data.defender == -1 || data.defender == data2.defender) ) {
 //out.print("%s,%d\n",__FILE__,__LINE__);

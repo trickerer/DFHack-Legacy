@@ -70,7 +70,7 @@ df::construction * Constructions::getConstruction(const int32_t index)
 
 df::construction * Constructions::findAtTile(df::coord pos)
 {
-    for (std::vector<df::construction*>::const_iterator it = world->constructions.begin(); it != world->constructions.end(); ++it) {
+    for (std::vector12<df::construction*>::const_iterator it = world->constructions.begin(); it != world->constructions.end(); ++it) {
         if ((*it)->pos == pos)
             return *it;
     }
@@ -126,7 +126,7 @@ bool Constructions::designateNew(df::coord pos, df::construction_type type,
     if (mat_index < 0)
         filter->flags2.bits.non_economic = true;
 
-    std::vector<df::job_item*> filters;
+    std::vector12<df::job_item*> filters;
     filters.push_back(filter);
 
     if (!Buildings::constructWithFilters(newinst, filters))

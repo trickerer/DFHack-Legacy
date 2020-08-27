@@ -156,19 +156,19 @@ namespace  DFHack
         friend class Plugin;
         friend class Core;
 
-        std::vector<ServerFunctionBase*> functions;
-        std::map<std::string, ServerFunctionBase*> lookup;
+        std::vector12<ServerFunctionBase*> functions;
+        std::map<std::string24, ServerFunctionBase*> lookup;
         ServerConnection *owner;
 
         Plugin *holder;
 
-        void finalize(ServerConnection *owner, std::vector<ServerFunctionBase*> *ftable);
+        void finalize(ServerConnection *owner, std::vector12<ServerFunctionBase*> *ftable);
 
     public:
         RPCService();
         virtual ~RPCService();
 
-        ServerFunctionBase *getFunction(const std::string &name);
+        ServerFunctionBase *getFunction(const std::string24 &name);
 
         template<typename In, typename Out>
         void addFunction(
@@ -231,10 +231,10 @@ namespace  DFHack
         CActiveSocket *socket;
         connection_ostream stream;
 
-        std::vector<ServerFunctionBase*> functions;
+        std::vector12<ServerFunctionBase*> functions;
 
         CoreService *core_service;
-        std::map<std::string, RPCService*> plugin_services;
+        std::map<std::string24, RPCService*> plugin_services;
 
         void threadFn();
         ServerConnection(CActiveSocket* socket);
@@ -245,7 +245,7 @@ namespace  DFHack
         static void Accepted(CActiveSocket* socket);
         static void cActiveSocketThreadFn(void* socket);
 
-        ServerFunctionBase *findFunction(color_ostream &out, const std::string &plugin, const std::string &name);
+        ServerFunctionBase *findFunction(color_ostream &out, const std::string24 &plugin, const std::string24 &name);
     };
 
     class ServerMain {

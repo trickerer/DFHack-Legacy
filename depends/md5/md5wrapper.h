@@ -50,7 +50,7 @@ class md5wrapper
 		 * "text" and returns it as
 		 * string
 		 */
-		std::string getHashFromString(std::string text);
+		std::string24 getHashFromString(std::string24 text);
 
 		std::string getHashFromBytes(const unsigned char *data, size_t size) {
 			return hashit(const_cast<unsigned char*>(data),size);

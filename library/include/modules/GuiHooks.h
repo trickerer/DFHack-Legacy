@@ -11,7 +11,7 @@ namespace DFHack {
             typedef Hook<T_func> T_hook;
             friend class Callback;
             T_func *base_func;
-            std::vector<T_func*> funcs;
+            std::vector12<T_func*> funcs;
             void add(T_func *func)
             {
                 if (std::find(funcs.begin(), funcs.end(), func) == funcs.end())

@@ -73,7 +73,7 @@ static const int MAX_COLORS = 15;
 // found. Call repeatedly do get all units in a specified box (uses tile coords)
 DFHACK_EXPORT int32_t getNumUnits();
 DFHACK_EXPORT df::unit *getUnit(const int32_t index);
-DFHACK_EXPORT bool getUnitsInBox(std::vector<df::unit*> &units,
+DFHACK_EXPORT bool getUnitsInBox(std::vector12<df::unit*> &units,
     int16_t x1, int16_t y1, int16_t z1,
     int16_t x2, int16_t y2, int16_t z2);
 
@@ -87,7 +87,7 @@ DFHACK_EXPORT df::specific_ref *getSpecificRef(df::unit *unit, df::specific_ref_
 
 DFHACK_EXPORT df::item *getContainer(df::unit *unit);
 
-DFHACK_EXPORT void setNickname(df::unit *unit, std::string nick);
+DFHACK_EXPORT void setNickname(df::unit *unit, std::string24 nick);
 DFHACK_EXPORT df::language_name *getVisibleName(df::unit *unit);
 
 DFHACK_EXPORT df::identity *getIdentity(df::unit *unit);
@@ -119,15 +119,15 @@ DFHACK_EXPORT bool isOwnGroup(df::unit* unit);
 DFHACK_EXPORT bool isOwnRace(df::unit* unit);
 DFHACK_EXPORT bool isVisible(df::unit* unit);
 
-DFHACK_EXPORT std::string getRaceNameById(int32_t race_id);
-DFHACK_EXPORT std::string getRaceName(df::unit* unit);
-DFHACK_EXPORT std::string getPhysicalDescription(df::unit* unit);
-DFHACK_EXPORT std::string getRaceNamePluralById(int32_t race_id);
-DFHACK_EXPORT std::string getRaceNamePlural(df::unit* unit);
-DFHACK_EXPORT std::string getRaceBabyNameById(int32_t race_id);
-DFHACK_EXPORT std::string getRaceBabyName(df::unit* unit);
-DFHACK_EXPORT std::string getRaceChildNameById(int32_t race_id);
-DFHACK_EXPORT std::string getRaceChildName(df::unit* unit);
+DFHACK_EXPORT std::string24 getRaceNameById(int32_t race_id);
+DFHACK_EXPORT std::string24 getRaceName(df::unit* unit);
+DFHACK_EXPORT std::string24 getPhysicalDescription(df::unit* unit);
+DFHACK_EXPORT std::string24 getRaceNamePluralById(int32_t race_id);
+DFHACK_EXPORT std::string24 getRaceNamePlural(df::unit* unit);
+DFHACK_EXPORT std::string24 getRaceBabyNameById(int32_t race_id);
+DFHACK_EXPORT std::string24 getRaceBabyName(df::unit* unit);
+DFHACK_EXPORT std::string24 getRaceChildNameById(int32_t race_id);
+DFHACK_EXPORT std::string24 getRaceChildName(df::unit* unit);
 
 DFHACK_EXPORT bool isBaby(df::unit* unit);
 DFHACK_EXPORT bool isChild(df::unit* unit);
@@ -173,25 +173,25 @@ struct NoblePosition {
     df::entity_position *position;
 };
 
-DFHACK_EXPORT bool getNoblePositions(std::vector<NoblePosition> *pvec, df::unit *unit);
+DFHACK_EXPORT bool getNoblePositions(std::vector12<NoblePosition> *pvec, df::unit *unit);
 
-DFHACK_EXPORT std::string getProfessionName(df::unit *unit, bool ignore_noble = false, bool plural = false);
-DFHACK_EXPORT std::string getCasteProfessionName(int race, int caste, df::profession pid, bool plural = false);
+DFHACK_EXPORT std::string24 getProfessionName(df::unit *unit, bool ignore_noble = false, bool plural = false);
+DFHACK_EXPORT std::string24 getCasteProfessionName(int race, int caste, df::profession pid, bool plural = false);
 
 DFHACK_EXPORT int8_t getProfessionColor(df::unit *unit, bool ignore_noble = false);
 DFHACK_EXPORT int8_t getCasteProfessionColor(int race, int caste, df::profession pid);
 
 DFHACK_EXPORT df::goal_type getGoalType(df::unit *unit, size_t goalIndex = 0);
-DFHACK_EXPORT std::string getGoalName(df::unit *unit, size_t goalIndex = 0);
+DFHACK_EXPORT std::string24 getGoalName(df::unit *unit, size_t goalIndex = 0);
 DFHACK_EXPORT bool isGoalAchieved(df::unit *unit, size_t goalIndex = 0);
 
-DFHACK_EXPORT std::string getSquadName(df::unit *unit);
+DFHACK_EXPORT std::string24 getSquadName(df::unit *unit);
 
 DFHACK_EXPORT df::activity_entry *getMainSocialActivity(df::unit *unit);
 DFHACK_EXPORT df::activity_event *getMainSocialEvent(df::unit *unit);
 
 // stress categories - 0 is highest stress
-DFHACK_EXPORT extern const std::vector<int32_t> stress_cutoffs;
+DFHACK_EXPORT extern const std::vector12<int32_t> stress_cutoffs;
 DFHACK_EXPORT int getStressCategory(df::unit *unit);
 DFHACK_EXPORT int getStressCategoryRaw(int32_t stress_level);
 

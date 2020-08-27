@@ -30,8 +30,8 @@ namespace DFHack
         uint16_t background; // 8
         uint16_t unk2; // alignment padding?
 
-        std::string name; // C
-        std::string text; // 10
+        std::string24 name; // C
+        std::string24 text; // 10
 
         uint16_t x; // 14
         uint16_t y; // 16
@@ -56,7 +56,7 @@ namespace DFHack
         {
             return true;
         }
-        std::vector<t_note*>* notes;
+        std::vector12<t_note*>* notes;
     };
 
 }

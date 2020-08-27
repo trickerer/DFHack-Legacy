@@ -69,11 +69,11 @@ namespace DFHack
         DFHACK_EXPORT bool removeWorker(df::job *job, int cooldown = 100);
 
         // This helpful method only removes the backref from the item to the job, but it doesn't
-        // remove the item ref from the job's vector, or delete it or anything.  Think of it as a method
+        // remove the item ref from the job's std::vector12, or delete it or anything.  Think of it as a method
         // that does all the needful to make an item ref ready to delete.
         DFHACK_EXPORT void disconnectJobItem(df::job *job, df::job_item_ref *item);
         // This helpful method only removes the backref from whatever the general_ref points to,
-        // it doesn't remove the general_ref from the job's vector, or delete it or anything.
+        // it doesn't remove the general_ref from the job's std::vector12, or delete it or anything.
         // Think of it as a method that does all the needful to make a ref ready to delete.
         // If it returns false, you've found a ref that the method doesn't know how to handle.  Congratulations!
         // You should report that and/or check in a fix.
@@ -95,7 +95,7 @@ namespace DFHack
         DFHACK_EXPORT bool removePostings(df::job *job, bool remove_all = false);
 
         // lists jobs with ids >= *id_var, and sets *id_var = *job_next_id;
-        DFHACK_EXPORT bool listNewlyCreated(std::vector<df::job*> *pvec, int *id_var);
+        DFHACK_EXPORT bool listNewlyCreated(std::vector12<df::job*> *pvec, int *id_var);
 
         DFHACK_EXPORT bool attachJobItem(df::job *job, df::item *item,
                                          df::job_item_ref::T_role role,
@@ -103,7 +103,7 @@ namespace DFHack
 
         DFHACK_EXPORT bool isSuitableItem(df::job_item *item, df::item_type itype, int isubtype);
         DFHACK_EXPORT bool isSuitableMaterial(df::job_item *item, int mat_type, int mat_index);
-        DFHACK_EXPORT std::string getName(df::job *job);
+        DFHACK_EXPORT std::string24 getName(df::job *job);
     }
 
     DFHACK_EXPORT bool operator== (const df::job_item &a, const df::job_item &b);

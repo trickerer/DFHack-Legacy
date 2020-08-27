@@ -103,7 +103,7 @@ namespace DFHack
             fputs(data, dfout_C);
         }
 
-        void print_text(color_ostream::color_value clr, const std::string &chunk)
+        void print_text(color_ostream::color_value clr, const std::string24 &chunk)
         {
             if(!in_batch && state == con_lineedit)
             {
@@ -281,8 +281,8 @@ namespace DFHack
             raw_cursor = 0;
             int history_index = 0;
             // The latest history entry is always our current buffer, that
-            // initially is just an empty string.
-            const std::string empty;
+            // initially is just an empty std::string24.
+            const std::string24 empty;
             history.add(empty);
 
             CONSOLE_SCREEN_BUFFER_INFO inf = { 0 };
@@ -386,7 +386,7 @@ namespace DFHack
                 }
             }
         }
-        int lineedit(const std::string & prompt, std::string & output, recursive_mutex * lock, CommandHistory & ch)
+        int lineedit(const std::string24 & prompt, std::string24 & output, recursive_mutex * lock, CommandHistory & ch)
         {
             output.clear();
             reset_color();
@@ -415,8 +415,8 @@ namespace DFHack
             con_lineedit
         } state;
         bool in_batch;
-        std::string prompt;     // current prompt string
-        std::string raw_buffer; // current raw mode buffer
+        std::string24 prompt;     // current prompt std::string24
+        std::string24 raw_buffer; // current raw mode buffer
         int raw_cursor;         // cursor position in the buffer
     };
 }
@@ -555,7 +555,7 @@ void Console::flush_proxy()
         d->flush();
 }
 
-void Console::add_text(color_value color, const std::string &text)
+void Console::add_text(color_value color, const std::string24 &text)
 {
     lock_guard <recursive_mutex> g(*wlock);
     if (inited)
@@ -601,7 +601,7 @@ void Console::cursor(bool enable)
         d->cursor(enable);
 }
 
-int Console::lineedit(const std::string & prompt, std::string & output, CommandHistory & ch)
+int Console::lineedit(const std::string24 & prompt, std::string24 & output, CommandHistory & ch)
 {
     wlock->lock();
     int ret = Console::SHUTDOWN;

@@ -90,7 +90,7 @@ namespace DFHack
     };
     struct DFHACK_EXPORT PluginCommand
     {
-        typedef command_result (*command_function)(color_ostream &out, std::vector <std::string> &);
+        typedef command_result (*command_function)(color_ostream &out, std::vector12 <std::string24> &);
         typedef bool (*command_hotkey_guard)(df::viewscreen *);
 
         /// create a command with a name, description, function pointer to its code
@@ -129,12 +129,12 @@ namespace DFHack
 
         bool isHotkeyCommand() const { return guard != NULL; }
 
-        std::string name;
-        std::string description;
+        std::string24 name;
+        std::string24 description;
         command_function function;
         bool interactive;
         command_hotkey_guard guard;
-        std::string usage;
+        std::string24 usage;
     };
     class Plugin
     {
@@ -143,8 +143,8 @@ namespace DFHack
         struct RefAutoinc;
         friend class PluginManager;
         friend class RPCService;
-        Plugin(DFHack::Core* core, const std::string& filepath,
-            const std::string &plug_name, PluginManager * pm);
+        Plugin(DFHack::Core* core, const std::string24& filepath,
+            const std::string24 &plug_name, PluginManager * pm);
         ~Plugin();
         command_result on_update(color_ostream &out);
         command_result on_state_change(color_ostream &out, state_change_event event);
@@ -171,8 +171,8 @@ namespace DFHack
         bool can_set_enabled() { return plugin_is_enabled != 0 && plugin_enable; }
         command_result set_enabled(color_ostream &out, bool enable);
 
-        command_result invoke(color_ostream &out, const std::string & command, std::vector <std::string> & parameters);
-        bool can_invoke_hotkey(const std::string & command, df::viewscreen *top );
+        command_result invoke(color_ostream &out, const std::string24 & command, std::vector12 <std::string24> & parameters);
+        bool can_invoke_hotkey(const std::string24 & command, df::viewscreen *top );
         plugin_state getState () const;
 
         RPCService *rpc_connect(color_ostream &out);
@@ -185,7 +185,7 @@ namespace DFHack
         {
             return commands.size();
         }
-        const std::string & getName() const
+        const std::string24 & getName() const
         {
             return name;
         }
@@ -204,21 +204,21 @@ namespace DFHack
 
     private:
         RefLock * access;
-        std::vector <PluginCommand> commands;
-        std::vector <RPCService*> services;
-        std::string path;
-        std::string name;
+        std::vector12 <PluginCommand> commands;
+        std::vector12 <RPCService*> services;
+        std::string24 path;
+        std::string24 name;
         DFLibrary * plugin_lib;
         PluginManager * parent;
         plugin_state state;
 
         struct LuaCommand;
-        typedef std::map<std::string, LuaCommand*> LuaCommandMap;
+        typedef std::map<std::string24, LuaCommand*> LuaCommandMap;
         LuaCommandMap lua_commands;
         static int lua_cmd_wrapper(lua_State *state);
 
         struct LuaFunction;
-        typedef std::map<std::string, LuaFunction*> LuaFunctionMap;
+        typedef std::map<std::string24, LuaFunction*> LuaFunctionMap;
         LuaFunctionMap lua_functions;
         static int lua_fun_wrapper(lua_State *state);
         void push_function(lua_State *state, LuaFunction *fn);
@@ -227,16 +227,16 @@ namespace DFHack
         static int lua_set_enabled(lua_State *state);
 
         struct LuaEvent;
-        typedef std::map<std::string, LuaEvent*> LuaEventMap;
+        typedef std::map<std::string24, LuaEvent*> LuaEventMap;
         LuaEventMap lua_events;
 
         void index_lua(DFLibrary *lib);
         void reset_lua();
 
         bool *plugin_is_enabled;
-        std::vector<std::string>* plugin_globals;
-        command_result (*plugin_init)(color_ostream &, std::vector <PluginCommand> &);
-        command_result (*plugin_status)(color_ostream &, std::string &);
+        std::vector12<std::string24>* plugin_globals;
+        command_result (*plugin_init)(color_ostream &, std::vector12 <PluginCommand> &);
+        command_result (*plugin_status)(color_ostream &, std::string24 &);
         command_result (*plugin_shutdown)(color_ostream &);
         command_result (*plugin_onupdate)(color_ostream &);
         command_result (*plugin_onstatechange)(color_ostream &, state_change_event);
@@ -263,36 +263,36 @@ namespace DFHack
     // PUBLIC METHODS
     public:
         // list names of all plugins present in hack/plugins
-        std::vector<std::string> listPlugins();
+        std::vector12<std::string24> listPlugins();
         // create Plugin instances for any plugins in hack/plugins that aren't present in all_plugins
         void refresh();
 
-        bool load (const std::string &name);
+        bool load (const std::string24 &name);
         bool loadAll();
-        bool unload (const std::string &name);
+        bool unload (const std::string24 &name);
         bool unloadAll();
-        bool reload (const std::string &name);
+        bool reload (const std::string24 &name);
         bool reloadAll();
 
-        Plugin *getPluginByName (const std::string &name) { return (*this)[name]; }
-        Plugin *getPluginByCommand (const std::string &command);
-        command_result InvokeCommand(color_ostream &out, const std::string & command, std::vector <std::string> & parameters);
-        bool CanInvokeHotkey(const std::string &command, df::viewscreen *top);
-        Plugin* operator[] (const std::string name);
+        Plugin *getPluginByName (const std::string24 &name) { return (*this)[name]; }
+        Plugin *getPluginByCommand (const std::string24 &command);
+        command_result InvokeCommand(color_ostream &out, const std::string24 & command, std::vector12 <std::string24> & parameters);
+        bool CanInvokeHotkey(const std::string24 &command, df::viewscreen *top);
+        Plugin* operator[] (const std::string24 name);
         std::size_t size();
         Plugin *ruby;
 
-        std::map<std::string, Plugin*>::iterator begin();
-        std::map<std::string, Plugin*>::iterator end();
+        std::map<std::string24, Plugin*>::iterator begin();
+        std::map<std::string24, Plugin*>::iterator end();
     // DATA
     private:
         Core *core;
-        bool addPlugin(std::string name);
+        bool addPlugin(std::string24 name);
         tthread::recursive_mutex * plugin_mutex;
         tthread::mutex * cmdlist_mutex;
-        std::map <std::string, Plugin*> command_map;
-        std::map <std::string, Plugin*> all_plugins;
-        std::string plugin_path;
+        std::map <std::string24, Plugin*> command_map;
+        std::map <std::string24, Plugin*> all_plugins;
+        std::string24 plugin_path;
     };
 
     namespace Gui
@@ -310,8 +310,8 @@ namespace DFHack
     DFhackDataExport const char * plugin_git_description = DFHack::Version::git_description();\
     DFhackDataExport int plugin_abi_version = DFHack::Version::dfhack_abi_version();\
     DFhackDataExport DFHack::Plugin *plugin_self = NULL;\
-    std::vector<std::string> _plugin_globals;\
-    DFhackDataExport std::vector<std::string>* plugin_globals = &_plugin_globals; \
+    std::vector12<std::string24> _plugin_globals;\
+    DFhackDataExport std::vector12<std::string24>* plugin_globals = &_plugin_globals; \
     DFhackDataExport bool plugin_dev = is_dev;
 
 /// You have to include DFHACK_PLUGIN("plugin_name") in every plugin you write - just once. Ideally at the top of the main file.

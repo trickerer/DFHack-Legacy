@@ -31,7 +31,7 @@ distribution.
 #include <stdlib.h>
 #include <sstream>
 #include <exception>
-#include <type_traits>
+//#include <type_traits>
 #include <iterator>
 namespace DFHack
 {
@@ -125,7 +125,7 @@ namespace DFHack
             if(byte < size)
             {
                 uint8_t bit = 1 << (index % 8);
-                return bit & bits[byte];
+                return !!(bit & bits[byte]);
             }
             else return false;
         }
@@ -574,11 +574,11 @@ namespace DFHack
     template<typename T, typename O, typename I>
     struct DfOtherVectors
     {
-        std::vector<I *> & operator[](O other_id)
+        std::vector12<I *> & operator[](O other_id)
         {
-            CHECK_INVALID_ARGUMENT(size_t(other_id) < sizeof(T) / sizeof(std::vector<I *>));
+            CHECK_INVALID_ARGUMENT(size_t(other_id) < sizeof(T) / sizeof(std::vector12<I *>));
 
-            std::vector<I*> * vectors = reinterpret_cast<std::vector<I*> *>(this);
+            std::vector12<I*> * vectors = reinterpret_cast<std::vector12<I*> *>(this);
             return vectors[other_id];
         }
     };

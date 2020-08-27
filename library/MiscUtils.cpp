@@ -45,15 +45,15 @@ distribution.
 #include <map>
 //#include <array>
 
-std::string stl_sprintf(const char *fmt, ...) {
+std::string24 stl_sprintf(const char *fmt, ...) {
     va_list lst;
     va_start(lst, fmt);
-    std::string rv = stl_vsprintf(fmt, lst);
+    std::string24 rv = stl_vsprintf(fmt, lst);
     va_end(lst);
     return rv;
 }
 
-std::string stl_vsprintf(const char *fmt, va_list args) {
+std::string24 stl_vsprintf(const char *fmt, va_list args) {
     /* Allow small (about single line) strings to be printed into stack memory
      * with a call to vsnprintf.
      */
@@ -65,10 +65,10 @@ std::string stl_vsprintf(const char *fmt, va_list args) {
     int rsz = vsnprintf(buf, stl_vsprintf_size, fmt, args2);
     va_end(args2);
     if (rsz < 0)
-        return std::string(); /* Error occurred */
+        return std::string24(); /* Error occurred */
     if (static_cast<unsigned>(rsz) < stl_vsprintf_size)
-        return std::string(buf, rsz); /* Whole string fits to a single line buffer */
-    std::string rv;
+        return std::string24(buf, rsz); /* Whole std::string24 fits to a single line buffer */
+    std::string24 rv;
     // Allocate enough memory for the output and null termination
     rv.resize(rsz);
     rsz = vsnprintf(&rv[0], rv.size()+1, fmt, args);
@@ -77,8 +77,8 @@ std::string stl_vsprintf(const char *fmt, va_list args) {
     return rv;
 }
 
-bool split_string(std::vector<std::string> *out,
-                  const std::string &str, const std::string &separator, bool squash_empty)
+bool split_string(std::vector12<std::string24> *out,
+                  const std::string24 &str, const std::string24 &separator, bool squash_empty)
 {
     out->clear();
 
@@ -86,7 +86,7 @@ bool split_string(std::vector<std::string> *out,
 
     if (!separator.empty())
     {
-        while ((pos = str.find(separator,start)) != std::string::npos)
+        while ((pos = str.find(separator,start)) != std::string24::npos)
         {
             if (pos > start || !squash_empty)
                 out->push_back(str.substr(start, pos-start));
@@ -100,40 +100,40 @@ bool split_string(std::vector<std::string> *out,
     return out->size() > 1;
 }
 
-std::string join_strings(const std::string &separator, const std::vector<std::string> &items)
+std::string24 join_strings(const std::string24 &separator, const std::vector12<std::string24> &items)
 {
     std::stringstream ss;
 
     for (size_t i = 0; i < items.size(); i++)
     {
         if (i)
-            ss << separator;
-        ss << items[i];
+            ss << separator.c_str();
+        ss << items[i].c_str();
     }
 
-    return ss.str();
+    return ss.str().c_str();
 }
 
-std::string toUpper(const std::string &str)
+std::string24 toUpper(const std::string24 &str)
 {
-    std::string rv(str.size(),' ');
+    std::string24 rv(str.size(),' ');
     for (unsigned i = 0; i < str.size(); ++i)
         rv[i] = toupper(str[i]);
     return rv;
 }
 
-std::string toLower(const std::string &str)
+std::string24 toLower(const std::string24 &str)
 {
-    std::string rv(str.size(),' ');
+    std::string24 rv(str.size(),' ');
     for (unsigned i = 0; i < str.size(); ++i)
         rv[i] = tolower(str[i]);
     return rv;
 }
 
-bool word_wrap(std::vector<std::string> *out, const std::string &str, size_t line_length)
+bool word_wrap(std::vector12<std::string24> *out, const std::string24 &str, size_t line_length)
 {
     out->clear();
-    std::istringstream input(str);
+    std::istringstream input(str.c_str());
     std::string out_line;
     std::string word;
     if (input >> word)
@@ -149,17 +149,17 @@ bool word_wrap(std::vector<std::string> *out, const std::string &str, size_t lin
             }
             else
             {
-                out->push_back(out_line);
+                out->push_back(out_line.c_str());
                 out_line = word;
             }
         }
         if (out_line.length())
-            out->push_back(out_line);
+            out->push_back(out_line.c_str());
     }
     return true;
 }
 
-bool prefix_matches(const std::string &prefix, const std::string &key, std::string *tail)
+bool prefix_matches(const std::string24 &prefix, const std::string24 &key, std::string24 *tail)
 {
     size_t ksize = key.size();
     size_t psize = prefix.size();
@@ -323,9 +323,9 @@ static uint16_t character_table[256] = {
     0xB0,   0x2219, 0xB7,   0x221A, 0x207F, 0xB2,   0x25A0, 0xA0
 };
 
-std::string DF2UTF(const std::string &in)
+std::string24 DF2UTF(const std::string24 &in)
 {
-    std::string out;
+    std::string24 out;
     out.reserve(in.size());
 
     uint8_t buf[4];
@@ -338,7 +338,7 @@ std::string DF2UTF(const std::string &in)
     return out;
 }
 
-std::string UTF2DF(const std::string &in)
+std::string24 UTF2DF(const std::string24 &in)
 {
     // Unicode to normal lookup table
     static std::map<uint32_t, char> ctable;
@@ -352,7 +352,7 @@ std::string UTF2DF(const std::string &in)
 
     // Actual conversion loop
     size_t size = in.size();
-    std::string out(size, char(0));
+    std::string24 out(size, char(0));
 
     uint32_t codepoint = 0;
     uint32_t state = UTF8_ACCEPT, prev = UTF8_ACCEPT;
@@ -382,23 +382,23 @@ std::string UTF2DF(const std::string &in)
     return out;
 }
 
-DFHACK_EXPORT std::string DF2CONSOLE(const std::string &in)
+DFHACK_EXPORT std::string24 DF2CONSOLE(const std::string24 &in)
 {
     bool is_utf = false;
 #ifdef LINUX_BUILD
-    std::string locale = "";
+    std::string24 locale = "";
     if (getenv("LANG"))
         locale += getenv("LANG");
     if (getenv("LC_CTYPE"))
         locale += getenv("LC_CTYPE");
     locale = toUpper(locale);
-    is_utf = (locale.find("UTF-8") != std::string::npos) ||
-             (locale.find("UTF8") != std::string::npos);
+    is_utf = (locale.find("UTF-8") != std::string24::npos) ||
+             (locale.find("UTF8") != std::string24::npos);
 #endif
     return is_utf ? DF2UTF(in) : in;
 }
 
-DFHACK_EXPORT std::string DF2CONSOLE(DFHack::color_ostream &out, const std::string &in)
+DFHACK_EXPORT std::string24 DF2CONSOLE(DFHack::color_ostream &out, const std::string24 &in)
 {
     return out.is_console() ? DF2CONSOLE(in) : in;
 }

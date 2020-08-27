@@ -52,16 +52,16 @@ SOFTWARE.
 
 using namespace DFHack;
 
-bool Filesystem::chdir (std::string path)
+bool Filesystem::chdir (std::string24 path)
 {
     return ::chdir(path.c_str()) == 0;
 }
 
-std::string Filesystem::getcwd ()
+std::string24 Filesystem::getcwd ()
 {
     char *path;
     char buf[FILENAME_MAX];
-    std::string result = "";
+    std::string24 result = "";
 #ifdef _WIN32
     if ((path = ::_getcwd(buf, FILENAME_MAX)) != NULL)
 #else
@@ -71,7 +71,7 @@ std::string Filesystem::getcwd ()
     return result;
 }
 
-bool Filesystem::mkdir (std::string path)
+bool Filesystem::mkdir (std::string24 path)
 {
     int fail;
 #ifdef _WIN32
@@ -83,12 +83,12 @@ bool Filesystem::mkdir (std::string path)
     return fail == 0;
 }
 
-static bool mkdir_recursive_impl (std::string path)
+static bool mkdir_recursive_impl (std::string24 path)
 {
     size_t last_slash = path.find_last_of("/");
-    if (last_slash != std::string::npos)
+    if (last_slash != std::string24::npos)
     {
-        std::string parent_path = path.substr(0, last_slash);
+        std::string24 parent_path = path.substr(0, last_slash);
         bool parent_exists = mkdir_recursive_impl(parent_path);
         if (!parent_exists)
         {
@@ -98,7 +98,7 @@ static bool mkdir_recursive_impl (std::string path)
     return (Filesystem::mkdir(path) || errno == EEXIST) && Filesystem::isdir(path);
 }
 
-bool Filesystem::mkdir_recursive (std::string path)
+bool Filesystem::mkdir_recursive (std::string24 path)
 {
 #ifdef _WIN32
     // normalize to forward slashes
@@ -114,7 +114,7 @@ bool Filesystem::mkdir_recursive (std::string path)
     return mkdir_recursive_impl(path);
 }
 
-bool Filesystem::rmdir (std::string path)
+bool Filesystem::rmdir (std::string24 path)
 {
     int fail;
 #ifdef _WIN32
@@ -146,18 +146,18 @@ _filetype mode2type (mode_t mode) {
         return FILETYPE_UNKNOWN;
 }
 
-bool Filesystem::stat (std::string path, STAT_STRUCT &info)
+bool Filesystem::stat (std::string24 path, STAT_STRUCT &info)
 {
     return (STAT_FUNC(path.c_str(), &info)) == 0;
 }
 
-bool Filesystem::exists (std::string path)
+bool Filesystem::exists (std::string24 path)
 {
     STAT_STRUCT info;
     return Filesystem::stat(path, info);
 }
 
-_filetype Filesystem::filetype (std::string path)
+_filetype Filesystem::filetype (std::string24 path)
 {
     STAT_STRUCT info;
     if (!Filesystem::stat(path, info))
@@ -165,18 +165,18 @@ _filetype Filesystem::filetype (std::string path)
     return mode2type(info.st_mode);
 }
 
-bool Filesystem::isfile (std::string path)
+bool Filesystem::isfile (std::string24 path)
 {
     return Filesystem::exists(path) && Filesystem::filetype(path) == FILETYPE_FILE;
 }
 
-bool Filesystem::isdir (std::string path)
+bool Filesystem::isdir (std::string24 path)
 {
     return Filesystem::exists(path) && Filesystem::filetype(path) == FILETYPE_DIRECTORY;
 }
 
 #define DEFINE_STAT_TIME_WRAPPER(attr) \
-int64_t Filesystem::attr (std::string path) \
+int64_t Filesystem::attr (std::string24 path) \
 { \
     STAT_STRUCT info; \
     if (!Filesystem::stat(path, info)) \
@@ -190,7 +190,7 @@ DEFINE_STAT_TIME_WRAPPER(mtime)
 
 #undef DEFINE_STAT_TIME_WRAPPER
 
-int Filesystem::listdir (std::string dir, std::vector<std::string> &files)
+int Filesystem::listdir (std::string24 dir, std::vector12<std::string24> &files)
 {
     DIR *dp;
     struct dirent *dirp;
@@ -199,7 +199,7 @@ int Filesystem::listdir (std::string dir, std::vector<std::string> &files)
         return errno;
     }
     while ((dirp = readdir(dp)) != NULL) {
-        files.push_back(std::string(dirp->d_name));
+        files.push_back(std::string24(dirp->d_name));
     }
     closedir(dp);
     return 0;
@@ -212,38 +212,38 @@ int Filesystem::listdir (std::string dir, std::vector<std::string> &files)
 //   we haven't finished recursing when we run out of depth.
 // include_prefix controls whether the directory where we started recursing is
 //   included in the filenames returned in files.
-static int listdir_recursive_impl (std::string prefix, std::string path,
-    std::map<std::string, bool> &files, int depth, bool include_prefix)
+static int listdir_recursive_impl (std::string24 prefix, std::string24 path,
+    std::map<std::string24, bool> &files, int depth, bool include_prefix)
 {
     if (depth < 0)
         return -1;
-    std::string prefixed_path = prefix + "/" + path;
-    std::vector<std::string> curdir_files;
+    std::string24 prefixed_path = prefix + "/" + path;
+    std::vector12<std::string24> curdir_files;
     int err = Filesystem::listdir(prefixed_path, curdir_files);
     if (err)
         return err;
-    for (std::vector<std::string>::const_iterator file = curdir_files.begin(); file != curdir_files.end(); ++file)
+    for (std::vector12<std::string24>::const_iterator file = curdir_files.begin(); file != curdir_files.end(); ++file)
     {
         if (*file == "." || *file == "..")
             continue;
-        std::string prefixed_file = prefixed_path + *file;
-        std::string path_file = path + *file;
+        std::string24 prefixed_file = prefixed_path + *file;
+        std::string24 path_file = path + *file;
         if (Filesystem::isdir(prefixed_file))
         {
-            files.insert(std::pair<std::string, bool>(include_prefix ? prefixed_file : path_file, true));
+            files.insert(std::pair<std::string24, bool>(include_prefix ? prefixed_file : path_file, true));
             err = listdir_recursive_impl(prefix, path_file + "/", files, depth - 1, include_prefix);
             if (err)
                 return err;
         }
         else
         {
-            files.insert(std::pair<std::string, bool>(include_prefix ? prefixed_file : path_file, false));
+            files.insert(std::pair<std::string24, bool>(include_prefix ? prefixed_file : path_file, false));
         }
     }
     return 0;
 }
 
-int Filesystem::listdir_recursive (std::string dir, std::map<std::string, bool> &files,
+int Filesystem::listdir_recursive (std::string24 dir, std::map<std::string24, bool> &files,
     int depth /* = 10 */, bool include_prefix /* = true */)
 {
     return listdir_recursive_impl(dir, "", files, depth, include_prefix);

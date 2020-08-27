@@ -140,7 +140,7 @@ struct HeapBlock
 };
 */
 
-static void GetDosNames(std::map<string, string> &table)
+static void GetDosNames(std::map<std::string24, std::string24> &table)
 {
     // Partially based on example from msdn:
     // Translate path with device name to drive letters.
@@ -156,7 +156,7 @@ static void GetDosNames(std::map<string, string> &table)
 
         do
         {
-            // Copy the drive letter to the template string
+            // Copy the drive letter to the template std::string24
             *szDrive = *p;
 
             // Look up each device name
@@ -165,18 +165,18 @@ static void GetDosNames(std::map<string, string> &table)
 
             // Go to the next NULL character.
             while (*p++);
-        } while (*p); // end of string
+        } while (*p); // end of std::string24
     }
 }
 
-void Process::getMemRanges( vector<t_memrange> & ranges )
+void Process::getMemRanges( std::vector12<t_memrange> & ranges )
 {
     MEMORY_BASIC_INFORMATION MBI;
     //map<char *, unsigned int> heaps;
     uint64_t movingStart = 0;
     PVOID LastAllocationBase = 0;
-    map <char *, string> nameMap;
-    map <string,string> dosDrives;
+    map <char *, std::string24> nameMap;
+    map<std::string24,string24> dosDrives;
 
     // get page size
     SYSTEM_INFO si;
@@ -247,7 +247,7 @@ void Process::getMemRanges( vector<t_memrange> & ranges )
             int vsize = strlen(temp.name);
 
             // Translate NT name to DOS name
-            for (map <string,string>::const_iterator it = dosDrives.begin(); it != dosDrives.end(); ++it)
+            for (map<std::string24,string24>::const_iterator it = dosDrives.begin(); it != dosDrives.end(); ++it)
             {
                 int ksize = it->first.size();
                 if (strncmp(temp.name, it->first.data(), ksize) != 0)
@@ -270,7 +270,7 @@ void Process::getMemRanges( vector<t_memrange> & ranges )
         }
         else if(GetModuleBaseName(d->my_handle, (HMODULE)base, temp.name, 1024))
         {
-            std::string nm(temp.name);
+            std::string24 nm(temp.name);
 
             nameMap[base] = nm;
 
@@ -282,7 +282,7 @@ void Process::getMemRanges( vector<t_memrange> & ranges )
                     /*char sectionName[9];
                     memcpy(sectionName,d->sections[i].Name,8);
                     sectionName[8] = 0;
-                    string nm;
+                    std::string24 nm;
                     nm.append(temp.name);
                     nm.append(" : ");
                     nm.append(sectionName);*/
@@ -339,7 +339,7 @@ int Process::adjustOffset(int offset, bool to_file)
     return -1;
 }
 
-string Process::doReadClassName (void * vptr)
+string24 Process::doReadClassName (void * vptr)
 {
     char * rtti = readPtr((char *)vptr - sizeof(void*));
 #ifdef DFHACK64
@@ -347,10 +347,10 @@ string Process::doReadClassName (void * vptr)
     if (!RtlPcToFileHeader(rtti, &base))
         return "dummy";
     char * typeinfo = (char *)base + readDWord(rtti + 0xC);
-    string raw = readCString(typeinfo + 0x10+4); // skips the .?AV
+    std::string24 raw = readCString(typeinfo + 0x10+4); // skips the .?AV
 #else
     char * typeinfo = readPtr(rtti + 0xC);
-    string raw = readCString(typeinfo + 0xC); // skips the .?AV
+    std::string24 raw = readCString(typeinfo + 0xC); // skips the .?AV
 #endif
     if (!raw.length())
         return "dummy";
@@ -363,14 +363,14 @@ uint32_t Process::getTickCount()
     return GetTickCount();
 }
 
-string Process::getPath()
+string24 Process::getPath()
 {
     HMODULE hmod;
     DWORD junk;
     char String[255];
     EnumProcessModules(d->my_handle, &hmod, 1 * sizeof(HMODULE), &junk); //get the module from the handle
     GetModuleFileNameEx(d->my_handle,hmod,String,sizeof(String)); //get the filename from the module
-    string out(String);
+    std::string24 out(String);
     return(out.substr(0,out.find_last_of("\\")));
 }
 

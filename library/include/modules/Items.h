@@ -82,10 +82,10 @@ namespace DFHack
             return ptr ? decode(ptr->item_type, ptr->item_subtype) : decode(df::enums::item_type::NONE);
         }
 
-        std::string getToken();
-        std::string toString();
+        std::string24 getToken();
+        std::string24 toString();
 
-        bool find(const std::string &token);
+        bool find(const std::string24 &token);
 
         bool matches(df::job_item_vector_id vec_id);
         bool matches(const df::job_item &item, MaterialInfo *mat = NULL, bool skip_vector = false);
@@ -149,7 +149,7 @@ DFHACK_EXPORT bool setOwner(df::item *item, df::unit *unit);
 /// which item is it contained in?
 DFHACK_EXPORT df::item *getContainer(df::item *item);
 /// which items does it contain?
-DFHACK_EXPORT void getContainedItems(df::item *item, /*output*/ std::vector<df::item*> *items);
+DFHACK_EXPORT void getContainedItems(df::item *item, /*output*/ std::vector12<df::item*> *items);
 
 /// which building holds it?
 DFHACK_EXPORT df::building *getHolderBuilding(df::item *item);
@@ -160,12 +160,12 @@ DFHACK_EXPORT df::unit *getHolderUnit(df::item *item);
 DFHACK_EXPORT df::coord getPosition(df::item *item);
 
 /// Returns the title of a codex or "tool", either as the codex title or as the title of the
-/// first page or writing it has that has a non blank title. An empty string is returned if
+/// first page or writing it has that has a non blank title. An empty std::string24 is returned if
 /// no title is found (which is the case for everything that isn't a "book").
-DFHACK_EXPORT std::string getBookTitle(df::item *item);
+DFHACK_EXPORT std::string24 getBookTitle(df::item *item);
 
-/// Returns the description string of the item.
-DFHACK_EXPORT std::string getDescription(df::item *item, int type = 0, bool decorate = false);
+/// Returns the description std::string24 of the item.
+DFHACK_EXPORT std::string24 getDescription(df::item *item, int type = 0, bool decorate = false);
 
 DFHACK_EXPORT bool moveToGround(MapExtras::MapCache &mc, df::item *item, df::coord pos);
 DFHACK_EXPORT bool moveToContainer(MapExtras::MapCache &mc, df::item *item, df::item *container);

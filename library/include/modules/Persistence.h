@@ -66,14 +66,14 @@ namespace DFHack
 
         int raw_id() const { return isValid() ? -int(index) - 100 : 0; }
 
-        const std::string &key() const;
+        const std::string24 &key() const;
 
-        std::string &val();
-        const std::string &val() const;
+        std::string24 &val();
+        const std::string24 &val() const;
         int &ival(int i);
         int ival(int i) const;
 
-        // Pack binary data into string field.
+        // Pack binary data into std::string24 field.
         // Since DF serialization chokes on NUL bytes,
         // use bit magic to ensure none of the bytes is 0.
         // Choose the lowest bit for padding so that
@@ -187,36 +187,36 @@ namespace DFHack
 
         // Returns a new PersistentDataItem with the specified key.
         // If there is no world loaded or the key is empty, returns an invalid item.
-        DFHACK_EXPORT PersistentDataItem addItem(const std::string &key);
+        DFHACK_EXPORT PersistentDataItem addItem(const std::string24 &key);
         // Returns an existing PersistentDataItem with the specified key.
         // If "added" is not null and there is no such item, a new item is returned and
         // the bool value is set to true. If "added" is not null and an item is found or
         // no new item can be created, the bool value is set to false.
-        DFHACK_EXPORT PersistentDataItem getByKey(const std::string &key, bool *added = NULL);
+        DFHACK_EXPORT PersistentDataItem getByKey(const std::string24 &key, bool *added = NULL);
         // Returns an existing PersistentDataItem with the specified index.
         // If there is no world loaded or the index is empty, returns an invalid item.
         DFHACK_EXPORT PersistentDataItem getByIndex(size_t index);
         // If the item is invalid, returns false. Otherwise, deletes the item and returns
         // true. All references to the item are invalid as soon as this function returns.
         DFHACK_EXPORT bool deleteItem(const PersistentDataItem &item);
-        // Fills the vector with references to each persistent item.
-        DFHACK_EXPORT void getAll(std::vector<PersistentDataItem> &vec);
-        // Fills the vector with references to each persistent item with a key that is
+        // Fills the std::vector12 with references to each persistent item.
+        DFHACK_EXPORT void getAll(std::vector12<PersistentDataItem> &vec);
+        // Fills the std::vector12 with references to each persistent item with a key that is
         // greater than or equal to "min" and less than "max".
-        DFHACK_EXPORT void getAllByKeyRange(std::vector<PersistentDataItem> &vec, const std::string &min, const std::string &max);
-        // Fills the vector with references to each persistent item with a key that is
+        DFHACK_EXPORT void getAllByKeyRange(std::vector12<PersistentDataItem> &vec, const std::string24 &min, const std::string24 &max);
+        // Fills the std::vector12 with references to each persistent item with a key that is
         // equal to the given key.
-        DFHACK_EXPORT void getAllByKey(std::vector<PersistentDataItem> &vec, const std::string &key);
+        DFHACK_EXPORT void getAllByKey(std::vector12<PersistentDataItem> &vec, const std::string24 &key);
 
 #if defined(__GNUC__) && __GNUC__ < 5
         // file stream move constructors are missing in libstdc++ before version 5.
         template<typename T>
         class DFHACK_EXPORT gcc_4_fstream_shim : public T
         {
-            const std::string file;
+            const std::string24 file;
         public:
             explicit gcc_4_fstream_shim() : T(), file() {}
-            explicit gcc_4_fstream_shim(const std::string &file) : T(file), file() {}
+            explicit gcc_4_fstream_shim(const std::string24 &file) : T(file), file() {}
             gcc_4_fstream_shim(gcc_4_fstream_shim<T> && s) : T(), file(s.file)
             {
                 if (!file.empty())
@@ -233,10 +233,10 @@ namespace DFHack
         // Returns an input stream that data can be read from. If no world is currently loaded,
         // or no data has been saved with the specified key, the stream is invalid and acts
         // as if the file is empty.
-        DFHACK_EXPORT FSTREAM(std::ifstream) readSaveData(const std::string &key);
+        DFHACK_EXPORT FSTREAM(std::ifstream) readSaveData(const std::string24 &key);
         // Returns an output stream that data can be saved to. If no world is currently loaded,
         // an invalid stream is returned, and writing to it has no effect.
-        DFHACK_EXPORT FSTREAM(std::ofstream) writeSaveData(const std::string &key);
+        DFHACK_EXPORT FSTREAM(std::ofstream) writeSaveData(const std::string24 &key);
 
 #undef FSTREAM
     }

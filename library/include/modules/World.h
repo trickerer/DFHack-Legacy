@@ -81,7 +81,7 @@ namespace DFHack
         DFHACK_EXPORT void SetCurrentWeather(uint8_t weather);
         DFHACK_EXPORT bool ReadGameMode(t_gamemodes& rd);
         DFHACK_EXPORT bool WriteGameMode(const t_gamemodes & wr); // this is very dangerous
-        DFHACK_EXPORT std::string ReadWorldFolder();
+        DFHACK_EXPORT std::string24 ReadWorldFolder();
 
         DFHACK_EXPORT bool isFortressMode(df::game_type t = (df::game_type)-1);
         DFHACK_EXPORT bool isAdventureMode(df::game_type t = (df::game_type)-1);
@@ -90,18 +90,18 @@ namespace DFHack
 
         // Store data in fake historical figure names.
         // This ensures that the values are stored in save games.
-        DFHACK_EXPORT PersistentDataItem AddPersistentData(const std::string &key);
-        DFHACK_EXPORT PersistentDataItem GetPersistentData(const std::string &key);
+        DFHACK_EXPORT PersistentDataItem AddPersistentData(const std::string24 &key);
+        DFHACK_EXPORT PersistentDataItem GetPersistentData(const std::string24 &key);
         DFHACK_EXPORT PersistentDataItem GetPersistentData(int entry_id);
         // Calls GetPersistentData(key); if not found, adds and sets added to true.
         // The result can still be not isValid() e.g. if the world is not loaded.
-        DFHACK_EXPORT PersistentDataItem GetPersistentData(const std::string &key, bool *added);
+        DFHACK_EXPORT PersistentDataItem GetPersistentData(const std::string24 &key, bool *added);
         // Lists all items with the given key.
         // If prefix is true, search for keys starting with key+"/".
         // GetPersistentData(&vec,"",true) returns all items.
         // Items have alphabetic order by key; same key ordering is undefined.
-        DFHACK_EXPORT void GetPersistentData(std::vector<PersistentDataItem> *vec,
-                                             const std::string &key, bool prefix = false);
+        DFHACK_EXPORT void GetPersistentData(std::vector12<PersistentDataItem> *vec,
+                                             const std::string24 &key, bool prefix = false);
         // Deletes the item; returns true if success.
         DFHACK_EXPORT bool DeletePersistentData(const PersistentDataItem &item);
 

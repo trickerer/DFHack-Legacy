@@ -34,6 +34,8 @@ distribution.
 #include <stdarg.h>
 #include <sstream>
 
+#include "common.h"
+
 namespace dfproto
 {
     class CoreTextNotification;
@@ -96,7 +98,7 @@ namespace  DFHack
         virtual void begin_batch();
         virtual void end_batch();
 
-        virtual void add_text(color_value color, const std::string &text) = 0;
+        virtual void add_text(color_value color, const std::string24 &text) = 0;
 
         virtual void flush_proxy() {};
 
@@ -137,7 +139,7 @@ namespace  DFHack
         std::ostream &out;
 
     protected:
-        virtual void add_text(color_value color, const std::string &text);
+        virtual void add_text(color_value color, const std::string24 &text);
         virtual void flush_proxy();
 
     public:
@@ -147,10 +149,10 @@ namespace  DFHack
     class DFHACK_EXPORT buffered_color_ostream : public color_ostream
     {
     protected:
-        virtual void add_text(color_value color, const std::string &text);
+        virtual void add_text(color_value color, const std::string24 &text);
 
     public:
-        typedef std::pair<color_value,std::string> fragment_type;
+        typedef std::pair<color_value,std::string24> fragment_type;
 
         buffered_color_ostream() {}
         ~buffered_color_ostream() {}

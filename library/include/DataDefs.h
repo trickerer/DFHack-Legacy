@@ -28,11 +28,13 @@ distribution.
 #include <set>
 #include <sstream>
 #include <string>
-#include <type_traits>
+//#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "BitArray.h"
+
+#include "common.h"
 
 // Stop some MS stupidity
 #ifdef interface
@@ -40,8 +42,6 @@ distribution.
 #endif
 
 typedef struct lua_State lua_State;
-
-typedef std::map<int64_t, size_t> ValueIndexMap;
 
 /*
  * Definitions of DFHack namespace structs used by generated headers.
@@ -101,7 +101,7 @@ namespace DFHack
 
         virtual identity_type type() = 0;
 
-        virtual std::string getFullName() = 0;
+        virtual std::string24 getFullName() = 0;
 
         // For internal use in the lua wrapper
         virtual void lua_read(lua_State *state, int fname_idx, void *ptr) = 0;
@@ -145,8 +145,8 @@ namespace DFHack
 
         const char *dfhack_name;
         compound_identity *scope_parent;
-        std::vector<compound_identity*> scope_children;
-        static std::vector<compound_identity*> top_scope;
+        std::vector12<compound_identity*> scope_children;
+        static std::vector12<compound_identity*> top_scope;
 
     protected:
         compound_identity(size_t size, TAllocateFn alloc,
@@ -157,11 +157,11 @@ namespace DFHack
     public:
         const char *getName() { return dfhack_name; }
 
-        virtual std::string getFullName();
+        virtual std::string24 getFullName();
 
         compound_identity *getScopeParent() { return scope_parent; }
-        const std::vector<compound_identity*> &getScopeChildren() { return scope_children; }
-        static const std::vector<compound_identity*> &getTopScope() { return top_scope; }
+        const std::vector12<compound_identity*> &getScopeChildren() { return scope_children; }
+        static const std::vector12<compound_identity*> &getTopScope() { return top_scope; }
 
         static void Init(Core *core);
     };
@@ -208,9 +208,9 @@ namespace DFHack
     public:
         struct ComplexData
         {
-            ValueIndexMap value_index_map;
-            std::vector<int64_t> index_value_map;
-            ComplexData(std::vector<int64_t> values);
+            std::map<int64_t, size_t> value_index_map;
+            std::vector12<int64_t> index_value_map;
+            ComplexData(std::vector12<int64_t> values);
             size_t size() const
             {
                 return index_value_map.size();
@@ -293,7 +293,7 @@ namespace DFHack
 
     class DFHACK_EXPORT struct_identity : public compound_identity {
         struct_identity *parent;
-        std::vector<struct_identity*> children;
+        std::vector12<struct_identity*> children;
         bool has_children;
 
         const struct_field_info *fields;
@@ -309,7 +309,7 @@ namespace DFHack
         virtual identity_type type() { return IDTYPE_STRUCT; }
 
         struct_identity *getParent() { return parent; }
-        const std::vector<struct_identity*> &getChildren() { return children; }
+        const std::vector12<struct_identity*> &getChildren() { return children; }
         bool hasChildren() { return has_children; }
 
         const struct_field_info *getFields() { return fields; }
@@ -401,7 +401,7 @@ namespace DFHack
         static virtual_identity *get(virtual_ptr instance_ptr);
 
         static virtual_identity *find(void *vtable);
-        static virtual_identity *find(const std::string &name);
+        static virtual_identity *find(const std::string24 &name);
 
         bool is_instance(virtual_ptr instance_ptr) {
             if (!instance_ptr) return false;
@@ -465,7 +465,7 @@ int linear_index(const DFHack::enum_list_attr<T> &lst, T val) {
     return -1;
 }
 
-inline int linear_index(const DFHack::enum_list_attr<const char*> &lst, const std::string &val) {
+inline int linear_index(const DFHack::enum_list_attr<const char*> &lst, const std::string24 &val) {
     for (size_t i = 0; i < lst.size; i++)
         if (lst.items[i] == val)
             return (int)i;
@@ -566,7 +566,7 @@ namespace df
  * Templates for access to enum and bitfield traits.
  */
 
-DFHACK_EXPORT std::string join_strings(const std::string &separator, const std::vector<std::string> &items);
+DFHACK_EXPORT std::string24 join_strings(const std::string24 &separator, const std::vector12<std::string24> &items);
 
 namespace DFHack {
     /*
@@ -598,7 +598,7 @@ namespace DFHack {
     T next_enum_item(T v, bool wrap = true)
     {
         typedef df::enum_traits<T> traits;
-        const ValueIndexMap::const_iterator& it = complex.value_index_map.find(v);
+        const std::map<int64_t, size_t>::const_iterator& it = complex.value_index_map.find(v);
         if (it != traits::complex.value_index_map.end())
         {
             if (!wrap && it->second + 1 == traits::complex.size())
@@ -687,7 +687,7 @@ namespace DFHack {
     //}
 
     /**
-     * Return the enum item key string pointer, or NULL if none.
+     * Return the enum item key std::string24 pointer, or NULL if none.
      */
     template<class T>
     const char* enum_item_raw_key_simple(T val)
@@ -700,8 +700,8 @@ namespace DFHack {
     const char* enum_item_raw_key(T val)
     {
         typedef df::enum_traits<T> traits;
-        const ValueIndexMap &value_index_map = traits::complex.value_index_map;
-        const ValueIndexMap::const_iterator& it = value_index_map.find(val);
+        const std::map<int64_t, size_t> &value_index_map = traits::complex.value_index_map;
+        const std::map<int64_t, size_t>::const_iterator& it = value_index_map.find(val);
         return (it != value_index_map.end()) ? traits::key_table[it->second] : NULL
     }
 
@@ -725,7 +725,7 @@ namespace DFHack {
     //}
 
     /**
-     * Return the enum item key string pointer, or "?" if none.
+     * Return the enum item key std::string24 pointer, or "?" if none.
      */
     template<class T>
     inline const char *enum_item_key_str_simple(T val)
@@ -740,36 +740,36 @@ namespace DFHack {
     }
 
     template<class BaseType>
-    std::string format_key(const char *keyname, BaseType val)
+    std::string24 format_key(const char *keyname, BaseType val)
     {
-        if (keyname) return std::string(keyname);
-        std::stringstream ss; ss << "?" << val << "?"; return ss.str();
+        if (keyname) return std::string24(keyname);
+        std::stringstream ss; ss << "?" << val << "?"; return ss.str().c_str();
     }
 
     /**
-     * Return the enum item key string, or ?123? (using the numeric value) if unknown.
+     * Return the enum item key std::string24, or ?123? (using the numeric value) if unknown.
      */
     template<class T>
-    inline std::string enum_item_key_simple(T val)
+    inline std::string24 enum_item_key_simple(T val)
     {
         typedef typename df::enum_traits<T>::base_type base_type;
         return format_key<base_type>(enum_item_raw_key_simple(val), base_type(val));
     }
 
     template<class T>
-    inline std::string enum_item_key(T val)
+    inline std::string24 enum_item_key(T val)
     {
         typedef typename df::enum_traits<T>::base_type base_type;
         return format_key<base_type>(enum_item_raw_key(val), base_type(val));
     }
 
-    DFHACK_EXPORT int findEnumItem(const std::string &name, int size, const char *const *items);
+    DFHACK_EXPORT int findEnumItem(const std::string24 &name, int size, const char *const *items);
 
     /**
-     * Find an enum item by key string. Returns success code.
+     * Find an enum item by key std::string24. Returns success code.
      */
     template<class T>
-    inline bool find_enum_item(T *var, const std::string &name)
+    inline bool find_enum_item(T *var, const std::string24 &name)
     {
         typedef df::enum_traits<T> traits;
         int size = traits::last_item_value-traits::first_item_value+1;
@@ -783,16 +783,16 @@ namespace DFHack {
      * Bitfield tools.
      */
 
-    DFHACK_EXPORT bool findBitfieldField(unsigned *idx, const std::string &name,
+    DFHACK_EXPORT bool findBitfieldField(unsigned *idx, const std::string24 &name,
                                          unsigned size, const bitfield_item_info *items);
     DFHACK_EXPORT void setBitfieldField(void *p, unsigned idx, unsigned size, int value);
     DFHACK_EXPORT int getBitfieldField(const void *p, unsigned idx, unsigned size);
 
     /**
-     * Find a bitfield item by key string. Returns success code.
+     * Find a bitfield item by key std::string24. Returns success code.
      */
     template<class T>
-    inline bool find_bitfield_field(unsigned *idx, const std::string &name, const T* = NULL)
+    inline bool find_bitfield_field(unsigned *idx, const std::string24 &name, const T* = NULL)
     {
         typedef df::bitfield_traits<T> traits;
         return findBitfieldField(&idx, name, traits::bit_count, traits::bits);
@@ -802,7 +802,7 @@ namespace DFHack {
      * Find a bitfield item by key and set its value. Returns success code.
      */
     template<class T>
-    inline bool set_bitfield_field(T *bitfield, const std::string &name, int value)
+    inline bool set_bitfield_field(T *bitfield, const std::string24 &name, int value)
     {
         typedef df::bitfield_traits<T> traits;
         unsigned idx;
@@ -815,7 +815,7 @@ namespace DFHack {
      * Find a bitfield item by key and retrieve its value. Returns success code.
      */
     template<class T>
-    inline bool get_bitfield_field(int *value, const T &bitfield, const std::string &name)
+    inline bool get_bitfield_field(int *value, const T &bitfield, const std::string24 &name)
     {
         typedef df::bitfield_traits<T> traits;
         unsigned idx;
@@ -824,26 +824,26 @@ namespace DFHack {
         return true;
     }
 
-    DFHACK_EXPORT void bitfieldToString(std::vector<std::string> *pvec, const void *p,
+    DFHACK_EXPORT void bitfieldToString(std::vector12<std::string24> *pvec, const void *p,
                                         unsigned size, const bitfield_item_info *items);
 
     /**
-     * Represent bitfield bits as strings in a vector.
+     * Represent bitfield bits as strings in a std::vector12.
      */
     template<class T>
-    inline void bitfield_to_string(std::vector<std::string> *pvec, const T &val)
+    inline void bitfield_to_string(std::vector12<std::string24> *pvec, const T &val)
     {
         typedef df::bitfield_traits<T> traits;
         bitfieldToString(pvec, &val.whole, traits::bit_count, traits::bits);
     }
 
     /**
-     * Represent bitfield bits as a string, using sep as join separator.
+     * Represent bitfield bits as a std::string24, using sep as join separator.
      */
     template<class T>
-    inline std::string bitfield_to_string(const T &val, const std::string &sep = " ")
+    inline std::string24 bitfield_to_string(const T &val, const std::string24 &sep = " ")
     {
-        std::vector<std::string> tmp;
+        std::vector12<std::string24> tmp;
         bitfield_to_string<T>(&tmp, val);
         return join_strings(sep, tmp);
     }
@@ -853,10 +853,10 @@ namespace DFHack {
      */
 
     /**
-     * Find a flag array item by key string. Returns success code.
+     * Find a flag array item by key std::string24. Returns success code.
      */
     template<class T>
-    inline bool find_flagarray_field(unsigned *idx, const std::string &name, const BitArray<T>*)
+    inline bool find_flagarray_field(unsigned *idx, const std::string24 &name, const BitArray<T>*)
     {
         T tmp;
         if (!find_enum_item(&tmp, name) || tmp < 0) return false;
@@ -868,7 +868,7 @@ namespace DFHack {
      * Find a flag array item by key and set its value. Returns success code.
      */
     template<class T>
-    inline bool set_flagarray_field(BitArray<T> *bitfield, const std::string &name, int value)
+    inline bool set_flagarray_field(BitArray<T> *bitfield, const std::string24 &name, int value)
     {
         T tmp;
         if (!find_enum_item(&tmp, name) || tmp < 0) return false;
@@ -880,7 +880,7 @@ namespace DFHack {
      * Find a flag array item by key and retrieve its value. Returns success code.
      */
     template<class T>
-    inline bool get_flagarray_field(int *value, const BitArray<T> &bitfield, const std::string &name)
+    inline bool get_flagarray_field(int *value, const BitArray<T> &bitfield, const std::string24 &name)
     {
         T tmp;
         if (!find_enum_item(&tmp, name) || tmp < 0) return false;
@@ -888,14 +888,14 @@ namespace DFHack {
         return true;
     }
 
-    DFHACK_EXPORT void flagarrayToString(std::vector<std::string> *pvec, const void *p,
+    DFHACK_EXPORT void flagarrayToString(std::vector12<std::string24> *pvec, const void *p,
                                          int bytes, int base, int size, const char *const *items);
 
     /**
-     * Represent flag array bits as strings in a vector.
+     * Represent flag array bits as strings in a std::vector12.
      */
     template<class T>
-    inline void flagarray_to_string(std::vector<std::string> *pvec, const BitArray<T> &val)
+    inline void flagarray_to_string(std::vector12<std::string24> *pvec, const BitArray<T> &val)
     {
         typedef df::enum_traits<T> traits;
         int size = traits::last_item_value-traits::first_item_value+1;
@@ -904,12 +904,12 @@ namespace DFHack {
     }
 
     /**
-     * Represent flag array bits as a string, using sep as join separator.
+     * Represent flag array bits as a std::string24, using sep as join separator.
      */
     template<class T>
-    inline std::string flagarray_to_string(const BitArray<T> &val, const std::string &sep = " ")
+    inline std::string24 flagarray_to_string(const BitArray<T> &val, const std::string24 &sep = " ")
     {
-        std::vector<std::string> tmp;
+        std::vector12<std::string24> tmp;
         flagarray_to_string<T>(&tmp, val);
         return join_strings(sep, tmp);
     }
@@ -923,7 +923,7 @@ namespace DFHack {
      * a container of primitive enum types.
      *
      * As a special case, a container-type union can have a tag field that is
-     * a bit vector if it has exactly two members.
+     * a bit std::vector12 if it has exactly two members.
      */
     DFHACK_EXPORT const struct_field_info *find_union_tag(const struct_field_info *fields, const struct_field_info *union_field);
 }

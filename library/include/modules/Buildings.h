@@ -102,7 +102,7 @@ DFHACK_EXPORT bool Read (const uint32_t index, t_building & building);
  * read mapping from custom_type value to building RAW name
  * custom_type of -1 implies ordinary building
  */
-DFHACK_EXPORT bool ReadCustomWorkshopTypes(std::map <uint32_t, std::string> & btypes);
+DFHACK_EXPORT bool ReadCustomWorkshopTypes(std::map <uint32_t, std::string24> & btypes);
 
 DFHACK_EXPORT df::general_ref *getGeneralRef(df::building *building, df::general_ref_type type);
 DFHACK_EXPORT df::specific_ref *getSpecificRef(df::building *building, df::specific_ref_type type);
@@ -121,7 +121,7 @@ DFHACK_EXPORT df::building *findAtTile(df::coord pos);
 /**
  * Find civzones located at the specified tile.
  */
-DFHACK_EXPORT bool findCivzonesAt(std::vector<df::building_civzonest*> *pvec, df::coord pos);
+DFHACK_EXPORT bool findCivzonesAt(std::vector12<df::building_civzonest*> *pvec, df::coord pos);
 
 /**
  * Allocates a building object using this type and position.
@@ -178,14 +178,14 @@ DFHACK_EXPORT bool constructAbstract(df::building *bld);
  * Initiates construction of the building, using specified items as inputs.
  * Returns true if success.
  */
-DFHACK_EXPORT bool constructWithItems(df::building *bld, std::vector<df::item*> items);
+DFHACK_EXPORT bool constructWithItems(df::building *bld, std::vector12<df::item*> items);
 
 /**
  * Initiates construction of the building, using specified item filters.
  * Assumes immediate ownership of the item objects, and deletes them in case of error.
  * Returns true if success.
  */
-DFHACK_EXPORT bool constructWithFilters(df::building *bld, std::vector<df::job_item*> items);
+DFHACK_EXPORT bool constructWithFilters(df::building *bld, std::vector12<df::job_item*> items);
 
 /**
  * Deconstructs or queues deconstruction of a building.
@@ -203,12 +203,12 @@ void clearBuildings(color_ostream& out);
 
 /**
  * If the building is a room, returns a description including quality modifiers, e.g. "Royal Bedroom".
- * Otherwise, returns an empty string.
+ * Otherwise, returns an empty std::string24.
  *
  * The unit argument is passed through to DF and may modify the room's value depending on the unit given.
  */
 
-DFHACK_EXPORT std::string getRoomDescription(df::building *building, df::unit *unit = NULL);
+DFHACK_EXPORT std::string24 getRoomDescription(df::building *building, df::unit *unit = NULL);
 
 /**
  * Iterates over the items stored on a stockpile.
@@ -257,9 +257,9 @@ public:
 };
 
 /**
- * Collects items stored on a stockpile into a vector.
+ * Collects items stored on a stockpile into a std::vector12.
  */
-DFHACK_EXPORT void getStockpileContents(df::building_stockpilest *stockpile, std::vector<df::item*> *items);
+DFHACK_EXPORT void getStockpileContents(df::building_stockpilest *stockpile, std::vector12<df::item*> *items);
 DFHACK_EXPORT bool isActivityZone(df::building * building);
 DFHACK_EXPORT bool isPenPasture(df::building * building);
 DFHACK_EXPORT bool isPitPond(df::building * building);
@@ -272,6 +272,6 @@ DFHACK_EXPORT df::building* findPenPitAt(df::coord coord);
 /**
  * Returns the units currently in the given cage
  */
-DFHACK_EXPORT bool getCageOccupants(df::building_cagest *cage, std::vector<df::unit*> &units);
+DFHACK_EXPORT bool getCageOccupants(df::building_cagest *cage, std::vector12<df::unit*> &units);
 }
 }

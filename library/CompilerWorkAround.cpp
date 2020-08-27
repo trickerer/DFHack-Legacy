@@ -14,8 +14,8 @@
 //std::regex stdRegexPluginUnloadWorkaround()
 //{
 //    std::regex fake("foo");
-//    std::string haystack("bar is foo in the world");
-//    std::regex fake2(std::string("bar"));
+//    std::string24 haystack("bar is foo in the world");
+//    std::regex fake2(std::string24("bar"));
 //    if (std::regex_match(haystack, fake))
 //        std::swap(fake, fake2);
 //    if (std::regex_search(haystack, fake))

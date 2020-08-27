@@ -147,24 +147,24 @@ enum _filetype {
 
 namespace DFHack {
     namespace Filesystem {
-        DFHACK_EXPORT bool chdir (std::string path);
-        DFHACK_EXPORT std::string getcwd ();
-        DFHACK_EXPORT bool mkdir (std::string path);
+        DFHACK_EXPORT bool chdir (std::string24 path);
+        DFHACK_EXPORT std::string24 getcwd ();
+        DFHACK_EXPORT bool mkdir (std::string24 path);
         // returns true on success or if directory already exists
-        DFHACK_EXPORT bool mkdir_recursive (std::string path);
-        DFHACK_EXPORT bool rmdir (std::string path);
-        DFHACK_EXPORT bool stat (std::string path, STAT_STRUCT &info);
-        DFHACK_EXPORT bool exists (std::string path);
-        DFHACK_EXPORT _filetype filetype (std::string path);
-        DFHACK_EXPORT bool isfile (std::string path);
-        DFHACK_EXPORT bool isdir (std::string path);
-        DFHACK_EXPORT int64_t atime (std::string path);
-        DFHACK_EXPORT int64_t ctime (std::string path);
-        DFHACK_EXPORT int64_t mtime (std::string path);
-        DFHACK_EXPORT int listdir (std::string dir, std::vector<std::string> &files);
+        DFHACK_EXPORT bool mkdir_recursive (std::string24 path);
+        DFHACK_EXPORT bool rmdir (std::string24 path);
+        DFHACK_EXPORT bool stat (std::string24 path, STAT_STRUCT &info);
+        DFHACK_EXPORT bool exists (std::string24 path);
+        DFHACK_EXPORT _filetype filetype (std::string24 path);
+        DFHACK_EXPORT bool isfile (std::string24 path);
+        DFHACK_EXPORT bool isdir (std::string24 path);
+        DFHACK_EXPORT int64_t atime (std::string24 path);
+        DFHACK_EXPORT int64_t ctime (std::string24 path);
+        DFHACK_EXPORT int64_t mtime (std::string24 path);
+        DFHACK_EXPORT int listdir (std::string24 dir, std::vector12<std::string24> &files);
         // set include_prefix to false to prevent dir from being prepended to
         // paths returned in files
-        DFHACK_EXPORT int listdir_recursive (std::string dir, std::map<std::string, bool> &files,
+        DFHACK_EXPORT int listdir_recursive (std::string24 dir, std::map<std::string24, bool> &files,
             int depth = 10, bool include_prefix = true);
     }
 }

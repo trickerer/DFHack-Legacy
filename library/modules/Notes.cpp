@@ -49,5 +49,5 @@ Module* DFHack::createNotes()
 // FIXME: not even a wrapper now
 Notes::Notes()
 {
-    notes = (std::vector<t_note*>*) &df::global::ui->waypoints.points;
+    notes = (std::vector12<t_note*>*) &df::global::ui->waypoints.points;
 }

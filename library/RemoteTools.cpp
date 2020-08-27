@@ -93,7 +93,7 @@ using namespace dfproto;
 
 using google::protobuf::MessageLite;
 
-void DFHack::strVectorToRepeatedField(RepeatedPtrField<std::string> *pf, const std::vector<std::string> &vec)
+void DFHack::strVectorToRepeatedField(RepeatedPtrField<std::string24> *pf, const std::vector12<std::string24> &vec)
 {
     for (size_t i = 0; i < vec.size(); ++i)
         *pf->Add() = vec[i];
@@ -137,13 +137,13 @@ void DFHack::describeBitfield(RepeatedPtrField<EnumItemName> *pf, int size, cons
 
 void DFHack::describeMaterial(BasicMaterialInfo *info, df::material *mat, const BasicMaterialInfoMask *mask)
 {
-    info->set_token(mat->id);
+    info->set_token(mat->id.c_str());
 
     if (mask && mask->flags())
         flagarray_to_ints(info->mutable_flags(), mat->flags);
 
     if (!mat->prefix.empty())
-        info->set_name_prefix(mat->prefix);
+        info->set_name_prefix(mat->prefix.c_str());
 
     if (!mask || mask->states_size() == 0)
     {
@@ -156,28 +156,28 @@ void DFHack::describeMaterial(BasicMaterialInfo *info, df::material *mat, const 
             state = matter_state::Gas;
 
         info->add_state_color(mat->state_color[state]);
-        info->add_state_name(mat->state_name[state]);
-        info->add_state_adj(mat->state_adj[state]);
+        info->add_state_name(mat->state_name[state].c_str());
+        info->add_state_adj(mat->state_adj[state].c_str());
     }
     else
     {
         for (int i = 0; i < mask->states_size(); i++)
         {
             info->add_state_color(mat->state_color[i]);
-            info->add_state_name(mat->state_name[i]);
-            info->add_state_adj(mat->state_adj[i]);
+            info->add_state_name(mat->state_name[i].c_str());
+            info->add_state_adj(mat->state_adj[i].c_str());
         }
     }
 
     if (mask && mask->reaction())
     {
         for (size_t i = 0; i < mat->reaction_class.size(); i++)
-            info->add_reaction_class(*mat->reaction_class[i]);
+            info->add_reaction_class((*mat->reaction_class[i]).c_str());
 
         for (size_t i = 0; i < mat->reaction_product.id.size(); i++)
         {
             BasicMaterialInfo_Product* ptr = info->add_reaction_product();
-            ptr->set_id(*mat->reaction_product.id[i]);
+            ptr->set_id((*mat->reaction_product.id[i]).c_str());
             ptr->set_type(mat->reaction_product.material.mat_type[i]);
             ptr->set_index(mat->reaction_product.material.mat_index[i]);
         }
@@ -195,7 +195,7 @@ void DFHack::describeMaterial(BasicMaterialInfo *info, const MaterialInfo &mat, 
 
     switch (mat.mode) {
     case MaterialInfo::Inorganic:
-        info->set_token(mat.inorganic->id);
+        info->set_token(mat.inorganic->id.c_str());
         if (mask && mask->flags())
             flagarray_to_ints(info->mutable_inorganic_flags(), mat.inorganic->flags);
         break;
@@ -223,29 +223,29 @@ void DFHack::describeMaterial(BasicMaterialInfo *info, const MaterialInfo &mat, 
 void DFHack::describeName(NameInfo *info, df::language_name *name)
 {
     if (!name->first_name.empty())
-        info->set_first_name(DF2UTF(name->first_name));
+        info->set_first_name(DF2UTF(name->first_name).c_str());
     if (!name->nickname.empty())
-        info->set_nickname(DF2UTF(name->nickname));
+        info->set_nickname(DF2UTF(name->nickname).c_str());
 
     if (name->language >= 0)
         info->set_language_id(name->language);
 
-    std::string lname = Translation::TranslateName(name, false, true);
+    std::string24 lname = Translation::TranslateName(name, false, true);
     if (!lname.empty())
-        info->set_last_name(DF2UTF(lname));
+        info->set_last_name(DF2UTF(lname).c_str());
 
     lname = Translation::TranslateName(name, true, true);
     if (!lname.empty())
-        info->set_english_name(DF2UTF(lname));
+        info->set_english_name(DF2UTF(lname).c_str());
 }
 
-void DFHack::describeNameTriple(NameTriple *info, const std::string &name, const std::string &plural, const std::string &adj)
+void DFHack::describeNameTriple(NameTriple *info, const std::string24 &name, const std::string24 &plural, const std::string24 &adj)
 {
-    info->set_normal(DF2UTF(name));
+    info->set_normal(DF2UTF(name).c_str());
     if (!plural.empty() && plural != name)
-        info->set_plural(DF2UTF(plural));
+        info->set_plural(DF2UTF(plural).c_str());
     if (!adj.empty() && adj != name)
-        info->set_adjective(DF2UTF(adj));
+        info->set_adjective(DF2UTF(adj).c_str());
 }
 
 void DFHack::describeUnit(BasicUnitInfo *info, df::unit *unit, const BasicUnitInfoMask *mask)
@@ -286,7 +286,7 @@ void DFHack::describeUnit(BasicUnitInfo *info, df::unit *unit, const BasicUnitIn
         if (unit->profession >= (df::profession)0)
             info->set_profession(unit->profession);
         if (!unit->custom_profession.empty())
-            info->set_custom_profession(unit->custom_profession);
+            info->set_custom_profession(unit->custom_profession.c_str());
 
         if (unit->military.squad_id >= 0)
         {
@@ -304,7 +304,7 @@ void DFHack::describeUnit(BasicUnitInfo *info, df::unit *unit, const BasicUnitIn
 
     if (mask && mask->skills() && unit->status.current_soul)
     {
-        std::vector<df::unit_skill*> &vec = unit->status.current_soul->skills;
+        std::vector12<df::unit_skill*> &vec = unit->status.current_soul->skills;
 
         for (size_t i = 0; i < vec.size(); i++)
         {
@@ -318,7 +318,7 @@ void DFHack::describeUnit(BasicUnitInfo *info, df::unit *unit, const BasicUnitIn
 
     if (mask && mask->misc_traits())
     {
-        std::vector<df::unit_misc_trait*> &vec = unit -> status.misc_traits;
+        std::vector12<df::unit_misc_trait*> &vec = unit -> status.misc_traits;
 
         for (size_t i = 0; i < vec.size(); i++)
         {
@@ -361,7 +361,7 @@ static command_result GetVersion(color_ostream &stream,
 static command_result GetDFVersion(color_ostream &stream,
                                    const EmptyMessage *, StringMessage *out)
 {
-    out->set_value(Core::getInstance().vinfo->getVersion());
+    out->set_value(Core::getInstance().vinfo->getVersion().c_str());
     return CR_OK;
 }
 
@@ -379,7 +379,7 @@ static command_result GetWorldInfo(color_ostream &stream,
     if (df::global::gametype)
         gt = *df::global::gametype;
 
-    out->set_save_dir(world->cur_savegame.save_dir);
+    out->set_save_dir(world->cur_savegame.save_dir.c_str());
 
     if (world->world_data->name.has_name)
         describeName(out->mutable_world_name(), &world->world_data->name);
@@ -468,12 +468,12 @@ static command_result ListJobSkills(color_ostream &stream, const EmptyMessage *,
         JobSkillAttr* item = pf_skill->Add();
 
         item->set_id(skill);
-        item->set_key(ENUM_KEY_STR_SIMPLE(job_skill, skill));
+        item->set_key(ENUM_KEY_STR_SIMPLE(job_skill, skill).c_str());
         item->set_caption(ENUM_ATTR_STR(job_skill, caption, skill));
         item->set_caption_noun(ENUM_ATTR_STR(job_skill, caption_noun, skill));
         item->set_profession(ENUM_ATTR(job_skill, profession, skill));
         item->set_labor(ENUM_ATTR(job_skill, labor, skill));
-        item->set_type(ENUM_KEY_STR_SIMPLE(job_skill_class, ENUM_ATTR(job_skill, type, skill)));
+        item->set_type(ENUM_KEY_STR_SIMPLE(job_skill_class, ENUM_ATTR(job_skill, type, skill)).c_str());
     }
 
     RepeatedPtrField<ProfessionAttr> * pf_profession = out->mutable_profession();
@@ -482,7 +482,7 @@ static command_result ListJobSkills(color_ostream &stream, const EmptyMessage *,
         ProfessionAttr* item = pf_profession->Add();
 
         item->set_id(p);
-        item->set_key(ENUM_KEY_STR_SIMPLE(profession, p));
+        item->set_key(ENUM_KEY_STR_SIMPLE(profession, p).c_str());
         item->set_caption(ENUM_ATTR_STR(profession, caption, p));
         item->set_military(ENUM_ATTR(profession, military, p));
         item->set_can_assign_labor(ENUM_ATTR(profession, can_assign_labor, p));
@@ -495,7 +495,7 @@ static command_result ListJobSkills(color_ostream &stream, const EmptyMessage *,
         UnitLaborAttr* item = pf_labor->Add();
 
         item->set_id(labor);
-        item->set_key(ENUM_KEY_STR_SIMPLE(unit_labor, labor));
+        item->set_key(ENUM_KEY_STR_SIMPLE(unit_labor, labor).c_str());
         item->set_caption(ENUM_ATTR_STR(unit_labor, caption, labor));
     }
 
@@ -527,14 +527,14 @@ static command_result ListMaterials(color_ostream &stream, const ListMaterialsIn
 
     if (in->inorganic())
     {
-        std::vector<df::inorganic_raw*> &vec = df::inorganic_raw::get_vector();
+        std::vector12<df::inorganic_raw*> &vec = df::inorganic_raw::get_vector();
         for (size_t i = 0; i < vec.size(); i++)
             listMaterial(out, 0, i, mask);
     }
 
     if (in->creatures())
     {
-        std::vector<df::creature_raw*> &vec = df::creature_raw::get_vector();
+        std::vector12<df::creature_raw*> &vec = df::creature_raw::get_vector();
         for (size_t i = 0; i < vec.size(); i++)
         {
             df::creature_raw* praw = vec[i];
@@ -546,7 +546,7 @@ static command_result ListMaterials(color_ostream &stream, const ListMaterialsIn
 
     if (in->plants())
     {
-        std::vector<df::plant_raw*> &vec = df::plant_raw::get_vector();
+        std::vector12<df::plant_raw*> &vec = df::plant_raw::get_vector();
         for (size_t i = 0; i < vec.size(); i++)
         {
             df::plant_raw* praw = vec[i];
@@ -575,7 +575,7 @@ static command_result ListUnits(color_ostream &stream, const ListUnitsIn *in, Li
 
     if (in->scan_all())
     {
-        std::vector<df::unit*> &vec = df::unit::get_vector();
+        std::vector12<df::unit*> &vec = df::unit::get_vector();
 
         for (size_t i = 0; i < vec.size(); i++)
         {
@@ -619,7 +619,7 @@ static command_result ListSquads(color_ostream &stream, const ListSquadsIn *in, 
         if (squad->name.has_name)
             describeName(item->mutable_name(), &squad->name);
         if (!squad->alias.empty())
-            item->set_alias(squad->alias);
+            item->set_alias(squad->alias.c_str());
 
         for (size_t j = 0; j < squad->positions.size(); j++)
             item->add_members(squad->positions[j]->occupant);
@@ -679,7 +679,7 @@ command_result CoreService::BindMethod(color_ostream &stream,
                                        const dfproto::CoreBindRequest *in,
                                        dfproto::CoreBindReply *out)
 {
-    ServerFunctionBase *fn = connection()->findFunction(stream, in->plugin(), in->method());
+    ServerFunctionBase *fn = connection()->findFunction(stream, in->plugin().c_str(), in->method().c_str());
 
     if (!fn)
     {
@@ -703,10 +703,10 @@ command_result CoreService::BindMethod(color_ostream &stream,
 command_result CoreService::RunCommand(color_ostream &stream,
                                        const dfproto::CoreRunCommandRequest *in)
 {
-    std::string cmd = in->command();
-    std::vector<std::string> args;
+    std::string24 cmd = in->command().c_str();
+    std::vector12<std::string24> args;
     for (int i = 0; i < in->arguments_size(); i++)
-        args.push_back(in->arguments(i));
+        args.push_back(in->arguments(i).c_str());
 
     return Core::getInstance().runCommand(stream, cmd, args);
 }
@@ -762,7 +762,7 @@ int CoreService::doRunLuaFunction(lua_State *L)
     LuaFunctionData &args = *(LuaFunctionData*)lua_touserdata(L, 1);
 
     // Verify module name
-    std::string module = args.in->module();
+    std::string24 module = args.in->module().c_str();
     size_t len = module.size();
 
     bool valid = false;

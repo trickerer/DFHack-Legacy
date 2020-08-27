@@ -193,7 +193,7 @@ namespace Windows
         unsigned int height;
     protected:
         df_window * parent;
-        std::vector <df_window *> children;
+        std::vector12<df_window *> children;
         int left;
         int top;
         // FIXME: FAKE

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef _COMMON_H_
+#define _COMMON_H_
+
 #include "vector12.h"       //std::vector12<T>
 #include "bvector12.h"      //std::vector12<bool>
 #include "string24.h"       //std::string24
@@ -29,3 +32,11 @@ typedef uint64              uint64_t;
 // print helpers
 #define INT64FMT "%I64d"
 #define UINT64FMT "%I64u"
+
+// placeholders
+struct fstream_empty
+{
+    char empty[144];
+};
+
+#endif // _COMMON_H_

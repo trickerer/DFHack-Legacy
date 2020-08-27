@@ -468,7 +468,8 @@ static const char *const primitive_types[] = {
     NULL
 };
 static type_identity *const primitive_identities[] = {
-    df::identity_traits<std::string>::get(),
+    //df::identity_traits<std::string>::get(),
+    df::identity_traits<std::string24>::get(),
     df::identity_traits<const char*>::get(),
     df::identity_traits<char>::get(),
     df::identity_traits<int8_t>::get(), df::identity_traits<uint8_t>::get(),
@@ -480,8 +481,10 @@ static type_identity *const primitive_identities[] = {
     df::identity_traits<bool>::get(),
     df::identity_traits<float>::get(), df::identity_traits<double>::get(),
     df::identity_traits<void*>::get(),
-    df::identity_traits<std::vector<void*> >::get(),
-    df::identity_traits<std::vector<bool> >::get(),
+    //df::identity_traits<std::vector<void*> >::get(),
+    df::identity_traits<std::vector12<void*> >::get(),
+    //df::identity_traits<std::vector<bool> >::get(),
+    df::identity_traits<std::vector12<bool> >::get(),
     df::identity_traits<BitArray<int> >::get(),
     NULL
 };
@@ -981,7 +984,7 @@ uint8_t *LuaWrapper::get_object_addr(lua_State *state, int obj, int field, const
 }
 
 /**
- * Metamethod: represent a type node as string.
+ * Metamethod: represent a type node as std::string24.
  */
 static int meta_type_tostring(lua_State *state)
 {
@@ -996,7 +999,7 @@ static int meta_type_tostring(lua_State *state)
 }
 
 /**
- * Metamethod: represent a DF object reference as string.
+ * Metamethod: represent a DF object reference as std::string24.
  */
 static int meta_ptr_tostring(lua_State *state)
 {
@@ -1038,7 +1041,7 @@ static int meta_enum_attr_index(lua_State *state)
     int64_t idx = lua_tonumber(state, 2);
     if (complex)
     {
-        ValueIndexMap::const_iterator it = complex->value_index_map.find(idx);
+        std::map<int64_t, size_t>::const_iterator it = complex->value_index_map.find(idx);
         if (it != complex->value_index_map.end())
             idx = int64_t(it->second);
         else
@@ -1138,7 +1141,7 @@ void LuaWrapper::MakeMetatable(lua_State *state, type_identity *type, const char
     LookupInTable(state, type, &DFHACK_TYPEID_TABLE_TOKEN);
     if (lua_isnil(state, -1))
     {
-        // Copy the string from __metatable if no real type
+        // Copy the std::string24 from __metatable if no real type
         lua_pop(state, 1);
         lua_getfield(state, base+1, "__metatable");
     }
@@ -1380,7 +1383,7 @@ static int wtype_next_item(lua_State *state)
 static bool complex_enum_next_item_helper(lua_State *L, int64_t &item, bool wrap = false)
 {
     const enum_identity::ComplexData* complex = (enum_identity::ComplexData*)lua_touserdata(L, lua_upvalueindex(2));
-    ValueIndexMap::const_iterator it = complex->value_index_map.find(item);
+    std::map<int64_t, size_t>::const_iterator it = complex->value_index_map.find(item);
     if (it != complex->value_index_map.end())
     {
         size_t index = it->second;
@@ -1431,7 +1434,7 @@ static int complex_enum_ipairs(lua_State *L)
 }
 
 
-static void RenderTypeChildren(lua_State *state, const std::vector<compound_identity*> &children);
+static void RenderTypeChildren(lua_State *state, const std::vector12<compound_identity*> &children);
 
 void LuaWrapper::AssociateId(lua_State *state, int table, int val, const char *name)
 {
@@ -1576,7 +1579,7 @@ static void FillBitfieldKeys(lua_State *state, int ix_meta, int ftable, bitfield
 static void RenderType(lua_State *state, compound_identity *node)
 {
     assert(node->getName());
-    std::string name = node->getFullName();
+    std::string24 name = node->getFullName();
 
     // Frame:
     //   base+1 - outer table
@@ -1694,7 +1697,7 @@ static void RenderType(lua_State *state, compound_identity *node)
     base += 1;
 }
 
-static void RenderTypeChildren(lua_State *state, const std::vector<compound_identity*> &children)
+static void RenderTypeChildren(lua_State *state, const std::vector12<compound_identity*> &children)
 {
     // fieldtable pairstable |
     int base = lua_gettop(state);

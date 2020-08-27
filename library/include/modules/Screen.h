@@ -196,14 +196,14 @@ namespace DFHack
         /// Retrieves one screen tile from the buffer
         DFHACK_EXPORT Pen readTile(int x, int y, bool map = false);
 
-        /// Paint a string onto the screen. Ignores ch and tile of pen.
-        DFHACK_EXPORT bool paintString(const Pen &pen, int x, int y, const std::string &text, bool map = false);
+        /// Paint a std::string24 onto the screen. Ignores ch and tile of pen.
+        DFHACK_EXPORT bool paintString(const Pen &pen, int x, int y, const std::string24 &text, bool map = false);
 
         /// Fills a rectangle with one pen. Possibly more efficient than a loop over paintTile.
         DFHACK_EXPORT bool fillRect(const Pen &pen, int x1, int y1, int x2, int y2, bool map = false);
 
-        /// Draws a standard dark gray window border with a title string
-        DFHACK_EXPORT bool drawBorder(const std::string &title);
+        /// Draws a standard dark gray window border with a title std::string24
+        DFHACK_EXPORT bool drawBorder(const std::string24 &title);
 
         /// Wipes the screen to full black
         DFHACK_EXPORT bool clear();
@@ -212,7 +212,7 @@ namespace DFHack
         DFHACK_EXPORT bool invalidate();
 
         /// Find a loaded graphics tile from graphics raws.
-        DFHACK_EXPORT bool findGraphicsTile(const std::string &page, int x, int y, int *ptile, int *pgs = NULL);
+        DFHACK_EXPORT bool findGraphicsTile(const std::string24 &page, int x, int y, int *ptile, int *pgs = NULL);
 
         // Push and remove viewscreens
         DFHACK_EXPORT bool show(df::viewscreen* screen, df::viewscreen *before = NULL, Plugin *p = NULL, bool selfclean = true);
@@ -222,8 +222,8 @@ namespace DFHack
         DFHACK_EXPORT bool isDismissed(df::viewscreen *screen);
         DFHACK_EXPORT bool hasActiveScreens(Plugin *p);
 
-        /// Retrieve the string representation of the bound key.
-        DFHACK_EXPORT std::string getKeyDisplay(df::interface_key key);
+        /// Retrieve the std::string24 representation of the bound key.
+        DFHACK_EXPORT std::string24 getKeyDisplay(df::interface_key key);
 
         /// Return the character represented by this key, or -1
         DFHACK_EXPORT int keyToChar(df::interface_key key);
@@ -286,11 +286,11 @@ namespace DFHack
             Painter &tile(char ch, bool map = false) { return tile(cur_pen.chtile(ch), map); }
             Painter &tile(char ch, int tileid, bool map = false) { return tile(cur_pen.chtile(ch, tileid), map); }
 
-            Painter &string(const std::string &str, const Pen &pen, bool map = false) {
+            Painter &string(const std::string24 &str, const Pen &pen, bool map = false) {
                 do_paint_string(str, pen, map); return advance(str.size());
             }
-            Painter &string(const std::string &str, bool map = false) { return string(str, cur_pen, map); }
-            Painter &string(const std::string &str, int8_t fg, bool map = false) { return string(str, cur_pen.color(fg), map); }
+            Painter &string(const std::string24 &str, bool map = false) { return string(str, cur_pen, map); }
+            Painter &string(const std::string24 &str, int8_t fg, bool map = false) { return string(str, cur_pen.color(fg), map); }
 
             Painter &key(df::interface_key kc, const Pen &pen, bool map = false) {
                 return string(getKeyDisplay(kc), pen, map);
@@ -298,7 +298,7 @@ namespace DFHack
             Painter &key(df::interface_key kc, bool map = false) { return key(kc, cur_key_pen, map); }
 
         private:
-            void do_paint_string(const std::string &str, const Pen &pen, bool map = false);
+            void do_paint_string(const std::string24 &str, const Pen &pen, bool map = false);
         };
 
         namespace Hooks {
@@ -339,7 +339,7 @@ namespace DFHack
 
         virtual bool is_lua_screen() { return false; }
 
-        virtual std::string getFocusString() = 0;
+        virtual std::string24 getFocusString() = 0;
         virtual void onShow() {};
         virtual void onDismiss() {};
         virtual df::unit *getSelectedUnit() { return NULL; }
@@ -352,7 +352,7 @@ namespace DFHack
     };
 
     class DFHACK_EXPORT dfhack_lua_viewscreen : public dfhack_viewscreen {
-        std::string focus;
+        std::string24 focus;
 
         void update_focus(lua_State *L, int idx);
 
@@ -372,7 +372,7 @@ namespace DFHack
         static df::viewscreen *get_pointer(lua_State *L, int idx, bool make);
 
         virtual bool is_lua_screen() { return true; }
-        virtual std::string getFocusString() { return focus; }
+        virtual std::string24 getFocusString() { return focus; }
 
         virtual void render();
         virtual void logic();

@@ -62,7 +62,7 @@ bool color_ostream::log_errors_to_stderr = false;
 void color_ostream::flush_buffer(bool flush)
 {
     buffer* buffer = buf();
-    std::string str = buffer->str();
+    std::string24 str = buffer->str().c_str();
 
     if (!str.empty()) {
         add_text(cur_color, str);
@@ -99,11 +99,19 @@ void color_ostream::print(const char *format, ...)
     va_start(args, format);
     vprint(format, args);
     va_end(args);
+
+    //char str[1024];
+    //va_list args;
+    //va_start(args, format);
+    //vsnprintf(str, 1024, format, args);
+    //va_end(args);
+
+    //*this << str;
 }
 
 void color_ostream::vprint(const char *format, va_list args)
 {
-    std::string str = stl_vsprintf(format, args);
+    std::string24 str = stl_vsprintf(format, args);
 
     if (!str.empty()) {
         flush_buffer(false);
@@ -157,9 +165,9 @@ void color_ostream::reset_color(void)
     color(COLOR_RESET);
 }
 
-void color_ostream_wrapper::add_text(color_value, const std::string &text)
+void color_ostream_wrapper::add_text(color_value, const std::string24 &text)
 {
-    out << text;
+    out << text.c_str();
 }
 
 void color_ostream_wrapper::flush_proxy()
@@ -167,7 +175,7 @@ void color_ostream_wrapper::flush_proxy()
     out << std::flush;
 }
 
-void buffered_color_ostream::add_text(color_value color, const std::string &text)
+void buffered_color_ostream::add_text(color_value color, const std::string24 &text)
 {
     if (text.empty())
         return;

@@ -112,13 +112,13 @@ RPCService::~RPCService()
         delete functions[i];
 }
 
-ServerFunctionBase *RPCService::getFunction(const std::string &name)
+ServerFunctionBase *RPCService::getFunction(const std::string24 &name)
 {
     assert(owner);
     return lookup[name];
 }
 
-void RPCService::finalize(ServerConnection *owner, std::vector<ServerFunctionBase*> *ftable)
+void RPCService::finalize(ServerConnection *owner, std::vector12<ServerFunctionBase*> *ftable)
 {
     this->owner = owner;
 
@@ -136,7 +136,7 @@ void RPCService::finalize(ServerConnection *owner, std::vector<ServerFunctionBas
 void RPCService::dumpMethods(std::ostream & out) const
 {
     //for (auto fn : functions)
-    for (std::vector<ServerFunctionBase*>::const_iterator it = functions.begin(); it != functions.end(); ++it)
+    for (std::vector12<ServerFunctionBase*>::const_iterator it = functions.begin(); it != functions.end(); ++it)
     {
         ServerFunctionBase* fn = *it;
         std::string in_name = fn->p_in_template->GetTypeName();
@@ -168,13 +168,13 @@ ServerConnection::~ServerConnection()
     socket->Close();
     delete socket;
 
-    for (std::map<std::string, RPCService*>::const_iterator it = plugin_services.begin(); it != plugin_services.end(); ++it)
+    for (std::map<std::string24, RPCService*>::const_iterator it = plugin_services.begin(); it != plugin_services.end(); ++it)
         delete it->second;
 
     delete core_service;
 }
 
-ServerFunctionBase *ServerConnection::findFunction(color_ostream &out, const std::string &plugin, const std::string &name)
+ServerFunctionBase *ServerConnection::findFunction(color_ostream &out, const std::string24 &plugin, const std::string24 &name)
 {
     RPCService *svc;
 
@@ -224,7 +224,7 @@ void ServerConnection::connection_ostream::flush_proxy()
     for (std::list<fragment_type>::const_iterator it = buffer.begin(); it != buffer.end(); ++it)
     {
         CoreTextFragment* frag = msg.add_fragments();
-        frag->set_text(it->second);
+        frag->set_text(it->second.c_str());
         if (it->first >= 0)
             frag->set_color(CoreTextFragment::Color(it->first));
     }
@@ -430,7 +430,7 @@ void ServerConnection::threadFn()
 //{
 //    socket.Initialize();
 //
-//    std::string filename("dfhack-config/remote-server.json");
+//    std::string24 filename("dfhack-config/remote-server.json");
 //
 //    Json::Value configJson;
 //

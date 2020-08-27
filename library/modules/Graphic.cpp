@@ -57,7 +57,7 @@ bool Graphic::Unregister(DFTileSurface* (*func)(int,int))
 {
     if ( funcs.empty() ) return false;
 
-    vector<DFTileSurface* (*)(int,int)>::iterator it = funcs.begin();
+    std::vector12<DFTileSurface* (*)(int,int)>::iterator it = funcs.begin();
     while ( it != funcs.end() )
     {
         if ( *it == func )
@@ -78,7 +78,7 @@ DFTileSurface* Graphic::Call(int x, int y)
 
     DFTileSurface* temp = NULL;
 
-    vector<DFTileSurface* (*)(int,int)>::iterator it = funcs.begin();
+    std::vector12<DFTileSurface* (*)(int,int)>::iterator it = funcs.begin();
     while ( it != funcs.end() )
     {
         temp = (*it)(x,y);

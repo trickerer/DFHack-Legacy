@@ -39,14 +39,14 @@ namespace DFHack
         public:
             VersionInfoFactory();
             ~VersionInfoFactory();
-            bool loadFile( std::string path_to_xml);
+            bool loadFile( std::string24 path_to_xml);
             bool isInErrorState() const {return error;};
-            VersionInfo const* getVersionInfoByMD5(std::string md5string) const;
+            VersionInfo const* getVersionInfoByMD5(std::string24 md5string) const;
             VersionInfo const* getVersionInfoByPETimestamp(uintptr_t timestamp) const;
             // trash existing list
             void clear();
         private:
-            std::vector<VersionInfo const*> versions;
+            std::vector12<VersionInfo const*> versions;
             void ParseVersion (TiXmlElement* version, VersionInfo* mem);
             bool error;
     };

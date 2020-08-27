@@ -101,7 +101,7 @@ struct t_feature
     df::feature_type type;
     /// main material type - decides between stuff like bodily fluids, inorganics, vomit, amber, etc.
     int16_t main_material;
-    /// generally some index to a vector of material types.
+    /// generally some index to a std::vector12 of material types.
     int32_t sub_material;
     /// placeholder
     bool discovered;
@@ -209,7 +209,7 @@ extern DFHACK_EXPORT bool IsValid();
  *
  * First get the stuff from ReadGeology and then for each block get the RegionOffsets.
  * For each tile get the real region from RegionOffsets and cross-reference it with
- * the geology stuff (region -- array of vectors, depth -- vector).
+ * the geology stuff (region -- array of vectors, depth -- std::vector12).
  * I'm thinking about turning that Geology stuff into a two-dimensional array
  * with static size.
  *
@@ -233,8 +233,8 @@ void DfMap::applyGeoMatgloss(Block * b)
 
  * @endcode
  */
-extern DFHACK_EXPORT bool ReadGeology(std::vector<std::vector<int16_t> > *layer_mats,
-                                      std::vector<df::coord2d> *geoidx);
+extern DFHACK_EXPORT bool ReadGeology(std::vector12<std::vector12<int16_t> > *layer_mats,
+                                      std::vector12<df::coord2d> *geoidx);
 /**
  * Get pointers to features of a block
  */
@@ -322,17 +322,17 @@ DFHACK_EXPORT void enableBlockUpdates(df::map_block *blk, bool flow = false, boo
 
 DFHACK_EXPORT df::flow_info *spawnFlow(df::coord pos, df::flow_type type, int mat_type = 0, int mat_index = -1, int density = 100);
 
-/// sorts the block event vector into multiple vectors by type
+/// sorts the block event std::vector12 into multiple vectors by type
 /// mineral veins, what's under ice, blood smears and mud
 extern DFHACK_EXPORT bool SortBlockEvents(df::map_block *block,
-    std::vector<df::block_square_event_mineralst *>* veins,
-    std::vector<df::block_square_event_frozen_liquidst *>* ices = 0,
-    std::vector<df::block_square_event_material_spatterst *>* materials = 0,
-    std::vector<df::block_square_event_grassst *>* grass = 0,
-    std::vector<df::block_square_event_world_constructionst *>* constructions = 0,
-    std::vector<df::block_square_event_spoorst *>* spoors = 0,
-    std::vector<df::block_square_event_item_spatterst *>* items = 0,
-    std::vector<df::block_square_event_designation_priorityst *>* priorities = 0
+    std::vector12<df::block_square_event_mineralst *>* veins,
+    std::vector12<df::block_square_event_frozen_liquidst *>* ices = 0,
+    std::vector12<df::block_square_event_material_spatterst *>* materials = 0,
+    std::vector12<df::block_square_event_grassst *>* grass = 0,
+    std::vector12<df::block_square_event_world_constructionst *>* constructions = 0,
+    std::vector12<df::block_square_event_spoorst *>* spoors = 0,
+    std::vector12<df::block_square_event_item_spatterst *>* items = 0,
+    std::vector12<df::block_square_event_designation_priorityst *>* priorities = 0
 );
 
 /// remove a block event from the block by address

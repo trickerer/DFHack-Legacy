@@ -97,7 +97,7 @@ df::unit *Units::getUnit (const int32_t index)
 }
 
 // returns index of creature actually read or -1 if no creature can be found
-bool Units::getUnitsInBox (std::vector<df::unit*> &units,
+bool Units::getUnitsInBox (std::vector12<df::unit*> &units,
     int16_t x1, int16_t y1, int16_t z1,
     int16_t x2, int16_t y2, int16_t z2)
 {
@@ -110,7 +110,7 @@ bool Units::getUnitsInBox (std::vector<df::unit*> &units,
 
     units.clear();
     //for (df::unit *u : world->units.all)
-    for (std::vector<df::unit*>::iterator it = world->units.all.begin(); it != world->units.all.end(); ++it)
+    for (std::vector12<df::unit*>::iterator it = world->units.all.begin(); it != world->units.all.end(); ++it)
     {
         df::unit *u = *it;
         if (u->pos.x >= x1 && u->pos.x <= x2)
@@ -184,7 +184,7 @@ df::identity *Units::getIdentity(df::unit *unit)
     return getFigureIdentity(figure);
 }
 
-void Units::setNickname(df::unit *unit, std::string nick)
+void Units::setNickname(df::unit *unit, std::string24 nick)
 {
     CHECK_NULL_POINTER(unit);
 
@@ -377,7 +377,7 @@ df::unit_misc_trait *Units::getMiscTrait(df::unit *unit, df::misc_trait_type typ
 {
     CHECK_NULL_POINTER(unit);
 
-    std::vector<df::unit_misc_trait*> &vec = unit->status.misc_traits;
+    std::vector12<df::unit_misc_trait*> &vec = unit->status.misc_traits;
     for (size_t i = 0; i < vec.size(); i++)
         if (vec[i]->id == type)
             return vec[i];
@@ -489,7 +489,7 @@ bool Units::isHunter(df::unit* unit)
 bool Units::isAvailableForAdoption(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
-    std::vector<df::specific_ref*> &refs = unit->specific_refs;
+    std::vector12<df::specific_ref*> &refs = unit->specific_refs;
     for(size_t i=0; i<refs.size(); i++)
     {
         df::specific_ref* ref = refs[i];
@@ -543,26 +543,26 @@ bool Units::isVisible(df::unit* unit)
 }
 
 // get race name by id or unit pointer
-string Units::getRaceNameById(int32_t id)
+string24 Units::getRaceNameById(int32_t id)
 {
     df::creature_raw *raw = world->raws.creatures.all[id];
     if (raw)
-        return raw->creature_id;
+        return raw->creature_id.c_str();
     return "";
 }
-string Units::getRaceName(df::unit* unit)
+string24 Units::getRaceName(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
     return getRaceNameById(unit->race);
 }
 
-void df_unit_get_physical_description(df::unit* unit, string* out_str)
+void df_unit_get_physical_description(df::unit* unit, std::string24* out_str)
 {
-    static void(THISCALL * const fn)(df::unit*, string*) =
-        reinterpret_cast<void(THISCALL *)(df::unit*, string*)>
+    static void(THISCALL * const fn)(df::unit*, std::string24*) =
+        reinterpret_cast<void(THISCALL *)(df::unit*, std::string24*)>
         (Core::getInstance().vinfo->getAddress("unit_get_physical_description"));
 
-    //static auto* const fn = reinterpret_cast<void(THISCALL *)(df::unit*, string*)>(
+    //static auto* const fn = reinterpret_cast<void(THISCALL *)(df::unit*, std::string24*)>(
     //    Core::getInstance().vinfo->getAddress("unit_get_physical_description"));
 
     if (fn)
@@ -571,16 +571,16 @@ void df_unit_get_physical_description(df::unit* unit, string* out_str)
         *out_str = "";
 }
 
-string Units::getPhysicalDescription(df::unit* unit)
+string24 Units::getPhysicalDescription(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
-    string str;
+    std::string24 str;
     df_unit_get_physical_description(unit, &str);
     return str;
 }
 
 // get plural of race name (used for display in autobutcher UI and for sorting the watchlist)
-string Units::getRaceNamePluralById(int32_t id)
+string24 Units::getRaceNamePluralById(int32_t id)
 {
     df::creature_raw *raw = world->raws.creatures.all[id];
     if (raw)
@@ -588,13 +588,13 @@ string Units::getRaceNamePluralById(int32_t id)
     return "";
 }
 
-string Units::getRaceNamePlural(df::unit* unit)
+string24 Units::getRaceNamePlural(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
     return getRaceNamePluralById(unit->race);
 }
 
-string Units::getRaceBabyNameById(int32_t id)
+string24 Units::getRaceBabyNameById(int32_t id)
 {
     df::creature_raw *raw = world->raws.creatures.all[id];
     if (raw)
@@ -602,13 +602,13 @@ string Units::getRaceBabyNameById(int32_t id)
     return "";
 }
 
-string Units::getRaceBabyName(df::unit* unit)
+string24 Units::getRaceBabyName(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
     return getRaceBabyNameById(unit->race);
 }
 
-string Units::getRaceChildNameById(int32_t id)
+string24 Units::getRaceChildNameById(int32_t id)
 {
     df::creature_raw *raw = world->raws.creatures.all[id];
     if (raw)
@@ -616,7 +616,7 @@ string Units::getRaceChildNameById(int32_t id)
     return "";
 }
 
-string Units::getRaceChildName(df::unit* unit)
+string24 Units::getRaceChildName(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
     return getRaceChildNameById(unit->race);
@@ -738,7 +738,7 @@ int Units::getKillCount(df::unit *unit)
     {
         df::historical_kills* kills = histfig->info->kills;
         count += std::accumulate(kills->killed_count.begin(), kills->killed_count.end(), 0);
-        for (std::vector<int32_t>::iterator it = kills->events.begin(); it != kills->events.end(); ++it)
+        for (std::vector12<int32_t>::iterator it = kills->events.begin(); it != kills->events.end(); ++it)
         {
             if (virtual_cast<df::history_event_hist_figure_diedst>(df::history_event::find(*it)))
                 ++count;
@@ -1215,7 +1215,7 @@ static bool noble_pos_compare(const Units::NoblePosition &a, const Units::NobleP
     return a.position->id < b.position->id;
 }
 
-bool Units::getNoblePositions(std::vector<NoblePosition> *pvec, df::unit *unit)
+bool Units::getNoblePositions(std::vector12<NoblePosition> *pvec, df::unit *unit)
 {
     CHECK_NULL_POINTER(unit);
 
@@ -1256,15 +1256,15 @@ bool Units::getNoblePositions(std::vector<NoblePosition> *pvec, df::unit *unit)
     return true;
 }
 
-std::string Units::getProfessionName(df::unit *unit, bool ignore_noble, bool plural)
+std::string24 Units::getProfessionName(df::unit *unit, bool ignore_noble, bool plural)
 {
     CHECK_NULL_POINTER(unit);
 
-    std::string prof = unit->custom_profession;
+    std::string24 prof = unit->custom_profession;
     if (!prof.empty())
         return prof;
 
-    std::vector<NoblePosition> np;
+    std::vector12<NoblePosition> np;
 
     if (!ignore_noble && getNoblePositions(&np, unit))
     {
@@ -1289,9 +1289,9 @@ std::string Units::getProfessionName(df::unit *unit, bool ignore_noble, bool plu
     return getCasteProfessionName(unit->race, unit->caste, unit->profession, plural);
 }
 
-std::string Units::getCasteProfessionName(int race, int casteid, df::profession pid, bool plural)
+std::string24 Units::getCasteProfessionName(int race, int casteid, df::profession pid, bool plural)
 {
-    std::string prof, race_prefix;
+    std::string24 prof, race_prefix;
 
     if (pid < (df::profession)0 || !is_valid_enum_item_simple(pid))
         return "";
@@ -1410,7 +1410,7 @@ int8_t Units::getProfessionColor(df::unit *unit, bool ignore_noble)
 {
     CHECK_NULL_POINTER(unit);
 
-    std::vector<NoblePosition> np;
+    std::vector12<NoblePosition> np;
 
     if (!ignore_noble && getNoblePositions(&np, unit))
     {
@@ -1458,18 +1458,18 @@ df::goal_type Units::getGoalType(df::unit *unit, size_t goalIndex)
     return goal;
 }
 
-std::string Units::getGoalName(df::unit *unit, size_t goalIndex)
+std::string24 Units::getGoalName(df::unit *unit, size_t goalIndex)
 {
     CHECK_NULL_POINTER(unit);
 
     df::goal_type goal = getGoalType(unit, goalIndex);
     bool achieved_goal = isGoalAchieved(unit, goalIndex);
 
-    std::string goal_name = achieved_goal ? ENUM_ATTR(goal_type, achieved_short_name, goal) : ENUM_ATTR(goal_type, short_name, goal);
+    std::string24 goal_name = achieved_goal ? ENUM_ATTR(goal_type, achieved_short_name, goal) : ENUM_ATTR(goal_type, short_name, goal);
     if (goal == df::goal_type::START_A_FAMILY) {
-        std::string parent = ENUM_KEY_STR_SIMPLE(histfig_relationship_type, histfig_relationship_type::Parent);
+        std::string24 parent = ENUM_KEY_STR_SIMPLE(histfig_relationship_type, histfig_relationship_type::Parent);
         size_t start_pos = goal_name.find(parent);
-        if (start_pos != std::string::npos) {
+        if (start_pos != std::string24::npos) {
             df::histfig_relationship_type parent_type = isFemale(unit) ? histfig_relationship_type::Mother : histfig_relationship_type::Father;
             goal_name.replace(start_pos, parent.length(), ENUM_KEY_STR_SIMPLE(histfig_relationship_type, parent_type));
         }
@@ -1486,7 +1486,7 @@ bool Units::isGoalAchieved(df::unit *unit, size_t goalIndex)
         && unit->status.current_soul->personality.dreams[goalIndex]->flags.whole != 0;
 }
 
-std::string Units::getSquadName(df::unit *unit)
+std::string24 Units::getSquadName(df::unit *unit)
 {
     CHECK_NULL_POINTER(unit);
     if (unit->military.squad_id == -1)
@@ -1647,11 +1647,11 @@ bool Units::isKilled(df::unit *unit)
 bool Units::isGelded(df::unit* unit)
 {
     CHECK_NULL_POINTER(unit);
-    std::vector<df::unit_wound*> const& wounds = unit->body.wounds;
-    for(std::vector<df::unit_wound*>::const_iterator wound = wounds.begin(); wound != wounds.end(); ++wound)
+    std::vector12<df::unit_wound*> const& wounds = unit->body.wounds;
+    for(std::vector12<df::unit_wound*>::const_iterator wound = wounds.begin(); wound != wounds.end(); ++wound)
     {
-        std::vector<df::unit_wound::T_parts*> const& parts = (*wound)->parts;
-        for (std::vector<df::unit_wound::T_parts*>::const_iterator part = parts.begin(); part != parts.end(); ++part)
+        std::vector12<df::unit_wound::T_parts*> const& parts = (*wound)->parts;
+        for (std::vector12<df::unit_wound::T_parts*>::const_iterator part = parts.begin(); part != parts.end(); ++part)
         {
             if ((*part)->flags2.bits.gelded)
                 return true;
@@ -1682,9 +1682,9 @@ bool Units::isDomesticated(df::unit* unit)
 }
 
 // 50000 and up is level 0, 25000 and up is level 1, etc.
-//const vector<int32_t> Units::stress_cutoffs {50000, 25000, 10000, -10000, -25000, -50000, -100000};
+//const std::vector12<int32_t> Units::stress_cutoffs {50000, 25000, 10000, -10000, -25000, -50000, -100000};
 int32_t cutoffs[7] = {50000, 25000, 10000, -10000, -25000, -50000, -100000};
-const vector<int32_t> Units::stress_cutoffs( cutoffs, cutoffs + sizeof(cutoffs) / sizeof(cutoffs[0]) );
+const std::vector12<int32_t> Units::stress_cutoffs( cutoffs, cutoffs + sizeof(cutoffs) / sizeof(cutoffs[0]) );
 
 int Units::getStressCategory(df::unit *unit)
 {

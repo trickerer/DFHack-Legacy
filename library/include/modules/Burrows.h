@@ -45,7 +45,7 @@ namespace DFHack
 {
 namespace Burrows
 {
-    DFHACK_EXPORT df::burrow *findByName(std::string name);
+    DFHACK_EXPORT df::burrow *findByName(std::string24 name);
 
     // Units
     DFHACK_EXPORT void clearUnits(df::burrow *burrow);
@@ -56,7 +56,7 @@ namespace Burrows
     // Tiles
     DFHACK_EXPORT void clearTiles(df::burrow *burrow);
 
-    DFHACK_EXPORT void listBlocks(std::vector<df::map_block*> *pvec, df::burrow *burrow);
+    DFHACK_EXPORT void listBlocks(std::vector12<df::map_block*> *pvec, df::burrow *burrow);
 
     DFHACK_EXPORT bool isAssignedBlockTile(df::burrow *burrow, df::map_block *block, df::coord2d tile);
     DFHACK_EXPORT bool setAssignedBlockTile(df::burrow *burrow, df::map_block *block, df::coord2d tile, bool enable);

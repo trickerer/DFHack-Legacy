@@ -98,9 +98,9 @@ namespace DFHack
     {
     public:
         state_change_event event;
-        std::string path;
+        std::string24 path;
         bool save_specific;
-        StateChangeScript(state_change_event event, std::string path, bool save_specific = false)
+        StateChangeScript(state_change_event event, std::string24 path, bool save_specific = false)
             :event(event), path(path), save_specific(save_specific)
         { }
         bool operator==(const StateChangeScript& other)
@@ -152,38 +152,38 @@ namespace DFHack
         /// get the graphic module
         Graphic * getGraphic();
         /// sets the current hotkey command
-        bool setHotkeyCmd( std::string cmd );
+        bool setHotkeyCmd( std::string24 cmd );
         /// removes the hotkey command and gives it to the caller thread
-        std::string getHotkeyCmd( bool &keep_going );
+        std::string24 getHotkeyCmd( bool &keep_going );
 
         /// adds a named pointer (for later or between plugins)
-        void RegisterData(void *data, std::string key);
+        void RegisterData(void *data, std::string24 key);
         /// returns a named pointer.
-        void *GetData(std::string key);
+        void *GetData(std::string24 key);
 
-        command_result runCommand(color_ostream &out, const std::string &command, std::vector <std::string> &parameters);
-        command_result runCommand(color_ostream &out, const std::string &command);
-        bool loadScriptFile(color_ostream &out, std::string fname, bool silent = false);
+        command_result runCommand(color_ostream &out, const std::string24 &command, std::vector12 <std::string24> &parameters);
+        command_result runCommand(color_ostream &out, const std::string24 &command);
+        bool loadScriptFile(color_ostream &out, std::string24 fname, bool silent = false);
 
-        bool addScriptPath(std::string path, bool search_before = false);
-        bool removeScriptPath(std::string path);
-        std::string findScript(std::string name);
-        void getScriptPaths(std::vector<std::string> *dest);
+        bool addScriptPath(std::string24 path, bool search_before = false);
+        bool removeScriptPath(std::string24 path);
+        std::string24 findScript(std::string24 name);
+        void getScriptPaths(std::vector12<std::string24> *dest);
 
-        bool ClearKeyBindings(std::string keyspec);
-        bool AddKeyBinding(std::string keyspec, std::string cmdline);
-        std::vector<std::string> ListKeyBindings(std::string keyspec);
+        bool ClearKeyBindings(std::string24 keyspec);
+        bool AddKeyBinding(std::string24 keyspec, std::string24 cmdline);
+        std::vector12<std::string24> ListKeyBindings(std::string24 keyspec);
         int8_t getModstate() { return modstate; }
 
-        bool AddAlias(const std::string &name, const std::vector<std::string> &command, bool replace = false);
-        bool RemoveAlias(const std::string &name);
-        bool IsAlias(const std::string &name);
-        bool RunAlias(color_ostream &out, const std::string &name,
-            const std::vector<std::string> &parameters, command_result &result);
-        std::map<std::string, std::vector<std::string> > ListAliases();
-        std::string GetAliasCommand(const std::string &name, const std::string &default_ = "");
+        bool AddAlias(const std::string24 &name, const std::vector12<std::string24> &command, bool replace = false);
+        bool RemoveAlias(const std::string24 &name);
+        bool IsAlias(const std::string24 &name);
+        bool RunAlias(color_ostream &out, const std::string24 &name,
+            const std::vector12<std::string24> &parameters, command_result &result);
+        std::map<std::string24, std::vector12<std::string24> > ListAliases();
+        std::string24 GetAliasCommand(const std::string24 &name, const std::string24 &default_ = "");
 
-        std::string getHackPath();
+        std::string24 getHackPath();
 
         bool isWorldLoaded() { return (last_world_data_ptr != NULL); }
         bool isMapLoaded() { return (last_local_map_ptr != NULL && last_world_data_ptr != NULL); }
@@ -201,7 +201,7 @@ namespace DFHack
 
         PluginManager *getPluginManager() { return plug_mgr; }
 
-        static void cheap_tokenise(std::string const& input, std::vector<std::string> &output);
+        static void cheap_tokenise(std::string24 const& input, std::vector12<std::string24> &output);
 
     private:
         DFHack::Console con;
@@ -239,7 +239,7 @@ namespace DFHack
         void operator=(Core const&);    // Don't implement
 
         // report error to user while failing
-        void fatal (std::string output);
+        void fatal (std::string24 output);
 
         // 1 = fatal failure
         bool errorstate;
@@ -255,24 +255,24 @@ namespace DFHack
             Notes * pNotes;
             Graphic * pGraphic;
         } s_mods;
-        std::vector<Module*> allModules;
+        std::vector12<Module*> allModules;
         DFHack::PluginManager * plug_mgr;
 
-        std::vector<std::string> script_paths[2];
+        std::vector12<std::string24> script_paths[2];
         tthread::mutex script_path_mutex;
 
         // hotkey-related stuff
         struct KeyBinding {
             int modifiers;
-            std::vector<std::string> command;
-            std::string cmdline;
-            std::string focus;
+            std::vector12<std::string24> command;
+            std::string24 cmdline;
+            std::string24 focus;
         };
         int8_t modstate;
 
-        std::map<int, std::vector<KeyBinding> > key_bindings;
+        std::map<int, std::vector12<KeyBinding> > key_bindings;
         std::map<int, bool> hotkey_states;
-        std::string hotkey_cmd;
+        std::string24 hotkey_cmd;
         enum hotkey_set_t {
             NO,
             SET,
@@ -282,7 +282,7 @@ namespace DFHack
         tthread::mutex HotkeyMutex;
         tthread::condition_variable HotkeyCond;
 
-        std::map<std::string, std::vector<std::string> > aliases;
+        std::map<std::string24, std::vector12<std::string24> > aliases;
         tthread::recursive_mutex alias_mutex;
 
         bool SelectHotkey(int key, int modifiers);
@@ -297,10 +297,10 @@ namespace DFHack
         // Very important!
         tthread::atomic<bool> started;
         // Additional state change scripts
-        std::vector<StateChangeScript> state_change_scripts;
+        std::vector12<StateChangeScript> state_change_scripts;
 
         tthread::mutex misc_data_mutex;
-        std::map<std::string,void*> misc_data_map;
+        std::map<std::string24,void*> misc_data_map;
 
         /*!
          * \defgroup core_suspend CoreSuspender state handling serialization to
@@ -309,8 +309,8 @@ namespace DFHack
          * \{
          */
         tthread::recursive_mutex CoreSuspendMutex;
-        //tthread::condition_variable CoreWakeup;
-        //tthread::atomic<size_t> toolCount;
+        tthread::condition_variable CoreWakeup;
+        tthread::atomic<size_t> toolCount;
         tthread::atomic<tthread::thread::id> ownerThread;
         //! \}
 
@@ -334,12 +334,21 @@ namespace DFHack
 
         void unlock()
         {
+            //Core& core = Core::getInstance();
+            ///* Restore core owner to previous value */
+            //core.ownerThread.store(tid, tthread::memory_order_release);
+            //if (tid == tthread::thread::id())
+            //    Lua::Core::Reset(core.getConsole(), "suspend");
+            release();
+            lock_type::unlock(); //unlock mutex explicitly only if called explicitly
+        }
+
+        void release()
+        {
             Core& core = Core::getInstance();
-            /* Restore core owner to previous value */
             core.ownerThread.store(tid, tthread::memory_order_release);
             if (tid == tthread::thread::id())
                 Lua::Core::Reset(core.getConsole(), "suspend");
-            lock_type::unlock();
         }
 
         bool owns_lock() const
@@ -405,26 +414,38 @@ namespace DFHack
             CoreSuspenderBase::lock();
         }
 
+        //should not be used
+        /*
         void unlock()
         {
             Core& core = Core::getInstance();
             CoreSuspenderBase::unlock();
+        */
             /* Notify core to continue when all queued tools have completed
              * 0 = None wants to own the core
              * 1+ = There are tools waiting core access
              * fetch_add returns old value before subtraction
              */
-            //if (core.toolCount.fetch_add(-1, tthread::memory_order_relaxed) == 1)
-            //    core.CoreWakeup.notify_one();
+        /*
+            if (core.toolCount.fetch_add(-1, tthread::memory_order_relaxed) == 1)
+                core.CoreWakeup.notify_one();
         }
+        */
 
         ~CoreSuspender()
         {
             //this is done in parent
             //if (owns_lock())
             //    unlock();
-            if (int a = get_recursion())
-                std::cerr << "\n~CoreSusp(): cur recursion '" << a << "'";
+            //if (int a = get_recursion())
+            //    std::cerr << "\n~CoreSusp(): cur recursion '" << a << "'";
+            Core& core = Core::getInstance();
+            release();
+            //it is safe to notify CoreWakeup waiter before mutex is unlocked
+            //since waiting thread will not be able to relock temporarily
+            //unlocked (and locked by this thread) mutex until we unlock it
+            if (core.toolCount.fetch_add(-1, tthread::memory_order_relaxed) == 1)
+                core.CoreWakeup.notify_one();
         }
     };
 

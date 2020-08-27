@@ -60,19 +60,19 @@ tthread::lock_guard<T> make_mutex_guard (T *mutex)
 }
 
 #if defined(_LINUX)
-    static const string plugin_suffix = ".plug.so";
+    static const std::string24 plugin_suffix = ".plug.so";
 #elif defined(_DARWIN)
-    static const string plugin_suffix = ".plug.dylib";
+    static const std::string24 plugin_suffix = ".plug.dylib";
 #else
-    static const string plugin_suffix = ".plug.dll";
+    static const std::string24 plugin_suffix = ".plug.dll";
 #endif
 
-static string getPluginPath()
+static std::string24 getPluginPath()
 {
     return Core::getInstance().getHackPath() + "plugins/";
 }
 
-static string getPluginPath (std::string name)
+static std::string24 getPluginPath (std::string24 name)
 {
     return getPluginPath() + name + plugin_suffix;
 }
@@ -139,20 +139,20 @@ struct Plugin::RefAutoinc
 
 struct Plugin::LuaCommand {
     Plugin *owner;
-    std::string name;
+    std::string24 name;
     int (*command)(lua_State *state);
 
-    LuaCommand(Plugin *owner, std::string name)
+    LuaCommand(Plugin *owner, std::string24 name)
       : owner(owner), name(name), command(NULL) {}
 };
 
 struct Plugin::LuaFunction {
     Plugin *owner;
-    std::string name;
+    std::string24 name;
     function_identity_base *identity;
     bool silent;
 
-    LuaFunction(Plugin *owner, std::string name)
+    LuaFunction(Plugin *owner, std::string24 name)
       : owner(owner), name(name), identity(NULL), silent(false) {}
 };
 
@@ -162,7 +162,7 @@ struct Plugin::LuaEvent : public Lua::Event::Owner {
     bool active;
     int count;
 
-    LuaEvent(Plugin *owner, std::string name)
+    LuaEvent(Plugin *owner, std::string24 name)
       : handler(owner,name), event(NULL), active(false), count(0)
     {
         handler.silent = true;
@@ -181,8 +181,8 @@ struct Plugin::LuaEvent : public Lua::Event::Owner {
     }
 };
 
-Plugin::Plugin(Core * core, const std::string & path,
-    const std::string &name, PluginManager * pm)
+Plugin::Plugin(Core * core, const std::string24 & path,
+    const std::string24 &name, PluginManager * pm)
     :path(path),
      name(name),
      parent(pm)
@@ -315,10 +315,10 @@ bool Plugin::load(color_ostream &con)
     {
         if (strcmp(dfhack_git_desc, plug_git_desc) != 0)
         {
-            std::string msg = stl_sprintf("Warning: Plugin %s compiled for DFHack %s, running DFHack %s\n",
+            std::string24 msg = stl_sprintf("Warning: Plugin %s compiled for DFHack %s, running DFHack %s\n",
                 *plug_name, plug_git_desc, dfhack_git_desc);
-            con << msg << flush;
-            cerr << msg << flush;
+            con << msg.c_str() << flush;
+            cerr << msg.c_str() << flush;
         }
     }
     else
@@ -331,12 +331,12 @@ bool Plugin::load(color_ostream &con)
         return false;
     }
     *plug_self = this;
-    plugin_init = (command_result (*)(color_ostream &, std::vector <PluginCommand> &)) LookupPlugin(plug, "plugin_init");
-    std::vector<std::string>* plugin_globals = *((std::vector<std::string>**) LookupPlugin(plug, "plugin_globals"));
+    plugin_init = (command_result (*)(color_ostream &, std::vector12 <PluginCommand> &)) LookupPlugin(plug, "plugin_init");
+    std::vector12<std::string24>* plugin_globals = *((std::vector12<std::string24>**) LookupPlugin(plug, "plugin_globals"));
     if (plugin_globals->size())
     {
-        std::vector<std::string> missing_globals;
-        for (std::vector<std::string>::const_iterator it = plugin_globals->begin(); it != plugin_globals->end(); ++it)
+        std::vector12<std::string24> missing_globals;
+        for (std::vector12<std::string24>::const_iterator it = plugin_globals->begin(); it != plugin_globals->end(); ++it)
         {
             if (!Core::getInstance().vinfo->getAddress(it->c_str()))
                 missing_globals.push_back(*it);
@@ -349,7 +349,7 @@ bool Plugin::load(color_ostream &con)
             return false;
         }
     }
-    plugin_status = (command_result (*)(color_ostream &, std::string &)) LookupPlugin(plug, "plugin_status");
+    plugin_status = (command_result (*)(color_ostream &, std::string24 &)) LookupPlugin(plug, "plugin_status");
     plugin_onupdate = (command_result (*)(color_ostream &)) LookupPlugin(plug, "plugin_onupdate");
     plugin_shutdown = (command_result (*)(color_ostream &)) LookupPlugin(plug, "plugin_shutdown");
     plugin_onstatechange = (command_result (*)(color_ostream &, state_change_event)) LookupPlugin(plug, "plugin_onstatechange");
@@ -467,7 +467,7 @@ bool Plugin::reload(color_ostream &out)
     return true;
 }
 
-command_result Plugin::invoke(color_ostream &out, const std::string & command, std::vector <std::string> & parameters)
+command_result Plugin::invoke(color_ostream &out, const std::string24 & command, std::vector12<std::string24> & parameters)
 {
     Core & c = Core::getInstance();
     command_result cr = CR_NOT_IMPLEMENTED;
@@ -507,7 +507,7 @@ command_result Plugin::invoke(color_ostream &out, const std::string & command, s
                     cr = cmd.function(out, parameters);
                 }
                 if (cr == CR_WRONG_USAGE && !cmd.usage.empty())
-                    out << "Usage:\n" << cmd.usage << flush;
+                    out << "Usage:\n" << cmd.usage.c_str() << flush;
                 break;
             }
         }
@@ -516,7 +516,7 @@ command_result Plugin::invoke(color_ostream &out, const std::string & command, s
     return cr;
 }
 
-bool Plugin::can_invoke_hotkey(const std::string & command, df::viewscreen *top )
+bool Plugin::can_invoke_hotkey(const std::string24 & command, df::viewscreen *top )
 {
     bool cr = false;
     access->lock_add();
@@ -836,7 +836,7 @@ PluginManager::PluginManager(Core * core) : core(core)
 
 PluginManager::~PluginManager()
 {
-    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
+    for (std::map<std::string24, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         Plugin *p = it->second;
         delete p;
@@ -852,7 +852,7 @@ void PluginManager::init()
 
     bool any_loaded = false;
     //for (auto p : all_plugins)
-    for (std::map <std::string, Plugin*>::const_iterator it = all_plugins.begin(); it != all_plugins.end(); ++it)
+    for (std::map<std::string24, Plugin*>::const_iterator it = all_plugins.begin(); it != all_plugins.end(); ++it)
     {
         if (it->second->getState() == Plugin::PS_LOADED)
         {
@@ -871,14 +871,14 @@ void PluginManager::init()
     }
 }
 
-bool PluginManager::addPlugin(string name)
+bool PluginManager::addPlugin(std::string24 name)
 {
     if (all_plugins.find(name) != all_plugins.end())
     {
         Core::printerr("Plugin already exists: %s\n", name.c_str());
         return false;
     }
-    string path = getPluginPath(name);
+    std::string24 path = getPluginPath(name);
     if (!Filesystem::isfile(path))
     {
         Core::printerr("Plugin does not exist: %s\n", name.c_str());
@@ -889,16 +889,16 @@ bool PluginManager::addPlugin(string name)
     return true;
 }
 
-vector<string> PluginManager::listPlugins()
+vector12<std::string24> PluginManager::listPlugins()
 {
-    vector<string> results;
-    vector<string> files;
+    std::vector12<std::string24> results;
+    std::vector12<std::string24> files;
     Filesystem::listdir(getPluginPath(), files);
-    for (vector<string>::const_iterator file = files.begin(); file != files.end(); ++file)
+    for (std::vector12<std::string24>::const_iterator file = files.begin(); file != files.end(); ++file)
     {
         if (hasEnding(*file, plugin_suffix))
         {
-            string shortname = file->substr(0, file->find(plugin_suffix));
+            std::string24 shortname = file->substr(0, file->find(plugin_suffix));
             results.push_back(shortname);
         }
     }
@@ -908,15 +908,15 @@ vector<string> PluginManager::listPlugins()
 void PluginManager::refresh()
 {
     tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
-    vector<string> files = listPlugins();
-    for (vector<string>::const_iterator f = files.begin(); f != files.end(); ++f)
+    std::vector12<std::string24> files = listPlugins();
+    for (std::vector12<std::string24>::const_iterator f = files.begin(); f != files.end(); ++f)
     {
         if (!(*this)[*f])
             addPlugin(*f);
     }
 }
 
-bool PluginManager::load (const string &name)
+bool PluginManager::load (const std::string24 &name)
 {
     tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     if (!(*this)[name] && !addPlugin(name))
@@ -933,10 +933,10 @@ bool PluginManager::load (const string &name)
 bool PluginManager::loadAll()
 {
     tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
-    std::vector<std::string> files = listPlugins();
+    std::vector12<std::string24> files = listPlugins();
     bool ok = true;
     // load all plugins in hack/plugins
-    for (std::vector<std::string>::const_iterator f = files.begin(); f != files.end(); ++f)
+    for (std::vector12<std::string24>::const_iterator f = files.begin(); f != files.end(); ++f)
     {
         if (!load(*f))
             ok = false;
@@ -944,7 +944,7 @@ bool PluginManager::loadAll()
     return ok;
 }
 
-bool PluginManager::unload (const string &name)
+bool PluginManager::unload (const std::string24 &name)
 {
     tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     if (!(*this)[name])
@@ -960,7 +960,7 @@ bool PluginManager::unloadAll()
     tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     bool ok = true;
     // only try to unload plugins that are in all_plugins
-    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
+    for (std::map<std::string24, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         if (!unload(it->first))
             ok = false;
@@ -968,7 +968,7 @@ bool PluginManager::unloadAll()
     return ok;
 }
 
-bool PluginManager::reload (const string &name)
+bool PluginManager::reload (const std::string24 &name)
 {
     // equivalent to "unload(name); load(name);" if plugin is recognized,
     // "load(name);" otherwise
@@ -991,10 +991,10 @@ bool PluginManager::reloadAll()
     return ok;
 }
 
-Plugin *PluginManager::getPluginByCommand(const std::string &command)
+Plugin *PluginManager::getPluginByCommand(const std::string24 &command)
 {
     tthread::lock_guard<tthread::mutex> lock(*cmdlist_mutex);
-    map <string, Plugin *>::iterator iter = command_map.find(command);
+    map<std::string24, Plugin *>::iterator iter = command_map.find(command);
     if (iter != command_map.end())
         return iter->second;
     else
@@ -1002,13 +1002,13 @@ Plugin *PluginManager::getPluginByCommand(const std::string &command)
 }
 
 // FIXME: handle name collisions...
-command_result PluginManager::InvokeCommand(color_ostream &out, const std::string & command, std::vector <std::string> & parameters)
+command_result PluginManager::InvokeCommand(color_ostream &out, const std::string24 & command, std::vector12<std::string24> & parameters)
 {
     Plugin *plugin = getPluginByCommand(command);
     return plugin ? plugin->invoke(out, command, parameters) : CR_NOT_IMPLEMENTED;
 }
 
-bool PluginManager::CanInvokeHotkey(const std::string &command, df::viewscreen *top)
+bool PluginManager::CanInvokeHotkey(const std::string24 &command, df::viewscreen *top)
 {
     Plugin *plugin = getPluginByCommand(command);
     return plugin ? plugin->can_invoke_hotkey(command, top) : true;
@@ -1016,23 +1016,23 @@ bool PluginManager::CanInvokeHotkey(const std::string &command, df::viewscreen *
 
 void PluginManager::OnUpdate(color_ostream &out)
 {
-    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
+    for (std::map<std::string24, Plugin*>::iterator it = begin(); it != end(); ++it)
         it->second->on_update(out);
 }
 
 void PluginManager::OnStateChange(color_ostream &out, state_change_event event)
 {
-    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
+    for (std::map<std::string24, Plugin*>::iterator it = begin(); it != end(); ++it)
         it->second->on_state_change(out, event);
 }
 
 void PluginManager::registerCommands( Plugin * p )
 {
     cmdlist_mutex->lock();
-    vector <PluginCommand> & cmds = p->commands;
+    std::vector12 <PluginCommand> & cmds = p->commands;
     for (size_t i = 0; i < cmds.size();i++)
     {
-        std::string name = cmds[i].name;
+        std::string24 name = cmds[i].name;
         if (command_map.find(name) != command_map.end())
         {
             core->printerr("Plugin %s re-implements command \"%s\" (from plugin %s)\n",
@@ -1049,7 +1049,7 @@ void PluginManager::registerCommands( Plugin * p )
 void PluginManager::unregisterCommands( Plugin * p )
 {
     cmdlist_mutex->lock();
-    vector <PluginCommand> & cmds = p->commands;
+    std::vector12 <PluginCommand> & cmds = p->commands;
     for(size_t i = 0; i < cmds.size();i++)
     {
         command_map.erase(cmds[i].name);
@@ -1061,7 +1061,7 @@ void PluginManager::unregisterCommands( Plugin * p )
 
 void PluginManager::doSaveData(color_ostream &out)
 {
-    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
+    for (std::map<std::string24, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         command_result cr = it->second->save_data(out);
 
@@ -1072,7 +1072,7 @@ void PluginManager::doSaveData(color_ostream &out)
 
 void PluginManager::doLoadData(color_ostream &out)
 {
-    for (std::map<std::string, Plugin*>::iterator it = begin(); it != end(); ++it)
+    for (std::map<std::string24, Plugin*>::iterator it = begin(); it != end(); ++it)
     {
         command_result cr = it->second->load_data(out);
 
@@ -1081,7 +1081,7 @@ void PluginManager::doLoadData(color_ostream &out)
     }
 }
 
-Plugin *PluginManager::operator[] (std::string name)
+Plugin *PluginManager::operator[] (std::string24 name)
 {
     tthread::lock_guard<tthread::recursive_mutex> r_lock = MUTEX_GUARD(plugin_mutex);
     if (all_plugins.find(name) == all_plugins.end())
@@ -1097,12 +1097,12 @@ size_t PluginManager::size()
     return all_plugins.size();
 }
 
-std::map<std::string, Plugin*>::iterator PluginManager::begin()
+std::map<std::string24, Plugin*>::iterator PluginManager::begin()
 {
     return all_plugins.begin();
 }
 
-std::map<std::string, Plugin*>::iterator PluginManager::end()
+std::map<std::string24, Plugin*>::iterator PluginManager::end()
 {
     return all_plugins.end();
 }

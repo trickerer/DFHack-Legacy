@@ -49,13 +49,13 @@ namespace DFHack
     struct DFHACK_EXPORT VersionInfo
     {
     private:
-        std::vector <std::string> md5_list;
-        std::vector <uintptr_t> PE_list;
-        std::map <std::string, uintptr_t> Addresses;
-        std::map <std::string, uintptr_t> VTables;
+        std::vector12<std::string24> md5_list;
+        std::vector12 <uintptr_t> PE_list;
+        std::map<std::string24, uintptr_t> Addresses;
+        std::map<std::string24, uintptr_t> VTables;
         uintptr_t base;
         intptr_t rebase_delta;
-        std::string version;
+        std::string24 version;
         OSType OS;
     public:
         VersionInfo()
@@ -86,17 +86,17 @@ namespace DFHack
             int64_t rebase = newx - old;
             base = new_base;
             rebase_delta += rebase;
-            for (std::map <std::string, uintptr_t>::iterator iter = Addresses.begin(); iter != Addresses.end(); ++iter)
+            for (std::map<std::string24, uintptr_t>::iterator iter = Addresses.begin(); iter != Addresses.end(); ++iter)
                 iter->second += rebase;
-            for (std::map <std::string, uintptr_t>::iterator iter = VTables.begin(); iter != VTables.end(); ++iter)
+            for (std::map<std::string24, uintptr_t>::iterator iter = VTables.begin(); iter != VTables.end(); ++iter)
                 iter->second += rebase;
         };
 
-        void addMD5 (const std::string & _md5)
+        void addMD5 (const std::string24 & _md5)
         {
             md5_list.push_back(_md5);
         };
-        bool hasMD5 (const std::string & _md5) const
+        bool hasMD5 (const std::string24 & _md5) const
         {
             return std::find(md5_list.begin(), md5_list.end(), _md5) != md5_list.end();
         };
@@ -110,48 +110,48 @@ namespace DFHack
             return std::find(PE_list.begin(), PE_list.end(), PE_) != PE_list.end();
         };
 
-        void setVersion(const std::string& v)
+        void setVersion(const std::string24& v)
         {
             version = v;
         };
-        std::string getVersion() const { return version; };
+        std::string24 getVersion() const { return version; };
 
-        void setAddress (const std::string& key, const uintptr_t value)
+        void setAddress (const std::string24& key, const uintptr_t value)
         {
             Addresses[key] = value;
         };
         template <typename T>
-        bool getAddress (const std::string& key, T & value)
+        bool getAddress (const std::string24& key, T & value)
         {
-            std::map <std::string, uintptr_t>::const_iterator i = Addresses.find(key);
+            std::map<std::string24, uintptr_t>::const_iterator i = Addresses.find(key);
             if(i == Addresses.end())
                 return false;
             value = (T) (*i).second;
             return true;
         };
 
-        uintptr_t getAddress (const std::string& key) const
+        uintptr_t getAddress (const std::string24& key) const
         {
-            std::map <std::string, uintptr_t>::const_iterator i = Addresses.find(key);
+            std::map<std::string24, uintptr_t>::const_iterator i = Addresses.find(key);
             if(i == Addresses.end())
                 return 0;
             return i->second;
         }
 
-        void setVTable (const std::string& key, const uintptr_t value)
+        void setVTable (const std::string24& key, const uintptr_t value)
         {
             VTables[key] = value;
         };
-        void *getVTable (const std::string& key) const
+        void *getVTable (const std::string24& key) const
         {
-            std::map <std::string, uintptr_t>::const_iterator i = VTables.find(key);
+            std::map<std::string24, uintptr_t>::const_iterator i = VTables.find(key);
             if(i == VTables.end())
                 return 0;
             return (void*)i->second;
         }
-        bool getVTableName (const void *vtable, std::string &out) const
+        bool getVTableName (const void *vtable, std::string24 &out) const
         {
-            for (std::map <std::string, uintptr_t>::const_iterator i = VTables.begin(); i != VTables.end(); ++i)
+            for (std::map<std::string24, uintptr_t>::const_iterator i = VTables.begin(); i != VTables.end(); ++i)
             {
                 if ((void*)i->second == vtable)
                 {

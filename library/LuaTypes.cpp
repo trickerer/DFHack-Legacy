@@ -170,12 +170,12 @@ void df::ptr_string_identity::lua_read(lua_State *state, int fname_idx, void *pt
 
 void df::ptr_string_identity::lua_write(lua_State *state, int fname_idx, void *ptr, int val_index)
 {
-    field_error(state, fname_idx, "raw pointer string", "write");
+    field_error(state, fname_idx, "raw pointer std::string24", "write");
 }
 
 void df::stl_string_identity::lua_read(lua_State *state, int fname_idx, void *ptr)
 {
-    std::string* pstr = (std::string*)ptr;
+    std::string24* pstr = (std::string24*)ptr;
     lua_pushlstring(state, pstr->data(), pstr->size());
 }
 
@@ -186,7 +186,7 @@ void df::stl_string_identity::lua_write(lua_State *state, int fname_idx, void *p
     if (!bytes)
         field_error(state, fname_idx, "string expected", "write");
 
-    *(std::string*)ptr = std::string(bytes, size);
+    *(std::string24*)ptr = std::string24(bytes, size);
 }
 
 void df::pointer_identity::lua_read(lua_State *state, int fname_idx, void *ptr, type_identity *target)
@@ -1109,7 +1109,7 @@ int LuaWrapper::method_wrapper_core(lua_State *state, function_identity_base *id
         field_error(state, UPVAL_METHOD_NAME, e.what(), "invoke");
     }
     catch (std::exception &e) {
-        std::string tmp = stl_sprintf("C++ exception: %s", e.what());
+        std::string24 tmp = stl_sprintf("C++ exception: %s", e.what());
         field_error(state, UPVAL_METHOD_NAME, tmp.c_str(), "invoke");
     }
 
@@ -1186,7 +1186,7 @@ static void IndexFields(lua_State *state, int base, struct_identity *pstruct, bo
     for (int i = 0; fields[i].mode != struct_field_info::END; ++i)
     {
         // Qualify conflicting field names with the type
-        std::string name = fields[i].name;
+        std::string24 name = fields[i].name;
 
         lua_getfield(state, base+2, name.c_str());
         if (!lua_isnil(state, -1))
@@ -1499,7 +1499,7 @@ static void GetAdHocMetatable(lua_State *state, const struct_field_info *field)
             break;
 
         case struct_field_info::STL_VECTOR_PTR:
-            MakeContainerMetatable(state, &df::identity_traits<std::vector<void*> >::identity,
+            MakeContainerMetatable(state, &df::identity_traits<std::vector12<void*> >::identity,
                                    field->type, -1, field->extra ? field->extra->index_enum : NULL);
             break;
 

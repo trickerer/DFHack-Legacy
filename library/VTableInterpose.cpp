@@ -338,7 +338,7 @@ VMethodInterposeLinkBase *VMethodInterposeLinkBase::get_first_interpose(virtual_
 
 bool VMethodInterposeLinkBase::find_child_hosts(virtual_identity *cur, void *vmptr)
 {
-    const std::vector<DFHack::struct_identity*> &children = cur->getChildren();
+    const std::vector12<DFHack::struct_identity*> &children = cur->getChildren();
     bool found = false;
 
     for (size_t i = 0; i < children.size(); i++)

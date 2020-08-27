@@ -73,9 +73,9 @@ bool Translation::copyName(df::language_name * source, df::language_name * targe
     return true;
 }
 
-std::string Translation::capitalize(const std::string &str, bool all_words)
+std::string24 Translation::capitalize(const std::string24 &str, bool all_words)
 {
-    string upper = str;
+    std::string24 upper = str;
 
     if (!upper.empty())
     {
@@ -92,7 +92,7 @@ std::string Translation::capitalize(const std::string &str, bool all_words)
     return upper;
 }
 
-void addNameWord (string &out, const string &word)
+void addNameWord (std::string24 &out, const std::string24 &word)
 {
     if (word.empty())
         return;
@@ -101,7 +101,7 @@ void addNameWord (string &out, const string &word)
     out.append(Translation::capitalize(word));
 }
 
-void Translation::setNickname(df::language_name *name, std::string nick)
+void Translation::setNickname(df::language_name *name, std::string24 nick)
 {
     CHECK_NULL_POINTER(name);
 
@@ -131,12 +131,12 @@ void Translation::setNickname(df::language_name *name, std::string nick)
     }
 }
 
-string Translation::TranslateName(const df::language_name * name, bool inEnglish, bool onlyLastPart)
+std::string24 Translation::TranslateName(const df::language_name * name, bool inEnglish, bool onlyLastPart)
 {
     CHECK_NULL_POINTER(name);
 
-    string out;
-    string word;
+    std::string24 out;
+    std::string24 word;
 
     if (!onlyLastPart) {
         if (!name->first_name.empty())
@@ -149,7 +149,7 @@ string Translation::TranslateName(const df::language_name * name, bool inEnglish
             {
             case d_init_nickname::REPLACE_ALL:
                 out = word;
-                return out;
+                return out.c_str();
             case d_init_nickname::REPLACE_FIRST:
                 out = "";
                 break;

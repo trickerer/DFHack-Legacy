@@ -126,7 +126,7 @@ int main (int argc, char *argv[])
     else
     {
         // Call the command
-        std::vector<std::string> args;
+        std::vector12<std::string24> args;
         for (int i = 2; i < argc; i++)
             args.push_back(argv[i]);
 

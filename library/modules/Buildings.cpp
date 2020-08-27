@@ -211,13 +211,13 @@ bool Buildings::Read (const uint32_t index, t_building & building)
     return true;
 }
 
-bool Buildings::ReadCustomWorkshopTypes(map <uint32_t, string> & btypes)
+bool Buildings::ReadCustomWorkshopTypes(map <uint32_t, std::string24> & btypes)
 {
-    vector<building_def*> & bld_def = world->raws.buildings.all;
+    std::vector12<building_def*> & bld_def = world->raws.buildings.all;
     uint32_t size = bld_def.size();
     btypes.clear();
 
-    for (vector<building_def*>::const_iterator iter = bld_def.begin(); iter != bld_def.end();iter++)
+    for (std::vector12<building_def*>::const_iterator iter = bld_def.begin(); iter != bld_def.end();iter++)
     {
         building_def * temp = *iter;
         btypes[temp->id] = temp->code;
@@ -250,12 +250,12 @@ bool Buildings::setOwner(df::building *bld, df::unit *unit)
 
     if (bld->owner)
     {
-        std::vector<df::building*> &blist = bld->owner->owned_buildings;
+        std::vector12<df::building*> &blist = bld->owner->owned_buildings;
         vector_erase_at(blist, linear_index(blist, bld));
 
         if (df::unit* spouse = df::unit::find(bld->owner->relationship_ids[df::unit_relationship_type::Spouse]))
         {
-            std::vector<df::building*> &blist = spouse->owned_buildings;
+            std::vector12<df::building*> &blist = spouse->owned_buildings;
             vector_erase_at(blist, linear_index(blist, bld));
         }
     }
@@ -269,7 +269,7 @@ bool Buildings::setOwner(df::building *bld, df::unit *unit)
 
         if (df::unit* spouse = df::unit::find(unit->relationship_ids[df::unit_relationship_type::Spouse]))
         {
-            std::vector<df::building*> &blist = spouse->owned_buildings;
+            std::vector12<df::building*> &blist = spouse->owned_buildings;
             if (bld->canUseSpouseRoom() && linear_index(blist, bld) < 0)
                 blist.push_back(bld);
         }
@@ -303,7 +303,7 @@ df::building *Buildings::findAtTile(df::coord pos)
     }
 
     // The authentic method, i.e. how the game generally does this:
-    std::vector<df::building*> &vec = df::building::get_vector();
+    std::vector12<df::building*> &vec = df::building::get_vector();
     for (size_t i = 0; i < vec.size(); i++)
     {
         df::building* bld = vec[i];
@@ -329,11 +329,11 @@ df::building *Buildings::findAtTile(df::coord pos)
     return NULL;
 }
 
-bool Buildings::findCivzonesAt(std::vector<df::building_civzonest*> *pvec, df::coord pos)
+bool Buildings::findCivzonesAt(std::vector12<df::building_civzonest*> *pvec, df::coord pos)
 {
     pvec->clear();
 
-    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
+    std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
 
     for (size_t i = 0; i < vec.size(); i++)
     {
@@ -875,7 +875,7 @@ static void markBuildingTiles(df::building *bld, bool remove)
 
 static void linkRooms(df::building *bld)
 {
-    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::IN_PLAY];
+    std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::IN_PLAY];
 
     bool changed = false;
 
@@ -945,7 +945,7 @@ static void createDesign(df::building *bld, bool rough)
 
 static int getMaxStockpileId()
 {
-    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::STOCKPILE];
+    std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::STOCKPILE];
     int max_id = 0;
 
     for (size_t i = 0; i < vec.size(); i++)
@@ -960,7 +960,7 @@ static int getMaxStockpileId()
 
 static int getMaxCivzoneId()
 {
-    std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
+    std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_ZONE];
     int max_id = 0;
 
     for (size_t i = 0; i < vec.size(); i++)
@@ -1053,7 +1053,7 @@ static bool needsItems(df::building *bld)
     }
 }
 
-bool Buildings::constructWithItems(df::building *bld, std::vector<df::item*> items)
+bool Buildings::constructWithItems(df::building *bld, std::vector12<df::item*> items)
 {
     CHECK_NULL_POINTER(bld);
     CHECK_INVALID_ARGUMENT(bld->id == -1);
@@ -1090,7 +1090,7 @@ bool Buildings::constructWithItems(df::building *bld, std::vector<df::item*> ite
     return true;
 }
 
-bool Buildings::constructWithFilters(df::building *bld, std::vector<df::job_item*> items)
+bool Buildings::constructWithFilters(df::building *bld, std::vector12<df::job_item*> items)
 {
     CHECK_NULL_POINTER(bld);
     CHECK_INVALID_ARGUMENT(bld->id == -1);
@@ -1200,7 +1200,7 @@ bool Buildings::markedForRemoval(df::building *bld)
 {
     CHECK_NULL_POINTER(bld);
     //for (df::job *job : bld->jobs)
-    for (std::vector<df::job*>::const_iterator it = bld->jobs.begin(); it != bld->jobs.end(); ++it)
+    for (std::vector12<df::job*>::const_iterator it = bld->jobs.begin(); it != bld->jobs.end(); ++it)
     {
         df::job *job = *it;
         if (job && job->job_type == df::job_type::DestroyBuilding)
@@ -1270,7 +1270,7 @@ void Buildings::updateBuildings(color_ostream& out, void* ptr)
     }
 }
 
-//static std::map<df::building_type, std::vector<std::string>> room_quality_names = {
+//static std::map<df::building_type, std::vector12<std::string24>> room_quality_names = {
 //    {df::building_type::Bed, {
 //        "Meager Quarters",
 //        "Modest Quarters",
@@ -1311,7 +1311,7 @@ void Buildings::updateBuildings(color_ostream& out, void* ptr)
 
 //What an ugly thing without C+11
 //... and event with it
-static std::string sv1[8] = {
+static std::string24 sv1[8] = {
     "Meager Quarters",
     "Modest Quarters",
     "Quarters",
@@ -1320,7 +1320,7 @@ static std::string sv1[8] = {
     "Great Bedroom",
     "Grand Bedroom",
     "Royal Bedroom"};
-static std::string sv2[8] = {
+static std::string24 sv2[8] = {
     "Meager Dining Room",
     "Modest Dining Room",
     "Dining Room",
@@ -1329,7 +1329,7 @@ static std::string sv2[8] = {
     "Great Dining Room",
     "Grand Dining Room",
     "Royal Dining Room"};
-static std::string sv3[8] = {
+static std::string24 sv3[8] = {
     "Meager Office",
     "Modest Office",
     "Office",
@@ -1338,7 +1338,7 @@ static std::string sv3[8] = {
     "Throne Room",
     "Opulent Throne Room",
     "Royal Throne Room"};
-static std::string sv4[8] = {
+static std::string24 sv4[8] = {
     "Grave",
     "Servant's Burial Chamber",
     "Burial Chamber",
@@ -1348,17 +1348,17 @@ static std::string sv4[8] = {
     "Grand Mausoleum",
     "Royal Mausoleum"};
 
-typedef std::pair<df::building_type, std::vector<std::string> > rq_pair;
-static std::pair<df::building_type, std::vector<std::string> > vv1[4] = {
-    rq_pair(df::building_type::Bed, std::vector<std::string>(sv1, sv1 + sizeof(sv1) / sizeof(sv1[0]))),
-    rq_pair(df::building_type::Table, std::vector<std::string>(sv2, sv2 + sizeof(sv2) / sizeof(sv2[0]))),
-    rq_pair(df::building_type::Chair, std::vector<std::string>(sv3, sv3 + sizeof(sv3) / sizeof(sv3[0]))),
-    rq_pair(df::building_type::Coffin, std::vector<std::string>(sv4, sv4 + sizeof(sv4) / sizeof(sv4[0])))
+typedef std::pair<df::building_type, std::vector12<std::string24> > rq_pair;
+static std::pair<df::building_type, std::vector12<std::string24> > vv1[4] = {
+    rq_pair(df::building_type::Bed, std::vector12<std::string24>(sv1, sv1 + sizeof(sv1) / sizeof(sv1[0]))),
+    rq_pair(df::building_type::Table, std::vector12<std::string24>(sv2, sv2 + sizeof(sv2) / sizeof(sv2[0]))),
+    rq_pair(df::building_type::Chair, std::vector12<std::string24>(sv3, sv3 + sizeof(sv3) / sizeof(sv3[0]))),
+    rq_pair(df::building_type::Coffin, std::vector12<std::string24>(sv4, sv4 + sizeof(sv4) / sizeof(sv4[0])))
 };
 
-static std::map<df::building_type, std::vector<std::string> > room_quality_names(vv1, vv1 + sizeof(vv1) / sizeof(vv1[0]));
+static std::map<df::building_type, std::vector12<std::string24> > room_quality_names(vv1, vv1 + sizeof(vv1) / sizeof(vv1[0]));
 
-std::string Buildings::getRoomDescription(df::building *building, df::unit *unit)
+std::string24 Buildings::getRoomDescription(df::building *building, df::unit *unit)
 {
     CHECK_NULL_POINTER(building);
     // unit can be null
@@ -1380,10 +1380,10 @@ std::string Buildings::getRoomDescription(df::building *building, df::unit *unit
         }
     }
 
-    return vector_get(room_quality_names[btype], size_t(level), string(""));
+    return vector_get(room_quality_names[btype], size_t(level), std::string24(""));
 }
 
-void Buildings::getStockpileContents(df::building_stockpilest *stockpile, std::vector<df::item*> *items)
+void Buildings::getStockpileContents(df::building_stockpilest *stockpile, std::vector12<df::item*> *items)
 {
     CHECK_NULL_POINTER(stockpile);
 
@@ -1442,9 +1442,9 @@ bool Buildings::isHospital(df::building * building)
 // returns building of pen/pit at cursor position (NULL if nothing found)
 df::building* Buildings::findPenPitAt(df::coord coord)
 {
-    vector<df::building_civzonest*> zones;
+    std::vector12<df::building_civzonest*> zones;
     Buildings::findCivzonesAt(&zones, coord);
-    for (vector<df::building_civzonest*>::const_iterator zone = zones.begin(); zone != zones.end(); ++zone)
+    for (std::vector12<df::building_civzonest*>::const_iterator zone = zones.begin(); zone != zones.end(); ++zone)
     {
         if (isPenPasture(*zone) || isPitPond(*zone))
             return (*zone);
@@ -1503,7 +1503,7 @@ StockpileIterator& StockpileIterator::operator++() {
     return *this;
 }
 
-bool Buildings::getCageOccupants(df::building_cagest *cage, vector<df::unit*> &units)
+bool Buildings::getCageOccupants(df::building_cagest *cage, std::vector12<df::unit*> &units)
 {
     CHECK_NULL_POINTER(cage);
     if (!world)
@@ -1517,7 +1517,7 @@ bool Buildings::getCageOccupants(df::building_cagest *cage, vector<df::unit*> &u
 
     units.clear();
     //for (df::general_ref *gref : cage_item->general_refs)
-    for (std::vector<df::general_ref*>::const_iterator it = cage_item->general_refs.begin(); it != cage_item->general_refs.end(); ++it)
+    for (std::vector12<df::general_ref*>::const_iterator it = cage_item->general_refs.begin(); it != cage_item->general_refs.end(); ++it)
     {
         df::general_ref *gref = *it;
         df::general_ref_contains_unitst* ref = virtual_cast<df::general_ref_contains_unitst>(gref);

@@ -112,7 +112,7 @@ using Random::PerlinNoise1D;
 using Random::PerlinNoise2D;
 using Random::PerlinNoise3D;
 
-void dfhack_printerr(lua_State *S, const std::string &str);
+void dfhack_printerr(lua_State *S, const std::string24 &str);
 
 void Lua::Push(lua_State *state, const Units::NoblePosition &pos)
 {
@@ -379,7 +379,7 @@ static int dfhack_persistent_get_all(lua_State *state)
     const char *str = luaL_checkstring(state, 1);
     bool prefix = (lua_gettop(state)>=2 ? lua_toboolean(state,2) : false);
 
-    std::vector<PersistentDataItem> data;
+    std::vector12<PersistentDataItem> data;
     World::GetPersistentData(&data, str, prefix);
 
     if (data.empty())
@@ -583,7 +583,7 @@ static int dfhack_matinfo_find(lua_State *state)
         info.find(luaL_checkstring(state, 1));
     else
     {
-        std::vector<std::string> tokens;
+        std::vector12<std::string24> tokens;
 
         for (int i = 1; i <= argc; i++)
             tokens.push_back(luaL_checkstring(state, i));
@@ -667,7 +667,7 @@ static int dfhack_matinfo_getToken(lua_State *state)
 {
     MaterialInfo info;
     decode_matinfo(state, &info, true);
-    std::string str = info.getToken();
+    std::string24 str = info.getToken();
     lua_pushstring(state, str.c_str());
     return 1;
 }
@@ -678,7 +678,7 @@ static int dfhack_matinfo_toString(lua_State *state)
     decode_matinfo(state, &info);
 
     lua_settop(state, 3);
-    std::string str = info.toString(luaL_optint(state, 2, 10015), lua_toboolean(state, 3));
+    std::string24 str = info.toString(luaL_optint(state, 2, 10015), lua_toboolean(state, 3));
     lua_pushstring(state, str.c_str());
     return 1;
 }
@@ -1196,7 +1196,7 @@ static int dfhack_random_init(lua_State *L)
         prng->init();
     else
     {
-        std::vector<uint32_t> data;
+        std::vector12<uint32_t> data;
         int tcnt = luaL_optint(L, 3, 1);
 
         if (lua_isnumber(L, 2))
@@ -1278,7 +1278,7 @@ static int dfhack_random_unitvector(lua_State *L)
         luaL_argerror(L, 2, "vector size must be positive");
     luaL_checkstack(L, size, "not enough stack in dfhack.random.unitvector");
 
-    std::vector<double> buf(size);
+    std::vector12<double> buf(size);
     prng->unitvector(&(*buf.begin()), size);
 
     for (int i = 0; i < size; i++)
@@ -1383,7 +1383,7 @@ static void OpenModule(lua_State *state, const char *mname,
 
 /***** DFHack module *****/
 
-static std::string getOSType()
+static std::string24 getOSType()
 {
     switch (Core::getInstance().vinfo->getOS())
     {
@@ -1406,23 +1406,23 @@ static int getArchitecture()
     return sizeof(void*) * 8;
 }
 
-static std::string getArchitectureName()
+static std::string24 getArchitectureName()
 {
     return getArchitecture() == 64 ? "x86_64" : "x86";
 }
 
-static std::string getDFVersion() { return Core::getInstance().vinfo->getVersion(); }
+static std::string24 getDFVersion() { return Core::getInstance().vinfo->getVersion(); }
 static uint32_t getTickCount() { return Core::getInstance().proc->getTickCount(); }
 
-static std::string getDFPath() { return Core::getInstance().proc->getPath(); }
-static std::string getHackPath() { return Core::getInstance().getHackPath(); }
+static std::string24 getDFPath() { return Core::getInstance().proc->getPath(); }
+static std::string24 getHackPath() { return Core::getInstance().getHackPath(); }
 
 static bool isWorldLoaded() { return Core::getInstance().isWorldLoaded(); }
 static bool isMapLoaded() { return Core::getInstance().isMapLoaded(); }
 
-static std::string df2utf(std::string s) { return DF2UTF(s); }
-static std::string utf2df(std::string s) { return UTF2DF(s); }
-static std::string df2console(color_ostream &out, std::string s) { return DF2CONSOLE(out, s); }
+static std::string24 df2utf(std::string24 s) { return DF2UTF(s); }
+static std::string24 utf2df(std::string24 s) { return UTF2DF(s); }
+static std::string24 df2console(color_ostream &out, std::string24 s) { return DF2CONSOLE(out, s); }
 
 #define WRAP_VERSION_FUNC(name, function) WRAPN(name, DFHack::Version::function)
 
@@ -1557,7 +1557,7 @@ static int job_listNewlyCreated(lua_State *state)
 
     lua_settop(state, 1);
 
-    std::vector<df::job*> pvec;
+    std::vector12<df::job*> pvec;
     if (Job::listNewlyCreated(&pvec, &nxid))
     {
         lua_pushinteger(state, nxid);
@@ -1667,7 +1667,7 @@ static int units_getPosition(lua_State *state)
 
 static int units_getNoblePositions(lua_State *state)
 {
-    std::vector<Units::NoblePosition> np;
+    std::vector12<Units::NoblePosition> np;
 
     if (Units::getNoblePositions(&np, Lua::CheckDFObject<df::unit>(state,1)))
         Lua::PushVector(state, np);
@@ -1699,7 +1699,7 @@ lua_State* oper_r::state = NULL;
 
 static int units_getUnitsInBox(lua_State *state)
 {
-    std::vector<df::unit*> units;
+    std::vector12<df::unit*> units;
     int x1 = luaL_checkint(state, 1);
     int y1 = luaL_checkint(state, 2);
     int z1 = luaL_checkint(state, 3);
@@ -1769,14 +1769,14 @@ static df::proj_itemst *items_makeProjectile(df::item *item)
     return Items::makeProjectile(mc, item);
 }
 
-static int16_t items_findType(std::string token)
+static int16_t items_findType(std::string24 token)
 {
     DFHack::ItemTypeInfo result;
     result.find(token);
     return result.type;
 }
 
-static int32_t items_findSubtype(std::string token)
+static int32_t items_findSubtype(std::string24 token)
 {
     DFHack::ItemTypeInfo result;
     result.find(token);
@@ -1821,7 +1821,7 @@ static int items_getPosition(lua_State *state)
 
 static int items_getContainedItems(lua_State *state)
 {
-    std::vector<df::item*> pvec;
+    std::vector12<df::item*> pvec;
     Items::getContainedItems(Lua::CheckDFObject<df::item>(state,1),&pvec);
     Lua::PushVector(state, pvec);
     return 1;
@@ -2015,7 +2015,7 @@ static const LuaWrapper::FunctionReg dfhack_burrows_module[] = {
 
 static int burrows_listBlocks(lua_State *state)
 {
-    std::vector<df::map_block*> pvec;
+    std::vector12<df::map_block*> pvec;
     Burrows::listBlocks(&pvec, Lua::CheckDFObject<df::burrow>(state,1));
     Lua::PushVector(state, pvec);
     return 1;
@@ -2064,7 +2064,7 @@ static int buildings_findAtTile(lua_State *L)
 static int buildings_findCivzonesAt(lua_State *L)
 {
     df::coord pos = CheckCoordXYZ(L, 1, true);
-    std::vector<df::building_civzonest*> pvec;
+    std::vector12<df::building_civzonest*> pvec;
     if (Buildings::findCivzonesAt(&pvec, pos))
         Lua::PushVector(L, pvec);
     else
@@ -2126,7 +2126,7 @@ int buildings_setSize(lua_State *state)
 
 static int buildings_getStockpileContents(lua_State *state)
 {
-    std::vector<df::item*> pvec;
+    std::vector12<df::item*> pvec;
     Buildings::getStockpileContents(Lua::CheckDFObject<df::building_stockpilest>(state,1),&pvec);
     Lua::PushVector(state, pvec);
     return 1;
@@ -2134,7 +2134,7 @@ static int buildings_getStockpileContents(lua_State *state)
 
 static int buildings_getCageOccupants(lua_State *state)
 {
-    std::vector<df::unit*> units;
+    std::vector12<df::unit*> units;
     Buildings::getCageOccupants(Lua::CheckDFObject<df::building_cagest>(state, 1), units);
     Lua::PushVector(state, units);
     return 1;
@@ -2408,8 +2408,8 @@ static const LuaWrapper::FunctionReg dfhack_filesystem_module[] = {
 static int filesystem_listdir(lua_State *L)
 {
     luaL_checktype(L,1,LUA_TSTRING);
-    std::string dir=lua_tostring(L,1);
-    std::vector<std::string> files;
+    std::string24 dir=lua_tostring(L,1);
+    std::vector12<std::string24> files;
     int err = DFHack::Filesystem::listdir(dir, files);
     if (err)
     {
@@ -2431,14 +2431,14 @@ static int filesystem_listdir(lua_State *L)
 static int filesystem_listdir_recursive(lua_State *L)
 {
     luaL_checktype(L,1,LUA_TSTRING);
-    std::string dir=lua_tostring(L,1);
+    std::string24 dir=lua_tostring(L,1);
     int depth = 10;
     if (lua_gettop(L) >= 2 && !lua_isnil(L, 2))
         depth = luaL_checkint(L, 2);
     bool include_prefix = true;
     if (lua_gettop(L) >= 3 && !lua_isnil(L, 3))
         include_prefix = lua_toboolean(L, 3);
-    std::map<std::string, bool> files;
+    std::map<std::string24, bool> files;
     int err = DFHack::Filesystem::listdir_recursive(dir, files, depth, include_prefix);
     if (err)
     {
@@ -2452,7 +2452,7 @@ static int filesystem_listdir_recursive(lua_State *L)
     }
     lua_newtable(L);
     int i = 1;
-    for (std::map<std::string, bool>::const_iterator it = files.begin(); it != files.end(); ++it)
+    for (std::map<std::string24, bool>::const_iterator it = files.begin(); it != files.end(); ++it)
     {
         lua_pushinteger(L, i++);
         lua_newtable(L);
@@ -2542,8 +2542,8 @@ static md5wrapper md5_wrap;
 static uintptr_t getImageBase() { return Core::getInstance().proc->getBase(); }
 static intptr_t getRebaseDelta() { return Core::getInstance().vinfo->getRebaseDelta(); }
 static int8_t getModstate() { return Core::getInstance().getModstate(); }
-static std::string internal_strerror(int n) { return strerror(n); }
-static std::string internal_md5(std::string s) { return md5_wrap.getHashFromString(s); }
+static std::string24 internal_strerror(int n) { return strerror(n); }
+static std::string24 internal_md5(std::string24 s) { return md5_wrap.getHashFromString(s); }
 
 static const LuaWrapper::FunctionReg dfhack_internal_module[] = {
     WRAP(getImageBase),
@@ -2585,7 +2585,7 @@ static int internal_getAddress(lua_State *L)
 
 static int internal_setAddress(lua_State *L)
 {
-    std::string name = luaL_checkstring(L, 1);
+    std::string24 name = luaL_checkstring(L, 1);
     uintptr_t addr = (uintptr_t)checkaddr(L, 2, true);
     internal_getAddress(L);
 
@@ -2635,7 +2635,7 @@ static int internal_adjustOffset(lua_State *L)
 
 static int internal_getMemRanges(lua_State *L)
 {
-    std::vector<DFHack::t_memrange> ranges;
+    std::vector12<DFHack::t_memrange> ranges;
     Core::getInstance().proc->getMemRanges(ranges);
 
     lua_newtable(L);
@@ -2850,8 +2850,8 @@ static int internal_runCommand(lua_State *L)
     int type_1 = lua_type(L, 1);
     if (type_1 == LUA_TTABLE)
     {
-        std::string command = "";
-        std::vector<std::string> args;
+        std::string24 command = "";
+        std::vector12<std::string24> args;
         lua_pushnil(L);   // first key
         while (lua_next(L, 1) != 0)
         {
@@ -2867,7 +2867,7 @@ static int internal_runCommand(lua_State *L)
     }
     else if (type_1 == LUA_TSTRING)
     {
-        std::string command = lua_tostring(L, 1);
+        std::string24 command = lua_tostring(L, 1);
         std::cerr << "internal_runCommand2 suspend";
         CoreSuspender suspend;
         res = Core::getInstance().runCommand(out, command);
@@ -2886,7 +2886,7 @@ static int internal_runCommand(lua_State *L)
     for (std::list<buffered_color_ostream::fragment_type>::const_iterator iter = fragments.begin(); iter != fragments.end(); iter++, i++)
     {
         int color = iter->first;
-        std::string output = iter->second;
+        std::string24 output = iter->second;
         lua_createtable(L, 2, 0);
         lua_pushinteger(L, color);
         lua_rawseti(L, -2, 1);
@@ -2933,9 +2933,9 @@ static int internal_getScriptPaths(lua_State *L)
 {
     int i = 1;
     lua_newtable(L);
-    std::vector<std::string> paths;
+    std::vector12<std::string24> paths;
     Core::getInstance().getScriptPaths(&paths);
-    for (std::vector<std::string>::const_iterator it = paths.begin(); it != paths.end(); ++it)
+    for (std::vector12<std::string24>::const_iterator it = paths.begin(); it != paths.end(); ++it)
     {
         lua_pushinteger(L, i++);
         lua_pushstring(L, it->c_str());
@@ -2947,7 +2947,7 @@ static int internal_getScriptPaths(lua_State *L)
 static int internal_findScript(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
-    std::string path = Core::getInstance().findScript(name);
+    std::string24 path = Core::getInstance().findScript(name);
     if (path.size())
         lua_pushstring(L, path.c_str());
     else
@@ -2970,12 +2970,12 @@ static int internal_md5file(lua_State *L)
     const char *s = luaL_checkstring(L, 1);
     uint32_t len;
     char *first_kb_raw = NULL;
-    std::vector<char> first_kb;
+    std::vector12<char> first_kb;
     if (lua_toboolean(L, 2))
         first_kb_raw = new char[1024];
 
-    std::string hash = md5_wrap.getHashFromFile(s, len, first_kb_raw);
-    bool err = (hash.find("file") != std::string::npos);
+    std::string24 hash = md5_wrap.getHashFromFile(s, len, first_kb_raw).c_str();
+    bool err = (hash.find("file") != std::string24::npos);
 
     if (first_kb_raw)
     {

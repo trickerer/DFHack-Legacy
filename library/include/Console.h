@@ -52,7 +52,7 @@ namespace  DFHack
         }
         bool load (const char * filename)
         {
-            std::string reader;
+            std::string24 reader;
             std::ifstream infile(filename);
             if(infile.bad())
                 return false;
@@ -61,7 +61,7 @@ namespace  DFHack
             {
                 if(s.empty())
                     continue;
-                history.push_back(s);
+                history.push_back(s.c_str());
             }
             return true;
         }
@@ -74,10 +74,10 @@ namespace  DFHack
             if(outfile.bad())
                 return false;
             //fprintf(stderr,"Save: Iterating...\n");
-            for(std::deque <std::string>::const_iterator iter = history.begin();iter < history.end(); iter++)
+            for(std::deque20 <std::string24>::const_iterator iter = history.begin();iter < history.end(); iter++)
             {
                 //fprintf(stderr,"Save: Dumping %s\n",(*iter).c_str());
-                outfile << *iter << std::endl;
+                outfile << (*iter).c_str() << std::endl;
                 //fprintf(stderr,"Save: Flushing\n");
                 outfile.flush();
             }
@@ -87,7 +87,7 @@ namespace  DFHack
             return true;
         }
         /// add a command to the history
-        void add(const std::string& command)
+        void add(const std::string24& command)
         {
             // if current command = last in history -> do not add. Always add if history is empty.
             if(!history.empty() && history.front() == command)
@@ -107,7 +107,7 @@ namespace  DFHack
             return history.size();
         }
         /// get pointer to a particular history item
-        std::string & operator[](std::size_t index)
+        std::string24 & operator[](std::size_t index)
         {
             assert(index < history.size());
             return history[index];
@@ -118,7 +118,7 @@ namespace  DFHack
         }
     private:
         std::size_t capacity;
-        std::deque <std::string> history;
+        std::deque20 <std::string24> history;
     };
 
     class Private;
@@ -126,7 +126,7 @@ namespace  DFHack
     {
     protected:
         virtual void begin_batch();
-        virtual void add_text(color_value color, const std::string &text);
+        virtual void add_text(color_value color, const std::string24 &text);
         virtual void end_batch();
 
         virtual void flush_proxy();
@@ -165,7 +165,7 @@ namespace  DFHack
         static int RETRY;
         //! \}
         /// A simple line edit (raw mode)
-        int lineedit(const std::string& prompt, std::string& output, CommandHistory & history );
+        int lineedit(const std::string24& prompt, std::string24& output, CommandHistory & history );
         bool isInited (void) { return inited; };
 
         bool is_console() { return true; }
