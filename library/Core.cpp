@@ -99,8 +99,8 @@ using df::global::world;
 
 // FIXME: A lot of code in one file, all doing different things... there's something fishy about it.
 
-static bool parseKeySpec(std::string keyspec, int *psym, int *pmod, std::string *pfocus = NULL);
-size_t loadScriptFiles(Core* core, color_ostream& out, const vector<std::string>& prefix, const std::string& folder);
+static bool parseKeySpec(std::string24 keyspec, int *psym, int *pmod, std::string24 *pfocus = NULL);
+size_t loadScriptFiles(Core* core, color_ostream& out, const std::vector12<std::string24>& prefix, const std::string24& folder);
 
 tthread::mutex suspender_creation_mutex;
 static std::map<uint32, CoreSuspenderBase*> threadLockHolders;
@@ -143,13 +143,13 @@ public:
 
 CoreSuspendClaimMain::CoreSuspendClaimMain()
 {
-    cerr << "\nCoreSuspendClaimMain(): lock";
+    //cerr << "\nCoreSuspendClaimMain(): lock";
     MainThread::suspend().lock();
 }
 
 CoreSuspendClaimMain::~CoreSuspendClaimMain()
 {
-    cerr << "\nCoreSuspendClaimMain(): unlock";
+    //cerr << "\nCoreSuspendClaimMain(): unlock";
     MainThread::suspend().unlock();
 }
 
@@ -163,9 +163,9 @@ struct CommandDepthCounter
 };
 thread_local int CommandDepthCounter::depth = 0;
 
-void Core::cheap_tokenise(string const& input, vector<string> &output)
+void Core::cheap_tokenise(std::string24 const& input, std::vector12<std::string24> &output)
 {
-    string *cur = NULL;
+    std::string24 *cur = NULL;
     size_t i = 0;
 
     // Check the first non-space character
@@ -175,7 +175,7 @@ void Core::cheap_tokenise(string const& input, vector<string> &output)
     if (i < input.size() && input[i] == ':')
     {
         // Read the command
-        std::string cmd;
+        std::string24 cmd;
         i++;
         while (i < input.size() && !isspace(input[i]))
             cmd.push_back(input[i++]);
@@ -243,7 +243,7 @@ void fHKthread(void * iodata)
     bool keep_going = true;
     while(keep_going)
     {
-        std::string stuff = core->getHotkeyCmd(keep_going); // waits on mutex!
+        std::string24 stuff = core->getHotkeyCmd(keep_going); // waits on mutex!
         if(!stuff.empty())
         {
             color_ostream_proxy out(core->getConsole());
@@ -259,10 +259,10 @@ void fHKthread(void * iodata)
 struct sortable
 {
     bool recolor;
-    string name;
-    string description;
+    std::string24 name;
+    std::string24 description;
     //FIXME: Nuke when MSVC stops failing at being C++11 compliant
-    sortable(bool recolor_,const string& name_,const string & description_): recolor(recolor_), name(name_), description(description_){};
+    sortable(bool recolor_,const std::string24& name_,const std::string24 & description_): recolor(recolor_), name(name_), description(description_){};
     bool operator <(const sortable & rhs) const
     {
         if( name < rhs.name )
@@ -271,7 +271,7 @@ struct sortable
     };
 };
 
-static string dfhack_version_desc()
+static std::string24 dfhack_version_desc()
 {
     stringstream s;
     s << Version::dfhack_version() << " ";
@@ -282,10 +282,10 @@ static string dfhack_version_desc()
     s << " on " << (sizeof(void*) == 8 ? "x86_64" : "x86");
     if (strlen(Version::dfhack_build_id()))
         s << " [build ID: " << Version::dfhack_build_id() << "]";
-    return s.str();
+    return s.str().c_str();
 }
 
-static std::string getScriptHelp(std::string path, std::string helpprefix)
+static std::string24 getScriptHelp(std::string24 path, std::string24 helpprefix)
 {
     ifstream script(path.c_str());
 
@@ -293,21 +293,21 @@ static std::string getScriptHelp(std::string path, std::string helpprefix)
     {
         std::string help;
         if (getline(script, help) &&
-            help.substr(0,helpprefix.length()) == helpprefix)
+            help.substr(0,helpprefix.length()) == helpprefix.c_str())
         {
             help = help.substr(helpprefix.length());
             while (help.size() && help[0] == ' ')
                 help = help.substr(1);
-            return help;
+            return help.c_str();
         }
     }
 
     return "No help available.";
 }
 
-static void listScripts(PluginManager *plug_mgr, std::map<string,string> &pset, std::string path, bool all, std::string prefix = "")
+static void listScripts(PluginManager *plug_mgr, std::map<std::string24,string24> &pset, std::string24 path, bool all, std::string24 prefix = "")
 {
-    std::vector<string> files;
+    std::vector12<std::string24> files;
     Filesystem::listdir(path, files);
 
     path += '/';
@@ -315,16 +315,16 @@ static void listScripts(PluginManager *plug_mgr, std::map<string,string> &pset, 
     {
         if (hasEnding(files[i], ".lua"))
         {
-            string help = getScriptHelp(path + files[i], "--");
-            string key = prefix + files[i].substr(0, files[i].size()-4);
+            std::string24 help = getScriptHelp(path + files[i], "--");
+            std::string24 key = prefix + files[i].substr(0, files[i].size()-4);
             if (pset.find(key) == pset.end()) {
                 pset[key] = help;
             }
         }
         else if (plug_mgr->ruby && plug_mgr->ruby->is_enabled() && hasEnding(files[i], ".rb"))
         {
-            string help = getScriptHelp(path + files[i], "#");
-            string key = prefix + files[i].substr(0, files[i].size()-3);
+            std::string24 help = getScriptHelp(path + files[i], "#");
+            std::string24 key = prefix + files[i].substr(0, files[i].size()-3);
             if (pset.find(key) == pset.end()) {
                 pset[key] = help;
             }
@@ -336,23 +336,23 @@ static void listScripts(PluginManager *plug_mgr, std::map<string,string> &pset, 
     }
 }
 
-static void listAllScripts(map<string, string> &pset, bool all)
+static void listAllScripts(map<std::string24, std::string24> &pset, bool all)
 {
-    vector<string> paths;
+    std::vector12<std::string24> paths;
     Core::getInstance().getScriptPaths(&paths);
-    //for (string path : paths)
+    //for (std::string24 path : paths)
     //    listScripts(Core::getInstance().getPluginManager(), pset, path, all);
-    for (vector<string>::const_iterator it = paths.begin(); it != paths.end(); ++it)
+    for (std::vector12<std::string24>::const_iterator it = paths.begin(); it != paths.end(); ++it)
         listScripts(Core::getInstance().getPluginManager(), pset, *it, all);
 }
 
 namespace {
     struct ScriptArgs {
-        const string *pcmd;
-        vector<string> *pargs;
+        const std::string24 *pcmd;
+        std::vector12<std::string24> *pargs;
     };
     struct ScriptEnableState {
-        const string *pcmd;
+        const std::string24 *pcmd;
         bool pstate;
     };
 }
@@ -371,7 +371,7 @@ static bool init_run_script(color_ostream &out, lua_State *state, void *info)
     return true;
 }
 
-static command_result runLuaScript(color_ostream &out, std::string name, vector<string> &args)
+static command_result runLuaScript(color_ostream &out, std::string24 name, std::vector12<std::string24> &args)
 {
     ScriptArgs data;
     data.pcmd = &name;
@@ -395,7 +395,7 @@ static bool init_enable_script(color_ostream &out, lua_State *state, void *info)
     return true;
 }
 
-static command_result enableLuaScript(color_ostream &out, std::string name, bool state)
+static command_result enableLuaScript(color_ostream &out, std::string24 name, bool state)
 {
     ScriptEnableState data;
     data.pcmd = &name;
@@ -406,13 +406,13 @@ static command_result enableLuaScript(color_ostream &out, std::string name, bool
     return ok ? CR_OK : CR_FAILURE;
 }
 
-static command_result runRubyScript(color_ostream &out, PluginManager *plug_mgr, std::string filename, vector<string> &args)
+static command_result runRubyScript(color_ostream &out, PluginManager *plug_mgr, std::string24 filename, std::vector12<std::string24> &args)
 {
     if (!plug_mgr->ruby || !plug_mgr->ruby->is_enabled())
         return CR_FAILURE;
 
     // ugly temporary patch for https://github.com/DFHack/dfhack/issues/1146
-    string cwd = Filesystem::getcwd();
+    std::string24 cwd = Filesystem::getcwd();
     if (filename.find(cwd) == 0)
     {
         filename = filename.substr(cwd.size());
@@ -420,7 +420,7 @@ static command_result runRubyScript(color_ostream &out, PluginManager *plug_mgr,
             filename = filename.substr(1);
     }
 
-    std::string rbcmd = "$script_args = [";
+    std::string24 rbcmd = "$script_args = [";
     for (size_t i = 0; i < args.size(); i++)
         rbcmd += "'" + args[i] + "', ";
     rbcmd += "]\n";
@@ -430,22 +430,22 @@ static command_result runRubyScript(color_ostream &out, PluginManager *plug_mgr,
     return plug_mgr->ruby->eval_ruby(out, rbcmd.c_str());
 }
 
-command_result Core::runCommand(color_ostream &out, const std::string &command)
+command_result Core::runCommand(color_ostream &out, const std::string24 &command)
 {
     if (!command.empty())
     {
-        vector <string> parts;
+        std::vector12<std::string24> parts;
         Core::cheap_tokenise(command,parts);
         if(parts.size() == 0)
             return CR_NOT_IMPLEMENTED;
 
-        string first = parts[0];
+        std::string24 first = parts[0];
         parts.erase(parts.begin());
 
         if (first[0] == '#')
             return CR_OK;
 
-        cerr << "Invoking: " << command << endl;
+        cerr << "Invoking: " << command.c_str() << endl;
         return runCommand(out, first, parts);
     }
     else
@@ -475,7 +475,7 @@ command_result Core::runCommand(color_ostream &out, const std::string &command)
 //    "sc-script"
 //};
 
-static std::string builtin_cmd_strings[] = {
+static std::string24 builtin_cmd_strings[] = {
     "ls" ,
     "help" ,
     "type" ,
@@ -496,21 +496,21 @@ static std::string builtin_cmd_strings[] = {
     "show" ,
     "sc-script"
 };
-static const std::set<std::string> built_in_commands(builtin_cmd_strings, builtin_cmd_strings + sizeof(builtin_cmd_strings) / sizeof(builtin_cmd_strings[0]));
+static const std::set<std::string24> built_in_commands(builtin_cmd_strings, builtin_cmd_strings + sizeof(builtin_cmd_strings) / sizeof(builtin_cmd_strings[0]));
 
 
-static bool try_autocomplete(color_ostream &con, const std::string &first, std::string &completed)
+static bool try_autocomplete(color_ostream &con, const std::string24 &first, std::string24 &completed)
 {
-    std::vector<std::string> possible;
+    std::vector12<std::string24> possible;
 
     // Check for possible built in commands to autocomplete first
     //for (auto const &command : built_in_commands)
-    for (std::set<std::string>::const_iterator ci = built_in_commands.begin(); ci != built_in_commands.end(); ++ci)
+    for (std::set<std::string24>::const_iterator ci = built_in_commands.begin(); ci != built_in_commands.end(); ++ci)
         if ((*ci).substr(0, first.size()) == first)
             possible.push_back(*ci);
 
     PluginManager* plug_mgr = Core::getInstance().getPluginManager();
-    for (std::map<std::string, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
+    for (std::map<std::string24, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
     {
         const Plugin * plug = it->second;
         for (size_t j = 0; j < plug->size(); j++)
@@ -523,11 +523,11 @@ static bool try_autocomplete(color_ostream &con, const std::string &first, std::
         }
     }
 
-    bool all = (first.find('/') != std::string::npos);
+    bool all = (first.find('/') != std::string24::npos);
 
-    std::map<string, string> scripts;
+    std::map<std::string24, std::string24> scripts;
     listAllScripts(scripts, all);
-    for (std::map<string, string>::iterator iter = scripts.begin(); iter != scripts.end(); ++iter)
+    for (std::map<std::string24, std::string24>::iterator iter = scripts.begin(); iter != scripts.end(); ++iter)
         if (iter->first.substr(0, first.size()) == first)
             possible.push_back(iter->first);
 
@@ -541,7 +541,7 @@ static bool try_autocomplete(color_ostream &con, const std::string &first, std::
 
     if (possible.size() > 1 && possible.size() < 8)
     {
-        std::string out;
+        std::string24 out;
         for (size_t i = 0; i < possible.size(); i++)
             out += " " + possible[i];
         con.printerr("%s is not recognized. Possible completions:%s\n", first.c_str(), out.c_str());
@@ -551,10 +551,10 @@ static bool try_autocomplete(color_ostream &con, const std::string &first, std::
     return false;
 }
 
-bool Core::addScriptPath(string path, bool search_before)
+bool Core::addScriptPath(std::string24 path, bool search_before)
 {
     tthread::lock_guard<tthread::mutex> lock(script_path_mutex);
-    vector<string> &vec = script_paths[search_before ? 0 : 1];
+    std::vector12<std::string24> &vec = script_paths[search_before ? 0 : 1];
     if (std::find(vec.begin(), vec.end(), path) != vec.end())
         return false;
     if (!Filesystem::isdir(path))
@@ -563,16 +563,16 @@ bool Core::addScriptPath(string path, bool search_before)
     return true;
 }
 
-bool Core::removeScriptPath(string path)
+bool Core::removeScriptPath(std::string24 path)
 {
     tthread::lock_guard<tthread::mutex> lock(script_path_mutex);
     bool found = false;
     for (int i = 0; i < 2; i++)
     {
-        vector<string> &vec = script_paths[i];
+        std::vector12<std::string24> &vec = script_paths[i];
         while (1)
         {
-            vector<string>::const_iterator it = std::find(vec.begin(), vec.end(), path);
+            std::vector12<std::string24>::const_iterator it = std::find(vec.begin(), vec.end(), path);
             if (it == vec.end())
                 break;
             vec.erase(it);
@@ -582,32 +582,32 @@ bool Core::removeScriptPath(string path)
     return found;
 }
 
-void Core::getScriptPaths(std::vector<std::string> *dest)
+void Core::getScriptPaths(std::vector12<std::string24> *dest)
 {
     tthread::lock_guard<tthread::mutex> lock(script_path_mutex);
     dest->clear();
-    string df_path = proc->getPath();
-    for (vector<string>::const_iterator it = script_paths[0].begin(); it != script_paths[0].end(); ++it)
+    std::string24 df_path = proc->getPath();
+    for (std::vector12<std::string24>::const_iterator it = script_paths[0].begin(); it != script_paths[0].end(); ++it)
         dest->push_back(*it);
     if (df::global::world && isWorldLoaded()) {
-        string save = World::ReadWorldFolder();
+        std::string24 save = World::ReadWorldFolder();
         if (save.size())
             dest->push_back(df_path + "/data/save/" + save + "/raw/scripts");
     }
     dest->push_back(df_path + "/raw/scripts");
     dest->push_back(df_path + "/hack/scripts");
-    for (vector<string>::const_iterator it = script_paths[1].begin(); it != script_paths[1].end(); ++it)
+    for (std::vector12<std::string24>::const_iterator it = script_paths[1].begin(); it != script_paths[1].end(); ++it)
         dest->push_back(*it);
 }
 
 
-string Core::findScript(string name)
+string24 Core::findScript(std::string24 name)
 {
-    vector<string> paths;
+    std::vector12<std::string24> paths;
     getScriptPaths(&paths);
-    for (vector<string>::const_iterator it = paths.begin(); it != paths.end(); ++it)
+    for (std::vector12<std::string24>::const_iterator it = paths.begin(); it != paths.end(); ++it)
     {
-        string path = *it + "/" + name;
+        std::string24 path = *it + "/" + name;
         if (Filesystem::isfile(path))
             return path;
     }
@@ -617,7 +617,7 @@ string Core::findScript(string name)
 bool loadScriptPaths(color_ostream &out, bool silent = false)
 {
     using namespace std;
-    string filename("dfhack-config/script-paths.txt");
+    std::string24 filename("dfhack-config/script-paths.txt");
     ifstream file(filename.c_str());
     if (!file)
     {
@@ -625,7 +625,7 @@ bool loadScriptPaths(color_ostream &out, bool silent = false)
             out.printerr("Could not load %s\n", filename.c_str());
         return false;
     }
-    string raw;
+    std::string raw;
     int line = 0;
     while (getline(file, raw))
     {
@@ -636,11 +636,11 @@ bool loadScriptPaths(color_ostream &out, bool silent = false)
         if (!(ss >> ch) || ch == '#')
             continue;
         ss >> ws; // discard whitespace
-        string path;
+        std::string path;
         getline(ss, path);
         if (ch == '+' || ch == '-')
         {
-            if (!Core::getInstance().addScriptPath(path, ch == '+') && !silent)
+            if (!Core::getInstance().addScriptPath(path.c_str(), ch == '+') && !silent)
                 out.printerr("%s:%i: Failed to add path: %s\n", filename.c_str(), line, path.c_str());
         }
         else if (!silent)
@@ -649,11 +649,11 @@ bool loadScriptPaths(color_ostream &out, bool silent = false)
     return true;
 }
 
-static std::map<std::string, state_change_event> state_change_event_map;
+static std::map<std::string24, state_change_event> state_change_event_map;
 static void sc_event_map_init() {
     if (!state_change_event_map.size())
     {
-        #define insert(name) state_change_event_map.insert(std::pair<std::string, state_change_event>(#name, name))
+        #define insert(name) state_change_event_map.insert(std::pair<std::string24, state_change_event>(#name, name))
         insert(SC_WORLD_LOADED);
         insert(SC_WORLD_UNLOADED);
         insert(SC_MAP_LOADED);
@@ -665,19 +665,19 @@ static void sc_event_map_init() {
     }
 }
 
-static state_change_event sc_event_id (std::string name) {
+static state_change_event sc_event_id (std::string24 name) {
     sc_event_map_init();
-    std::map<std::string, state_change_event>::const_iterator it = state_change_event_map.find(name);
+    std::map<std::string24, state_change_event>::const_iterator it = state_change_event_map.find(name);
     if (it != state_change_event_map.end())
         return it->second;
     if (name.find("SC_") != 0)
-        return sc_event_id(std::string("SC_") + name);
+        return sc_event_id(std::string24("SC_") + name);
     return SC_UNKNOWN;
 }
 
-static std::string sc_event_name (state_change_event id) {
+static std::string24 sc_event_name (state_change_event id) {
     sc_event_map_init();
-    for (std::map<std::string, state_change_event>::const_iterator it = state_change_event_map.begin(); it != state_change_event_map.end(); ++it)
+    for (std::map<std::string24, state_change_event>::const_iterator it = state_change_event_map.begin(); it != state_change_event_map.end(); ++it)
     {
         if (it->second == id)
             return it->first;
@@ -685,9 +685,9 @@ static std::string sc_event_name (state_change_event id) {
     return "SC_UNKNOWN";
 }
 
-string getBuiltinCommand(std::string cmd)
+string24 getBuiltinCommand(std::string24 cmd)
 {
-    std::string builtin = "";
+    std::string24 builtin = "";
 
     // Check our list of builtin commands from the header
     if (built_in_commands.count(cmd))
@@ -709,11 +709,11 @@ string getBuiltinCommand(std::string cmd)
     return builtin;
 }
 
-void ls_helper(color_ostream &con, const string &name, const string &desc)
+void ls_helper(color_ostream &con, const std::string24 &name, const std::string24 &desc)
 {
     const size_t help_line_length = 80 - 22 - 5;
-    const string padding = string(80 - help_line_length, ' ');
-    vector<string> lines;
+    const std::string24 padding = std::string24(80 - help_line_length, ' ');
+    std::vector12<std::string24> lines;
     con.print("  %-22s - ", name.c_str());
     word_wrap(&lines, desc, help_line_length);
 
@@ -730,9 +730,9 @@ void ls_helper(color_ostream &con, const PluginCommand &pcmd)
     con.reset_color();
 }
 
-command_result Core::runCommand(color_ostream &con, const std::string &first_, vector<string> &parts)
+command_result Core::runCommand(color_ostream &con, const std::string24 &first_, std::vector12<std::string24> &parts)
 {
-    std::string first = first_;
+    std::string24 first = first_;
     CommandDepthCounter counter;
     if (!counter.ok())
     {
@@ -744,7 +744,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
     command_result res;
     if (!first.empty())
     {
-        if(first.find('\\') != std::string::npos)
+        if(first.find('\\') != std::string24::npos)
         {
             con.printerr("Replacing backslashes with forward slashes in \"%s\"\n", first.c_str());
             for (size_t i = 0; i < first.size(); i++)
@@ -755,7 +755,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
         }
 
         // let's see what we actually got
-        string builtin = getBuiltinCommand(first);
+        std::string24 builtin = getBuiltinCommand(first);
         if (builtin == "help")
         {
             if(!parts.size())
@@ -789,7 +789,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             {
                 if (getBuiltinCommand(parts[0]).size())
                 {
-                    con << parts[0] << ": built-in command; Use `ls`, `help`, or check hack/Readme.html for more information" << std::endl;
+                    con << parts[0].c_str() << ": built-in command; Use `ls`, `help`, or check hack/Readme.html for more information" << std::endl;
                     return CR_NOT_IMPLEMENTED;
                 }
                 Plugin *plug = plug_mgr->getPluginByCommand(parts[0]);
@@ -805,20 +805,20 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                         con.print("%s: %s\n",pcmd.name.c_str(), pcmd.description.c_str());
                         con.reset_color();
                         if (!pcmd.usage.empty())
-                            con << "Usage:\n" << pcmd.usage << flush;
+                            con << "Usage:\n" << pcmd.usage.c_str() << flush;
                         return CR_OK;
                     }
                 }
-                string file = findScript(parts[0] + ".lua");
+                std::string24 file = findScript(parts[0] + ".lua");
                 if ( file != "" ) {
-                    string help = getScriptHelp(file, "--");
+                    std::string24 help = getScriptHelp(file, "--");
                     con.print("%s: %s\n", parts[0].c_str(), help.c_str());
                     return CR_OK;
                 }
                 if (plug_mgr->ruby && plug_mgr->ruby->is_enabled() ) {
                     file = findScript(parts[0] + ".rb");
                     if ( file != "" ) {
-                        string help = getScriptHelp(file, "#");
+                        std::string24 help = getScriptHelp(file, "#");
                         con.print("%s: %s\n", parts[0].c_str(), help.c_str());
                         return CR_OK;
                     }
@@ -839,11 +839,11 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             bool unload = (builtin == "unload");
             if (parts.size())
             {
-                for (vector<string>::const_iterator p = parts.begin(); p != parts.end(); p++)
+                for (std::vector12<std::string24>::const_iterator p = parts.begin(); p != parts.end(); p++)
                 {
                     if (p->size() && (*p)[0] == '-')
                     {
-                        if (p->find('a') != string::npos)
+                        if (p->find('a') != std::string24::npos)
                             all = true;
                     }
                 }
@@ -857,7 +857,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                         plug_mgr->reloadAll();
                     return CR_OK;
                 }
-                for (vector<string>::const_iterator p = parts.begin(); p != parts.end(); p++)
+                for (std::vector12<std::string24>::const_iterator p = parts.begin(); p != parts.end(); p++)
                 {
                     if (!p->size() || (*p)[0] == '-')
                         continue;
@@ -882,8 +882,8 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             {
                 for (size_t i = 0; i < parts.size(); i++)
                 {
-                    std::string part = parts[i];
-                    if (part.find('\\') != std::string::npos)
+                    std::string24 part = parts[i];
+                    if (part.find('\\') != std::string24::npos)
                     {
                         con.printerr("Replacing backslashes with forward slashes in \"%s\"\n", part.c_str());
                         for (size_t j = 0; j < part.size(); j++)
@@ -897,7 +897,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
 
                     if(!plug)
                     {
-                        std::string lua = findScript(part + ".lua");
+                        std::string24 lua = findScript(part + ".lua");
                         if (lua.size())
                         {
                             res = enableLuaScript(con, part, enable);
@@ -926,7 +926,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             }
             else
             {
-                for (std::map<std::string, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
+                for (std::map<std::string24, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
                 {
                     Plugin * plug = it->second;
                     if (!plug->can_be_enabled()) continue;
@@ -950,7 +950,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             }
             if(parts.size())
             {
-                string & plugname = parts[0];
+                std::string24 & plugname = parts[0];
                 const Plugin * plug = (*plug_mgr)[plugname];
                 if(!plug)
                 {
@@ -992,7 +992,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                 "plugins:\n"
                 );
                 std::set <sortable> out;
-                for (std::map<std::string, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
+                for (std::map<std::string24, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
                 {
                     const Plugin * plug = it->second;
                     if(!plug->size())
@@ -1010,12 +1010,12 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                     ls_helper(con, iter->name, iter->description);
                     con.reset_color();
                 }
-                std::map<string, string> scripts;
+                std::map<std::string24, std::string24> scripts;
                 listAllScripts(scripts, all);
                 if (!scripts.empty())
                 {
                     con.print("\nscripts:\n");
-                    for (std::map<string, string>::const_iterator iter = scripts.begin(); iter != scripts.end(); ++iter)
+                    for (std::map<std::string24, std::string24>::const_iterator iter = scripts.begin(); iter != scripts.end(); ++iter)
                         ls_helper(con, iter->first, iter->second);
                 }
             }
@@ -1027,7 +1027,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             con.print(header_format, "Name", "State", "Cmds", "Enabled");
 
             plug_mgr->refresh();
-            for (std::map<std::string, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
+            for (std::map<std::string24, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
             {
                 Plugin * plug = it->second;
                 if (!plug)
@@ -1073,40 +1073,40 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                 con.printerr("type: no argument\n");
                 return CR_WRONG_USAGE;
             }
-            con << parts[0];
-            string builtin_cmd = getBuiltinCommand(parts[0]);
-            string lua_path = findScript(parts[0] + ".lua");
-            string ruby_path = findScript(parts[0] + ".rb");
+            con << parts[0].c_str();
+            std::string24 builtin_cmd = getBuiltinCommand(parts[0]);
+            std::string24 lua_path = findScript(parts[0] + ".lua");
+            std::string24 ruby_path = findScript(parts[0] + ".rb");
             Plugin *plug = plug_mgr->getPluginByCommand(parts[0]);
             if (builtin_cmd.size())
             {
                 con << " is a built-in command";
                 if (builtin_cmd != parts[0])
-                    con << " (aliased to " << builtin_cmd << ")";
+                    con << " (aliased to " << builtin_cmd.c_str() << ")";
                 con << std::endl;
             }
             else if (IsAlias(parts[0]))
             {
-                con << " is an alias: " << GetAliasCommand(parts[0]) << std::endl;
+                con << " is an alias: " << GetAliasCommand(parts[0]).c_str() << std::endl;
             }
             else if (plug)
             {
-                con << " is a command implemented by the plugin " << plug->getName() << std::endl;
+                con << " is a command implemented by the plugin " << plug->getName().c_str() << std::endl;
             }
             else if (lua_path.size())
             {
-                con << " is a Lua script: " << lua_path << std::endl;
+                con << " is a Lua script: " << lua_path.c_str() << std::endl;
             }
             else if (ruby_path.size())
             {
-                con << " is a Ruby script: " << ruby_path << std::endl;
+                con << " is a Ruby script: " << ruby_path.c_str() << std::endl;
             }
             else
             {
                 con << " is not a recognized command." << std::endl;
                 plug = plug_mgr->getPluginByName(parts[0]);
                 if (plug)
-                    con << "Plugin " << parts[0] << " exists and implements " << plug->size() << " commands." << std::endl;
+                    con << "Plugin " << parts[0].c_str() << " exists and implements " << plug->size() << " commands." << std::endl;
                 return CR_FAILURE;
             }
         }
@@ -1114,7 +1114,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
         {
             if (parts.size() >= 3 && (parts[0] == "set" || parts[0] == "add"))
             {
-                std::string keystr = parts[1];
+                std::string24 keystr = parts[1];
                 if (parts[0] == "set")
                     ClearKeyBindings(keystr);
                 for (int i = parts.size()-1; i >= 2; i--)
@@ -1137,11 +1137,11 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             }
             else if (parts.size() == 2 && parts[0] == "list")
             {
-                std::vector<std::string> list = ListKeyBindings(parts[1]);
+                std::vector12<std::string24> list = ListKeyBindings(parts[1]);
                 if (list.empty())
                     con << "No bindings." << endl;
                 for (size_t i = 0; i < list.size(); i++)
-                    con << "  " << list[i] << endl;
+                    con << "  " << list[i].c_str() << endl;
             }
             else
             {
@@ -1155,15 +1155,15 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                     << "Context may be used to limit the scope of the binding, by" << endl
                     << "requiring the current context to have a certain prefix." << endl
                     << "Current UI context is: "
-                    << Gui::getFocusString(Core::getTopViewscreen()) << endl;
+                    << Gui::getFocusString(Core::getTopViewscreen()).c_str() << endl;
             }
         }
         else if (builtin == "alias")
         {
             if (parts.size() >= 3 && (parts[0] == "add" || parts[0] == "replace"))
             {
-                const string &name = parts[1];
-                vector<string> cmd(parts.begin() + 2, parts.end());
+                const std::string24 &name = parts[1];
+                std::vector12<std::string24> cmd(parts.begin() + 2, parts.end());
                 if (!AddAlias(name, cmd, parts[0] == "replace"))
                 {
                     con.printerr("Could not add alias %s - already exists\n", name.c_str());
@@ -1180,11 +1180,11 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             }
             else if (parts.size() >= 1 && (parts[0] == "list"))
             {
-                std::map<std::string, std::vector<std::string> > aliases = ListAliases();
+                std::map<std::string24, std::vector12<std::string24> > aliases = ListAliases();
                 //for (auto p : aliases)
-                for (std::map<std::string, std::vector<std::string> >::const_iterator ci = aliases.begin(); ci != aliases.end(); ++ci)
+                for (std::map<std::string24, std::vector12<std::string24> >::const_iterator ci = aliases.begin(); ci != aliases.end(); ++ci)
                 {
-                    con << (*ci).first << ": " << join_strings(" ", (*ci).second) << endl;
+                    con << (*ci).first.c_str() << ": " << join_strings(" ", (*ci).second).c_str() << endl;
                 }
             }
             else
@@ -1222,7 +1222,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
         else if (builtin == "kill-lua")
         {
             bool force = false;
-            for (vector<string>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+            for (std::vector12<std::string24>::const_iterator it = parts.begin(); it != parts.end(); ++it)
             {
                 if (*it == "force")
                     force = true;
@@ -1269,9 +1269,9 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                 con << "Valid event names (SC_ prefix is optional):" << endl;
                 for (int i = SC_WORLD_LOADED; i <= SC_UNPAUSED; i++)
                 {
-                    std::string name = sc_event_name((state_change_event)i);
+                    std::string24 name = sc_event_name((state_change_event)i);
                     if (name != "SC_UNKNOWN")
-                        con << "  " << name << endl;
+                        con << "  " << name.c_str() << endl;
                 }
                 return CR_OK;
             }
@@ -1281,10 +1281,10 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                     parts.push_back("");
                 if (parts[1].size() && sc_event_id(parts[1]) == SC_UNKNOWN)
                 {
-                    con << "Unrecognized event name: " << parts[1] << endl;
+                    con << "Unrecognized event name: " << parts[1].c_str() << endl;
                     return CR_WRONG_USAGE;
                 }
-                for (std::vector<StateChangeScript>::const_iterator it = state_change_scripts.begin(); it != state_change_scripts.end(); ++it)
+                for (std::vector12<StateChangeScript>::const_iterator it = state_change_scripts.begin(); it != state_change_scripts.end(); ++it)
                 {
                     if (!parts[1].size() || (it->event == sc_event_id(parts[1])))
                     {
@@ -1306,12 +1306,12 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                 state_change_event evt = sc_event_id(parts[1]);
                 if (evt == SC_UNKNOWN)
                 {
-                    con << "Unrecognized event: " << parts[1] << endl;
+                    con << "Unrecognized event: " << parts[1].c_str() << endl;
                     return CR_FAILURE;
                 }
                 bool save_specific = (parts.size() >= 4 && parts[3] == "-save");
                 StateChangeScript script(evt, parts[2], save_specific);
-                for (std::vector<StateChangeScript>::const_iterator it = state_change_scripts.begin(); it != state_change_scripts.end(); ++it)
+                for (std::vector12<StateChangeScript>::const_iterator it = state_change_scripts.begin(); it != state_change_scripts.end(); ++it)
                 {
                     if (script == *it)
                     {
@@ -1332,12 +1332,12 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                 state_change_event evt = sc_event_id(parts[1]);
                 if (evt == SC_UNKNOWN)
                 {
-                    con << "Unrecognized event: " << parts[1] << endl;
+                    con << "Unrecognized event: " << parts[1].c_str() << endl;
                     return CR_FAILURE;
                 }
                 bool save_specific = (parts.size() >= 4 && parts[3] == "-save");
                 StateChangeScript tmp(evt, parts[2], save_specific);
-                std::vector<StateChangeScript>::const_iterator it = std::find(state_change_scripts.begin(), state_change_scripts.end(), tmp);
+                std::vector12<StateChangeScript>::const_iterator it = std::find(state_change_scripts.begin(), state_change_scripts.end(), tmp);
                 if (it != state_change_scripts.end())
                 {
                     state_change_scripts.erase(it);
@@ -1366,7 +1366,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                 RPCService* svc = NULL;
 
                 //for (auto & it : *plug_mgr)
-                for (std::map<std::string, Plugin*>::iterator& it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
+                for (std::map<std::string24, Plugin*>::iterator& it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
                 {
                     Plugin * plug = (*it).second;
                     if (!plug)
@@ -1377,7 +1377,7 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
                     if (!svc)
                         continue;
 
-                    file << "// Plugin: " << plug->getName() << endl;
+                    file << "// Plugin: " << plug->getName().c_str() << endl;
                     svc->dumpMethods(file);
                 }
             }
@@ -1396,8 +1396,8 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
             res = plug_mgr->InvokeCommand(con, first, parts);
             if(res == CR_NOT_IMPLEMENTED)
             {
-                string completed;
-                string filename = findScript(first + ".lua");
+                std::string24 completed;
+                std::string24 filename = findScript(first + ".lua");
                 bool lua = filename != "";
                 if ( !lua ) {
                     filename = findScript(first + ".rb");
@@ -1438,10 +1438,10 @@ command_result Core::runCommand(color_ostream &con, const std::string &first_, v
     return CR_NOT_IMPLEMENTED;
 }
 
-bool Core::loadScriptFile(color_ostream &out, string fname, bool silent)
+bool Core::loadScriptFile(color_ostream &out, std::string24 fname, bool silent)
 {
     if(!silent)
-        out << "Loading script at " << fname << std::endl;
+        out << "Loading script at " << fname.c_str() << std::endl;
     ifstream script(fname.c_str());
     if ( !script.good() )
     {
@@ -1449,9 +1449,9 @@ bool Core::loadScriptFile(color_ostream &out, string fname, bool silent)
             out.printerr("Error loading script\n");
         return false;
     }
-    string command;
+    std::string24 command;
     while(script.good()) {
-        string temp;
+        std::string temp;
         getline(script,temp);
         bool doMore = false;
         if ( temp.length() > 0 ) {
@@ -1466,7 +1466,7 @@ bool Core::loadScriptFile(color_ostream &out, string fname, bool silent)
                 }
             }
         }
-        command = command + temp;
+        command = command + temp.c_str();
         if ( (!doMore || !script.good()) && !command.empty() ) {
             runCommand(out, command);
             command = "";
@@ -1485,7 +1485,7 @@ static void run_dfhack_init(color_ostream &out, Core *core)
         return;
     }
 
-    std::vector<std::string> prefixes(1, "dfhack");
+    std::vector12<std::string24> prefixes(1, "dfhack");
     size_t count = loadScriptFiles(core, out, prefixes, ".");
     if (!count || !Filesystem::isfile("dfhack.init"))
     {
@@ -1536,7 +1536,7 @@ void fIOthread(void * iodata)
 
     while (true)
     {
-        string command = "";
+        std::string24 command = "";
         int ret;
         while ((ret = con.lineedit("[DFHack]# ",command, main_history))
                 == Console::RETRY);
@@ -1585,9 +1585,9 @@ Core::Core() :
     started(false),
     misc_data_mutex(),
     CoreSuspendMutex(),
-    //CoreWakeup(),
-    //toolCount(0),
-    ownerThread(tthread::this_thread::get_id())
+    CoreWakeup(),
+    toolCount(0),
+    ownerThread()
 {
     // init the console. This must be always the first step!
     plug_mgr = NULL;
@@ -1607,11 +1607,11 @@ Core::Core() :
 
 };
 
-void Core::fatal(std::string output)
+void Core::fatal(std::string24 output)
 {
     errorstate = true;
     stringstream out;
-    out << output ;
+    out << output.c_str();
     if (output[output.size() - 1] != '\n')
         out << '\n';
     out << "DFHack will now deactivate.\n";
@@ -1636,7 +1636,7 @@ void Core::fatal(std::string output)
     }
 }
 
-std::string Core::getHackPath()
+std::string24 Core::getHackPath()
 {
 #ifdef LINUX_BUILD
     return proc->getPath() + "/hack/";
@@ -1691,7 +1691,7 @@ bool Core::Init()
         out << "Error while reading symbols.xml:\n";
         out << err.what() << std::endl;
         errorstate = true;
-        fatal(out.str());
+        fatal(out.str().c_str());
         delete local_vif;
         return false;
     }
@@ -1733,7 +1733,7 @@ bool Core::Init()
         delete local_p;
         return false;
     }
-    cerr << "Version: " << local_vinfo->getVersion() << endl;
+    cerr << "Version: " << local_vinfo->getVersion().c_str() << endl;
     proc = local_p;
     vinfo = local_vinfo;
 
@@ -1792,8 +1792,8 @@ bool Core::Init()
     virtual_identity::Init(this);
 
     // copy over default config files if necessary
-    std::map<std::string, bool> config_files;
-    std::map<std::string, bool> default_config_files;
+    std::map<std::string24, bool> config_files;
+    std::map<std::string24, bool> default_config_files;
     if (Filesystem::listdir_recursive("dfhack-config", config_files, 10, false) != 0)
         con.printerr("Failed to list directory: dfhack-config");
     else if (Filesystem::listdir_recursive("dfhack-config/default", default_config_files, 10, false) != 0)
@@ -1801,12 +1801,12 @@ bool Core::Init()
     else
     {
         // ensure all config file directories exist before we start copying files
-        for (std::map<std::string, bool>::const_iterator it = default_config_files.begin(); it != default_config_files.end(); ++it)
+        for (std::map<std::string24, bool>::const_iterator it = default_config_files.begin(); it != default_config_files.end(); ++it)
         {
             // skip over files
             if (!it->second)
                 continue;
-            std::string dirname = "dfhack-config/" + it->first;
+            std::string24 dirname = "dfhack-config/" + it->first;
             if (!Filesystem::mkdir_recursive(dirname))
             {
                 con.printerr("Failed to create config directory: '%s'\n", dirname.c_str());
@@ -1814,18 +1814,18 @@ bool Core::Init()
         }
 
         // copy files from the default tree that don't already exist in the config tree
-        for (std::map<std::string, bool>::const_iterator it = default_config_files.begin(); it != default_config_files.end(); ++it)
+        for (std::map<std::string24, bool>::const_iterator it = default_config_files.begin(); it != default_config_files.end(); ++it)
         {
             // skip over directories
             if (it->second)
                 continue;
-            std::string filename = it->first;
+            std::string24 filename = it->first;
             if (config_files.find(filename) == config_files.end())
             {
-                std::string src_file = std::string("dfhack-config/default/") + filename;
+                std::string24 src_file = std::string24("dfhack-config/default/") + filename;
                 if (!Filesystem::isfile(src_file))
                     continue;
-                std::string dest_file = std::string("dfhack-config/") + filename;
+                std::string24 dest_file = std::string24("dfhack-config/") + filename;
                 std::ifstream src(src_file.c_str(), std::ios::binary);
                 std::ofstream dest(dest_file.c_str(), std::ios::binary);
                 if (!src.good() || !dest.good())
@@ -1886,8 +1886,8 @@ bool Core::Init()
 
     if (df::global::ui_sidebar_menus)
     {
-        vector<string> args;
-        const string & raw = df::global::ui_sidebar_menus->command_line.original;
+        std::vector12<std::string24> args;
+        const std::string24 & raw = df::global::ui_sidebar_menus->command_line.original;
         size_t offset = 0;
         while (offset < raw.size())
         {
@@ -1901,7 +1901,7 @@ bool Core::Init()
             else
             {
                 size_t next = raw.find(" ", offset);
-                if (next == string::npos)
+                if (next == std::string24::npos)
                 {
                     args.push_back(raw.substr(offset));
                     offset = raw.size();
@@ -1913,14 +1913,14 @@ bool Core::Init()
                 }
             }
         }
-        for (std::vector<string>::const_iterator it = args.begin(); it != args.end(); )
+        for (std::vector12<std::string24>::const_iterator it = args.begin(); it != args.end(); )
         {
-            const string & first = *it;
+            const std::string24 & first = *it;
             if (first.length() > 0 && first[0] == '+')
             {
-                vector<string> cmd;
+                std::vector12<std::string24> cmd;
                 for (it++; it != args.end(); it++) {
-                    const string & arg = *it;
+                    const std::string24 & arg = *it;
                     if (arg.length() > 0 && arg[0] == '+')
                     {
                         break;
@@ -1930,10 +1930,10 @@ bool Core::Init()
 
                 if (runCommand(con, first.substr(1), cmd) != CR_OK)
                 {
-                    cerr << "Error running command: " << first.substr(1);
-                    for (vector<string>::const_iterator it2 = cmd.begin(); it2 != cmd.end(); it2++)
+                    cerr << "Error running command: " << first.substr(1).c_str();
+                    for (std::vector12<std::string24>::const_iterator it2 = cmd.begin(); it2 != cmd.end(); it2++)
                     {
-                        cerr << " \"" << *it2 << "\"";
+                        cerr << " \"" << (*it2).c_str() << "\"";
                     }
                     cerr << "\n";
                 }
@@ -1949,7 +1949,7 @@ bool Core::Init()
     return true;
 }
 /// sets the current hotkey command
-bool Core::setHotkeyCmd( std::string cmd )
+bool Core::setHotkeyCmd( std::string24 cmd )
 {
     // access command
     tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
@@ -1959,9 +1959,9 @@ bool Core::setHotkeyCmd( std::string cmd )
     return true;
 }
 /// removes the hotkey command and gives it to the caller thread
-std::string Core::getHotkeyCmd( bool &keep_going )
+std::string24 Core::getHotkeyCmd( bool &keep_going )
 {
-    string returner;
+    std::string24 returner;
     tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
     //HotkeyCond.wait(lock, [this]() -> bool {return this->hotkey_set;});
     //HotkeyMutex.lock();
@@ -1999,16 +1999,16 @@ void Core::printerr(const char *format, ...)
     va_end(args);
 }
 
-void Core::RegisterData( void *data, std::string key )
+void Core::RegisterData( void *data, std::string24 key )
 {
     tthread::lock_guard<tthread::mutex> lock(misc_data_mutex);
     misc_data_map[key] = data;
 }
 
-void *Core::GetData( std::string key )
+void *Core::GetData( std::string24 key )
 {
     tthread::lock_guard<tthread::mutex> lock(misc_data_mutex);
-    std::map<std::string,void*>::iterator it=misc_data_map.find(key);
+    std::map<std::string24,void*>::iterator it=misc_data_map.find(key);
 
     if ( it != misc_data_map.end() )
     {
@@ -2162,27 +2162,22 @@ int Core::Update()
     //CoreWakeup.wait(MainThread::suspend(),
     //        [this]() -> bool {return this->toolCount.load() == 0;});
 
-    //Core::getInstance().getConsole().printerr("\nCore::Update lock");
-    //Core::getInstance().CoreSuspendMutex.lock();
-    //while (this->toolCount.load() != 0)
-    //{
-    //    Core::getInstance().getConsole().printerr("\nCore::Update wait for %u tools", uint32(this->toolCount.load()));
-    //    CoreWakeup.wait(Core::getInstance().CoreSuspendMutex);
-    //}
-    //Core::getInstance().getConsole().printerr("\nCore::Update: unlock");
-    //Core::getInstance().CoreSuspendMutex.unlock();
-
     //keep this last
-    cerr << "\nCore::Update waiting for other threads";
-    CoreSuspendClaimMain waitForOtherThreadsToFinishUpdate;
-    cerr << "\nCore::Update: unlock";
+    //Core::getInstance().getConsole().printerr("\nCore::Update lock");
+    CoreSuspendClaimMain waitForToolsThreadsToFinish;
+    while (this->toolCount.load() != 0)
+    {
+        Core::getInstance().getConsole().printerr("\nCore::Update wait for %u tools", uint32(this->toolCount.load()));
+        CoreWakeup.wait(Core::getInstance().CoreSuspendMutex);
+    }
+    Core::getInstance().getConsole().printerr("\nCore::Update: unlock");
 
     return 0;
 };
 void CoreSuspenderBase::lock()
 {
-    cerr <<  "\nCoreSuspenderBase::lock\nold tid " << uint32(tid.get())
-        << "\nnew tid " << uint32(tthread::this_thread::get_id().get());
+    //cerr <<  "\nCoreSuspenderBase::lock\nold tid " << uint32(tid.get())
+    //    << "\nnew tid " << uint32(tthread::this_thread::get_id().get());
     lock_type::lock();
     tid = Core::getInstance().ownerThread.exchange(tthread::this_thread::get_id(), tthread::memory_order_acquire);
 }
@@ -2207,9 +2202,9 @@ void Core::onUpdate(color_ostream &out)
     Lua::Core::onUpdate(out);
 }
 
-void getFilesWithPrefixAndSuffix(const std::string& folder, const std::string& prefix, const std::string& suffix, std::vector<std::string>& result) {
-    //DFHACK_EXPORT int listdir (std::string dir, std::vector<std::string> &files);
-    std::vector<std::string> files;
+void getFilesWithPrefixAndSuffix(const std::string24& folder, const std::string24& prefix, const std::string24& suffix, std::vector12<std::string24>& result) {
+    //DFHACK_EXPORT int listdir (std::string24 dir, std::vector12<std::string24> &files);
+    std::vector12<std::string24> files;
     DFHack::Filesystem::listdir(folder, files);
     for ( size_t a = 0; a < files.size(); a++ ) {
         if ( prefix.length() > files[a].length() )
@@ -2225,8 +2220,8 @@ void getFilesWithPrefixAndSuffix(const std::string& folder, const std::string& p
     return;
 }
 
-size_t loadScriptFiles(Core* core, color_ostream& out, const vector<std::string>& prefix, const std::string& folder) {
-    vector<std::string> scriptFiles;
+size_t loadScriptFiles(Core* core, color_ostream& out, const std::vector12<std::string24>& prefix, const std::string24& folder) {
+    std::vector12<std::string24> scriptFiles;
     for ( size_t a = 0; a < prefix.size(); a++ ) {
         getFilesWithPrefixAndSuffix(folder, prefix[a], ".init", scriptFiles);
     }
@@ -2242,9 +2237,9 @@ size_t loadScriptFiles(Core* core, color_ostream& out, const vector<std::string>
 namespace DFHack {
     namespace X {
         typedef state_change_event Key;
-        typedef vector<string> Val;
+        typedef std::vector12<std::string24> Val;
         typedef pair<Key,Val> Entry;
-        typedef vector<Entry> EntryVector;
+        typedef std::vector12<Entry> EntryVector;
         typedef map<Key,Val> InitVariationTable;
 
         EntryVector computeInitVariationTable(void* none, ...) {
@@ -2260,7 +2255,7 @@ namespace DFHack {
                     const char *v = va_arg(list, const char *);
                     if (!v || !v[0])
                         break;
-                    val.push_back(string(v));
+                    val.push_back(std::string24(v));
                 }
                 result.push_back(Entry(key,val));
             }
@@ -2274,8 +2269,11 @@ namespace DFHack {
     }
 }
 
-void Core::handleLoadAndUnloadScripts(color_ostream& out, state_change_event event) {
-    static const X::InitVariationTable table = X::getTable(X::computeInitVariationTable(0,
+void Core::handleLoadAndUnloadScripts(color_ostream& out, state_change_event event)
+{
+    static const X::InitVariationTable table = X::getTable(
+        X::computeInitVariationTable(
+        0,
         (int)SC_WORLD_LOADED, "onLoad", "onLoadWorld", "onWorldLoaded", "",
         (int)SC_WORLD_UNLOADED, "onUnload", "onUnloadWorld", "onWorldUnloaded", "",
         (int)SC_MAP_LOADED, "onMapLoad", "onLoadMap", "",
@@ -2285,17 +2283,32 @@ void Core::handleLoadAndUnloadScripts(color_ostream& out, state_change_event eve
 
     if (!df::global::world)
         return;
-    std::string rawFolder = "data/save/" + (df::global::world->cur_savegame.save_dir) + "/raw/";
+
+    char* val1 = "world = ";
+    df::world* wo = df::global::world;
+    char* val2 = "sg = ";
+    df::world::T_cur_savegame sg = wo->cur_savegame;
+    char* val3 = "sgdir = ";
+    const char* sgdir = sg.save_dir.c_str();
+
+    //std::string rawFolder = "data/save/" + (df::global::world->cur_savegame.save_dir) + "/raw/";
+    std::string24 rawFolder = "data/save/";
+    rawFolder += sgdir;
+    rawFolder += "/raw/";
+
+    const char* rawFolderC = rawFolder.c_str();
+    char* val4 = "END = "; //do not remove until STL resolution
 
     X::InitVariationTable::const_iterator i = table.find(event);
-    if ( i != table.end() ) {
-        const std::vector<std::string>& set = i->second;
+    if ( i != table.end() )
+    {
+        const std::vector12<std::string24>& set = i->second;
         loadScriptFiles(this, out, set, "."      );
         loadScriptFiles(this, out, set, rawFolder);
         loadScriptFiles(this, out, set, rawFolder + "objects/");
     }
 
-    for (std::vector<StateChangeScript>::const_iterator it = state_change_scripts.begin(); it != state_change_scripts.end(); ++it)
+    for (std::vector12<StateChangeScript>::const_iterator it = state_change_scripts.begin(); it != state_change_scripts.end(); ++it)
     {
         if (it->event == event)
         {
@@ -2347,8 +2360,8 @@ void Core::onStateChange(color_ostream &out, state_change_event event)
     case SC_MAP_UNLOADED:
         if (world && world->cur_savegame.save_dir.size())
         {
-            std::string save_dir = "data/save/" + world->cur_savegame.save_dir;
-            std::string evtlogpath = save_dir + "/events-dfhack.log";
+            std::string24 save_dir = "data/save/" + world->cur_savegame.save_dir;
+            std::string24 evtlogpath = save_dir + "/events-dfhack.log";
             std::ofstream evtlog;
             evtlog.open(evtlogpath.c_str(), std::ios_base::app);  // append
             if (evtlog.fail())
@@ -2364,11 +2377,11 @@ void Core::onStateChange(color_ostream &out, state_change_event event)
                 strftime(timebuf, sizeof(timebuf), "[%Y-%m-%dT%H:%M:%S%z] ", timeinfo);
                 evtlog << timebuf;
                 evtlog << "DFHack " << Version::git_description() << " on " << ostype << "; ";
-                evtlog << "cwd md5: " << md5w.getHashFromString(getHackPath()).substr(0, 10) << "; ";
-                evtlog << "save: " << world->cur_savegame.save_dir << "; ";
-                evtlog << sc_event_name(event) << "; ";
+                evtlog << "cwd md5: " << md5w.getHashFromString(getHackPath()).substr(0, 10).c_str() << "; ";
+                evtlog << "save: " << world->cur_savegame.save_dir.c_str() << "; ";
+                evtlog << sc_event_name(event).c_str() << "; ";
                 if (gametype)
-                    evtlog << "game type " << ENUM_KEY_STR_SIMPLE(game_type, *gametype) << " (" << *gametype << ")";
+                    evtlog << "game type " << ENUM_KEY_STR_SIMPLE(game_type, *gametype).c_str() << " (" << *gametype << ")";
                 else
                     evtlog << "game type unavailable";
                 evtlog << std::endl;
@@ -2611,13 +2624,13 @@ bool Core::SelectHotkey(int sym, int modifiers)
     if (sym == SDL::K_KP_ENTER)
         sym = SDL::K_RETURN;
 
-    std::string cmd;
+    std::string24 cmd;
 
     {
         tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
 
         // Check the internal keybindings
-        std::vector<KeyBinding> &bindings = key_bindings[sym];
+        std::vector12<KeyBinding> &bindings = key_bindings[sym];
         for (int i = bindings.size()-1; i >= 0; --i) {
             if (bindings[i].modifiers != modifiers)
                 continue;
@@ -2656,7 +2669,7 @@ bool Core::SelectHotkey(int sym, int modifiers)
         return false;
 }
 
-static bool parseKeySpec(std::string keyspec, int *psym, int *pmod, std::string *pfocus)
+static bool parseKeySpec(std::string24 keyspec, int *psym, int *pmod, std::string24 *pfocus)
 {
     *pmod = 0;
 
@@ -2665,7 +2678,7 @@ static bool parseKeySpec(std::string keyspec, int *psym, int *pmod, std::string 
         *pfocus = "";
 
         size_t idx = keyspec.find('@');
-        if (idx != std::string::npos)
+        if (idx != std::string24::npos)
         {
             *pfocus = keyspec.substr(idx+1);
             keyspec = keyspec.substr(0, idx);
@@ -2706,16 +2719,16 @@ static bool parseKeySpec(std::string keyspec, int *psym, int *pmod, std::string 
         return false;
 }
 
-bool Core::ClearKeyBindings(std::string keyspec)
+bool Core::ClearKeyBindings(std::string24 keyspec)
 {
     int sym, mod;
-    std::string focus;
+    std::string24 focus;
     if (!parseKeySpec(keyspec, &sym, &mod, &focus))
         return false;
 
     tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
 
-    std::vector<KeyBinding> &bindings = key_bindings[sym];
+    std::vector12<KeyBinding> &bindings = key_bindings[sym];
     for (int i = bindings.size()-1; i >= 0; --i) {
         if (bindings[i].modifiers == mod && prefix_matches(focus, bindings[i].focus))
             bindings.erase(bindings.begin()+i);
@@ -2724,16 +2737,16 @@ bool Core::ClearKeyBindings(std::string keyspec)
     return true;
 }
 
-bool Core::AddKeyBinding(std::string keyspec, std::string cmdline)
+bool Core::AddKeyBinding(std::string24 keyspec, std::string24 cmdline)
 {
     size_t at_pos = keyspec.find('@');
-    if (at_pos != std::string::npos)
+    if (at_pos != std::string24::npos)
     {
-        std::string raw_spec = keyspec.substr(0, at_pos);
-        std::string raw_focus = keyspec.substr(at_pos + 1);
-        if (raw_focus.find('|') != std::string::npos)
+        std::string24 raw_spec = keyspec.substr(0, at_pos);
+        std::string24 raw_focus = keyspec.substr(at_pos + 1);
+        if (raw_focus.find('|') != std::string24::npos)
         {
-            std::vector<std::string> focus_strings;
+            std::vector12<std::string24> focus_strings;
             split_string(&focus_strings, raw_focus, "|");
             for (size_t i = 0; i < focus_strings.size(); i++)
             {
@@ -2755,7 +2768,7 @@ bool Core::AddKeyBinding(std::string keyspec, std::string cmdline)
     tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
 
     // Don't add duplicates
-    std::vector<KeyBinding> &bindings = key_bindings[sym];
+    std::vector12<KeyBinding> &bindings = key_bindings[sym];
     for (int i = bindings.size()-1; i >= 0; --i) {
         if (bindings[i].modifiers == binding.modifiers &&
             bindings[i].cmdline == cmdline &&
@@ -2768,23 +2781,23 @@ bool Core::AddKeyBinding(std::string keyspec, std::string cmdline)
     return true;
 }
 
-std::vector<std::string> Core::ListKeyBindings(std::string keyspec)
+std::vector12<std::string24> Core::ListKeyBindings(std::string24 keyspec)
 {
     int sym, mod;
-    std::vector<std::string> rv;
-    std::string focus;
+    std::vector12<std::string24> rv;
+    std::string24 focus;
     if (!parseKeySpec(keyspec, &sym, &mod, &focus))
         return rv;
 
     tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
 
-    std::vector<KeyBinding> &bindings = key_bindings[sym];
+    std::vector12<KeyBinding> &bindings = key_bindings[sym];
     for (int i = bindings.size()-1; i >= 0; --i) {
         if (focus.size() && focus != bindings[i].focus)
             continue;
         if (bindings[i].modifiers == mod)
         {
-            std::string cmd = bindings[i].cmdline;
+            std::string24 cmd = bindings[i].cmdline;
             if (!bindings[i].focus.empty())
                 cmd = "@" + bindings[i].focus + ": " + cmd;
             rv.push_back(cmd);
@@ -2794,7 +2807,7 @@ std::vector<std::string> Core::ListKeyBindings(std::string keyspec)
     return rv;
 }
 
-bool Core::AddAlias(const std::string &name, const std::vector<std::string> &command, bool replace)
+bool Core::AddAlias(const std::string24 &name, const std::vector12<std::string24> &command, bool replace)
 {
     tthread::lock_guard<tthread::recursive_mutex> lock(alias_mutex);
     if (!IsAlias(name) || replace)
@@ -2805,7 +2818,7 @@ bool Core::AddAlias(const std::string &name, const std::vector<std::string> &com
     return false;
 }
 
-bool Core::RemoveAlias(const std::string &name)
+bool Core::RemoveAlias(const std::string24 &name)
 {
     tthread::lock_guard<tthread::recursive_mutex> lock(alias_mutex);
     if (IsAlias(name))
@@ -2816,14 +2829,14 @@ bool Core::RemoveAlias(const std::string &name)
     return false;
 }
 
-bool Core::IsAlias(const std::string &name)
+bool Core::IsAlias(const std::string24 &name)
 {
     tthread::lock_guard<tthread::recursive_mutex> lock(alias_mutex);
     return aliases.find(name) != aliases.end();
 }
 
-bool Core::RunAlias(color_ostream &out, const std::string &name,
-    const std::vector<std::string> &parameters, command_result &result)
+bool Core::RunAlias(color_ostream &out, const std::string24 &name,
+    const std::vector12<std::string24> &parameters, command_result &result)
 {
     tthread::lock_guard<tthread::recursive_mutex> lock(alias_mutex);
     if (!IsAlias(name))
@@ -2831,20 +2844,20 @@ bool Core::RunAlias(color_ostream &out, const std::string &name,
         return false;
     }
 
-    const string &first = aliases[name][0];
-    vector<string> parts(aliases[name].begin() + 1, aliases[name].end());
+    const std::string24 &first = aliases[name][0];
+    std::vector12<std::string24> parts(aliases[name].begin() + 1, aliases[name].end());
     parts.insert(parts.end(), parameters.begin(), parameters.end());
     result = runCommand(out, first, parts);
     return true;
 }
 
-std::map<std::string, std::vector<std::string>> Core::ListAliases()
+std::map<std::string24, std::vector12<std::string24>> Core::ListAliases()
 {
     tthread::lock_guard<tthread::recursive_mutex> lock(alias_mutex);
     return aliases;
 }
 
-std::string Core::GetAliasCommand(const std::string &name, const std::string &default_)
+std::string24 Core::GetAliasCommand(const std::string24 &name, const std::string24 &default_)
 {
     tthread::lock_guard<tthread::recursive_mutex> lock(alias_mutex);
     if (IsAlias(name))
@@ -2859,10 +2872,10 @@ std::string Core::GetAliasCommand(const std::string &name, const std::string &de
 
 // Since there is no Process.cpp, put ClassNameCheck stuff in Core.cpp
 
-static std::set<std::string> known_class_names;
-static std::map<std::string, void*> known_vptrs;
+static std::set<std::string24> known_class_names;
+static std::map<std::string24, void*> known_vptrs;
 
-ClassNameCheck::ClassNameCheck(std::string _name) : name(_name), vptr(0)
+ClassNameCheck::ClassNameCheck(std::string24 _name) : name(_name), vptr(0)
 {
     known_class_names.insert(name);
 }
@@ -2881,9 +2894,9 @@ bool ClassNameCheck::operator() (Process *pr, void * ptr) const {
     return (vptr && vptr == ptr);
 }
 
-void ClassNameCheck::getKnownClassNames(std::vector<std::string> &names)
+void ClassNameCheck::getKnownClassNames(std::vector12<std::string24> &names)
 {
-    std::set<std::string>::iterator it = known_class_names.begin();
+    std::set<std::string24>::iterator it = known_class_names.begin();
 
     for (; it != known_class_names.end(); it++)
         names.push_back(*it);
