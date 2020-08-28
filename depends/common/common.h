@@ -3,6 +3,8 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#define _SECURE_SCL 0   //do not inherit from secure base containers with extra debug allocations
+
 #include "vector12.h"       //std::vector12<T>
 #include "bvector12.h"      //std::vector12<bool>
 #include "string24.h"       //std::string24
@@ -38,5 +40,9 @@ struct fstream_empty
 {
     char empty[144];
 };
+
+namespace CountedTypes {
+void CheckTypes();
+}
 
 #endif // _COMMON_H_
