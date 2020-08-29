@@ -43,6 +43,17 @@ distribution.
 
 typedef struct lua_State lua_State;
 
+// placeholders
+struct fstream_empty
+{
+public:
+    char empty[144];
+    fstream_empty() {
+        for (int i = 0; i < 144; ++i)
+            empty[i] = 0;
+    }
+};
+
 /*
  * Definitions of DFHack namespace structs used by generated headers.
  */

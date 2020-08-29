@@ -545,10 +545,10 @@ namespace df
         static stl_string_identity *get() { return &identity; }
     };
 
-    //template<> struct DFHACK_EXPORT identity_traits<std::fstream> {
-    //    static opaque_identity identity;
-    //    static opaque_identity *get() { return &identity; }
-    //};
+    template<> struct DFHACK_EXPORT identity_traits<std::fstream> {
+        static opaque_identity identity;
+        static opaque_identity *get() { return &identity; }
+    };
     //additional for new types
     template<> struct DFHACK_EXPORT identity_traits<fstream_empty> {
         static opaque_identity identity;

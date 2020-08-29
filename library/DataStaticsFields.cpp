@@ -45,15 +45,16 @@ namespace df {
     stl_bit_vector_identity identity_traits<std::vector12<bool> >::identity;
     bit_array_identity identity_traits<BitArray<int> >::identity;
 
-    //static void *fstream_allocator_fn(void *out, const void *in) {
-    //    if (out) { /* *(T*)out = *(const T*)in;*/ return NULL; }
-    //    else if (in) { delete (std::fstream*)in; return (std::fstream*)in; }
-    //    else return new std::fstream();
-    //}
-    //opaque_identity identity_traits<std::fstream>::identity(
-    //    sizeof(std::fstream), fstream_allocator_fn, "fstream");
-    static void *fstream_empty_allocator_fn(void *out, const void *in) {
+    static void *fstream_allocator_fn(void *out, const void *in) {
         if (out) { /* *(T*)out = *(const T*)in;*/ return NULL; }
+        else if (in) { delete (std::fstream*)in; return (std::fstream*)in; }
+        else return new std::fstream();
+    }
+    opaque_identity identity_traits<std::fstream>::identity(
+        sizeof(std::fstream), fstream_allocator_fn, "fstream");
+
+    static void *fstream_empty_allocator_fn(void *out, const void *in) {
+        if (out) { *(fstream_empty*)out = *(const fstream_empty*)in; return NULL; }
         else if (in) { delete (fstream_empty*)in; return (fstream_empty*)in; }
         else return new fstream_empty();
     }

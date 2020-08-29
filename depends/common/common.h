@@ -33,10 +33,4 @@ typedef uint64              uint64_t;
 #define INT64FMT "%I64d"
 #define UINT64FMT "%I64u"
 
-// placeholders
-struct fstream_empty
-{
-    char empty[144];
-};
-
 #endif // _COMMON_H_
