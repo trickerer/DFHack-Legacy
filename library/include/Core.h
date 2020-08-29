@@ -395,22 +395,12 @@ namespace DFHack
      */
     class CoreSuspender : public CoreSuspenderBase {
     public:
-        //CoreSuspender() : CoreSuspender(&Core::getInstance()) { }
-        //CoreSuspender(std::defer_lock_t d) : CoreSuspender{&Core::getInstance(),d} { }
-        //CoreSuspender(bool) : CoreSuspender() { }
-        //CoreSuspender(Core* core) : CoreSuspenderBase(core) { lock(); }
-        //CoreSuspender(Core* core, bool) : CoreSuspender(core) { }
-        //CoreSuspender(Core* core, std::defer_lock_t) : CoreSuspenderBase{core, std::defer_lock} {}
-
         CoreSuspender() : CoreSuspenderBase(&Core::getInstance()) { lock(); }
-        //CoreSuspender(bool) : CoreSuspenderBase(&Core::getInstance()) { lock(); }
-        //CoreSuspender(Core* core) : CoreSuspenderBase(core) { lock(); }
-        //CoreSuspender(Core* core, bool) : CoreSuspenderBase(core) { lock(); }
 
         void lock()
         {
             Core& core = Core::getInstance();
-            //core.toolCount.fetch_add(1, tthread::memory_order_relaxed);
+            core.toolCount.fetch_add(1, tthread::memory_order_relaxed);
             CoreSuspenderBase::lock();
         }
 
