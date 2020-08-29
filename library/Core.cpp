@@ -2019,11 +2019,10 @@ bool Core::setHotkeyCmd( std::string24 cmd )
 std::string24 Core::getHotkeyCmd( bool &keep_going )
 {
     std::string24 returner;
-    tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
     //HotkeyCond.wait(lock, [this]() -> bool {return this->hotkey_set;});
-    //HotkeyMutex.lock();
-    //while (hotkey_set == NO)
-    //    HotkeyCond.wait(HotkeyMutex);
+    tthread::lock_guard<tthread::mutex> lock(HotkeyMutex);
+    while (hotkey_set == NO)
+        HotkeyCond.wait(HotkeyMutex);
 
     if (hotkey_set == SHUTDOWN) {
         keep_going = false;
@@ -2032,7 +2031,6 @@ std::string24 Core::getHotkeyCmd( bool &keep_going )
     hotkey_set = NO;
     returner = hotkey_cmd;
     hotkey_cmd.clear();
-    HotkeyMutex.unlock();
     return returner;
 }
 
