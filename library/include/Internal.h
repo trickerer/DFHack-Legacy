@@ -36,6 +36,5 @@ distribution.
 
 // one file for telling the MSVC compiler where it can shove its pointless warnings
 #include "Pragma.h"
-
-// C99 integer types
+// container types with fixed size
 #include "common.h"

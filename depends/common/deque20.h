@@ -32,13 +32,13 @@ template<class _Type,
 		// TEMPLATE CLASS _Deque20_const_iterator
 template<class _Type, class _Alloc, bool _SECURE_VALIDATION>
 	class _Deque20_const_iterator
- #if !defined(_DEBUG) && !_SECURE_SCL
-		: public _Ranit_base<_Type, typename _Alloc::difference_type,
-			typename _Alloc::const_pointer, typename _Alloc::const_reference, _Iterator_base_aux>
-#else
+// #if !defined(_DEBUG) && !_SECURE_SCL
+//		: public _Ranit_base<_Type, typename _Alloc::difference_type,
+//			typename _Alloc::const_pointer, typename _Alloc::const_reference, _Iterator_base_aux>
+//#else
 		: public _Ranit<_Type, typename _Alloc::difference_type,
 			typename _Alloc::const_pointer, typename _Alloc::const_reference>
-#endif
+//#endif
 	{	// iterator for nonmutable vector
 public:
 	// helper data used by the expression evaluator
@@ -47,11 +47,11 @@ public:
 	typedef _Deque20_const_iterator<_Type, _Alloc, _SECURE_VALIDATION> _Myt;
 	typedef deque20<_Type, _Alloc> _Mydeque;
 
-#if !defined(_DEBUG) && !_SECURE_SCL
-	typedef _Container_base_aux _Mydequebase;
-#else
+//#if !defined(_DEBUG) && !_SECURE_SCL
+//	typedef _Container_base_aux _Mydequebase;
+//#else
 	typedef _Container_base _Mydequebase;
-#endif
+//#endif
 
 	typedef random_access_iterator_tag iterator_category;
 	typedef _Type value_type;
@@ -61,27 +61,27 @@ public:
 
 	typedef typename _Alloc::size_type size_type;
 
- #if _SECURE_SCL
-	typedef typename _Secure_validation_helper<_SECURE_VALIDATION>::_Checked_iterator_category _Checked_iterator_category;
-	typedef typename _If<_SECURE_VALIDATION,
-		_Deque20_const_iterator<_Type, _Alloc, false>,
-		_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
+ //#if _SECURE_SCL
+	//typedef typename _Secure_validation_helper<_SECURE_VALIDATION>::_Checked_iterator_category _Checked_iterator_category;
+	//typedef typename _If<_SECURE_VALIDATION,
+	//	_Deque20_const_iterator<_Type, _Alloc, false>,
+	//	_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
 
-	friend _Deque20_const_iterator<_Type, _Alloc, false>;
-	friend _Deque20_const_iterator<_Type, _Alloc, true>;
+	//friend _Deque20_const_iterator<_Type, _Alloc, false>;
+	//friend _Deque20_const_iterator<_Type, _Alloc, true>;
 
-	_Deque20_const_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
-	{
-		_Deque20_const_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
-		return _Base;
-	}
+	//_Deque20_const_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
+	//{
+	//	_Deque20_const_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
+	//	return _Base;
+	//}
 
-	void _Checked_iterator_assign_from_base(_Deque20_const_iterator<_Type, _Alloc, false> _Base)
-	{
-		_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
-		this->_Myoff = _Base._Myoff;
-	}
- #endif
+	//void _Checked_iterator_assign_from_base(_Deque20_const_iterator<_Type, _Alloc, false> _Base)
+	//{
+	//	_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
+	//	this->_Myoff = _Base._Myoff;
+	//}
+ //#endif
 
  #if _HAS_ITERATOR_DEBUGGING
 		_Deque20_const_iterator()
@@ -142,8 +142,8 @@ public:
 			{	// return designated object
 			size_type _Block = _Myoff / _DEQUE20SIZ;
 			size_type _Off = _Myoff & (_DEQUE20SIZ - 1);	// assume power of 2
-			_SCL_SECURE_VALIDATE(this->_Has_container());
-			_SCL_SECURE_VALIDATE_RANGE(_Myoff < ((_Mydeque *)(this->_Getmycont()))->_Myoff + ((_Mydeque *)(this->_Getmycont()))->_Mysize);
+			//_SCL_SECURE_VALIDATE(this->_Has_container());
+			//_SCL_SECURE_VALIDATE_RANGE(_Myoff < ((_Mydeque *)(this->_Getmycont()))->_Myoff + ((_Mydeque *)(this->_Getmycont()))->_Mysize);
 			if (static_cast<const _Mydeque *>(this->_Getmycont())->_Mapsize <= _Block)
 				_Block -= static_cast<const _Mydeque *>(this->_Getmycont())->_Mapsize;
 			return ((static_cast<const _Mydeque *>(this->_Getmycont())->_Map)[_Block][_Off]);
@@ -253,11 +253,11 @@ public:
 		return (_Myoff == _Right._Myoff);
 		}
 
- #elif _SECURE_SCL
-		_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
-		return (_Myoff == _Right._Myoff);
-		}
-			
+ //#elif _SECURE_SCL
+	//	_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+	//	return (_Myoff == _Right._Myoff);
+	//	}
+
  #else
 		return (this->_Same_container(_Right) && _Myoff == _Right._Myoff);
 		}
@@ -276,10 +276,10 @@ public:
 		return (_Myoff < _Right._Myoff);
 		}
 
- #elif _SECURE_SCL
-		_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
-		return (_Myoff < _Right._Myoff);
-		}
+ //#elif _SECURE_SCL
+	//	_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+	//	return (_Myoff < _Right._Myoff);
+	//	}
 			
  #else
 		return (this->_Same_container(_Right) && _Myoff < _Right._Myoff);
@@ -357,26 +357,26 @@ public:
 
 	typedef typename _Alloc::size_type size_type;
 
- #if _SECURE_SCL
-	typedef typename _If<_SECURE_VALIDATION,
-		_Deque20_iterator<_Type, _Alloc, false>,
-		_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
+ //#if _SECURE_SCL
+	//typedef typename _If<_SECURE_VALIDATION,
+	//	_Deque20_iterator<_Type, _Alloc, false>,
+	//	_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
 
-	friend _Deque20_iterator<_Type, _Alloc, false>;
-	friend _Deque20_iterator<_Type, _Alloc, true>;
+	//friend _Deque20_iterator<_Type, _Alloc, false>;
+	//friend _Deque20_iterator<_Type, _Alloc, true>;
 
-	_Deque20_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
-	{
-		_Deque20_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
-		return _Base;
-	}
+	//_Deque20_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
+	//{
+	//	_Deque20_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
+	//	return _Base;
+	//}
 
-	void _Checked_iterator_assign_from_base(_Deque20_iterator<_Type, _Alloc, false> _Base)
-	{
-		_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
-		this->_Myoff = _Base._Myoff;
-	}
- #endif
+	//void _Checked_iterator_assign_from_base(_Deque20_iterator<_Type, _Alloc, false> _Base)
+	//{
+	//	_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
+	//	this->_Myoff = _Base._Myoff;
+	//}
+ //#endif
 
 	_Deque20_iterator()
 		{	// construct with null vector pointer
@@ -497,20 +497,20 @@ template<class _Alloc>
 		}
 
 	//typename _Alloc::template rebind<_Aux_cont>::other _Alaux; // allocator object for aux objects
-#if !defined(_DEBUG) && !_SECURE_SCL
+//#if !defined(_DEBUG) && !_SECURE_SCL
         typedef typename _Alloc::template rebind<_Aux_cont>::other _Aux_alloc;
     static _Aux_alloc _Alaux()
         {
             return _Aux_alloc();
         }
-#endif
+//#endif
 	};
 
-#if !defined(_DEBUG) && !_SECURE_SCL
+//#if !defined(_DEBUG) && !_SECURE_SCL
 	#define _DEQUE20_BASE _Container_base_aux_alloc_real_no_alloc<_Alloc>
-#else
-	#define _DEQUE20_BASE _CONTAINER_BASE_AUX_ALLOC<_Alloc>
-#endif
+//#else
+//	#define _DEQUE20_BASE _CONTAINER_BASE_AUX_ALLOC<_Alloc>
+//#endif
 
 		// TEMPLATE CLASS _Deque20_map
 template<class _Type,
@@ -594,9 +594,10 @@ public:
 
 //	friend class _Deque20_iterator<_Type, _Alloc>;
 	friend class _Deque20_const_iterator<_Type, _Alloc, false>;
-#if _SECURE_SCL
-	friend class _Deque20_const_iterator<_Type, _Alloc, true>;
-#endif
+    friend class _Deque20_const_iterator<_Type, _Alloc, true>;
+//#if _SECURE_SCL
+//	friend class _Deque20_const_iterator<_Type, _Alloc, true>;
+//#endif
 
 	typedef std::reverse_iterator<iterator> reverse_iterator;
 	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;

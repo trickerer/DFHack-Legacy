@@ -47,23 +47,23 @@ public:
     typedef typename _Alloc::const_reference reference;
     typedef _Elem* _Inner_type;
 
-#if _SECURE_SCL
-    typedef _Range_checked_iterator_tag _Checked_iterator_category;
-#endif
+//#if _SECURE_SCL
+//    typedef _Range_checked_iterator_tag _Checked_iterator_category;
+//#endif
 
-#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
-    typedef pointer _Checked_iterator_base_type;
-
-    _Checked_iterator_base_type _Checked_iterator_base() const
-    {
-        return _Myptr;
-    }
-
-    void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
-    {
-        this->_Myptr = _Base;
-    }
-#endif
+//#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
+//    typedef pointer _Checked_iterator_base_type;
+//
+//    _Checked_iterator_base_type _Checked_iterator_base() const
+//    {
+//        return _Myptr;
+//    }
+//
+//    void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
+//    {
+//        this->_Myptr = _Base;
+//    }
+//#endif
 
     __CLR_OR_THIS_CALL _String24_const_iterator()
         {    // construct with null pointer
@@ -75,25 +75,25 @@ public:
 
     __CLR_OR_THIS_CALL _String24_const_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
         {    // construct with pointer _Ptr
-        _SCL_SECURE_VALIDATE(
-            _Pstring == NULL || 
-            _Ptr != NULL && 
-            ((_Mystring *)_Pstring)->_Myptr() <= _Ptr && _Ptr <= (((_Mystring *)_Pstring)->_Myptr() + ((_Mystring *)_Pstring)->_Mysize));
+        //_SCL_SECURE_VALIDATE(
+        //    _Pstring == NULL || 
+        //    _Ptr != NULL && 
+        //    ((_Mystring *)_Pstring)->_Myptr() <= _Ptr && _Ptr <= (((_Mystring *)_Pstring)->_Myptr() + ((_Mystring *)_Pstring)->_Mysize));
         this->_Adopt(_Pstring);
         _Myptr = _Ptr;
         }
 
- #elif _SECURE_SCL
- #define _STRING24_CONST_ITERATOR(ptr)    const_iterator(ptr, this)
-        __CLR_OR_THIS_CALL _String24_const_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
-            {    // construct with pointer _Ptr
-            _SCL_SECURE_VALIDATE(
-                _Pstring != NULL && 
-                _Ptr != NULL && 
-                ((_Mystring *)_Pstring)->_Myptr() <= _Ptr && _Ptr <= (((_Mystring *)_Pstring)->_Myptr() + ((_Mystring *)_Pstring)->_Mysize));
-            this->_Mycont = _Pstring;
-            _Myptr = _Ptr;
-            }
+ //#elif _SECURE_SCL
+ //#define _STRING24_CONST_ITERATOR(ptr)    const_iterator(ptr, this)
+ //       __CLR_OR_THIS_CALL _String24_const_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
+ //           {    // construct with pointer _Ptr
+ //           _SCL_SECURE_VALIDATE(
+ //               _Pstring != NULL && 
+ //               _Ptr != NULL && 
+ //               ((_Mystring *)_Pstring)->_Myptr() <= _Ptr && _Ptr <= (((_Mystring *)_Pstring)->_Myptr() + ((_Mystring *)_Pstring)->_Mysize));
+ //           this->_Mycont = _Pstring;
+ //           _Myptr = _Ptr;
+ //           }
 
  #else /* _HAS_ITERATOR_DEBUGGING */
  #define _STRING24_CONST_ITERATOR(ptr)    const_iterator(ptr)
@@ -121,8 +121,8 @@ public:
  #else
         if (this->_Mycont != _IGNORE_MYCONT)
         {
-            _SCL_SECURE_VALIDATE(this->_Has_container());
-            _SCL_SECURE_VALIDATE_RANGE(_Myptr < (((_Mystring *)this->_Mycont)->_Myptr() + ((_Mystring *)(this->_Mycont))->_Mysize));
+            //_SCL_SECURE_VALIDATE(this->_Has_container());
+            //_SCL_SECURE_VALIDATE_RANGE(_Myptr < (((_Mystring *)this->_Mycont)->_Myptr() + ((_Mystring *)(this->_Mycont))->_Mysize));
         }
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
@@ -138,8 +138,8 @@ public:
         {    // preincrement
         if (this->_Mycont != _IGNORE_MYCONT)
         {
-            _SCL_SECURE_VALIDATE(this->_Has_container());
-            _SCL_SECURE_VALIDATE_RANGE(_Myptr < (((_Mystring *)this->_Mycont)->_Myptr() + ((_Mystring *)this->_Mycont)->_Mysize));
+            //_SCL_SECURE_VALIDATE(this->_Has_container());
+            //_SCL_SECURE_VALIDATE_RANGE(_Myptr < (((_Mystring *)this->_Mycont)->_Myptr() + ((_Mystring *)this->_Mycont)->_Mysize));
         }
         ++_Myptr;
         return (*this);
@@ -156,8 +156,8 @@ public:
         {    // predecrement
         if (this->_Mycont != _IGNORE_MYCONT)
         {
-            _SCL_SECURE_VALIDATE(this->_Has_container());
-            _SCL_SECURE_VALIDATE_RANGE(_Myptr > ((_Mystring *)this->_Mycont)->_Myptr());
+            //_SCL_SECURE_VALIDATE(this->_Has_container());
+            //_SCL_SECURE_VALIDATE_RANGE(_Myptr > ((_Mystring *)this->_Mycont)->_Myptr());
         }
         --_Myptr;
         return (*this);
@@ -174,10 +174,10 @@ public:
         {    // increment by integer
         if (this->_Mycont != _IGNORE_MYCONT)
         {
-            _SCL_SECURE_VALIDATE(this->_Has_container());
-            _SCL_SECURE_VALIDATE_RANGE(
-                _Myptr + _Off <= (((_Mystring *)this->_Mycont)->_Myptr() + ((_Mystring *)this->_Mycont)->_Mysize) &&
-                _Myptr + _Off >= ((_Mystring *)this->_Mycont)->_Myptr());
+            //_SCL_SECURE_VALIDATE(this->_Has_container());
+            //_SCL_SECURE_VALIDATE_RANGE(
+            //    _Myptr + _Off <= (((_Mystring *)this->_Mycont)->_Myptr() + ((_Mystring *)this->_Mycont)->_Mysize) &&
+            //    _Myptr + _Off >= ((_Mystring *)this->_Mycont)->_Myptr());
         }
         _Myptr += _Off;
         return (*this);
@@ -208,7 +208,7 @@ public:
  #else
         if (this->_Mycont != _IGNORE_MYCONT)
         {
-            _SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+            //_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
         }
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
@@ -228,7 +228,7 @@ public:
  #else
         if (this->_Mycont != _IGNORE_MYCONT)
         {
-            _SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+            //_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
         }
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
@@ -248,7 +248,7 @@ public:
  #else
         if (this->_Mycont != _IGNORE_MYCONT)
         {
-            _SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+            //_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
         }
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
@@ -339,12 +339,12 @@ public:
         {    // construct with pointer _Ptr
         }
 
-  #elif _SECURE_SCL
- #define _STRING24_ITERATOR(ptr)    iterator(ptr, this)
-        __CLR_OR_THIS_CALL _String24_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
-            : _Mybase(_Ptr, _Pstring)
-            {    // construct with pointer _Ptr
-            }
+ // #elif _SECURE_SCL
+ //#define _STRING24_ITERATOR(ptr)    iterator(ptr, this)
+ //       __CLR_OR_THIS_CALL _String24_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
+ //           : _Mybase(_Ptr, _Pstring)
+ //           {    // construct with pointer _Ptr
+ //           }
 
  #else /* _HAS_ITERATOR_DEBUGGING */
  #define _STRING24_ITERATOR(ptr)    iterator(ptr)
@@ -355,19 +355,19 @@ public:
         }
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
-#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
-    typedef pointer _Checked_iterator_base_type;
-
-    _Checked_iterator_base_type _Checked_iterator_base() const
-    {
-        return const_cast<pointer>(this->_Myptr);
-    }
-
-    void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
-    {
-        this->_Myptr = _Base;
-    }
-#endif
+//#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
+//    typedef pointer _Checked_iterator_base_type;
+//
+//    _Checked_iterator_base_type _Checked_iterator_base() const
+//    {
+//        return const_cast<pointer>(this->_Myptr);
+//    }
+//
+//    void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
+//    {
+//        this->_Myptr = _Base;
+//    }
+//#endif
 
     reference __CLR_OR_THIS_CALL operator*() const
         {    // return designated object
@@ -526,13 +526,13 @@ public:
     * The correct operator[] is chosen based on the value of _SECURE_SCL.
     * See below when we define operator[].
     */
-    #if _DEFINE_DLL_OVERLOADS || !_SECURE_SCL
+    //#if _DEFINE_DLL_OVERLOADS || !_SECURE_SCL
     struct _Size_type_nosscl
     {
     size_t _Value;
     _Size_type_nosscl(size_t _Val): _Value(_Val) { }
     };
-    #endif
+    //#endif
 
     /*
     * _No_debug_placeholder is used to overload the basic_string24 constructors.
@@ -1548,53 +1548,53 @@ public:
         return (_Myptr()[_Off]);
         }
 
- #if !defined(_DLL_CPPLIB) || _SECURE_SCL
+ //#if !defined(_DLL_CPPLIB) || _SECURE_SCL
 
-    reference __CLR_OR_THIS_CALL operator[](size_type _Off)
-        {    // subscript mutable sequence
+ //   reference __CLR_OR_THIS_CALL operator[](size_type _Off)
+ //       {    // subscript mutable sequence
 
- #if _HAS_ITERATOR_DEBUGGING
-        // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
-        if (this->_Myfirstiter != _IGNORE_MYITERLIST)
-            {
-            if (_Mysize < _Off)
-                {
-                _DEBUG_ERROR("string subscript out of range");
-                _SCL_SECURE_OUT_OF_RANGE;
-                }
-            }
- #else
-        _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+ //       // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
+ //       if (this->_Myfirstiter != _IGNORE_MYITERLIST)
+ //           {
+ //           if (_Mysize < _Off)
+ //               {
+ //               _DEBUG_ERROR("string subscript out of range");
+ //               _SCL_SECURE_OUT_OF_RANGE;
+ //               }
+ //           }
+ //#else
+ //       _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
-        return (_Myptr()[_Off]);
-        }
+ //       return (_Myptr()[_Off]);
+ //       }
 
-    const_reference __CLR_OR_THIS_CALL operator[](size_type _Off) const
-        {    // subscript nonmutable sequence
+ //   const_reference __CLR_OR_THIS_CALL operator[](size_type _Off) const
+ //       {    // subscript nonmutable sequence
 
- #if _HAS_ITERATOR_DEBUGGING
-        // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
-        if (this->_Myfirstiter != _IGNORE_MYITERLIST)
-            {
-            if (_Mysize < _Off)    // sic
-                {
-                _DEBUG_ERROR("string subscript out of range");
-                _SCL_SECURE_OUT_OF_RANGE;
-                }
-            }
- #else
-        _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+ //       // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
+ //       if (this->_Myfirstiter != _IGNORE_MYITERLIST)
+ //           {
+ //           if (_Mysize < _Off)    // sic
+ //               {
+ //               _DEBUG_ERROR("string subscript out of range");
+ //               _SCL_SECURE_OUT_OF_RANGE;
+ //               }
+ //           }
+ //#else
+ //       _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
-        return (_Myptr()[_Off]);
-        }
+ //       return (_Myptr()[_Off]);
+ //       }
 
- #endif /* !defined(_DLL_CPPLIB) || _SECURE_SCL */
+ //#endif /* !defined(_DLL_CPPLIB) || _SECURE_SCL */
 
  #if defined(_DLL_CPPLIB)
 
-  #if _DEFINE_DLL_OVERLOADS || !_SECURE_SCL
+  //#if _DEFINE_DLL_OVERLOADS || !_SECURE_SCL
 
     reference __CLR_OR_THIS_CALL operator[](_Size_type_nosscl _SpecialOff)
         {    // subscript mutable sequence
@@ -1634,7 +1634,7 @@ public:
         return (_Myptr()[_Off]);
         }
 
-  #endif /* _DEFINE_DLL_OVERLOADS || !_SECURE_SCL */
+  //#endif /* _DEFINE_DLL_OVERLOADS || !_SECURE_SCL */
 
  #endif /* _DLL_CPPLIB */
 

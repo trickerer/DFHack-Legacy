@@ -40,24 +40,24 @@ public:
 	typedef typename _Alloc::const_pointer pointer;
 	typedef typename _Alloc::const_reference reference;
 
-#if _SECURE_SCL
-	typedef _Range_checked_iterator_tag _Checked_iterator_category;
-#endif
+//#if _SECURE_SCL
+//	typedef _Range_checked_iterator_tag _Checked_iterator_category;
+//#endif
 
-#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
-	typedef pointer _Checked_iterator_base_type;
-
-	_Checked_iterator_base_type _Checked_iterator_base() const
-	{
-		return _Myptr;
-	}
-
-	void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
-	{
-		this->_Myptr = const_cast<_Tptr>(_Base);
-	}
-#endif
-
+//#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
+//	typedef pointer _Checked_iterator_base_type;
+//
+//	_Checked_iterator_base_type _Checked_iterator_base() const
+//	{
+//		return _Myptr;
+//	}
+//
+//	void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
+//	{
+//		this->_Myptr = const_cast<_Tptr>(_Base);
+//	}
+//#endif
+//
 	typedef _Tptr _Inner_type;
 
 	_Vector12_const_iterator()
@@ -68,25 +68,25 @@ public:
  #if _HAS_ITERATOR_DEBUGGING
 	_Vector12_const_iterator(_Tptr _Ptr, const _Container_base *_Pvector)
 		{	// construct with pointer _Ptr
-		_SCL_SECURE_VALIDATE(_Pvector == NULL || (((_Myvec *)_Pvector)->_Myfirst <= _Ptr && _Ptr <= ((_Myvec *)_Pvector)->_Mylast));
+		//_SCL_SECURE_VALIDATE(_Pvector == NULL || (((_Myvec *)_Pvector)->_Myfirst <= _Ptr && _Ptr <= ((_Myvec *)_Pvector)->_Mylast));
 		this->_Adopt(_Pvector);
 		_Myptr = _Ptr;
 		}
 
- #elif _SECURE_SCL
-	_Vector12_const_iterator(_Tptr _Ptr, const _Container_base *_Pvector)
-		{	// construct with pointer _Ptr
-		_SCL_SECURE_VALIDATE(_Pvector != NULL && ((_Myvec *)_Pvector)->_Myfirst <= _Ptr && _Ptr <= ((_Myvec *)_Pvector)->_Mylast);
-		this->_Set_container(_Pvector);
-		_Myptr = _Ptr;
-		}
+ //#elif _SECURE_SCL
+	//_Vector12_const_iterator(_Tptr _Ptr, const _Container_base *_Pvector)
+	//	{	// construct with pointer _Ptr
+	//	_SCL_SECURE_VALIDATE(_Pvector != NULL && ((_Myvec *)_Pvector)->_Myfirst <= _Ptr && _Ptr <= ((_Myvec *)_Pvector)->_Mylast);
+	//	this->_Set_container(_Pvector);
+	//	_Myptr = _Ptr;
+	//	}
 
  #else
 	explicit _Vector12_const_iterator(_Tptr _Ptr)
 		{	// construct with pointer _Ptr
 		_Myptr = _Ptr;
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	reference operator*() const
 		{	// return designated object
@@ -100,8 +100,8 @@ public:
 			_SCL_SECURE_OUT_OF_RANGE;
 			}
  #else
- 		_SCL_SECURE_VALIDATE(this->_Has_container());
-		_SCL_SECURE_VALIDATE_RANGE(_Myptr < ((_Myvec *)(this->_Getmycont()))->_Mylast);
+ 		//_SCL_SECURE_VALIDATE(this->_Has_container());
+		//_SCL_SECURE_VALIDATE_RANGE(_Myptr < ((_Myvec *)(this->_Getmycont()))->_Mylast);
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (*_Myptr);
@@ -114,8 +114,8 @@ public:
 
 	_MyType& operator++()
 		{	// preincrement
-		_SCL_SECURE_VALIDATE(this->_Has_container());
-		_SCL_SECURE_VALIDATE_RANGE(_Myptr < ((_Myvec *)(this->_Getmycont()))->_Mylast);
+		//_SCL_SECURE_VALIDATE(this->_Has_container());
+		//_SCL_SECURE_VALIDATE_RANGE(_Myptr < ((_Myvec *)(this->_Getmycont()))->_Mylast);
 
  #if _HAS_ITERATOR_DEBUGGING
 		if (this->_Mycont == 0
@@ -136,8 +136,8 @@ public:
 
 	_MyType& operator--()
 		{	// predecrement
-		_SCL_SECURE_VALIDATE(this->_Has_container());
-		_SCL_SECURE_VALIDATE_RANGE(_Myptr > ((_Myvec *)(this->_Getmycont()))->_Myfirst);
+		//_SCL_SECURE_VALIDATE(this->_Has_container());
+		//_SCL_SECURE_VALIDATE_RANGE(_Myptr > ((_Myvec *)(this->_Getmycont()))->_Myfirst);
 
  #if _HAS_ITERATOR_DEBUGGING
 		if (this->_Mycont == 0
@@ -158,10 +158,10 @@ public:
 
 	_MyType& operator+=(difference_type _Off)
 		{	// increment by integer
-		_SCL_SECURE_VALIDATE(this->_Has_container());
-		_SCL_SECURE_VALIDATE_RANGE(
-			_Myptr + _Off <= ((_Myvec *)(this->_Getmycont()))->_Mylast &&
-			_Myptr + _Off >= ((_Myvec *)(this->_Getmycont()))->_Myfirst);
+		//_SCL_SECURE_VALIDATE(this->_Has_container());
+		//_SCL_SECURE_VALIDATE_RANGE(
+			//_Myptr + _Off <= ((_Myvec *)(this->_Getmycont()))->_Mylast &&
+			//_Myptr + _Off >= ((_Myvec *)(this->_Getmycont()))->_Myfirst);
 		_Myptr += _Off;
 		return (*this);
 		}
@@ -189,7 +189,7 @@ public:
  #if _HAS_ITERATOR_DEBUGGING
 		_Compat(_Right);
  #else
-		_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (_Myptr - _Right._Myptr);
@@ -206,7 +206,7 @@ public:
  #if _HAS_ITERATOR_DEBUGGING
 		_Compat(_Right);
  #else
-		_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (_Myptr == _Right._Myptr);
@@ -223,7 +223,7 @@ public:
  #if _HAS_ITERATOR_DEBUGGING
 		_Compat(_Right);
  #else
-		_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (_Myptr < _Right._Myptr);
@@ -298,19 +298,19 @@ public:
 	typedef typename _Alloc::pointer pointer;
 	typedef typename _Alloc::reference reference;
 
-#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
-	typedef pointer _Checked_iterator_base_type;
-
-	_Checked_iterator_base_type _Checked_iterator_base() const
-	{
-		return this->_Myptr;
-	}
-
-	void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
-	{
-		this->_Myptr = _Base;
-	}
-#endif
+//#if _SECURE_SCL && !_HAS_ITERATOR_DEBUGGING
+//	typedef pointer _Checked_iterator_base_type;
+//
+//	_Checked_iterator_base_type _Checked_iterator_base() const
+//	{
+//		return this->_Myptr;
+//	}
+//
+//	void _Checked_iterator_assign_from_base(_Checked_iterator_base_type _Base)
+//	{
+//		this->_Myptr = _Base;
+//	}
+//#endif
 
 	_Vector12_iterator()
 		{	// construct with null vector12 pointer
@@ -322,11 +322,11 @@ public:
 		{	// construct with pointer _Ptr
 		}
 
- #elif _SECURE_SCL
-	_Vector12_iterator(pointer _Ptr, const _Container_base *_Pvector)
-		: _Mybase(_Ptr, _Pvector)
-		{	// construct with pointer _Ptr
-		}
+ //#elif _SECURE_SCL
+	//_Vector12_iterator(pointer _Ptr, const _Container_base *_Pvector)
+	//	: _Mybase(_Ptr, _Pvector)
+	//	{	// construct with pointer _Ptr
+	//	}
 
  #else
 	explicit _Vector12_iterator(pointer _Ptr)
@@ -414,15 +414,41 @@ template<class _Type,
 	return (_Next += _Off);
 	}
 
+class _Container_base_no_alloc
+	{	// base of all containers
+	public:
+	void _Swap_aux(_Container_base_no_alloc&)
+		{
+		// Do nothing: we don't have an aux object.
+		}
+	};
+
+template<class _Alloc>
+	class _Container_base_aux_alloc_empty_no_alloc
+		: public _Container_base_no_alloc
+	{ // base class for containers to avoid holding allocator _Alaux
+	protected:
+	explicit _Container_base_aux_alloc_empty_no_alloc(_Alloc) { }
+
+	_Container_base_aux_alloc_empty_no_alloc(const _Container_base_aux_alloc_empty_no_alloc&) { }
+
+	_Container_base_aux_alloc_empty_no_alloc& operator=(const _Container_base_aux_alloc_empty_no_alloc&)
+		{
+		return *this;
+		}
+
+	~_Container_base_aux_alloc_empty_no_alloc() { }
+	};
+
 		// TEMPLATE CLASS _Vector12_val
 template<class _Type,
 	class _Alloc>
 	class _Vector12_val
-		: public _CONTAINER_BASE_AUX_ALLOC<_Alloc>
+		: public _Container_base_aux_alloc_empty_no_alloc<_Alloc>
 	{	// base class for vector12 to hold allocator _Alval
 protected:
 	_Vector12_val(_Alloc _Al = _Alloc())
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Al)//, _Alval(_Al)
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Al)//, _Alval(_Al)
 		{	// construct allocator from _Al
 		}
 
@@ -641,33 +667,33 @@ public:
 		return (_Myfirst == 0 ? 0 : _Myend - _Myfirst);
 		}
 
- #if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
-	iterator begin()
-		{	// return iterator for beginning of mutable sequence
-		return (iterator(_Myfirst, this));
-		}
+ //#if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
+	//iterator begin()
+	//	{	// return iterator for beginning of mutable sequence
+	//	return (iterator(_Myfirst, this));
+	//	}
 
-	const_iterator begin() const
-		{	// return iterator for beginning of nonmutable sequence
-		return (const_iterator(_Myfirst, this));
-		}
+	//const_iterator begin() const
+	//	{	// return iterator for beginning of nonmutable sequence
+	//	return (const_iterator(_Myfirst, this));
+	//	}
 
-	iterator end()
-		{	// return iterator for end of mutable sequence
-		return (iterator(_Mylast, this));
-		}
+	//iterator end()
+	//	{	// return iterator for end of mutable sequence
+	//	return (iterator(_Mylast, this));
+	//	}
 
-	const_iterator end() const
-		{	// return iterator for end of nonmutable sequence
-		return (const_iterator(_Mylast, this));
-		}
+	//const_iterator end() const
+	//	{	// return iterator for end of nonmutable sequence
+	//	return (const_iterator(_Mylast, this));
+	//	}
 
-	iterator _Make_iter(const_iterator _Where) const
-		{	// make iterator from const_iterator
-		return (iterator(_Where._Myptr, this));
-		}
+	//iterator _Make_iter(const_iterator _Where) const
+	//	{	// make iterator from const_iterator
+	//	return (iterator(_Where._Myptr, this));
+	//	}
 
- #else /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
 	iterator begin()
 		{	// return iterator for beginning of mutable sequence
 		return (iterator(_Myfirst));
@@ -692,7 +718,7 @@ public:
 		{	// make iterator from const_iterator
 		return (iterator(_Where._Myptr));
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	reverse_iterator rbegin()
 		{	// return iterator for beginning of reversed mutable sequence
@@ -771,7 +797,7 @@ public:
 			_SCL_SECURE_OUT_OF_RANGE;
 			}
  #endif /* _HAS_ITERATOR_DEBUGGING */
-		_SCL_SECURE_VALIDATE_RANGE(_Pos < size());
+		//_SCL_SECURE_VALIDATE_RANGE(_Pos < size());
 
 		return (*(_Myfirst + _Pos));
 		}
@@ -786,7 +812,7 @@ public:
 			_SCL_SECURE_OUT_OF_RANGE;
 			}
  #endif /* _HAS_ITERATOR_DEBUGGING */
-		_SCL_SECURE_VALIDATE_RANGE(_Pos < size());
+		//_SCL_SECURE_VALIDATE_RANGE(_Pos < size());
 
 		return (*(_Myfirst + _Pos));
 		}

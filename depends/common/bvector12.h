@@ -3,10 +3,9 @@
 #ifndef _BVECTOR12_
 #define _BVECTOR12_
 #ifndef RC_INVOKED
+#include "vector12.h"
 #include <memory>
 #include <stdexcept>
-
-#include "vector12.h"
 
 #ifdef _MSC_VER
  #pragma pack(push,_CRT_PACKING)
@@ -27,9 +26,9 @@ template<class _Sizet,
 		: public _Ranit<_Bool, _Difft, bool *, bool>
 	{	// store information common to reference and iterators
 public:
-#if _SECURE_SCL
-	typedef _Range_checked_iterator_tag _Checked_iterator_category;
-#endif
+//#if _SECURE_SCL
+//	typedef _Range_checked_iterator_tag _Checked_iterator_category;
+//#endif
 
 	_Vb12_iter_base()
 		: _Myptr(0), _Myoff(0)
@@ -41,18 +40,18 @@ public:
 		const _Container_base *_Mypvbool)
 		: _Myptr(_Ptr), _Myoff(_Off)
 		{	// construct with offset and pointer
-		_SCL_SECURE_VALIDATE(_Mypvbool != NULL);
+		//_SCL_SECURE_VALIDATE(_Mypvbool != NULL);
 		this->_Adopt(_Mypvbool);
 		}
 
- #elif _SECURE_SCL
-	_Vb12_iter_base(_V12base *_Ptr, _Sizet _Off,
-		const _Container_base *_Mypvbool)
-		: _Myptr(_Ptr), _Myoff(_Off)
-		{	// construct with offset and pointer
-		_SCL_SECURE_VALIDATE(_Mypvbool != NULL);
-		this->_Set_container(_Mypvbool);
-		}
+ //#elif _SECURE_SCL
+	//_Vb12_iter_base(_V12base *_Ptr, _Sizet _Off,
+	//	const _Container_base *_Mypvbool)
+	//	: _Myptr(_Ptr), _Myoff(_Off)
+	//	{	// construct with offset and pointer
+	//	_SCL_SECURE_VALIDATE(_Mypvbool != NULL);
+	//	this->_Set_container(_Mypvbool);
+	//	}
  #else
 	_Vb12_iter_base(_V12base *_Ptr, _Sizet _Off)
 		: _Myptr(_Ptr), _Myoff(_Off)
@@ -78,19 +77,19 @@ public:
 		_THROW(invalid_argument, "invalid vector12<bool> argument");
 		}
 
- #if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
-	_V12base * _My_cont_begin() const
-		{
-			return _VEC_ITER_BASE(((_MycontTy *)this->_Getmycont())->_Myvec.begin());
-		}
+ //#if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
+	//_V12base * _My_cont_begin() const
+	//	{
+	//		return _VEC_ITER_BASE(((_MycontTy *)this->_Getmycont())->_Myvec.begin());
+	//	}
 
-	_Sizet _My_actual_offset() const
-		{
-		_Sizet _Off = this->_Myoff;
-		_Off += _V12BITS * (this->_Myptr - _My_cont_begin());
-		return _Off;
-		}
- #endif
+	//_Sizet _My_actual_offset() const
+	//	{
+	//	_Sizet _Off = this->_Myoff;
+	//	_Off += _V12BITS * (this->_Myptr - _My_cont_begin());
+	//	return _Off;
+	//	}
+ //#endif
 	};
 
 		// CLASS _Vb12_reference
@@ -108,18 +107,18 @@ public:
 		{	// construct with null pointer
 		}
 
- #if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
-	_Vb12_reference(const _Mybase& _Right)
-		: _Mybase(_Right._Myptr, _Right._Myoff, _Right._Getmycont())
-		{	// construct with base
-		}
+ //#if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
+	//_Vb12_reference(const _Mybase& _Right)
+	//	: _Mybase(_Right._Myptr, _Right._Myoff, _Right._Getmycont())
+	//	{	// construct with base
+	//	}
 
- #else /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
 	_Vb12_reference(const _Mybase& _Right)
 		: _Mybase(_Right._Myptr, _Right._Myoff)
 		{	// construct with base
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	_Mytype& operator=(const _Mytype& _Right)
 		{	// assign _Vb12_reference _Right to bit
@@ -159,9 +158,9 @@ public:
 			_DEBUG_ERROR("vector12<bool> iterator not dereferencable");
 			_SCL_SECURE_OUT_OF_RANGE;
 			}
- #else /* _HAS_ITERATOR_DEBUGGING */
- 		_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
-		_SCL_SECURE_VALIDATE_RANGE(this->_My_actual_offset() < ((_MycontTy *)this->_Getmycont())->_Mysize);
+ //#else /* _HAS_ITERATOR_DEBUGGING */
+ //		_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
+	//	_SCL_SECURE_VALIDATE_RANGE(this->_My_actual_offset() < ((_MycontTy *)this->_Getmycont())->_Mysize);
  #endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (this->_Myptr);
@@ -210,15 +209,15 @@ public:
 		{	// construct with null reference
 		}
 
- #if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
-	_Vb12_const_iterator(const _V12base *_Ptr, const _Container_base *_Mypvbool)
-		: _Mybase((_V12base *)_Ptr, 0, (_Container_base *)_Mypvbool)
+ //#if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
+	//_Vb12_const_iterator(const _V12base *_Ptr, const _Container_base *_Mypvbool)
+	//	: _Mybase((_V12base *)_Ptr, 0, (_Container_base *)_Mypvbool)
 
- #else
+ //#else
 	_Vb12_const_iterator(const _V12base *_Ptr)
 		: _Mybase((_V12base *)_Ptr, 0)
 
- #endif
+ //#endif
 		{	// construct with offset and pointer
 		}
 
@@ -257,14 +256,14 @@ public:
 		{	// increment by integer
 		if (_Off == 0)
 			return (*this); // early out
-		_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
+		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
 		if (_Off < 0)
 			{
-			_SCL_SECURE_VALIDATE_RANGE(this->_My_actual_offset() >= ((size_type)-_Off));
+			//_SCL_SECURE_VALIDATE_RANGE(this->_My_actual_offset() >= ((size_type)-_Off));
 			}
 		else
 			{
-			_SCL_SECURE_VALIDATE_RANGE((this->_My_actual_offset() + _Off) <= ((_MycontTy *)this->_Getmycont())->_Mysize);
+			//_SCL_SECURE_VALIDATE_RANGE((this->_My_actual_offset() + _Off) <= ((_MycontTy *)this->_Getmycont())->_Mysize);
 			}
 		if (_Off < 0 && this->_Myoff < 0 - (size_type)_Off)
 			{	/* add negative increment */
@@ -377,8 +376,8 @@ protected:
 			}
 		else
 			{
-			_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
-			_SCL_SECURE_VALIDATE_RANGE(this->_Myptr > this->_My_cont_begin());
+			//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
+			//_SCL_SECURE_VALIDATE_RANGE(this->_Myptr > this->_My_cont_begin());
 			--this->_Myptr;
 			this->_Myoff = _V12BITS - 1;
 			}
@@ -386,8 +385,8 @@ protected:
 
 	void _Inc()
 		{	// increment bit position
-		_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
-		_SCL_SECURE_VALIDATE_RANGE((this->_My_actual_offset() + 1) <= ((_MycontTy *)this->_Getmycont())->_Mysize);
+		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Myptr != NULL);
+		//_SCL_SECURE_VALIDATE_RANGE((this->_My_actual_offset() + 1) <= ((_MycontTy *)this->_Getmycont())->_Mysize);
 		if (this->_Myoff < _V12BITS - 1)
 			++this->_Myoff;
 		else
@@ -429,14 +428,14 @@ public:
 		{	// construct with null reference
 		}
 
- #if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
-	_Vb12_iterator(_V12base *_Ptr, _Container_base *_Mypvbool)
-		: _Mybase(_Ptr, _Mypvbool)
+ //#if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
+	//_Vb12_iterator(_V12base *_Ptr, _Container_base *_Mypvbool)
+	//	: _Mybase(_Ptr, _Mypvbool)
 
- #else
+ //#else
 	_Vb12_iterator( _V12base *_Ptr)
 		: _Mybase(_Ptr)
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		{	// construct with offset and pointer
 		}
@@ -518,7 +517,7 @@ template<class _Sizet,
 		// CLASS vector_bool
 template<class _Alloc>
 	class vector12<_Bool, _Alloc>
-		: public _CONTAINER_BASE_AUX_ALLOC<_Alloc>
+		: public _Container_base_aux_alloc_empty_no_alloc<_Alloc>
 	{	// varying size array of bits
 public:
 	typedef typename _Alloc::size_type size_type;
@@ -554,42 +553,42 @@ public:
 	static const int _V12BITS = std::_V12BITS;
 
 	vector12()
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Alloc()), _Mysize(0), _Myvec()
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Alloc()), _Mysize(0), _Myvec()
 		{	// construct empty vector12
 		}
 
 	vector12(const _MyType& _Right)
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Right.get_allocator()), _Mysize(_Right._Mysize), _Myvec(_Right._Myvec)
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Right.get_allocator()), _Mysize(_Right._Mysize), _Myvec(_Right._Myvec)
 		{	// copy construct vector12; an implicitly defined copy constructor would not create an aux object.
 		}
 
 	explicit vector12(const _Alloc& _Al)
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Al), _Mysize(0), _Myvec(_Al)
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Al), _Mysize(0), _Myvec(_Al)
 		{	// construct empty vector12, with allocator
 		}
 
 	explicit vector12(size_type _Count, bool _Val = false)
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Alloc()), _Mysize(0), _Myvec(_Nw(_Count), (_V12base)(_Val ? -1 : 0))
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Alloc()), _Mysize(0), _Myvec(_Nw(_Count), (_V12base)(_Val ? -1 : 0))
 		{	// construct from _Count * _Val
 		_Trim(_Count);
 		}
 
 	vector12(size_type _Count, bool _Val, const _Alloc& _Al)
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Al), _Mysize(0), _Myvec(_Nw(_Count), (_V12base)(_Val ? -1 : 0), _Al)
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Al), _Mysize(0), _Myvec(_Nw(_Count), (_V12base)(_Val ? -1 : 0), _Al)
 		{	// construct from _Count * _Val, with allocator
 		_Trim(_Count);
 		}
 
 	template<class _Iter>
 		vector12(_Iter _First, _Iter _Last)
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Alloc()), _Mysize(0), _Myvec()
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Alloc()), _Mysize(0), _Myvec()
 		{	// construct from [_First, _Last)
 		_BConstruct(_First, _Last, _Iter_cat(_First));
 		}
 
 	template<class _Iter>
 		vector12(_Iter _First, _Iter _Last, const _Alloc& _Al)
-		: _CONTAINER_BASE_AUX_ALLOC<_Alloc>(_Al), _Mysize(0), _Myvec(_Al)
+		: _Container_base_aux_alloc_empty_no_alloc<_Alloc>(_Al), _Mysize(0), _Myvec(_Al)
 		{	// construct from [_First, _Last), with allocator
 		_BConstruct(_First, _Last, _Iter_cat(_First));
 		}
@@ -623,18 +622,18 @@ public:
 		return (_Myvec.capacity() * _V12BITS);
 		}
 
- #if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
-	iterator begin()
-		{	// return iterator for beginning of mutable sequence
-		return (iterator(_VEC_ITER_BASE(_Myvec.begin()), this));
-		}
+ //#if _HAS_ITERATOR_DEBUGGING || _SECURE_SCL
+	//iterator begin()
+	//	{	// return iterator for beginning of mutable sequence
+	//	return (iterator(_VEC_ITER_BASE(_Myvec.begin()), this));
+	//	}
 
-	const_iterator begin() const
-		{	// return iterator for beginning of nonmutable sequence
-		return (const_iterator(_VEC_ITER_BASE(_Myvec.begin()), this));
-		}
+	//const_iterator begin() const
+	//	{	// return iterator for beginning of nonmutable sequence
+	//	return (const_iterator(_VEC_ITER_BASE(_Myvec.begin()), this));
+	//	}
 
- #else
+ //#else
 	iterator begin()
 		{	// return iterator for beginning of mutable sequence
 		return (iterator(_VEC_ITER_BASE(_Myvec.begin())));
@@ -644,7 +643,7 @@ public:
 		{	// return iterator for beginning of nonmutable sequence
 		return (const_iterator(_VEC_ITER_BASE(_Myvec.begin())));
 		}
- #endif
+ //#endif
 
 	iterator end()
 		{	// return iterator for end of mutable sequence

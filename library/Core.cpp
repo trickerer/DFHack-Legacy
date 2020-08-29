@@ -758,7 +758,7 @@ command_result Core::runCommand(color_ostream &con, const std::string24 &first_,
         std::string24 builtin = getBuiltinCommand(first);
         if (builtin == "checktypes")
         {
-            CountedTypes::CheckTypes();
+            CheckCountedTypes();
         }
         else if (builtin == "help")
         {
