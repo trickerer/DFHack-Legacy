@@ -71,7 +71,7 @@ public:
         }
 
  #if _HAS_ITERATOR_DEBUGGING
- #define _STRING_CONST_ITERATOR(ptr)    const_iterator(ptr, this)
+ #define _STRING24_CONST_ITERATOR(ptr)    const_iterator(ptr, this)
 
     __CLR_OR_THIS_CALL _String24_const_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
         {    // construct with pointer _Ptr
@@ -84,7 +84,7 @@ public:
         }
 
  #elif _SECURE_SCL
- #define _STRING_CONST_ITERATOR(ptr)    const_iterator(ptr, this)
+ #define _STRING24_CONST_ITERATOR(ptr)    const_iterator(ptr, this)
         __CLR_OR_THIS_CALL _String24_const_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
             {    // construct with pointer _Ptr
             _SCL_SECURE_VALIDATE(
@@ -96,7 +96,7 @@ public:
             }
 
  #else /* _HAS_ITERATOR_DEBUGGING */
- #define _STRING_CONST_ITERATOR(ptr)    const_iterator(ptr)
+ #define _STRING24_CONST_ITERATOR(ptr)    const_iterator(ptr)
 
     __CLR_OR_THIS_CALL _String24_const_iterator(pointer _Ptr)
         {    // construct with pointer _Ptr
@@ -332,7 +332,7 @@ public:
         }
 
  #if _HAS_ITERATOR_DEBUGGING
- #define _STRING_ITERATOR(ptr)    iterator(ptr, this)
+ #define _STRING24_ITERATOR(ptr)    iterator(ptr, this)
 
     __CLR_OR_THIS_CALL _String24_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
         : _Mybase(_Ptr, _Pstring)
@@ -340,14 +340,14 @@ public:
         }
 
   #elif _SECURE_SCL
- #define _STRING_ITERATOR(ptr)    iterator(ptr, this)
+ #define _STRING24_ITERATOR(ptr)    iterator(ptr, this)
         __CLR_OR_THIS_CALL _String24_iterator(pointer _Ptr, const _Container_base_secure *_Pstring)
             : _Mybase(_Ptr, _Pstring)
             {    // construct with pointer _Ptr
             }
 
  #else /* _HAS_ITERATOR_DEBUGGING */
- #define _STRING_ITERATOR(ptr)    iterator(ptr)
+ #define _STRING24_ITERATOR(ptr)    iterator(ptr)
 
     __CLR_OR_THIS_CALL _String24_iterator(pointer _Ptr)
         : _Mybase(_Ptr)
@@ -1275,14 +1275,14 @@ public:
         {    // erase element at _Where
         size_type _Count = _Pdif(_Where, begin());
         erase(_Count, 1);
-        return (_STRING_ITERATOR(_Myptr() + _Count));
+        return (_STRING24_ITERATOR(_Myptr() + _Count));
         }
 
     iterator __CLR_OR_THIS_CALL erase(const_iterator _First, const_iterator _Last)
         {    // erase substring [_First, _Last)
         size_type _Count = _Pdif(_First, begin());
         erase(_Count, _Pdif(_Last, _First));
-        return (_STRING_ITERATOR(_Myptr() + _Count));
+        return (_STRING24_ITERATOR(_Myptr() + _Count));
         }
 
     void __CLR_OR_THIS_CALL clear()
@@ -1496,22 +1496,22 @@ public:
 
     iterator __CLR_OR_THIS_CALL begin()
         {    // return iterator for beginning of mutable sequence
-        return (_STRING_ITERATOR(_Myptr()));
+        return (_STRING24_ITERATOR(_Myptr()));
         }
 
     const_iterator __CLR_OR_THIS_CALL begin() const
         {    // return iterator for beginning of nonmutable sequence
-        return (_STRING_CONST_ITERATOR(_Myptr()));
+        return (_STRING24_CONST_ITERATOR(_Myptr()));
         }
 
     iterator __CLR_OR_THIS_CALL end()
         {    // return iterator for end of mutable sequence
-        return (_STRING_ITERATOR(_Myptr() + _Mysize));
+        return (_STRING24_ITERATOR(_Myptr() + _Mysize));
         }
 
     const_iterator __CLR_OR_THIS_CALL end() const
         {    // return iterator for end of nonmutable sequence
-        return (_STRING_CONST_ITERATOR(_Myptr() + _Mysize));
+        return (_STRING24_CONST_ITERATOR(_Myptr() + _Mysize));
         }
 
     reverse_iterator __CLR_OR_THIS_CALL rbegin()
