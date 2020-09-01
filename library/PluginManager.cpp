@@ -248,7 +248,7 @@ bool Plugin::load(color_ostream &con)
         state = PS_LOADING;
     }
     // enter suspend
-    std::cerr << "Plugin::load suspend";
+    //std::cerr << "Plugin::load suspend";
     CoreSuspender suspend;
     // open the library, etc
     fprintf(stderr, "loading plugin %s\n", name.c_str());
@@ -413,7 +413,7 @@ bool Plugin::unload(color_ostream &con)
         state = PS_UNLOADING;
         access->unlock();
         // enter suspend
-        std::cerr << "Plugin::unload suspend";
+        //std::cerr << "Plugin::unload suspend";
         CoreSuspender suspend;
         access->lock();
         if (Core::getInstance().isWorldLoaded() && plugin_save_data && plugin_save_data(con) != CR_OK)
@@ -488,7 +488,7 @@ command_result Plugin::invoke(color_ostream &out, const std::string24 & command,
                     // expect their guard conditions to be matched,
                     // so as to avoid duplicating checks.
                     // This means suspending the core beforehand.
-                    std::cerr << "Plugin::invoke suspend";
+                    //std::cerr << "Plugin::invoke suspend";
                     CoreSuspender suspend;
                     df::viewscreen *top = c.getTopViewscreen();
 

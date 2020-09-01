@@ -98,56 +98,56 @@ using df::global::init;
 using df::global::world;
 
 // FIXME:
-#ifdef  __cplusplus
-extern "C" {
-_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
-}
-#else
-_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
-#endif
-
-#undef Assert_Type
-#define Assert_Type(_Expression) (void)( (!!(_Expression)) || (_wassert(_CRT_WIDE(#_Expression), _CRT_WIDE(__FILE__), __LINE__), 0) )
-
-void checkString24() {
-    if (!(sizeof(std::string24) == 24)) {
-        std::cerr << "\nType assertion fail: string24";
-        Assert_Type(false);
-    }
-}
-void checkVector12() {
-    if (!(sizeof(std::vector12<int>) == 12)) {
-        std::cerr << "\nType assertion fail: vector12<int>";
-        Assert_Type(false);
-    }
-}
-void checkVector12Bool() {
-    if (!(sizeof(std::vector12<bool>) == 16)) {
-        std::cerr << "\nType assertion fail: vector12<bool>";
-        Assert_Type(false);
-    }
-}
-void checkDeque20() {
-    if (!(sizeof(std::deque20<int>) == 20)) {
-        std::cerr << "\nType assertion fail: std::deque20<int>";
-        Assert_Type(false);
-    }
-}
-void checkFstream() {
-    if (!(sizeof(fstream_empty) == 144)) {
-        std::cerr << "\nType assertion fail: fstream_empty";
-        Assert_Type(false);
-    }
-}
-
-void CheckCountedTypes()
-{
-    checkString24();
-    checkVector12();
-    checkVector12Bool();
-    checkDeque20();
-    checkFstream();
-}
+//#ifdef  __cplusplus
+//extern "C" {
+//_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
+//}
+//#else
+//_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
+//#endif
+//
+//#undef Assert_Type
+//#define Assert_Type(_Expression) (void)( (!!(_Expression)) || (_wassert(_CRT_WIDE(#_Expression), _CRT_WIDE(__FILE__), __LINE__), 0) )
+//
+//void checkString24() {
+//    if (!(sizeof(std::string24) == 24)) {
+//        std::cerr << "\nType assertion fail: string24";
+//        Assert_Type(false);
+//    }
+//}
+//void checkVector12() {
+//    if (!(sizeof(std::vector12<int>) == 12)) {
+//        std::cerr << "\nType assertion fail: vector12<int>";
+//        Assert_Type(false);
+//    }
+//}
+//void checkVector12Bool() {
+//    if (!(sizeof(std::vector12<bool>) == 16)) {
+//        std::cerr << "\nType assertion fail: vector12<bool>";
+//        Assert_Type(false);
+//    }
+//}
+//void checkDeque20() {
+//    if (!(sizeof(std::deque20<int>) == 20)) {
+//        std::cerr << "\nType assertion fail: std::deque20<int>";
+//        Assert_Type(false);
+//    }
+//}
+//void checkFstream() {
+//    if (!(sizeof(fstream_empty) == 144)) {
+//        std::cerr << "\nType assertion fail: fstream_empty";
+//        Assert_Type(false);
+//    }
+//}
+//
+//void CheckCountedTypes()
+//{
+//    checkString24();
+//    checkVector12();
+//    checkVector12Bool();
+//    checkDeque20();
+//    checkFstream();
+//}
 
 // FIXME: A lot of code in one file, all doing different things... there's something fishy about it.
 
@@ -528,7 +528,7 @@ command_result Core::runCommand(color_ostream &out, const std::string24 &command
 //};
 
 static std::string24 builtin_cmd_strings[] = {
-    "checktypes" ,
+//    "checktypes" ,
     "ls" ,
     "help" ,
     "type" ,
@@ -809,11 +809,11 @@ command_result Core::runCommand(color_ostream &con, const std::string24 &first_,
 
         // let's see what we actually got
         std::string24 builtin = getBuiltinCommand(first);
-        if (builtin == "checktypes")
+        /*if (builtin == "checktypes")
         {
             CheckCountedTypes();
         }
-        else if (builtin == "help")
+        else */if (builtin == "help")
         {
             if(!parts.size())
             {
@@ -931,7 +931,7 @@ command_result Core::runCommand(color_ostream &con, const std::string24 &first_,
         }
         else if( builtin == "enable" || builtin == "disable" )
         {
-            cerr << "enable/disable suspend";
+            //cerr << "enable/disable suspend";
             CoreSuspender suspend;
             bool enable = (builtin == "enable");
 
@@ -1534,7 +1534,7 @@ bool Core::loadScriptFile(color_ostream &out, std::string24 fname, bool silent)
 
 static void run_dfhack_init(color_ostream &out, Core *core)
 {
-    cerr << "\nrun_dfhack_init suspend";
+    //cerr << "\nrun_dfhack_init suspend";
     CoreSuspender lock;
     if (!df::global::world || !df::global::ui || !df::global::gview)
     {
@@ -2339,20 +2339,7 @@ void Core::handleLoadAndUnloadScripts(color_ostream& out, state_change_event eve
     if (!df::global::world)
         return;
 
-    char* val1 = "world = ";
-    df::world* wo = df::global::world;
-    char* val2 = "sg = ";
-    df::world::T_cur_savegame sg = wo->cur_savegame;
-    char* val3 = "sgdir = ";
-    const char* sgdir = sg.save_dir.c_str();
-
-    //std::string rawFolder = "data/save/" + (df::global::world->cur_savegame.save_dir) + "/raw/";
-    std::string24 rawFolder = "data/save/";
-    rawFolder += sgdir;
-    rawFolder += "/raw/";
-
-    const char* rawFolderC = rawFolder.c_str();
-    char* val4 = "END = "; //do not remove until STL resolution
+    std::string24 rawFolder = "data/save/" + (df::global::world->cur_savegame.save_dir) + "/raw/";
 
     X::InitVariationTable::const_iterator i = table.find(event);
     if ( i != table.end() )

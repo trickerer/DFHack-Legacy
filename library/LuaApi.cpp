@@ -350,7 +350,7 @@ static PersistentDataItem get_persistent(lua_State *state)
 
 static int dfhack_persistent_get(lua_State *state)
 {
-    std::cerr << "presistent_get suspend";
+    //std::cerr << "presistent_get suspend";
     CoreSuspender suspend;
 
     PersistentDataItem ref = get_persistent(state);
@@ -360,7 +360,7 @@ static int dfhack_persistent_get(lua_State *state)
 
 static int dfhack_persistent_delete(lua_State *state)
 {
-    std::cerr << "persistent delete suspend";
+    //std::cerr << "persistent delete suspend";
     CoreSuspender suspend;
 
     PersistentDataItem ref = get_persistent(state);
@@ -373,7 +373,7 @@ static int dfhack_persistent_delete(lua_State *state)
 
 static int dfhack_persistent_get_all(lua_State *state)
 {
-    std::cerr << "persistent_get_all suspend";
+    //std::cerr << "persistent_get_all suspend";
     CoreSuspender suspend;
 
     const char *str = luaL_checkstring(state, 1);
@@ -401,7 +401,7 @@ static int dfhack_persistent_get_all(lua_State *state)
 
 static int dfhack_persistent_save(lua_State *state)
 {
-    std::cerr << "peristent_save suspend";
+    //std::cerr << "peristent_save suspend";
     CoreSuspender suspend;
 
     lua_settop(state, 2);
@@ -473,7 +473,7 @@ static int dfhack_persistent_save(lua_State *state)
 
 static int dfhack_persistent_getTilemask(lua_State *state)
 {
-    std::cerr << "persistent_getTilemask suspend";
+    //std::cerr << "persistent_getTilemask suspend";
     CoreSuspender suspend;
 
     lua_settop(state, 3);
@@ -487,7 +487,7 @@ static int dfhack_persistent_getTilemask(lua_State *state)
 
 static int dfhack_persistent_deleteTilemask(lua_State *state)
 {
-    std::cerr << "persistent_deleteTimemask suspend";
+    //std::cerr << "persistent_deleteTimemask suspend";
     CoreSuspender suspend;
 
     lua_settop(state, 2);
@@ -2861,14 +2861,14 @@ static int internal_runCommand(lua_State *L)
                 args.push_back(lua_tostring(L, -1));
             lua_pop(L, 1);  // remove value, leave key
         }
-        std::cerr << "internal_runCommand1 suspend";
+        //std::cerr << "internal_runCommand1 suspend";
         CoreSuspender suspend;
         res = Core::getInstance().runCommand(out, command, args);
     }
     else if (type_1 == LUA_TSTRING)
     {
         std::string24 command = lua_tostring(L, 1);
-        std::cerr << "internal_runCommand2 suspend";
+        //std::cerr << "internal_runCommand2 suspend";
         CoreSuspender suspend;
         res = Core::getInstance().runCommand(out, command);
     }

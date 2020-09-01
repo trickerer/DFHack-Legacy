@@ -47,6 +47,7 @@ typedef struct lua_State lua_State;
 static const int vb_fstr = 0x10864A4; // virtual base offset from fstream
 static const int vb_fbuf = 0x108649C; // virtual base offset from filestreambuf
 static const int vt_fbuf = 0x1026F58; // vtable for basic_streambuf -> basic_filebuf)
+static const int vt_iosb = 0x1027004; // vtable for _Iosb -> base_ios)
 struct fstream_empty
 {
 public:
@@ -71,11 +72,11 @@ public:
         _Pcount(0),         _IGcount(0),        IPcount(0),         _Plocale(0),
         NULL_5_0(0),     _Mych(0xD),_Wrts(0),   _Pcvt(0),           _State(0),
         _Closef(0),         NULL_6_1(0),        UNK_6_2(0),         UNK_6_3(0),
-        NULL_7_0(0),        UNK_0x60(0),        vt_ios_base(0),     NULL_7_3(0),
+        NULL_7_0(0),        UNK_0x60(0),      vt_ios_base(vt_iosb), NULL_7_3(0),
         _Stdstr(0),         _Mystate(0),        _Except(0),         _Fmtfl_0x201(0x201),
         _Prec_0x6(0x6),     _Wide(0),           _Arr(0),            _Calls(0),
         _Ploc(0),           NULL_A_1(0),        UNK_A_2(0),         UNK_A_3(0),
-        _Mystrbuf(&fbuf_st),_Tiestr(0),         _Fillch(0)
+        _Mystrbuf(&fbuf_st),_Tiestr(0),         _Fillch(0x20)
     {}
 };
 

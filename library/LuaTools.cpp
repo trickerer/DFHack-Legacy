@@ -1020,7 +1020,7 @@ bool DFHack::Lua::RunCoreQueryLoop(color_ostream &out, lua_State *state,
     std::string24 histname;
 
     {
-        DFHack::Core::getInstance().getConsole().printerr("RunCoreQueryLoop1 suspend");
+        //DFHack::Core::getInstance().getConsole().printerr("RunCoreQueryLoop1 suspend");
         CoreSuspender suspend;
 
         int base = lua_gettop(state);
@@ -1073,7 +1073,7 @@ bool DFHack::Lua::RunCoreQueryLoop(color_ostream &out, lua_State *state,
         hist.add(curline);
 
         {
-            DFHack::Core::getInstance().getConsole().printerr("RunCoreQueryLoop2 suspend");
+            //DFHack::Core::getInstance().getConsole().printerr("RunCoreQueryLoop2 suspend");
             CoreSuspender suspend;
 
             lua_pushlstring(state, curline.data(), curline.size());
@@ -1085,7 +1085,7 @@ bool DFHack::Lua::RunCoreQueryLoop(color_ostream &out, lua_State *state,
         hist.save(histname.c_str());
 
     {
-        DFHack::Core::getInstance().getConsole().printerr("RunCoreQueryLoop3 suspend");
+        //DFHack::Core::getInstance().getConsole().printerr("RunCoreQueryLoop3 suspend");
         CoreSuspender suspend;
 
         lua_rawgetp(state, LUA_REGISTRYINDEX, &DFHACK_QUERY_COROTABLE_TOKEN);
@@ -1238,7 +1238,7 @@ static int lua_dfhack_with_suspend(lua_State *L)
     int nargs = lua_gettop(L);
     luaL_checktype(L, 1, LUA_TFUNCTION);
 
-    Core::getInstance().getConsole().printerr("with_suspend %d suspend", L->ci->func->tt_);
+    //Core::getInstance().getConsole().printerr("with_suspend %d suspend", L->ci->func->tt_);
     CoreSuspender suspend;
     lua_call(L, nargs-1, LUA_MULTRET);
 
