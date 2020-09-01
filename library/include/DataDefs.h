@@ -44,14 +44,39 @@ distribution.
 typedef struct lua_State lua_State;
 
 // placeholders
+static const int vb_fstr = 0x10864A4; // virtual base offset from fstream
+static const int vb_fbuf = 0x108649C; // virtual base offset from filestreambuf
+static const int vt_fbuf = 0x1026F58; // vtable for basic_streambuf -> basic_filebuf)
 struct fstream_empty
 {
 public:
-    char empty[144];
-    fstream_empty() {
-        for (int i = 0; i < 144; ++i)
-            empty[i] = 0;
-    }
+    int vboff_fstr;  int UNK_0_1;     int _Chcount;    int NULL_0_3;
+    int vboff_fbuf;  int UNK_1_1;     int fbuf_st;     int _Gfirst;
+    int _Pfirst;     int _IGfirst;    int _IPfirst;    int _Gnext;
+    int _Pnext;      int _IGnext;     int _IPnext;     int _Gcount;
+    int _Pcount;     int _IGcount;    int IPcount;     int _Plocale;
+    int NULL_5_0;char _Mych;bool _Wrts;int _Pcvt;      int _State;
+   bool _Closef;     int NULL_6_1;    int UNK_6_2;     int UNK_6_3;
+    int NULL_7_0;    int UNK_0x60;    int vt_ios_base; int NULL_7_3;
+    int _Stdstr;     int _Mystate;    int _Except;     int _Fmtfl_0x201;
+    int _Prec_0x6;   int _Wide;       int _Arr;        int _Calls;
+    int _Ploc;       int NULL_A_1;    int UNK_A_2;     int UNK_A_3;//_Chcount_ptr;
+    int*_Mystrbuf;   int _Tiestr;    char _Fillch;
+
+    fstream_empty() :
+        vboff_fstr(vb_fstr),UNK_0_1(0),         _Chcount(0),        NULL_0_3(0),
+        vboff_fbuf(vb_fbuf),UNK_1_1(0),         fbuf_st(vt_fbuf),   _Gfirst(0),
+        _Pfirst(0),         _IGfirst(0),        _IPfirst(0),        _Gnext(0),
+        _Pnext(0),          _IGnext(0),         _IPnext(0),         _Gcount(0),
+        _Pcount(0),         _IGcount(0),        IPcount(0),         _Plocale(0),
+        NULL_5_0(0),     _Mych(0xD),_Wrts(0),   _Pcvt(0),           _State(0),
+        _Closef(0),         NULL_6_1(0),        UNK_6_2(0),         UNK_6_3(0),
+        NULL_7_0(0),        UNK_0x60(0),        vt_ios_base(0),     NULL_7_3(0),
+        _Stdstr(0),         _Mystate(0),        _Except(0),         _Fmtfl_0x201(0x201),
+        _Prec_0x6(0x6),     _Wide(0),           _Arr(0),            _Calls(0),
+        _Ploc(0),           NULL_A_1(0),        UNK_A_2(0),         UNK_A_3(0),
+        _Mystrbuf(&fbuf_st),_Tiestr(0),         _Fillch(0)
+    {}
 };
 
 /*
