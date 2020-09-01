@@ -28,7 +28,7 @@ distribution.
 #include <sstream>
 #include <vector>
 #include <map>
-#include <type_traits>
+//#include <type_traits>
 
 #include "ColorText.h"
 #include "DataDefs.h"

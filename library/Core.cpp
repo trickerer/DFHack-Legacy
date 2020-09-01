@@ -32,8 +32,8 @@ distribution.
 #include <cstring>
 #include <iterator>
 #include <sstream>
-#include <forward_list>
-#include <type_traits>
+//#include <forward_list>
+//#include <type_traits>
 #include <cstdarg>
 using namespace std;
 

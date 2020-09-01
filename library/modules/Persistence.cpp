@@ -23,7 +23,7 @@ distribution.
 */
 
 #include "Internal.h"
-#include <array>
+//#include <array>
 #include <map>
 #include <json/json.h>
 

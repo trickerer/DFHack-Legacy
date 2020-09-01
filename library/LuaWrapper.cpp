@@ -27,7 +27,7 @@ distribution.
 #include <string>
 #include <vector>
 #include <map>
-#include <cinttypes>
+//#include <cinttypes>
 
 #include "MemAccess.h"
 #include "Core.h"
