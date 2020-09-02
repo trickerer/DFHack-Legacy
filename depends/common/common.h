@@ -7,6 +7,7 @@
 #include "bvector12.h"      //std::vector12<bool>
 #include "string24.h"       //std::string24
 #include "deque20.h"        //std::deque20<T>
+#include "set8.h"           //std::set8<T>
 
 //TYPES
 typedef signed __int8       int8;
