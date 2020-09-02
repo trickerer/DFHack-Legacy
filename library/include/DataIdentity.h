@@ -271,7 +271,7 @@ namespace df
     class DFHACK_EXPORT stl_string_identity : public DFHack::constructed_identity {
     public:
         stl_string_identity()
-            : constructed_identity(sizeof(std::string24), &allocator_fn<std::string>)
+            : constructed_identity(sizeof(std::string24), &allocator_fn<std::string24>)
         {};
 
         std::string24 getFullName() { return "string"; }
