@@ -437,8 +437,8 @@ struct GeoLayer
     void print_mineral_stats(color_ostream &out)
     {
         for (std::map<t_veinkey,int>::iterator it = mineral_count.begin(); it != mineral_count.end(); ++it)
-            out << "    " << MaterialInfo(0,it->first.first).getToken()
-                << " " << ENUM_KEY_STR_SIMPLE(inclusion_type,it->first.second)
+            out << "    " << MaterialInfo(0,it->first.first).getToken().c_str()
+                << " " << ENUM_KEY_STR_SIMPLE(inclusion_type,it->first.second).c_str()
                 << ": \t\t" << it->second << " (" << (float(it->second)/unmined_tiles) << ")" << std::endl;
 
         out.print("    Total tiles: %d (%d unmined)\n", tiles, unmined_tiles);

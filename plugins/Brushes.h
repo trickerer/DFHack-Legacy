@@ -73,7 +73,7 @@ public:
         {
             std::ostringstream ss;
             ss << "rect: " << x_ << "/" << y_ << "/" << z_ << std::endl;
-            return ss.str();
+            return ss.str().c_str();
         }
     }
 private:
@@ -237,7 +237,7 @@ DFHack::command_result parseRectangle(DFHack::color_ostream & out,
 
             str.str("");
             str << "Set range width <" << width << "> ";
-            while ((rv = con.lineedit(str.str(), command, hist))
+            while ((rv = con.lineedit(str.str().c_str(), command, hist))
                     == Console::RETRY);
             if (rv <= Console::FAILURE)
                 return rv == Console::FAILURE ? CR_FAILURE : CR_FAILURE;
@@ -254,7 +254,7 @@ DFHack::command_result parseRectangle(DFHack::color_ostream & out,
 
             str.str("");
             str << "Set range height <" << height << "> ";
-            while ((rv = con.lineedit(str.str(), command, hist))
+            while ((rv = con.lineedit(str.str().c_str(), command, hist))
                     == Console::RETRY);
             if (rv <= Console::FAILURE)
                 return rv == Console::FAILURE ? CR_FAILURE : CR_OK;
@@ -271,7 +271,7 @@ DFHack::command_result parseRectangle(DFHack::color_ostream & out,
 
             str.str("");
             str << "Set range z-levels <" << zLevels << "> ";
-            while ((rv = con.lineedit(str.str(), command, hist))
+            while ((rv = con.lineedit(str.str().c_str(), command, hist))
                     == Console::RETRY);
             if (rv <= Console::FAILURE)
                 return rv == Console::FAILURE ? CR_FAILURE :  CR_OK;
@@ -291,12 +291,12 @@ DFHack::command_result parseRectangle(DFHack::color_ostream & out,
 
 inline std::ostream &operator<<(std::ostream &stream, const Brush& brush)
 {
-    stream << brush.str();
+    stream << brush.str().c_str();
     return stream;
 }
 
 inline std::ostream &operator<<(std::ostream &stream, const Brush* brush)
 {
-    stream << brush->str();
+    stream << brush->str().c_str();
     return stream;
 }

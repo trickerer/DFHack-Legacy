@@ -16,7 +16,7 @@ struct hotkey_clear_hook : df::viewscreen_dwarfmodest {
         }
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (ui->main.mode == df::ui_sidebar_mode::Hotkeys &&
             input->count(df::interface_key::CUSTOM_C) &&

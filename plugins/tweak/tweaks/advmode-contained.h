@@ -3,7 +3,7 @@ using namespace std;
 struct advmode_contained_hook : df::viewscreen_layer_unit_actionst {
     typedef df::viewscreen_layer_unit_actionst interpose_base;
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (set8<df::interface_key> *input))
     {
         df::reaction* old_reaction = cur_reaction;
         int32_t old_reagent = reagent;

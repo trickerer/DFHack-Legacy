@@ -442,7 +442,7 @@ static int fix_job_postings (color_ostream *out, bool dry_run)
                     ++count;
                     if (out)
                         *out << "Found extra job posting: Job " << job->id << ": "
-                            << Job::getName(job) << endl;
+                        << Job::getName(job).c_str() << endl;
                     if (!dry_run)
                         posting->flags.bits.dead = true;
                 }
@@ -1697,16 +1697,16 @@ static void print_constraint(color_ostream &out, ItemConstraint *cv, bool no_job
         color = COLOR_DARKGREY;
 
     out.color(color);
-    out << prefix << "Constraint " << flush;
+    out << prefix.c_str() << "Constraint " << flush;
     out.color(COLOR_GREY);
-    out << cv->config.val() << " " << flush;
+    out << cv->config.val().c_str() << " " << flush;
     out.color(color);
     out << (cv->goalByCount() ? "count " : "amount ")
            << cv->goalCount() << " (gap " << cv->goalGap() << ")" << endl;
     out.reset_color();
 
     if (cv->item_count || cv->item_inuse_count)
-        out << prefix << "  items: amount " << cv->item_amount << "; "
+        out << prefix.c_str() << "  items: amount " << cv->item_amount << "; "
                          << cv->item_count << " stacks available, "
                          << cv->item_inuse_count << " in use." << endl;
 
@@ -1748,24 +1748,24 @@ static void print_constraint(color_ostream &out, ItemConstraint *cv, bool no_job
             if (pj->want_resumed)
             {
                 out.color(COLOR_YELLOW);
-                out << start << " (delayed)" << endl;
+                out << start.c_str() << " (delayed)" << endl;
             }
             else
             {
                 out.color(COLOR_BLUE);
-                out << start << " (suspended)" << endl;
+                out << start.c_str() << " (suspended)" << endl;
             }
         }
         else
         {
             out.color(COLOR_GREEN);
-            out << start << endl;
+            out << start.c_str() << endl;
         }
 
         out.reset_color();
 
         if (unique_counts[i] > 1)
-            out << prefix << "    (" << unique_counts[i] << " copies)" << endl;
+            out << prefix.c_str() << "    (" << unique_counts[i] << " copies)" << endl;
     }
 }
 
@@ -1911,7 +1911,7 @@ static command_result workflow_cmd(color_ostream &out, std::vector12<std::string
         {
             ItemConstraint* cv = constraints[i];
             out << "workflow " << (cv->goalByCount() ? "count " : "amount ")
-                << cv->config.val() << " " << cv->goalCount() << " " << cv->goalGap() << endl;
+                << cv->config.val().c_str() << " " << cv->goalCount() << " " << cv->goalGap() << endl;
         }
 
         return CR_OK;

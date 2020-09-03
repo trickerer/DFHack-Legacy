@@ -49,7 +49,7 @@ bool isContainedInItem(df::unit* unit)
     for (size_t r=0; r < unit->general_refs.size(); r++)
     {
         df::general_ref * ref = unit->general_refs[r];
-        auto rtype = ref->getType();
+        df::general_ref_type rtype = ref->getType();
         if(rtype == df::general_ref_type::CONTAINED_IN_ITEM)
         {
             contained = true;
@@ -100,7 +100,7 @@ command_result df_stripcaged(color_ostream &out, std::vector12<std::string24> & 
                         continue;
                     std::string24 desc;
                     uii->item->getItemDescription(&desc,0);
-                    out << "Item " << desc << " dumped." << endl;
+                    out << "Item " << desc.c_str() << " dumped." << endl;
                     uii->item->flags.bits.forbid = 0;
                     uii->item->flags.bits.dump = 1;
                     count++;

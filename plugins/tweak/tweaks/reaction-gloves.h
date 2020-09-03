@@ -8,10 +8,10 @@ struct reaction_gloves_hook : df::reaction_product_itemst {
     typedef df::reaction_product_itemst interpose_base;
 
     DEFINE_VMETHOD_INTERPOSE(void, produce, (df::unit *unit,
-        std::vector<df::reaction_product*> *out_products, std::vector<df::item*> *out_items,
-        std::vector<df::reaction_reagent*> *in_reag, std::vector<df::item*> *in_items,
+        std::vector12<df::reaction_product*> *out_products, std::vector12<df::item*> *out_items,
+        std::vector12<df::reaction_reagent*> *in_reag, std::vector12<df::item*> *in_items,
         int32_t quantity, df::job_skill skill, int32_t quality,
-        df::historical_entity *entity, df::world_site *site, std::vector<void *> *unk_2))
+        df::historical_entity *entity, df::world_site *site, std::vector12<void *> *unk_2))
     {
         if (item_type != df::item_type::GLOVES)
         {
@@ -35,7 +35,7 @@ struct reaction_gloves_hook : df::reaction_product_itemst {
             }
         }
 
-        std::vector<df::item*> out_items_temp;
+        std::vector12<df::item*> out_items_temp;
         int old_count = count;
 
         // If the reaction product's count is set to 1 or 2, set it to the number of hands

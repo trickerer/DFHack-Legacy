@@ -46,7 +46,7 @@ struct farm_select_hook : df::viewscreen_dwarfmodest {
 
     inline int32_t getSelectedCropId() { return ui->selected_farm_crops[*ui_building_item_cursor]; }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         df::building_farmplotst* farm_plot = getFarmPlot();
         if (farm_plot && ui->selected_farm_crops.size() > 0)

@@ -114,7 +114,7 @@ void help( color_ostream & out, std::vector12<std::string24> &commands, int star
             << " ANY" << std::endl;
         FOR_ENUM_ITEMS_SIMPLE(tiletype_shape,i)
         {
-            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_shape,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_shape,i).c_str() << std::endl;
         }
     }
     else if (option == "material"|| option == "mat" ||option == "m")
@@ -123,7 +123,7 @@ void help( color_ostream & out, std::vector12<std::string24> &commands, int star
             << " ANY" << std::endl;
         FOR_ENUM_ITEMS_SIMPLE(tiletype_material,i)
         {
-            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_material,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_material,i).c_str() << std::endl;
         }
     }
     else if (option == "special" || option == "sp")
@@ -132,7 +132,7 @@ void help( color_ostream & out, std::vector12<std::string24> &commands, int star
             << " ANY" << std::endl;
         FOR_ENUM_ITEMS_SIMPLE(tiletype_special,i)
         {
-            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_special,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_special,i).c_str() << std::endl;
         }
     }
     else if (option == "variant" || option == "var" || option == "v")
@@ -141,7 +141,7 @@ void help( color_ostream & out, std::vector12<std::string24> &commands, int star
             << " ANY" << std::endl;
         FOR_ENUM_ITEMS_SIMPLE(tiletype_variant,i)
         {
-            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_variant,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(tiletype_variant,i).c_str() << std::endl;
         }
     }
     else if (option == "designated" || option == "d")
@@ -187,7 +187,7 @@ void help( color_ostream & out, std::vector12<std::string24> &commands, int star
         out << "Specifies which vein type to use when painting specific stone." << std::endl
             << "The vein type determines stone drop rate. Available types:" << std::endl;
         FOR_ENUM_ITEMS_SIMPLE(inclusion_type,i)
-            out << " " << ENUM_KEY_STR_SIMPLE(inclusion_type,i) << std::endl;
+            out << " " << ENUM_KEY_STR_SIMPLE(inclusion_type,i).c_str() << std::endl;
         out << "Vein type other than CLUSTER forces creation of a vein." << std::endl;
     }
 }
@@ -264,7 +264,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
 
     if (paint.special >= 0)
     {
-        stream << ENUM_KEY_STR_SIMPLE(tiletype_special,paint.special);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_special,paint.special).c_str();
         used = true;
         needSpace = true;
     }
@@ -277,7 +277,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
             needSpace = false;
         }
 
-        stream << ENUM_KEY_STR_SIMPLE(tiletype_material,paint.material);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_material,paint.material).c_str();
         used = true;
         needSpace = true;
     }
@@ -290,7 +290,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
             needSpace = false;
         }
 
-        stream << ENUM_KEY_STR_SIMPLE(tiletype_shape,paint.shape);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_shape,paint.shape).c_str();
         used = true;
         needSpace = true;
     }
@@ -303,7 +303,7 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
             needSpace = false;
         }
 
-        stream << ENUM_KEY_STR_SIMPLE(tiletype_variant,paint.variant);
+        stream << ENUM_KEY_STR_SIMPLE(tiletype_variant,paint.variant).c_str();
         used = true;
         needSpace = true;
     }
@@ -394,8 +394,8 @@ std::ostream &operator<<(std::ostream &stream, const TileType &paint)
             needSpace = false;
         }
 
-        stream << MaterialInfo(0,paint.stone_material).getToken()
-               << " " << ENUM_KEY_STR_SIMPLE(inclusion_type, paint.vein_type);
+        stream << MaterialInfo(0,paint.stone_material).getToken().c_str()
+               << " " << ENUM_KEY_STR_SIMPLE(inclusion_type, paint.vein_type).c_str();
         used = true;
         needSpace = true;
     }
@@ -443,7 +443,7 @@ void toupper(std::string24 &str)
 
 int toint(const std::string24 &str, int failValue = 0)
 {
-    std::istringstream ss(str);
+    std::istringstream ss(str.c_str());
     int valInt;
     ss >> valInt;
     if (ss.fail())
@@ -544,7 +544,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         {
             if (!tryShape(value, paint))
             {
-                out << "Unknown tile shape: " << value << std::endl;
+                out << "Unknown tile shape: " << value.c_str() << std::endl;
             }
         }
     }
@@ -562,7 +562,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         {
             if (!tryMaterial(value, paint))
             {
-                out << "Unknown tile material: " << value << std::endl;
+                out << "Unknown tile material: " << value.c_str() << std::endl;
             }
         }
     }
@@ -577,7 +577,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         {
             if (!trySpecial(value, paint))
             {
-                out << "Unknown tile special: " << value << std::endl;
+                out << "Unknown tile special: " << value.c_str() << std::endl;
             }
         }
     }
@@ -592,7 +592,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         {
             if (!tryVariant(value, paint))
             {
-                out << "Unknown tile variant: " << value << std::endl;
+                out << "Unknown tile variant: " << value.c_str() << std::endl;
             }
         }
     }
@@ -605,7 +605,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         }
         else
         {
-            out << "Unknown designation flag: " << value << std::endl;
+            out << "Unknown designation flag: " << value.c_str() << std::endl;
         }
     }
     else if (option == "hidden" || option == "h")
@@ -617,7 +617,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         }
         else
         {
-            out << "Unknown hidden flag: " << value << std::endl;
+            out << "Unknown hidden flag: " << value.c_str() << std::endl;
         }
     }
     else if (option == "light" || option == "l")
@@ -629,7 +629,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         }
         else
         {
-            out << "Unknown light flag: " << value << std::endl;
+            out << "Unknown light flag: " << value.c_str() << std::endl;
         }
     }
     else if (option == "subterranean" || option == "st")
@@ -641,7 +641,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         }
         else
         {
-            out << "Unknown subterranean flag: " << value << std::endl;
+            out << "Unknown subterranean flag: " << value.c_str() << std::endl;
         }
     }
     else if (option == "skyview" || option == "sv")
@@ -653,7 +653,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         }
         else
         {
-            out << "Unknown skyview flag: " << value << std::endl;
+            out << "Unknown skyview flag: " << value.c_str() << std::endl;
         }
     }
     else if (option == "aquifer" || option == "aqua")
@@ -665,7 +665,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         }
         else
         {
-            out << "Unknown aquifer flag: " << value << std::endl;
+            out << "Unknown aquifer flag: " << value.c_str() << std::endl;
         }
     }
     else if (option == "all" || option == "a")
@@ -679,7 +679,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
             if (!(tryShape(param, paint) || tryMaterial(param, paint) ||
                          trySpecial(param, paint) || tryVariant(param, paint)))
             {
-                out << "Unknown description: '" << param << "'" << std::endl;
+                out << "Unknown description: '" << param.c_str() << "'" << std::endl;
                 break;
             }
         }
@@ -691,9 +691,9 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
         MaterialInfo mat;
 
         if (!mat.findInorganic(value))
-            out << "Unknown inorganic material: " << value << std::endl;
+            out << "Unknown inorganic material: " << value.c_str() << std::endl;
         else if (!isStoneInorganic(mat.index))
-            out << "Not a stone material: " << value << std::endl;
+            out << "Not a stone material: " << value.c_str() << std::endl;
         else
         {
             paint.material = tiletype_material::STONE;
@@ -703,11 +703,11 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::st
     else if (option == "veintype")
     {
         if (!find_enum_item(&paint.vein_type, value))
-            out << "Unknown vein type: " << value << std::endl;
+            out << "Unknown vein type: " << value.c_str() << std::endl;
     }
     else
     {
-        out << "Unknown option: '" << option << "'" << std::endl;
+        out << "Unknown option: '" << option.c_str() << "'" << std::endl;
     }
 
     return found;

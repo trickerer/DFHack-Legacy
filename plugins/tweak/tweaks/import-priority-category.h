@@ -8,14 +8,14 @@ using namespace df::enums;
 
 struct takerequest_hook : df::viewscreen_topicmeeting_takerequestsst {
     typedef df::viewscreen_topicmeeting_takerequestsst interpose_base;
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key>* input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key>* input))
     {
         if (input->count(interface_key::CURSOR_RIGHT_FAST) ||
             input->count(interface_key::CURSOR_LEFT_FAST))
         {
             int delta = 0 + input->count(interface_key::CURSOR_RIGHT_FAST)
                           - input->count(interface_key::CURSOR_LEFT_FAST);
-            vector<int8_t> &cur_priorities = meeting->sell_requests->priority[type_categories[type_idx]];
+            std::vector12<int8_t> &cur_priorities = meeting->sell_requests->priority[type_categories[type_idx]];
             for (size_t i = 0; i < cur_priorities.size(); i++)
             {
                 cur_priorities[i] += delta;

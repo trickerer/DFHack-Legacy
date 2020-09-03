@@ -330,7 +330,11 @@ namespace DFHack
         explicit CoreSuspenderBase(Core* core) : lock_type(core->CoreSuspendMutex), tid() {}
 
     public:
-        void lock();
+        void lock()
+        {
+            lock_type::lock();
+            tid = Core::getInstance().ownerThread.exchange(tthread::this_thread::get_id(), tthread::memory_order_acquire);
+        }
 
         void unlock()
         {

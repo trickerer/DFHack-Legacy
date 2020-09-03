@@ -8,16 +8,16 @@ struct title_start_rename_hook : df::viewscreen_titlest {
     static T_sel_subpage last_subpage;
     static bool in_rename;
     static bool rename_failed;
-    static std::string entry;
+    static std::string24 entry;
 
     inline df::viewscreen_titlest::T_start_savegames *get_cur_save()
     {
         return vector_get(start_savegames, sel_submenu_line);
     }
 
-    inline std::string full_save_dir(const std::string &region_name)
+    inline std::string24 full_save_dir(const std::string24 &region_name)
     {
-        return std::string("data/save/") + region_name;
+        return std::string24("data/save/") + region_name;
     }
 
     bool do_rename()
@@ -55,7 +55,7 @@ struct title_start_rename_hook : df::viewscreen_titlest {
         }
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         using namespace df::enums::interface_key;
         if (in_rename)
@@ -83,7 +83,7 @@ struct title_start_rename_hook : df::viewscreen_titlest {
             {
                 entry = "";
                 in_rename = false;
-                std::set<df::interface_key> tmp;
+                std::set8<df::interface_key> tmp;
                 if (input->count(STANDARDSCROLL_UP))
                     tmp.insert(STANDARDSCROLL_UP);
                 if (input->count(STANDARDSCROLL_DOWN))
@@ -109,4 +109,4 @@ df::viewscreen_titlest::T_sel_subpage title_start_rename_hook::last_subpage =
     df::viewscreen_titlest::T_sel_subpage::None;
 bool title_start_rename_hook::in_rename = false;
 bool title_start_rename_hook::rename_failed = false;
-std::string title_start_rename_hook::entry;
+std::string24 title_start_rename_hook::entry;

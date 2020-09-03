@@ -9,16 +9,16 @@ struct military_assign_hook : df::viewscreen_layer_militaryst {
         return page == Positions && !(in_create_squad || in_new_squad);
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (inPositionsMode() && !layer_objects[0]->active)
         {
             df::layer_object* pos_list = layer_objects[1];
             df::layer_object* plist = layer_objects[2];
-            std::vector<df::unit*> &cand = positions.candidates;
+            std::vector12<df::unit*> &cand = positions.candidates;
 
             // Save the candidate list and cursors
-            std::vector<df::unit*> copy = cand;
+            std::vector12<df::unit*> copy = cand;
             int cursor = plist->getListCursor();
             int pos_cursor = pos_list->getListCursor();
 
@@ -36,10 +36,10 @@ struct military_assign_hook : df::viewscreen_layer_militaryst {
                     // the ordering of the items in the list before keypress.
                     // This does the right thing even if the list was sorted
                     // with sort-units.
-                    std::set<df::unit*> prev, next;
+                    std::set8<df::unit*> prev, next;
                     prev.insert(copy.begin(), copy.end());
                     next.insert(cand.begin(), cand.end());
-                    std::vector<df::unit*> out;
+                    std::vector12<df::unit*> out;
 
                     // (old-before-cursor) (new) |cursor| (old-after-cursor)
                     for (int i = 0; i < cursor && i < (int)copy.size(); i++)

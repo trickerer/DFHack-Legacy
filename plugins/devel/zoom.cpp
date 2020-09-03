@@ -45,9 +45,10 @@ command_result df_zoom (color_ostream &out, std::vector12<std::string24> & param
     {
         out.printerr("Unrecognized zoom command: %s\n", parameters[0].c_str());
         out.print("Valid commands:");
-        for (auto it = zcmap.begin(); it != zcmap.end(); ++it)
+        //for (auto it = zcmap.begin(); it != zcmap.end(); ++it)
+        for (std::map<std::string24, df::zoom_commands>::const_iterator it = zcmap.begin(); it != zcmap.end(); ++it)
         {
-            out << " " << it->first;
+            out << " " << it->first.c_str();
         }
         out.print("\n");
         return CR_FAILURE;

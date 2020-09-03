@@ -111,7 +111,7 @@ struct dwarfmode_pausing_fps_counter_hook : df::viewscreen_dwarfmodest {
         // show this FPS counter same as the default counter.
         int x = 10;
         int y = 0;
-        OutputString(COLOR_WHITE, x, y, fps_counter.str(),
+        OutputString(COLOR_WHITE, x, y, fps_counter.str().c_str(),
                      false, 0, COLOR_CYAN, false);
     }
 };

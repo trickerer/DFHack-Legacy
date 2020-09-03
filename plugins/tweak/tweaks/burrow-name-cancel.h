@@ -5,9 +5,9 @@ using df::global::ui;
 struct burrow_name_cancel_hook : df::viewscreen_dwarfmodest {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
-    static std::string old_name;
+    static std::string24 old_name;
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (ui->main.mode == df::ui_sidebar_mode::Burrows)
         {
@@ -39,6 +39,6 @@ struct burrow_name_cancel_hook : df::viewscreen_dwarfmodest {
     }
 };
 
-std::string burrow_name_cancel_hook::old_name;
+std::string24 burrow_name_cancel_hook::old_name;
 
 IMPLEMENT_VMETHOD_INTERPOSE(burrow_name_cancel_hook, feed);

@@ -2234,13 +2234,7 @@ int Core::Update()
 
     return 0;
 };
-void CoreSuspenderBase::lock()
-{
-    //cerr <<  "\nCoreSuspenderBase::lock\nold tid " << uint32(tid.get())
-    //    << "\nnew tid " << uint32(tthread::this_thread::get_id().get());
-    lock_type::lock();
-    tid = Core::getInstance().ownerThread.exchange(tthread::this_thread::get_id(), tthread::memory_order_acquire);
-}
+
 extern bool buildings_do_onupdate;
 void buildings_onStateChange(color_ostream &out, state_change_event event);
 void buildings_onUpdate(color_ostream &out);

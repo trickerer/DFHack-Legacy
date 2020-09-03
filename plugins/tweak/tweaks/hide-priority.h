@@ -48,7 +48,7 @@ struct hide_priority_hook : df::viewscreen_dwarfmodest {
             }
         }
     }
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (valid_mode() && input->count(df::interface_key::CUSTOM_ALT_P))
             ui_sidebar_menus->designation.priority_set = !ui_sidebar_menus->designation.priority_set;

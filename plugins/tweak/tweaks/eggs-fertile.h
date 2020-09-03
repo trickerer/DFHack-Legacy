@@ -29,7 +29,7 @@ struct egg_fertile_hook : df::viewscreen_dwarfmodest {
             bool has_eggs = false;
             bool fertile = false;
             int idx = 0;
-            std::vector<df::building_actual::T_contained_items *>::const_iterator iter;
+            std::vector12<df::building_actual::T_contained_items *>::const_iterator iter;
             for (iter = nest_box->contained_items.begin();
                  iter != nest_box->contained_items.end(); ++iter)
             {

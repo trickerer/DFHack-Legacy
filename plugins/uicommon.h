@@ -5,8 +5,8 @@
 #include <functional>
 #include <locale>
 #include <map>
-#include <string>
-#include <set>
+
+
 
 #include "Core.h"
 #include "MiscUtils.h"
@@ -28,11 +28,11 @@
 #include "df/world.h"
 
 using namespace std;
-using std::string;
-using std::vector;
+
+
 using std::map;
 using std::ostringstream;
-using std::set;
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -67,7 +67,7 @@ struct coord32_t
 };
 
 template <class T, typename Fn>
-static void for_each_(vector<T> &v, Fn func)
+static void for_each_(std::vector12<T> &v, Fn func)
 {
     for_each(v.begin(), v.end(), func);
 }
@@ -79,14 +79,14 @@ static void for_each_(map<T, V> &v, Fn func)
 }
 
 template <class T, class V, typename Fn>
-static void transform_(vector<T> &src, vector<V> &dst, Fn func)
+static void transform_(std::vector12<T> &src, std::vector12<V> &dst, Fn func)
 {
     transform(src.begin(), src.end(), back_inserter(dst), func);
 }
 
 typedef int8_t UIColor;
 
-static inline void OutputString(UIColor color, int &x, int &y, const std::string &text,
+static inline void OutputString(UIColor color, int &x, int &y, const std::string24 &text,
     bool newline = false, int left_margin = 0, const UIColor bg_color = 0, bool map = false)
 {
     Screen::paintString(Screen::Pen(' ', color, bg_color), x, y, text, map);
@@ -103,7 +103,7 @@ static inline void OutputHotkeyString(int &x, int &y, const char *text, const ch
     int left_margin = 0, int8_t text_color = COLOR_WHITE, int8_t hotkey_color = COLOR_LIGHTGREEN, bool map = false)
 {
     OutputString(hotkey_color, x, y, hotkey, false, 0, 0, map);
-    string display(": ");
+    std::string24 display(": ");
     display.append(text);
     OutputString(text_color, x, y, display, newline, left_margin, 0, map);
 }
@@ -115,18 +115,18 @@ static inline void OutputHotkeyString(int &x, int &y, const char *text, df::inte
     OutputHotkeyString(x, y, text, DFHack::Screen::getKeyDisplay(hotkey).c_str(), newline, left_margin, text_color, hotkey_color, map);
 }
 
-static inline void OutputLabelString(int &x, int &y, const char *text, const char *hotkey, const string &label, bool newline = false,
+static inline void OutputLabelString(int &x, int &y, const char *text, const char *hotkey, const std::string24 &label, bool newline = false,
     int left_margin = 0, int8_t text_color = COLOR_WHITE, int8_t hotkey_color = COLOR_LIGHTGREEN, bool map = false)
 {
     OutputString(hotkey_color, x, y, hotkey, false, 0, 0, map);
-    string display(": ");
+    std::string24 display(": ");
     display.append(text);
     display.append(": ");
     OutputString(text_color, x, y, display, false, 0, 0, map);
     OutputString(hotkey_color, x, y, label, newline, left_margin, 0, map);
 }
 
-static inline void OutputLabelString(int &x, int &y, const char *text, df::interface_key hotkey, const string &label, bool newline = false,
+static inline void OutputLabelString(int &x, int &y, const char *text, df::interface_key hotkey, const std::string24 &label, bool newline = false,
     int left_margin = 0, int8_t text_color = COLOR_WHITE, int8_t hotkey_color = COLOR_LIGHTGREEN, bool map = false)
 {
     OutputLabelString(x, y, text, DFHack::Screen::getKeyDisplay(hotkey).c_str(), label, newline,
@@ -158,13 +158,13 @@ static inline void OutputToggleString(int &x, int &y, const char *text, df::inte
     OutputToggleString(x, y, text, DFHack::Screen::getKeyDisplay(hotkey).c_str(), state, newline, left_margin, color, hotkey_color, map);
 }
 
-inline string int_to_string(const int n)
+inline std::string24 int_to_string(const int n)
 {
-    return static_cast<ostringstream*>( &(ostringstream() << n) )->str();
+    return static_cast<ostringstream*>( &(ostringstream() << n) )->str().c_str();
 }
-inline string uint_to_string(const unsigned int n)
+inline std::string24 uint_to_string(const unsigned int n)
 {
-    return static_cast<ostringstream*>( &(ostringstream() << n) )->str();
+    return static_cast<ostringstream*>( &(ostringstream() << n) )->str().c_str();
 }
 
 static inline void set_to_limit(int &value, const int maximum, const int min = 0)
@@ -176,28 +176,28 @@ static inline void set_to_limit(int &value, const int maximum, const int min = 0
 }
 
 // trim from start
-static inline std::string &ltrim(std::string &s) {
+static inline std::string24 &ltrim(std::string24 &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
     return s;
 }
 
 // trim from end
-static inline std::string &rtrim(std::string &s) {
+static inline std::string24 &rtrim(std::string24 &s) {
     s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
 }
 
 // trim from both ends
-static inline std::string &trim(std::string &s) {
+static inline std::string24 &trim(std::string24 &s) {
     return ltrim(rtrim(s));
 }
 
-inline void paint_text(const UIColor color, const int &x, const int &y, const std::string &text, const UIColor background = 0)
+inline void paint_text(const UIColor color, const int &x, const int &y, const std::string24 &text, const UIColor background = 0)
 {
     Screen::paintString(Screen::Pen(' ', color, background), x, y, text);
 }
 
-static inline string pad_string(string text, const int size, const bool front = true, const bool trim = false)
+static inline std::string24 pad_string(std::string24 text, const int size, const bool front = true, const bool trim = false)
 {
     if (text.length() > size_t(size))
     {
@@ -209,7 +209,7 @@ static inline string pad_string(string text, const int size, const bool front = 
         return text;
     }
 
-    string aligned(size - text.length(), ' ');
+    std::string24 aligned(size - text.length(), ' ');
     if (front)
     {
         aligned.append(text);
@@ -222,9 +222,9 @@ static inline string pad_string(string text, const int size, const bool front = 
     }
 }
 
-static inline df::interface_key get_string_key(const std::set<df::interface_key> *input)
+static inline df::interface_key get_string_key(const std::set8<df::interface_key> *input)
 {
-    for (std::set<df::interface_key>::const_iterator it = input->begin(); it != input->end(); ++it)
+    for (std::set8<df::interface_key>::const_iterator it = input->begin(); it != input->end(); ++it)
     {
         if (DFHack::Screen::keyToChar(*it) >= 0)
             return *it;
@@ -232,7 +232,7 @@ static inline df::interface_key get_string_key(const std::set<df::interface_key>
     return df::interface_key::NONE;
 }
 
-static inline char get_string_input(const std::set<df::interface_key> *input)
+static inline char get_string_input(const std::set8<df::interface_key> *input)
 {
     return DFHack::Screen::keyToChar(get_string_key(input));
 }
@@ -257,7 +257,7 @@ static inline bool can_trade()
     if (df::global::ui->caravans.size() == 0)
         return false;
 
-    for (std::vector<df::caravan_state*>::const_iterator it = df::global::ui->caravans.begin(); it != df::global::ui->caravans.end(); it++)
+    for (std::vector12<df::caravan_state*>::const_iterator it = df::global::ui->caravans.begin(); it != df::global::ui->caravans.end(); it++)
     {
         typedef df::caravan_state::T_trade_state state;
         df::caravan_state* caravan = *it;
@@ -304,7 +304,7 @@ static inline bool can_melt(df::item* item)
 
     if (!is_metal_item(item)) return false;
 
-    for (std::vector<df::general_ref*>::const_iterator g = item->general_refs.begin(); g != item->general_refs.end(); g++)
+    for (std::vector12<df::general_ref*>::const_iterator g = item->general_refs.begin(); g != item->general_refs.end(); g++)
     {
         switch ((*g)->getType())
         {
@@ -315,7 +315,7 @@ static inline bool can_melt(df::item* item)
         case general_ref_type::CONTAINED_IN_ITEM:
             {
                 df::item* c = (*g)->getItem();
-                for (std::vector<df::general_ref*>::const_iterator gg = c->general_refs.begin(); gg != c->general_refs.end(); gg++)
+                for (std::vector12<df::general_ref*>::const_iterator gg = c->general_refs.begin(); gg != c->general_refs.end(); gg++)
                 {
                     if ((*gg)->getType() == general_ref_type::UNIT_HOLDER)
                         return false;
@@ -422,12 +422,12 @@ protected:
 
 class PersistentStockpileInfo : public StockpileInfo {
 public:
-    PersistentStockpileInfo(df::building_stockpilest *sp, string persistence_key) :
+    PersistentStockpileInfo(df::building_stockpilest *sp, std::string24 persistence_key) :
       StockpileInfo(sp), persistence_key(persistence_key)
     {
     }
 
-    PersistentStockpileInfo(PersistentDataItem &config, string persistence_key) :
+    PersistentStockpileInfo(PersistentDataItem &config, std::string24 persistence_key) :
         config(config), persistence_key(persistence_key)
     {
         id = config.ival(1);
@@ -461,5 +461,5 @@ public:
 
 protected:
     PersistentDataItem config;
-    string persistence_key;
+    std::string24 persistence_key;
 };

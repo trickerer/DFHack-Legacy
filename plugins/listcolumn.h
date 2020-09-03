@@ -11,11 +11,11 @@ class ListEntry
 {
 public:
     T elem;
-    string text, keywords;
+    std::string24 text, keywords;
     bool selected;
     UIColor color;
 
-    ListEntry(const string text, const T elem, const string keywords = "", const UIColor color = COLOR_UNSELECTED) :
+    ListEntry(const std::string24 text, const T elem, const std::string24 keywords = "", const UIColor color = COLOR_UNSELECTED) :
         elem(elem), text(text), keywords(keywords), selected(false), color(color)
     {
     }
@@ -77,7 +77,7 @@ public:
             max_item_width = entry.text.length();
     }
 
-    void add(const string &text, const T &elem)
+    void add(const std::string24 &text, const T &elem)
     {
         list.push_back(ListEntry<T>(text, elem));
         if (text.length() > size_t(max_item_width))
@@ -89,7 +89,7 @@ public:
         if (text_clip_at > 0 && max_item_width > text_clip_at)
             max_item_width = text_clip_at;
 
-        for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
+        for (std::vector12<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
         {
             it->text = pad_string(it->text, max_item_width, false);
         }
@@ -116,7 +116,7 @@ public:
             UIColor fg_color = (is_selected_column && display_list[i]->selected) ? COLOR_SELECTED : display_list[i]->color;
             UIColor bg_color = (is_selected_column && i == highlighted_index) ? COLOR_HIGHLIGHTED : COLOR_BLACK;
 
-            string item_label = display_list[i]->text;
+            std::string24 item_label = display_list[i]->text;
             if (text_clip_at > 0 && item_label.length() > text_clip_at)
                 item_label.resize(text_clip_at);
 
@@ -136,21 +136,21 @@ public:
         }
     }
 
-    virtual void tokenizeSearch (vector<string> *dest, const string search)
+    virtual void tokenizeSearch (std::vector12<std::string24> *dest, const std::string24 search)
     {
         if (!search.empty())
             split_string(dest, search, " ");
     }
 
-    virtual bool showEntry(const ListEntry<T> *entry, const vector<string> &search_tokens)
+    virtual bool showEntry(const ListEntry<T> *entry, const std::vector12<std::string24> &search_tokens)
     {
         if (!search_tokens.empty())
         {
-            string item_string = toLower(entry->text);
-            for (vector<string>::const_iterator si = search_tokens.begin(); si != search_tokens.end(); si++)
+            std::string24 item_string = toLower(entry->text);
+            for (std::vector12<std::string24>::const_iterator si = search_tokens.begin(); si != search_tokens.end(); si++)
             {
-                if (!si->empty() && item_string.find(*si) == string::npos &&
-                    entry->keywords.find(*si) == string::npos)
+                if (!si->empty() && item_string.find(*si) == std::string24::npos &&
+                    entry->keywords.find(*si) == std::string24::npos)
                 {
                     return false;
                 }
@@ -165,7 +165,7 @@ public:
         display_list.clear();
 
         search_string = toLower(search_string);
-        vector<string> search_tokens;
+        std::vector12<std::string24> search_tokens;
         tokenizeSearch(&search_tokens, search_string);
 
         for (size_t i = 0; i < list.size(); i++)
@@ -256,7 +256,7 @@ public:
 
         if (auto_select && !multiselect)
         {
-            for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
+            for (std::vector12<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
             {
                 it->selected = false;
             }
@@ -292,10 +292,10 @@ public:
         entry->selected = !entry->selected;
     }
 
-    vector<T> getSelectedElems(bool only_one = false)
+    std::vector12<T> getSelectedElems(bool only_one = false)
     {
-        vector<T> results;
-        for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
+        std::vector12<T> results;
+        for (std::vector12<ListEntry<T> >::iterator it = list.begin(); it != list.end(); it++)
         {
             if ((*it).selected)
             {
@@ -310,7 +310,7 @@ public:
 
     T getFirstSelectedElem()
     {
-        vector<T> results = getSelectedElems(true);
+        std::vector12<T> results = getSelectedElems(true);
         if (results.size() == 0)
             return default_value;
         else
@@ -320,7 +320,7 @@ public:
     bool hasSelection()
     {
         //for (auto item : list)
-        for (std::vector<ListEntry<T> >::iterator it = list.begin(); it != list.end(); ++it)
+        for (std::vector12<ListEntry<T> >::iterator it = list.begin(); it != list.end(); ++it)
         {
             if ((*it).selected)
             {
@@ -358,7 +358,7 @@ public:
         return display_list.size();
     }
 
-    vector<ListEntry<T>*> &getDisplayList()
+    std::vector12<ListEntry<T>*> &getDisplayList()
     {
         return display_list;
     }
@@ -469,7 +469,7 @@ public:
         filterDisplay();
     }
 
-    void setTitle(const string t)
+    void setTitle(const std::string24 t)
     {
         title = t;
         if (title.length() > size_t(max_item_width))
@@ -485,10 +485,10 @@ protected:
     static void clear_fn(ListEntry<T> &e) { e.selected = false; }
     static bool sort_fn(ListEntry<T> const& a, ListEntry<T> const& b) { return a.text.compare(b.text) < 0; }
 
-    vector<ListEntry<T>> list;
-    vector<ListEntry<T>*> display_list;
-    string search_string;
-    string title;
+    std::vector12<ListEntry<T>> list;
+    std::vector12<ListEntry<T>*> display_list;
+    std::string24 search_string;
+    std::string24 title;
     int display_max_rows;
     int max_item_width;
 };

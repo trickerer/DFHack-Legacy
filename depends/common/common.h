@@ -48,4 +48,6 @@ _CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wcha
 #define ASSERT(_Expression) (void)( (!!(_Expression)) || (_wassert(_CRT_WIDE(#_Expression), _CRT_WIDE(__FILE__), __LINE__), 0) )
 #endif
 
+void placeholder_0();
+
 #endif // _COMMON_H_

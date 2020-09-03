@@ -4,9 +4,9 @@ using df::global::gps;
 struct kitchen_prefs_color_hook : df::viewscreen_kitchenprefst {
     typedef df::viewscreen_kitchenprefst interpose_base;
 
-    static std::string read_string(unsigned x, unsigned y, size_t length)
+    static std::string24 read_string(unsigned x, unsigned y, size_t length)
     {
-        std::string s;
+        std::string24 s;
         for ( ; length; x++, length--)
         {
             Screen::Pen tile = Screen::readTile(x, y);
@@ -17,7 +17,7 @@ struct kitchen_prefs_color_hook : df::viewscreen_kitchenprefst {
         return s;
     }
 
-    static void recolor(unsigned x, unsigned y, std::string str,
+    static void recolor(unsigned x, unsigned y, std::string24 str,
         UIColor old_color, UIColor new_color)
     {
         static Screen::Pen tile;
@@ -50,7 +50,7 @@ struct kitchen_prefs_color_hook : df::viewscreen_kitchenprefst {
             start_y = 6;
         for (int x = 0; x < gps->dimx; x++)
         {
-            std::string word = read_string(x, start_y, 4);
+            std::string24 word = read_string(x, start_y, 4);
             if (word == "Cook" || word == "----")
             {
                 start_x = x;

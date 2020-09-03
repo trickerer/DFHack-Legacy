@@ -81,6 +81,8 @@
 #include "df/viewscreen_dwarfmodest.h"
 #include "modules/Translation.h"
 
+#include "custom_hash.h"
+
 using std::make_pair;
 
 //using std::unordered_map;
@@ -123,7 +125,7 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
 
 DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable);
 
-const std::string24 zone_help =
+const std::string zone_help =
     "Allows easier management of pens/pastures, pits and cages.\n"
     "Commands:\n"
     "  help         - print this help message\n"
@@ -148,7 +150,7 @@ const std::string24 zone_help =
     "  verbose      - print some more info, mostly useless debug stuff\n"
     ;
 
-const std::string24 zone_help_filters =
+const std::string zone_help_filters =
     "Filters (to be used in combination with 'all' or 'count'):\n"
     "Required (one of):\n"
     "  all          - process all units\n"
@@ -181,7 +183,7 @@ const std::string24 zone_help_filters =
     "  war          - trained war creature\n"
     ;
 
-const std::string24 zone_help_examples =
+const std::string zone_help_examples =
     "Example for assigning single units:\n"
     "  (ingame) move cursor to a pen/pasture or pit zone\n"
     "  (dfhack) 'zone set' to use this zone for future assignments\n"
@@ -206,7 +208,7 @@ const std::string24 zone_help_examples =
     "  well, unless you have a mod with egg-laying male elves who give milk...\n";
 
 
-const std::string24 autonestbox_help =
+const std::string autonestbox_help =
     "Assigns unpastured female egg-layers to nestbox zones.\n"
     "Requires that you create pen/pasture zones above nestboxes.\n"
     "If the pen is bigger than 1x1 the nestbox must be in the top left corner.\n"
@@ -219,7 +221,7 @@ const std::string24 autonestbox_help =
     "  stop         - stop running automatically\n"
     "  sleep X      - change timer to sleep X frames between runs.\n";
 
-const std::string24 autobutcher_help =
+const std::string autobutcher_help =
     "Assigns your lifestock for slaughter once it reaches a specific count. Requires\n"
     "that you add the target race(s) to a watch list. Only tame units will be\n"
     "processed. Named units will be completely ignored (you can give animals\n"
@@ -262,7 +264,7 @@ const std::string24 autobutcher_help =
     "                 without changing your current watchlist\n"
     "  example      - print some usage examples\n";
 
-const std::string24 autobutcher_help_example =
+const std::string autobutcher_help_example =
     "Examples:\n"
     "  autobutcher target 4 3 2 1 ALPACA BIRD_TURKEY\n"
     "  autobutcher watch ALPACA BIRD_TURKEY\n"
@@ -397,10 +399,10 @@ void unitInfo(color_ostream & out, df::unit* unit, bool verbose = false)
         if(firstname.size() > 0)
         {
             firstname[0] = toupper(firstname[0]);
-            out << "Name: " << firstname;
+            out << "Name: " << firstname.c_str();
         }
         if(unit->name.nickname.size() > 0)
-            out << " '" << unit->name.nickname << "'";
+            out << " '" << unit->name.nickname.c_str() << "'";
         out << ", ";
     }
 
@@ -416,7 +418,7 @@ void unitInfo(color_ostream & out, df::unit* unit, bool verbose = false)
     //out << getRaceBabyName(unit);
     //out << getRaceChildName(unit);
 
-    out << getRaceName(unit) << " (";
+    out << getRaceName(unit).c_str() << " (";
     switch(unit->sex)
     {
     case 0:
@@ -963,7 +965,7 @@ command_result assignUnitToZone(color_ostream& out, df::unit* unit, df::building
     civz->assigned_units.push_back(unit->id);
 
     out << "Unit " << unit->id
-        << "(" << getRaceName(unit) << ")"
+        << "(" << getRaceName(unit).c_str() << ")"
         << " assigned to zone " << building->id;
     if(isPitPond(building))
         out << " (pit/pond).";
@@ -1004,7 +1006,7 @@ command_result assignUnitToCage(color_ostream& out, df::unit* unit, df::building
     civz->assigned_units.push_back(unit->id);
 
     out << "Unit " << unit->id
-        << "(" << getRaceName(unit) << ")"
+        << "(" << getRaceName(unit).c_str() << ")"
         << " assigned to cage " << building->id;
     out << endl;
 
@@ -1321,7 +1323,7 @@ df::building* getAssignableBuildingAtCursor(color_ostream& out)
 // ZONE FILTERS (as in, filters used by 'zone')
 
 // Extra annotations / descriptions for parameter names.
-UNORDERED_MAP<std::string24, std::string24> zone_filter_notes;
+stdext::hash_map<std::string24, std::string24, String24Hash> zone_filter_notes;
 static struct zone_filter_notes_init { zone_filter_notes_init() {
     zone_filter_notes["caged"] = "caged (ignores built cages)";
     zone_filter_notes["hunting"] = "trained hunting creature";
@@ -1531,13 +1533,13 @@ pair<std::string24, UnitFilter> createRaceFilter(std::vector12<std::string24> &f
 pair<std::string24, UnitFilter> createAgeFilter(std::vector12<std::string24> &filter_args)
 {
     int target_age;
-    stringstream ss(filter_args[0]);
+    stringstream ss(filter_args[0].c_str());
 
     ss >> target_age;
 
     if (ss.fail()) {
         ostringstream err;
-        err <<  "Invalid age: " << filter_args[0] << "; age must be a number!";
+        err <<  "Invalid age: " << filter_args[0].c_str() << "; age must be a number!";
         throw runtime_error(err.str());
     }
     if (target_age < 0) {
@@ -1558,13 +1560,13 @@ pair<std::string24, UnitFilter> createAgeFilter(std::vector12<std::string24> &fi
 pair<std::string24, UnitFilter> createMinAgeFilter(std::vector12<std::string24> &filter_args)
 {
     int min_age;
-    stringstream ss(filter_args[0]);
+    stringstream ss(filter_args[0].c_str());
 
     ss >> min_age;
 
     if (ss.fail()) {
         ostringstream err;
-        err <<  "Invalid minimum age: " << filter_args[0] << "; age must be a number!";
+        err <<  "Invalid minimum age: " << filter_args[0].c_str() << "; age must be a number!";
         throw runtime_error(err.str());
     }
     if (min_age < 0) {
@@ -1585,13 +1587,13 @@ pair<std::string24, UnitFilter> createMinAgeFilter(std::vector12<std::string24> 
 pair<std::string24, UnitFilter> createMaxAgeFilter(std::vector12<std::string24> &filter_args)
 {
     int max_age;
-    stringstream ss(filter_args[0]);
+    stringstream ss(filter_args[0].c_str());
 
     ss >> max_age;
 
     if (ss.fail()) {
         ostringstream err;
-        err <<  "Invalid maximum age: " << filter_args[0] << "; age must be a number!";
+        err <<  "Invalid maximum age: " << filter_args[0].c_str() << "; age must be a number!";
         throw runtime_error(err.str());
     }
     if (max_age < 0) {
@@ -1681,17 +1683,17 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
 
         if (p0 == "help" || p0 == "?")
         {
-            out << zone_help << endl;
+            out << zone_help.c_str() << endl;
             return CR_OK;
         }
         if (p0 == "filters")
         {
-            out << zone_help_filters << endl;
+            out << zone_help_filters.c_str() << endl;
             return CR_OK;
         }
         if (p0 == "examples")
         {
-            out << zone_help_examples << endl;
+            out << zone_help_examples.c_str() << endl;
             return CR_OK;
         }
         else if(p0 == "zinfo")
@@ -1765,7 +1767,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
                 std::string24 & str = parameters[1];
                 if(str.size() > 0 && str[0] >= '0' && str[0] <= '9')
                 {
-                    stringstream ss(parameters[1]);
+                    stringstream ss(parameters[1].c_str());
                     int new_building = -1;
                     ss >> new_building;
                     if(new_building != -1)
@@ -1777,7 +1779,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
                     else
                     {
                         out.color(COLOR_RED);
-                        out << "Couldn't parse " << parameters[1] << endl;
+                        out << "Couldn't parse " << parameters[1].c_str() << endl;
                         out.reset_color();
 
                     }
@@ -1819,7 +1821,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
                 std::string24 & str = parameters[1];
                 if(str.size() > 0 && str[0] >= '0' && str[0] <= '9')
                 {
-                    stringstream ss(parameters[1]);
+                    stringstream ss(parameters[1].c_str());
                     int new_building = -1;
                     ss >> new_building;
                     if(new_building != -1)
@@ -1874,7 +1876,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
             nick_set = true;
             target_nick = parameters[1];
             start_index = 2;
-            out << "Set nickname to: " << target_nick << endl;
+            out << "Set nickname to: " << target_nick.c_str() << endl;
         }
         else if(p0 == "remnick")
         {
@@ -1890,7 +1892,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
         else
         {
             out.color(COLOR_RED);
-            out << "Unknown command: " << p0 << endl;
+            out << "Unknown command: " << p0.c_str() << endl;
             out.reset_color();
 
             return CR_WRONG_USAGE;
@@ -1952,7 +1954,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
             }
             else
             {
-                stringstream ss(parameters[i+1]);
+                stringstream ss(parameters[i+1].c_str());
                 i++;
                 ss >> target_count;
                 if(target_count <= 0)
@@ -2007,13 +2009,13 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
                 active_filters.push_back(filter);
 
                 out.color(COLOR_GREEN);
-                out << "Filter: 'not " << desc << "'"
+                out << "Filter: 'not " << desc.c_str() << "'"
                     << endl;
                 out.reset_color();
             } else {
                 active_filters.push_back(zone_filters[p.c_str()]);
                 out.color(COLOR_GREEN);
-                out << "Filter: '" << desc << "'"
+                out << "Filter: '" << desc.c_str() << "'"
                     << endl;
                 out.reset_color();
 
@@ -2045,13 +2047,13 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
                     active_filters.push_back(filter);
                     //active_filters.push_back(not1(filter));
                     out.color(COLOR_GREEN);
-                    out << "Filter: 'not " << desc << "'"
+                    out << "Filter: 'not " << desc.c_str() << "'"
                         << endl;
                     out.reset_color();
                 } else {
                     active_filters.push_back(filter);
                     out.color(COLOR_GREEN);
-                    out << "Filter: '" << desc << "'"
+                    out << "Filter: '" << desc.c_str() << "'"
                         << endl;
                     out.reset_color();
 
@@ -2189,7 +2191,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
     if (target_count == 0)
     {
         out.color(COLOR_RED);
-        out << "No target count! 'zone " << parameters[0]
+        out << "No target count! 'zone " << parameters[0].c_str()
             << "' must be followed by 'all' or 'count [COUNT]'." << endl;
         out.reset_color();
 
@@ -2200,9 +2202,9 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
     {
         std::string24 own_race_name = getRaceNameById(ui->race_id);
         out.color(COLOR_BROWN);
-        out << "Default filter for " << parameters[0]
-            << ": 'not (race " << own_race_name << " or own civilization)'; use 'race "
-            << own_race_name << "' filter to override."
+        out << "Default filter for " << parameters[0].c_str()
+            << ": 'not (race " << own_race_name.c_str() << " or own civilization)'; use 'race "
+            << own_race_name.c_str() << "' filter to override."
             << endl;
         out.reset_color();
 
@@ -2216,7 +2218,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
     if(!named_filter_set && unit_slaughter)
     {
         out.color(COLOR_BROWN);
-        out << "Default filter for " << parameters[0]
+        out << "Default filter for " << parameters[0].c_str()
             << ": 'not named'; use 'named' filter to override."
             << endl;
         out.reset_color();
@@ -2231,7 +2233,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
     if(!merchant_filter_set && (building_assign || cagezone_assign || unit_slaughter))
     {
         out.color(COLOR_BROWN);
-        out << "Default filter for " << parameters[0]
+        out << "Default filter for " << parameters[0].c_str()
             << ": 'not merchant'; use 'merchant' filter to override."
             << endl;
         out.reset_color();
@@ -2338,7 +2340,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
                 if (removed)
                 {
                     out << "Unit " << unit->id
-                        << "(" << getRaceName(unit) << ")"
+                        << "(" << getRaceName(unit).c_str() << ")"
                         << " unassigned from";
 
                     if (isActivityZone(target_building))
@@ -2460,7 +2462,7 @@ command_result df_autonestbox(color_ostream &out, std::vector12<std::string24> &
             else
             {
                 size_t ticks = 0;
-                stringstream ss(parameters[i+1]);
+                stringstream ss(parameters[i+1].c_str());
                 i++;
                 ss >> ticks;
                 if(ticks <= 0)
@@ -2477,7 +2479,7 @@ command_result df_autonestbox(color_ostream &out, std::vector12<std::string24> &
         }
         else
         {
-            out << "Unknown command: " << p << endl;
+            out << "Unknown command: " << p.c_str() << endl;
             return CR_WRONG_USAGE;
         }
     }
@@ -2522,8 +2524,8 @@ command_result autoNestbox( color_ostream &out, bool verbose = false )
                 {
                     stringstream ss;
                     ss << freeEgglayers;
-                    std::string24 announce = "Not enough free nestbox zones found! You need " + ss.str() + " more.";
-                    Gui::showAnnouncement(announce, 6, true);
+                    std::string announce = "Not enough free nestbox zones found! You need " + ss.str() + " more.";
+                    Gui::showAnnouncement(announce.c_str(), 6, true);
                     out << announce << endl;
                     autonestbox_did_complain = true;
                 }
@@ -2534,9 +2536,9 @@ command_result autoNestbox( color_ostream &out, bool verbose = false )
     {
         stringstream ss;
         ss << processed;
-        std::string24 announce;
+        std::string announce;
         announce = ss.str() + " nestboxes were assigned.";
-        Gui::showAnnouncement(announce, 2, false);
+        Gui::showAnnouncement(announce.c_str(), 2, false);
         out << announce << endl;
         // can complain again
         // (might lead to spamming the same message twice, but catches the case
@@ -2654,7 +2656,7 @@ public:
         {
             // this should never happen
             std::string24 keyname = "autobutcher/watchlist/" + getRaceNameById(raceId);
-            out << "Something failed, could not find/create config key " << keyname << "!" << endl;
+            out << "Something failed, could not find/create config key " << keyname.c_str() << "!" << endl;
         }
     }
 
@@ -2859,7 +2861,7 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
         else
         {
             size_t ticks = 0;
-            stringstream ss(parameters.back());
+            stringstream ss(parameters.back().c_str());
             ss >> ticks;
             if(ticks <= 0)
             {
@@ -2902,10 +2904,10 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
         }
         else
         {
-            stringstream fk(parameters[1]);
-            stringstream mk(parameters[2]);
-            stringstream fa(parameters[3]);
-            stringstream ma(parameters[4]);
+            stringstream fk(parameters[1].c_str());
+            stringstream mk(parameters[2].c_str());
+            stringstream fa(parameters[3].c_str());
+            stringstream ma(parameters[4].c_str());
             fk >> target_fk;
             mk >> target_mk;
             fa >> target_fa;
@@ -2941,7 +2943,7 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
     }
     else
     {
-        out << "Unknown command: " << p << endl;
+        out << "Unknown command: " << p.c_str() << endl;
         return CR_WRONG_USAGE;
     }
 
@@ -2984,7 +2986,7 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
                 out << "watched: ";
             else
                 out << "not watched: ";
-            out << name
+            out << name.c_str()
                 << " fk=" << w->fk
                 << " mk=" << w->mk
                 << " fa=" << w->fa
@@ -3024,10 +3026,10 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
                 << " " << w->mk
                 << " " << w->fa
                 << " " << w->ma
-                << " " << name << endl;
+                << " " << name.c_str() << endl;
 
             if(w->isWatched)
-                out << "autobutcher watch " << name << endl;
+                out << "autobutcher watch " << name.c_str() << endl;
         }
         return CR_OK;
     }
@@ -3048,7 +3050,7 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
             std::string24 tr = parameters.back();
             target_racenames.push_back(tr);
             parameters.pop_back();
-            out << tr << " ";
+            out << tr.c_str() << " ";
         }
         out << endl;
     }
@@ -3128,7 +3130,7 @@ command_result df_autobutcher(color_ostream &out, std::vector12<std::string24> &
             }
             if(!found_race)
             {
-                out << "Race not found: " << target_racenames.back() << endl;
+                out << "Race not found: " << target_racenames.back().c_str() << endl;
                 return CR_OK;
             }
         }
@@ -3292,7 +3294,7 @@ command_result autoButcher( color_ostream &out, bool verbose = false )
             stringstream ss;
             ss << slaughter_subcount;
             std::string24 announce;
-            announce = getRaceNamePluralById(w->raceId) + " marked for slaughter: " + ss.str();
+            announce = getRaceNamePluralById(w->raceId) + " marked for slaughter: " + ss.str().c_str();
             Gui::showAnnouncement(announce, 2, false);
         }
     }
@@ -3374,7 +3376,7 @@ command_result init_autobutcher(color_ostream &out)
     for (std::vector12<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
     {
         std::string24 key = p->key();
-        out << "Reading from save: " << key << endl;
+        out << "Reading from save: " << key.c_str() << endl;
         //out << "  raceid: "   << p->ival(0) << endl;
         //out << "  watched: "  << p->ival(1) << endl;
         //out << "  fk: "       << p->ival(2) << endl;

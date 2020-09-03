@@ -32,7 +32,7 @@ struct stable_cursor_hook : df::viewscreen_dwarfmodest
         }
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         bool was_default = check_default();
         df::coord view = Gui::getViewportPos();

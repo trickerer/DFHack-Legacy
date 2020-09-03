@@ -7,7 +7,7 @@ using namespace DFHack;
 struct stone_status_all_hook : df::viewscreen_layer_stone_restrictionst {
     typedef df::viewscreen_layer_stone_restrictionst interpose_base;
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (input->count(interface_key::SELECT_ALL))
         {
@@ -15,7 +15,7 @@ struct stone_status_all_hook : df::viewscreen_layer_stone_restrictionst {
             {
                 bool new_state = !*stone_economic[type_tab][list->cursor];
                 //for (bool *economic : stone_economic[type_tab])
-                for (std::vector<bool*>::iterator it = stone_economic[type_tab].begin(); it != stone_economic[type_tab].end(); ++it)
+                for (std::vector12<bool*>::iterator it = stone_economic[type_tab].begin(); it != stone_economic[type_tab].end(); ++it)
                     *(*it) = new_state;
             }
         }

@@ -60,7 +60,8 @@ command_result tilesieve(color_ostream &out, std::vector12<std::string24> & para
     }
     out.print("Scanning.\n");
     std::set8<df::tiletype> seen;
-    for (auto iter = world->map.map_blocks.begin(); iter != world->map.map_blocks.end(); iter++)
+    for (std::vector12<df::map_block* >::iterator iter = world->map.map_blocks.begin();
+        iter != world->map.map_blocks.end(); iter++)
     {
         df::map_block *block = *iter;
         df::tiletype tt;

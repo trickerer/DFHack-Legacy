@@ -35,11 +35,11 @@ struct max_wheelbarrow_hook : df::viewscreen_dwarfmodest {
         {
             Gui::DwarfmodeDims dims = Gui::getDwarfmodeViewDims();
             Screen::paintString(Screen::Pen(' ', COLOR_LIGHTCYAN),
-                dims.menu_x1 + 22, dims.y1 + 6, wheelbarrow_entry + "_  ");
+                dims.menu_x1 + 22, dims.y1 + 6, (wheelbarrow_entry + "_  ").c_str());
         }
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key>* input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key>* input))
     {
         df::building_stockpilest* stockpile = getStockpile();
         bool handled = false;
@@ -73,7 +73,7 @@ struct max_wheelbarrow_hook : df::viewscreen_dwarfmodest {
                 else
                 {
                     //for (df::interface_key key : *input)
-                    for (std::set<df::interface_key>::const_iterator i = input->begin(); i != input->end(); ++i)
+                    for (std::set8<df::interface_key>::const_iterator i = input->begin(); i != input->end(); ++i)
                     {
                         df::interface_key key = *i;
                         if (key >= Screen::charToKey('0') && key <= Screen::charToKey('9') &&

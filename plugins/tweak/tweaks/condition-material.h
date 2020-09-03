@@ -7,11 +7,11 @@ struct condition_material_hook : df::viewscreen_workquota_conditionst {
     typedef df::viewscreen_workquota_conditionst T_screen;
 
     struct T_order_mat_data {
-        std::vector<std::string*> list_entries;
-        std::vector<int16_t> mat_types;
-        std::vector<int32_t> mat_indices;
-        std::vector<int16_t> list_unk3;
-        std::vector<int16_t> list_visible;
+        std::vector12<std::string24*> list_entries;
+        std::vector12<int16_t> mat_types;
+        std::vector12<int32_t> mat_indices;
+        std::vector12<int16_t> list_unk3;
+        std::vector12<int16_t> list_visible;
     };
 
     static std::map<df::viewscreen_workquota_conditionst*, T_order_mat_data*> order_mat_data;
@@ -67,8 +67,8 @@ struct condition_material_hook : df::viewscreen_workquota_conditionst {
                 {
                     break;
                 }
-                std::string *s = data->list_entries[i];
-                if (s->find(filter) != std::string::npos)
+                std::string24 *s = data->list_entries[i];
+                if (s->find(filter) != std::string24::npos)
                 {
                     list_entries.push_back(data->list_entries[i]);
                     mat_types.push_back(data->mat_types[i]);
@@ -81,13 +81,13 @@ struct condition_material_hook : df::viewscreen_workquota_conditionst {
         }
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         using namespace df::enums::interface_key;
         if (mode == T_mode::Material)
         {
             //for (auto key : *input)
-            for (std::set<df::interface_key>::const_iterator ci = input->begin(); ci != input->end(); ++ci)
+            for (std::set8<df::interface_key>::const_iterator ci = input->begin(); ci != input->end(); ++ci)
             {
                 df::interface_key key = *ci;
                 if (key == LEAVESCREEN || key == SELECT)

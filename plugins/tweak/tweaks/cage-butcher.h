@@ -44,7 +44,7 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
         if (!cage)
             return;
 
-        std::vector<df::unit*> units;
+        std::vector12<df::unit*> units;
         if (!Buildings::getCageOccupants(cage, units))
             return;
 
@@ -65,13 +65,13 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
         OutputHotkeyString(x, y, "Butcher ", CUSTOM_B, false, 0, COLOR_WHITE, COLOR_LIGHTRED);
         OutputHotkeyString(x, y, "all", CUSTOM_SHIFT_B, false, 0, COLOR_WHITE, COLOR_LIGHTRED);
     }
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         using namespace df::enums::interface_key;
         df::building_cagest* cage = get_cage();
         if (cage)
         {
-            std::vector<df::unit*> units;
+            std::vector12<df::unit*> units;
             if (Buildings::getCageOccupants(cage, units))
             {
                 df::unit *unit = vector_get(units, *ui_building_item_cursor);
@@ -86,7 +86,7 @@ struct cage_butcher_hook : df::viewscreen_dwarfmodest {
                 {
                     bool state = unit ? !unit->flags2.bits.slaughter : true;
                     //for (auto u : units)
-                    for (std::vector<df::unit*>::const_iterator ci = units.begin(); ci != units.end(); ++ci)
+                    for (std::vector12<df::unit*>::const_iterator ci = units.begin(); ci != units.end(); ++ci)
                         (*ci)->flags2.bits.slaughter = state;
                 }
             }

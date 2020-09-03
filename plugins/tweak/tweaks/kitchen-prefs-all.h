@@ -9,7 +9,7 @@ using namespace DFHack;
 struct kitchen_prefs_all_hook : df::viewscreen_kitchenprefst {
     typedef df::viewscreen_kitchenprefst interpose_base;
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         df::kitchen_pref_flag flag;
         df::kitchen_exc_type exc_type;

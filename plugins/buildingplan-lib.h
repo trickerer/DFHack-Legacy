@@ -76,11 +76,11 @@ static inline bool canReserveRoom(df::building *building)
     return building->is_room;
 }
 
-static inline std::vector<Units::NoblePosition> getUniqueNoblePositions(df::unit *unit)
+static inline std::vector12<Units::NoblePosition> getUniqueNoblePositions(df::unit *unit)
 {
-    std::vector<Units::NoblePosition> np;
+    std::vector12<Units::NoblePosition> np;
     Units::getNoblePositions(&np, unit);
-    for (std::vector<Units::NoblePosition>::const_iterator iter = np.begin(); iter != np.end(); iter++)
+    for (std::vector12<Units::NoblePosition>::const_iterator iter = np.begin(); iter != np.end(); iter++)
     {
         if (iter->position->code == "MILITIA_CAPTAIN")
         {
@@ -100,8 +100,8 @@ extern map<df::building_type, bool> planmode_enabled, saved_planmodes;
 
 void enable_quickfort_fn(pair<const df::building_type, bool>& pair);
 
-void debug(const std::string &msg);
-std::string material_to_string_fn(MaterialInfo m);
+void debug(const std::string24 &msg);
+std::string24 material_to_string_fn(MaterialInfo m);
 
 extern bool show_debugging;
 extern bool show_help;
@@ -109,7 +109,7 @@ extern bool show_help;
 struct ItemFilter
 {
     df::dfhack_material_category mat_mask;
-    std::vector<DFHack::MaterialInfo> materials;
+    std::vector12<DFHack::MaterialInfo> materials;
     df::item_quality min_quality;
     df::item_quality max_quality;
 
@@ -128,14 +128,14 @@ struct ItemFilter
 
     bool matches(df::item *item);
 
-    std::vector<std::string> getMaterialFilterAsVector();
+    std::vector12<std::string24> getMaterialFilterAsVector();
 
-    std::string getMaterialFilterAsSerial();
+    std::string24 getMaterialFilterAsSerial();
 
-    bool parseSerializedMaterialTokens(std::string str);
+    bool parseSerializedMaterialTokens(std::string24 str);
 
-    std::string getMinQuality();
-    std::string getMaxQuality();
+    std::string24 getMinQuality();
+    std::string24 getMaxQuality();
 
     bool isValid();
 
@@ -154,7 +154,7 @@ public:
 
     void render();
 
-    std::string getFocusString() { return "buildingplan_choosemat"; }
+    std::string24 getFocusString() { return "buildingplan_choosemat"; }
 
 private:
     ListColumn<df::dfhack_material_category> masks_column;
@@ -164,7 +164,7 @@ private:
 
     df::building_type btype;
 
-    void addMaskEntry(df::dfhack_material_category &mask, const std::string &text)
+    void addMaskEntry(df::dfhack_material_category &mask, const std::string24 &text)
     {
         ListEntry<df::dfhack_material_category> entry = ListEntry<df::dfhack_material_category>(pad_string(text, MAX_MASK, false), mask);
         if (filter->matches(mask))
@@ -201,7 +201,7 @@ private:
     {
         materials_column.clear();
         df::dfhack_material_category selected_category;
-        std::vector<df::dfhack_material_category> selected_masks = masks_column.getSelectedElems();
+        std::vector12<df::dfhack_material_category> selected_masks = masks_column.getSelectedElems();
         if (selected_masks.size() == 1)
             selected_category = selected_masks[0];
         else if (selected_masks.size() > 1)
@@ -242,7 +242,7 @@ private:
 
                     MaterialInfo material;
                     material.decode(DFHack::MaterialInfo::PLANT_BASE+j, i);
-                    std::string name = material.toString();
+                    std::string24 name = material.toString();
                     ListEntry<MaterialInfo> entry(pad_string(name, MAX_MATERIAL, false), material);
                     if (filter->matches(material))
                         entry.selected = true;
@@ -255,7 +255,7 @@ private:
     }
 
     void addMaterialEntry(df::dfhack_material_category &selected_category,
-                          MaterialInfo &material, std::string name)
+                          MaterialInfo &material, std::string24 name)
     {
         if (!selected_category.whole || material.matches(selected_category))
         {
@@ -283,7 +283,7 @@ private:
 class ReservedRoom
 {
 public:
-    ReservedRoom(df::building *building, std::string noble_code);
+    ReservedRoom(df::building *building, std::string24 noble_code);
 
     ReservedRoom(PersistentDataItem &config, color_ostream &out);
 
@@ -310,19 +310,19 @@ public:
         return building->id;
     }
 
-    std::string getCode() { return config.val(); }
+    std::string24 getCode() { return config.val(); }
 
-    void setCode(const std::string &noble_code) { config.val() = noble_code; }
+    void setCode(const std::string24 &noble_code) { config.val() = noble_code; }
 
 private:
     df::building *building;
     PersistentDataItem config;
     df::coord pos;
 
-    std::vector<Units::NoblePosition> getOwnersNobleCode()
+    std::vector12<Units::NoblePosition> getOwnersNobleCode()
     {
         if (!building->owner)
-            return std::vector<Units::NoblePosition> ();
+            return std::vector12<Units::NoblePosition> ();
 
         return getUniqueNoblePositions(building->owner);
     }
@@ -333,20 +333,20 @@ class RoomMonitor
 public:
     RoomMonitor() { }
 
-    std::string getReservedNobleCode(int32_t buildingId);
+    std::string24 getReservedNobleCode(int32_t buildingId);
 
-    void toggleRoomForPosition(int32_t buildingId, std::string noble_code);
+    void toggleRoomForPosition(int32_t buildingId, std::string24 noble_code);
 
     void doCycle();
 
     void reset(color_ostream &out);
 
 private:
-    std::vector<ReservedRoom> reservedRooms;
+    std::vector12<ReservedRoom> reservedRooms;
 
     void addRoom(ReservedRoom &rr)
     {
-        for (std::vector<ReservedRoom>::iterator iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
+        for (std::vector12<ReservedRoom>::iterator iter = reservedRooms.begin(); iter != reservedRooms.end(); iter++)
         {
             if (iter->getId() == rr.getId())
                 return;
@@ -364,7 +364,7 @@ public:
 
     PlannedBuilding(PersistentDataItem &config, color_ostream &out);
 
-    bool assignClosestItem(std::vector<df::item *> *items_vector);
+    bool assignClosestItem(std::vector12<df::item *> *items_vector);
 
     bool assignItem(df::item *item);
 
@@ -439,18 +439,18 @@ public:
 private:
     map<df::building_type, df::item_type> item_for_building_type;
     map<df::building_type, ItemFilter> default_item_filters;
-    map<df::item_type, std::vector<df::item *>> available_item_vectors;
+    map<df::item_type, std::vector12<df::item *>> available_item_vectors;
     map<df::item_type, bool> is_relevant_item_type; //Needed for fast check when looping over all items
     bool quickfort_mode;
 
-    std::vector<PlannedBuilding> planned_buildings;
+    std::vector12<PlannedBuilding> planned_buildings;
 
     void boundsCheckItemQuality(item_quality::item_quality *quality);
 
     void gather_available_items()
     {
         debug("Gather available items");
-        for (map<df::item_type, std::vector<df::item *>>::iterator iter = available_item_vectors.begin(); iter != available_item_vectors.end(); iter++)
+        for (map<df::item_type, std::vector12<df::item *>>::iterator iter = available_item_vectors.begin(); iter != available_item_vectors.end(); iter++)
         {
             iter->second.clear();
         }
@@ -465,7 +465,7 @@ private:
         F(in_building); F(construction); F(artifact);
 #undef F
 
-        std::vector<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
+        std::vector12<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
 
         for (size_t i = 0; i < items.size(); i++)
         {

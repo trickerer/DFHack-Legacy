@@ -288,7 +288,7 @@ namespace DFHack
             return sourceTileType;
 
         #ifdef ASSERT
-        ASSERT(is_valid_enum_item(sourceTileType));
+        ASSERT(is_valid_enum_item_simple(sourceTileType));
         #endif
 
         // Special case for smooth pillars.

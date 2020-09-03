@@ -72,7 +72,7 @@ struct block_labors_hook : df::viewscreen_dwarfmodest {
             }
         }
     }
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         using namespace df::enums::interface_key;
         df::unit *unit = Gui::getAnyUnit(this);

@@ -3,7 +3,7 @@
 struct do_job_now_hook : public df::viewscreen_joblistst {
     typedef df::viewscreen_joblistst interpose_base;
 
-    bool handleInput(std::set<df::interface_key> *input) {
+    bool handleInput(std::set8<df::interface_key> *input) {
         if (input->count(interface_key::BUILDJOB_NOW)) {
             df::job *job = vector_get(jobs, cursor_pos);
             if (job) {
@@ -16,7 +16,7 @@ struct do_job_now_hook : public df::viewscreen_joblistst {
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input)) {
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input)) {
         if (!handleInput(input)) {
             INTERPOSE_NEXT(feed)(input);
         }
