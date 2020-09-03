@@ -912,7 +912,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
     while (a < reports.size() && reports[a]->id <= lastReportUnitAttack) {
         a++;
     }
-    std::set<int32_t> strikeReports;
+    std::set8<int32_t> strikeReports;
     for ( ; a < reports.size(); a++ ) {
         df::report* report = reports[a];
         lastReportUnitAttack = report->id;
@@ -928,7 +928,7 @@ static void manageUnitAttackEvent(color_ostream& out) {
         return;
     updateReportToRelevantUnits();
     map<int32_t, map<int32_t, int32_t> > alreadyDone;
-    for (std::set<int32_t>::const_iterator a = strikeReports.begin(); a != strikeReports.end(); a++ ) {
+    for (std::set8<int32_t>::const_iterator a = strikeReports.begin(); a != strikeReports.end(); a++ ) {
         int32_t reportId = *a;
         df::report* report = df::report::find(reportId);
         if ( !report )

@@ -645,7 +645,7 @@ void MapExtras::Block::WriteVeins(TileInfo *tiles, BasematInfo *bmats)
     // Classify modified tiles into distinct buckets
     typedef std::pair<int, df::inclusion_type> t_vein_key;
     std::map<t_vein_key, df::tile_bitmask> added;
-    std::set<t_vein_key> discovered;
+    std::set8<t_vein_key> discovered;
 
     for (int y = 0; y < 16; y++)
     {

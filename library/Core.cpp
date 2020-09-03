@@ -528,7 +528,7 @@ command_result Core::runCommand(color_ostream &out, const std::string24 &command
 //};
 
 static std::string24 builtin_cmd_strings[] = {
-//    "checktypes" ,
+    "checktypes" ,
     "ls" ,
     "help" ,
     "type" ,
@@ -549,7 +549,7 @@ static std::string24 builtin_cmd_strings[] = {
     "show" ,
     "sc-script"
 };
-static const std::set<std::string24> built_in_commands(builtin_cmd_strings, builtin_cmd_strings + sizeof(builtin_cmd_strings) / sizeof(builtin_cmd_strings[0]));
+static const std::set8<std::string24> built_in_commands(builtin_cmd_strings, builtin_cmd_strings + sizeof(builtin_cmd_strings) / sizeof(builtin_cmd_strings[0]));
 
 
 static bool try_autocomplete(color_ostream &con, const std::string24 &first, std::string24 &completed)
@@ -558,7 +558,7 @@ static bool try_autocomplete(color_ostream &con, const std::string24 &first, std
 
     // Check for possible built in commands to autocomplete first
     //for (auto const &command : built_in_commands)
-    for (std::set<std::string24>::const_iterator ci = built_in_commands.begin(); ci != built_in_commands.end(); ++ci)
+    for (std::set8<std::string24>::const_iterator ci = built_in_commands.begin(); ci != built_in_commands.end(); ++ci)
         if ((*ci).substr(0, first.size()) == first)
             possible.push_back(*ci);
 
@@ -809,11 +809,16 @@ command_result Core::runCommand(color_ostream &con, const std::string24 &first_,
 
         // let's see what we actually got
         std::string24 builtin = getBuiltinCommand(first);
-        /*if (builtin == "checktypes")
+        if (builtin == "checktypes")
         {
-            CheckCountedTypes();
+            //CheckCountedTypes();
+            con.print("sizeof string24 is %u\n", uint32(sizeof(std::string24)));
+            con.print("sizeof vector12 is %u\n", uint32(sizeof(std::vector12<int>)));
+            con.print("sizeof bvector12 is %u\n", uint32(sizeof(std::vector12<bool>)));
+            con.print("sizeof deque20 is %u\n", uint32(sizeof(std::deque20<int>)));
+            con.print("sizeof set8 is %u\n", uint32(sizeof(std::set8<int>)));
         }
-        else */if (builtin == "help")
+        else if (builtin == "help")
         {
             if(!parts.size())
             {
@@ -1048,7 +1053,7 @@ command_result Core::runCommand(color_ostream &con, const std::string24 &first_,
                 "\n"
                 "plugins:\n"
                 );
-                std::set <sortable> out;
+                std::set8<sortable> cmds_out;
                 for (std::map<std::string24, Plugin*>::iterator it = plug_mgr->begin(); it != plug_mgr->end(); ++it)
                 {
                     const Plugin * plug = it->second;
@@ -1057,10 +1062,10 @@ command_result Core::runCommand(color_ostream &con, const std::string24 &first_,
                     for (size_t j = 0; j < plug->size();j++)
                     {
                         const PluginCommand & pcmd = (plug->operator[](j));
-                        out.insert(sortable(pcmd.isHotkeyCommand(),pcmd.name,pcmd.description));
+                        cmds_out.insert(sortable(pcmd.isHotkeyCommand(),pcmd.name,pcmd.description));
                     }
                 }
-                for(std::set<sortable>::const_iterator iter = out.begin();iter != out.end();iter++)
+                for(std::set8<sortable>::const_iterator iter = cmds_out.begin();iter != cmds_out.end();iter++)
                 {
                     if ((*iter).recolor)
                         con.color(COLOR_CYAN);
@@ -2914,7 +2919,7 @@ std::string24 Core::GetAliasCommand(const std::string24 &name, const std::string
 
 // Since there is no Process.cpp, put ClassNameCheck stuff in Core.cpp
 
-static std::set<std::string24> known_class_names;
+static std::set8<std::string24> known_class_names;
 static std::map<std::string24, void*> known_vptrs;
 
 ClassNameCheck::ClassNameCheck(std::string24 _name) : name(_name), vptr(0)
@@ -2938,7 +2943,7 @@ bool ClassNameCheck::operator() (Process *pr, void * ptr) const {
 
 void ClassNameCheck::getKnownClassNames(std::vector12<std::string24> &names)
 {
-    std::set<std::string24>::iterator it = known_class_names.begin();
+    std::set8<std::string24>::iterator it = known_class_names.begin();
 
     for (; it != known_class_names.end(); it++)
         names.push_back(*it);

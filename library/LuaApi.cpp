@@ -2316,7 +2316,7 @@ static int screen_doSimulateInput(lua_State *L)
         luaL_argerror(L, 1, "NULL screen");
 
     int sz = lua_rawlen(L, 2);
-    std::set<df::interface_key> keys;
+    std::set8<df::interface_key> keys;
 
     for (int j = 1; j <= sz; j++)
     {

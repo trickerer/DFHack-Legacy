@@ -640,7 +640,11 @@ namespace df
         static container_identity *get();
     };
 
-    template<class T> struct identity_traits<std::set<T> > {
+    //template<class T> struct identity_traits<std::set<T> > {
+    //    static container_identity *get();
+    //};
+
+    template<class T> struct identity_traits<std::set8<T> > {
         static container_identity *get();
     };
 
@@ -727,9 +731,16 @@ namespace df
         return &identity;
     }
 
+    //template<class T>
+    //inline container_identity *identity_traits<std::set<T> >::get() {
+    //    typedef std::set<T> container;
+    //    static ro_stl_container_identity<container> identity("set", identity_traits<T>::get());
+    //    return &identity;
+    //}
+
     template<class T>
-    inline container_identity *identity_traits<std::set<T> >::get() {
-        typedef std::set<T> container;
+    inline container_identity *identity_traits<std::set8<T> >::get() {
+        typedef std::set8<T> container;
         static ro_stl_container_identity<container> identity("set", identity_traits<T>::get());
         return &identity;
     }

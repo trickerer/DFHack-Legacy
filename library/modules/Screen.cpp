@@ -527,7 +527,7 @@ void PenArray::draw(unsigned int x, unsigned int y, unsigned int width, unsigned
  * Base DFHack viewscreen.
  */
 
-static std::set<df::viewscreen*> dfhack_screens;
+static std::set8<df::viewscreen*> dfhack_screens;
 
 dfhack_viewscreen::dfhack_viewscreen() : text_input_mode(false)
 {
@@ -739,7 +739,7 @@ int dfhack_lua_viewscreen::do_input(lua_State *L)
     dfhack_lua_viewscreen* self = get_self(L);
     if (!self) return 0;
 
-    std::set<df::interface_key>* keys = (std::set<df::interface_key>*)lua_touserdata(L, 2);
+    std::set8<df::interface_key>* keys = (std::set8<df::interface_key>*)lua_touserdata(L, 2);
 
     lua_getfield(L, -1, "onInput");
 
@@ -755,7 +755,7 @@ int dfhack_lua_viewscreen::do_input(lua_State *L)
 
     lua_createtable(L, 0, keys->size()+3);
 
-    for (std::set<df::interface_key>::const_iterator it = keys->begin(); it != keys->end(); ++it)
+    for (std::set8<df::interface_key>::const_iterator it = keys->begin(); it != keys->end(); ++it)
     {
         df::interface_key key = *it;
 
@@ -872,7 +872,7 @@ void dfhack_lua_viewscreen::resize(int w, int h)
     safe_call_lua(do_notify, 3, 0);
 }
 
-void dfhack_lua_viewscreen::feed(std::set<df::interface_key> *keys)
+void dfhack_lua_viewscreen::feed(std::set8<df::interface_key> *keys)
 {
     if (Screen::isDismissed(this)) return;
 

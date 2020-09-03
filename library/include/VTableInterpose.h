@@ -173,9 +173,9 @@ namespace DFHack
         // Chain of hooks within the same host
         VMethodInterposeLinkBase *next, *prev;
         // Subclasses that inherit this topmost hook directly
-        std::set<virtual_identity*> child_hosts;
+        std::set8<virtual_identity*> child_hosts;
         // Hooks within subclasses that branch off this topmost hook
-        std::set<VMethodInterposeLinkBase*> child_next;
+        std::set8<VMethodInterposeLinkBase*> child_next;
         // (See the cpp file for a more detailed description of these links)
 
         void set_chain(void *chain);

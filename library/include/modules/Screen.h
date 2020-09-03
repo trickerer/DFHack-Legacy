@@ -59,8 +59,6 @@ namespace DFHack
     class Core;
     class Plugin;
 
-    typedef std::set<df::interface_key> interface_key_set;
-
     /**
      * The Screen module
      * \ingroup grp_modules
@@ -378,7 +376,7 @@ namespace DFHack
         virtual void logic();
         virtual void help();
         virtual void resize(int w, int h);
-        virtual void feed(std::set<df::interface_key> *keys);
+        virtual void feed(std::set8<df::interface_key> *keys);
         virtual bool key_conflict(df::interface_key key);
 
         virtual void onShow();
