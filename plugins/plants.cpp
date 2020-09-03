@@ -2,8 +2,8 @@
 #include <iomanip>
 #include <map>
 #include <algorithm>
-#include <vector>
-#include <string>
+
+
 
 #include "Core.h"
 #include "Console.h"
@@ -17,8 +17,8 @@
 #include "df/plant.h"
 #include "df/world.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 
 DFHACK_PLUGIN("plants");
@@ -33,7 +33,7 @@ enum do_what
     do_extirpate
 };
 
-static bool getoptions( vector <string> & parameters, bool & shrubs, bool & trees, bool & help)
+static bool getoptions( std::vector12<std::string24> & parameters, bool & shrubs, bool & trees, bool & help)
 {
     for(size_t i = 0;i < parameters.size();i++)
     {
@@ -127,7 +127,7 @@ static command_result immolations (color_ostream &out, do_what what, bool shrubs
     return CR_OK;
 }
 
-command_result df_immolate (color_ostream &out, vector <string> & parameters, do_what what)
+command_result df_immolate (color_ostream &out, std::vector12<std::string24> & parameters, do_what what)
 {
     bool shrubs = false, trees = false, help = false;
     if (getoptions(parameters, shrubs, trees, help) && !help)
@@ -135,7 +135,7 @@ command_result df_immolate (color_ostream &out, vector <string> & parameters, do
         return immolations(out, what, shrubs, trees);
     }
 
-    string mode;
+    std::string24 mode;
     if (what == do_immolate)
         mode = "Set plants on fire";
     else
@@ -155,7 +155,7 @@ command_result df_immolate (color_ostream &out, vector <string> & parameters, do
     return CR_OK;
 }
 */
-command_result df_grow (color_ostream &out, vector <string> & parameters)
+command_result df_grow (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     for(size_t i = 0; i < parameters.size();i++)
     {
@@ -216,7 +216,7 @@ command_result df_grow (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result df_createplant (color_ostream &out, vector <string> & parameters)
+command_result df_createplant (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if ((parameters.size() != 1) || (parameters[0] == "help" || parameters[0] == "?"))
     {
@@ -313,7 +313,7 @@ command_result df_createplant (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result df_plant (color_ostream &out, vector <string> & parameters)
+command_result df_plant (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() >= 1)
     {
@@ -339,7 +339,7 @@ command_result df_plant (color_ostream &out, vector <string> & parameters)
     return CR_WRONG_USAGE;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("plant", "Plant creation and removal.", df_plant, false,
         "Command to create, grow or remove plants on the map. For more details, check the subcommand help :\n"

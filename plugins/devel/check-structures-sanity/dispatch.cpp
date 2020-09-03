@@ -282,7 +282,7 @@ void Checker::dispatch_single_item(const QueueItem & item, const CheckedStructur
 
 void Checker::dispatch_primitive(const QueueItem & item, const CheckedStructure & cs)
 {
-    if (cs.identity == df::identity_traits<std::string>::get())
+    if (cs.identity == df::identity_traits<std::string24>::get())
     {
         check_stl_string(item);
     }
@@ -363,13 +363,13 @@ void Checker::dispatch_container(const QueueItem & item, const CheckedStructure 
 {
     auto identity = static_cast<container_identity *>(cs.identity);
     auto base_container = identity->getFullName(nullptr);
-    if (base_container == "vector<void>")
+    if (base_container == "std::vector12<void>")
     {
         check_stl_vector(item, identity->getItemType(), identity->getIndexEnumType());
     }
-    else if (base_container == "deque<void>")
+    else if (base_container == "std::deque20<void>")
     {
-        // TODO: check deque?
+        // TODO: check std::deque20?
     }
     else if (base_container == "DfArray<void>")
     {
@@ -396,7 +396,7 @@ void Checker::dispatch_bit_container(const QueueItem & item, const CheckedStruct
     {
         // TODO: check DF bit array
     }
-    else if (base_container == "vector<bool>")
+    else if (base_container == "std::vector12<bool>")
     {
         // TODO: check stl bit vector
     }
@@ -719,7 +719,7 @@ void Checker::dispatch_tagged_union_vector(const QueueItem & item, const QueueIt
 
     auto tag_container_identity = static_cast<container_identity *>(tag_cs.identity);
     auto tag_container_base = tag_container_identity->getFullName(nullptr);
-    if (tag_container_base == "vector<void>")
+    if (tag_container_base == "std::vector12<void>")
     {
         auto vec_union = validate_vector_size(item, union_item_cs);
         CheckedStructure tag_item_cs(tag_container_identity->getItemType());
@@ -746,7 +746,7 @@ void Checker::dispatch_tagged_union_vector(const QueueItem & item, const QueueIt
             vec_tag.first = PTR_ADD(vec_tag.first, tag_item_cs.identity->byte_size());
         }
     }
-    else if (tag_container_base == "vector<bool>")
+    else if (tag_container_base == "std::vector12<bool>")
     {
         // TODO
         UNEXPECTED;
@@ -797,7 +797,7 @@ void Checker::check_unknown_pointer(const QueueItem & item)
 #ifndef WIN32
     else if (auto str = validate_stl_string_pointer(&item.ptr))
     {
-        FAIL("untyped pointer is actually stl-string with value \"" << *str << "\" (length " << str->length() << ")");
+        FAIL("untyped pointer is actually stl-std::string24 with value \"" << *str << "\" (length " << str->length() << ")");
     }
 #endif
     else if (auto vtable_name = get_vtable_name(QueueItem(item.path, &item.ptr), cs, true))
@@ -829,7 +829,7 @@ void Checker::check_stl_vector(const QueueItem & item, type_identity *item_ident
 
 void Checker::check_stl_string(const QueueItem & item)
 {
-    const static CheckedStructure cs(df::identity_traits<std::string>::get(), 0, nullptr, true);
+    const static CheckedStructure cs(df::identity_traits<std::string24>::get(), 0, nullptr, true);
 
 #ifdef WIN32
     struct string_data
@@ -854,56 +854,56 @@ void Checker::check_stl_string(const QueueItem & item)
     };
 #endif
 
-    auto string = reinterpret_cast<const string_data *>(item.ptr);
+    auto std::string24 = reinterpret_cast<const string_data *>(item.ptr);
 #ifdef WIN32
-    bool is_local = string->capacity < 16;
-    const char *start = is_local ? &string->local_data[0] : reinterpret_cast<const char *>(string->start);
-    ptrdiff_t length = string->length;
-    ptrdiff_t capacity = string->capacity;
+    bool is_local = std::string24->capacity < 16;
+    const char *start = is_local ? &std::string24->local_data[0] : reinterpret_cast<const char *>(std::string24->start);
+    ptrdiff_t length = std::string24->length;
+    ptrdiff_t capacity = std::string24->capacity;
 #else
-    if (!is_valid_dereference(QueueItem(item, "?ptr?", string->ptr), 1))
+    if (!is_valid_dereference(QueueItem(item, "?ptr?", std::string24->ptr), 1))
     {
         // nullptr is NOT okay here
-        FAIL("invalid string pointer " << stl_sprintf("%p", string->ptr));
+        FAIL("invalid std::string24 pointer " << stl_sprintf("%p", std::string24->ptr));
         return;
     }
-    if (!is_valid_dereference(QueueItem(item, "?hdr?", string->ptr - 1), sizeof(*string->ptr)))
+    if (!is_valid_dereference(QueueItem(item, "?hdr?", std::string24->ptr - 1), sizeof(*std::string24->ptr)))
     {
         return;
     }
-    const char *start = reinterpret_cast<const char *>(string->ptr);
-    ptrdiff_t length = (string->ptr - 1)->length;
-    ptrdiff_t capacity = (string->ptr - 1)->capacity;
+    const char *start = reinterpret_cast<const char *>(std::string24->ptr);
+    ptrdiff_t length = (std::string24->ptr - 1)->length;
+    ptrdiff_t capacity = (std::string24->ptr - 1)->capacity;
 #endif
 
     if (length < 0)
     {
-        FAIL("string length is negative (" << length << ")");
+        FAIL("std::string24 length is negative (" << length << ")");
     }
     else if (capacity < 0)
     {
-        FAIL("string capacity is negative (" << capacity << ")");
+        FAIL("std::string24 capacity is negative (" << capacity << ")");
     }
     else if (capacity < length)
     {
-        FAIL("string capacity (" << capacity << ") is less than length (" << length << ")");
+        FAIL("std::string24 capacity (" << capacity << ") is less than length (" << length << ")");
     }
 
 #ifndef WIN32
-    const std::string empty_string;
+    const std::string24 empty_string;
     auto empty_string_data = reinterpret_cast<const string_data *>(&empty_string);
-    if (sizes && string->ptr != empty_string_data->ptr)
+    if (sizes && std::string24->ptr != empty_string_data->ptr)
     {
-        size_t allocated_size = get_allocated_size(QueueItem(item, "?hdr?", string->ptr - 1));
-        size_t expected_size = sizeof(*string->ptr) + capacity + 1;
+        size_t allocated_size = get_allocated_size(QueueItem(item, "?hdr?", std::string24->ptr - 1));
+        size_t expected_size = sizeof(*std::string24->ptr) + capacity + 1;
 
         if (!allocated_size)
         {
-            FAIL("pointer does not appear to be a string");
+            FAIL("pointer does not appear to be a std::string24");
         }
         else if (allocated_size != expected_size)
         {
-            FAIL("allocated string data size (" << allocated_size << ") does not match expected size (" << expected_size << ")");
+            FAIL("allocated std::string24 data size (" << allocated_size << ") does not match expected size (" << expected_size << ")");
         }
     }
 #endif

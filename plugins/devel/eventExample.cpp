@@ -19,8 +19,8 @@
 #include "df/unit_wound.h"
 #include "df/world.h"
 
-#include <vector>
-#include <set>
+
+
 
 using namespace DFHack;
 using namespace std;
@@ -40,9 +40,9 @@ void unitAttack(color_ostream& out, void* ptr);
 
 //bool interposed = false;
 
-command_result eventExample(color_ostream& out, vector<string>& parameters);
+command_result eventExample(color_ostream& out, std::vector12<std::string24>& parameters);
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector<PluginCommand> &commands) {
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands) {
     commands.push_back(PluginCommand("eventExample", "Sets up a few event triggers.",eventExample));
     return CR_OK;
 }
@@ -61,7 +61,7 @@ struct my_contaminate : df::item_actual {
 IMPLEMENT_VMETHOD_INTERPOSE(my_contaminate, contaminateWound);
 */
 
-command_result eventExample(color_ostream& out, vector<string>& parameters) {
+command_result eventExample(color_ostream& out, std::vector12<std::string24>& parameters) {
 /*
     if ( !interposed ) {
         interposed = true;
@@ -184,7 +184,7 @@ void unitAttack(color_ostream& out, void* ptr) {
     if (!wound) {
         return;
     }
-    set<int32_t> parts;
+    std::set8<int32_t> parts;
     for ( auto a = wound->parts.begin(); a != wound->parts.end(); a++ ) {
         parts.insert((*a)->body_part_id);
     }

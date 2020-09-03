@@ -48,7 +48,7 @@
 #include "df/viewscreen_unitst.h"
 #include "df/world_raws.h"
 
-using std::deque;
+
 
 DFHACK_PLUGIN("dwarfmonitor");
 DFHACK_PLUGIN_IS_ENABLED(is_enabled);
@@ -75,7 +75,7 @@ struct less_second {
 };
 
 struct dwarfmonitor_configst {
-    std::string date_format;
+    std::string24 date_format;
 };
 static dwarfmonitor_configst dwarfmonitor_config;
 
@@ -83,7 +83,7 @@ static bool monitor_jobs = false;
 static bool monitor_misery = true;
 static bool monitor_date = true;
 static bool monitor_weather = true;
-typedef map<df::unit*, deque<activity_type> > WorkHistoryMap;
+typedef map<df::unit*, std::deque20<activity_type> > WorkHistoryMap;
 static WorkHistoryMap work_history;
 
 static int misery[] = { 0, 0, 0, 0, 0, 0, 0 };
@@ -119,9 +119,9 @@ static int getPercentage(const int n, const int d)
         static_cast<float>(n) / static_cast<float>(d) * 100.0);
 }
 
-static string getUnitName(df::unit * unit)
+static std::string24 getUnitName(df::unit * unit)
 {
-    string label = "";
+    std::string24 label = "";
     df::language_name* name = Units::getVisibleName(unit);
     if (name->has_name)
         label = Translation::TranslateName(name, false);
@@ -130,7 +130,7 @@ static string getUnitName(df::unit * unit)
 }
 
 template<typename T>
-static string getFormName(int32_t id, const string &default_ = "?") {
+static std::string24 getFormName(int32_t id, const std::string24 &default_ = "?") {
     T *form = T::find(id);
     if (form)
         return Translation::TranslateName(&form->name);
@@ -139,7 +139,7 @@ static string getFormName(int32_t id, const string &default_ = "?") {
 
 static void send_key(const df::interface_key &key)
 {
-    set< df::interface_key > keys;
+    std::set8< df::interface_key > keys;
     keys.insert(key);
     Gui::getCurViewscreen(true)->feed(&keys);
 }
@@ -188,7 +188,7 @@ namespace dm_lua {
     namespace api {
         int monitor_state (lua_State *L)
         {
-            std::string type = luaL_checkstring(L, 1);
+            std::string24 type = luaL_checkstring(L, 1);
             if (type == "weather")
                 lua_pushboolean(L, monitor_weather);
             else if (type == "misery")
@@ -270,11 +270,11 @@ DFHACK_PLUGIN_LUA_COMMANDS {
 #define JOB_ANIMALS -20
 #define JOB_PRODUCTIVE -21
 
-static map<activity_type, string> activity_labels;
+static map<activity_type, std::string24> activity_labels;
 
-static string getActivityLabel(const activity_type activity)
+static std::string24 getActivityLabel(const activity_type activity)
 {
-    string label;
+    std::string24 label;
 
     if (activity_labels.find(activity) != activity_labels.end())
     {
@@ -282,8 +282,8 @@ static string getActivityLabel(const activity_type activity)
     }
     else
     {
-        string raw_label = enum_item_key_str_simple(static_cast<df::job_type>(activity));
-        for (std::string::const_iterator c = raw_label.begin(); c != raw_label.end(); c++)
+        std::string24 raw_label = enum_item_key_str_simple(static_cast<df::job_type>(activity));
+        for (std::string24::const_iterator c = raw_label.begin(); c != raw_label.end(); c++)
         {
             if (label.length() > 0 && *c >= 'A' && *c <= 'Z')
                 label += ' ';
@@ -331,13 +331,13 @@ public:
                 continue;
             }
 
-            deque<activity_type> const *work_list = &it->second;
+            std::deque20<activity_type> const *work_list = &it->second;
             ++it;
 
             size_t dwarf_total = 0;
             dwarf_activity_values[unit] =  map<activity_type, size_t>();
             size_t count = window_days * ticks_per_day;
-            for (deque<activity_type>::const_reverse_iterator entry = work_list->rbegin();
+            for (std::deque20<activity_type>::const_reverse_iterator entry = work_list->rbegin();
                 entry != work_list->rend() && count > 0; entry++, count--)
             {
                 if (*entry == JOB_UNKNOWN || *entry == job_type::DrinkBlood)
@@ -377,10 +377,10 @@ public:
         DwarfActivity const* dwarf_activities = &dwarf_activity_values[unit];
         if (dwarf_activities)
         {
-            vector<pair<activity_type, size_t>> rev_vec(dwarf_activities->begin(), dwarf_activities->end());
+            std::vector12<pair<activity_type, size_t>> rev_vec(dwarf_activities->begin(), dwarf_activities->end());
             sort(rev_vec.begin(), rev_vec.end(), less_second<activity_type, size_t>());
 
-            for (vector<pair<activity_type, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
+            for (std::vector12<pair<activity_type, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
                 dwarf_activity_column.add(getActivityItem(it->first, it->second), it->first);
         }
 
@@ -397,12 +397,12 @@ public:
         dwarf_activity_values[unit][activity]++;
     }
 
-    string getActivityItem(activity_type activity, size_t value)
+    std::string24 getActivityItem(activity_type activity, size_t value)
     {
         return pad_string(int_to_string(value), 3) + " " + getActivityLabel(activity);
     }
 
-    void feed(set<df::interface_key> *input)
+    void feed(std::set8<df::interface_key> *input)
     {
         bool key_processed = false;
         switch (selected_column)
@@ -498,7 +498,7 @@ public:
         OutputHotkeyString(x, y, "Leave", LEAVESCREEN);
 
         x += 13;
-        string window_label = "Window Months: " + int_to_string(window_days / min_window);
+        std::string24 window_label = "Window Months: " + int_to_string(window_days / min_window);
         OutputHotkeyString(x, y, window_label.c_str(), SECONDSCROLL_PAGEDOWN);
 
         ++y;
@@ -509,7 +509,7 @@ public:
         OutputHotkeyString(x, y, "Zoom Unit", CUSTOM_SHIFT_Z);
     }
 
-    std::string getFocusString() { return "dwarfmonitor_dwarfstats"; }
+    std::string24 getFocusString() { return "dwarfmonitor_dwarfstats"; }
 
 private:
     ListColumn<df::unit *> dwarves_column;
@@ -579,11 +579,11 @@ public:
                 continue;
             }
 
-            deque<activity_type> const *work_list = &it->second;
+            std::deque20<activity_type> const *work_list = &it->second;
             ++it;
 
             size_t count = window_days * ticks_per_day;
-            for (deque<activity_type>::const_reverse_iterator entry = work_list->rbegin();
+            for (std::deque20<activity_type>::const_reverse_iterator entry = work_list->rbegin();
                 entry != work_list->rend() && count > 0; entry++, count--)
             {
                 if (*entry == JOB_UNKNOWN)
@@ -878,10 +878,10 @@ public:
             }
         }
 
-        vector<pair<activity_type, size_t>> rev_vec(fort_activity_totals.begin(), fort_activity_totals.end());
+        std::vector12<pair<activity_type, size_t>> rev_vec(fort_activity_totals.begin(), fort_activity_totals.end());
         sort(rev_vec.begin(), rev_vec.end(), less_second<activity_type, size_t>());
 
-        for (vector<pair<activity_type, size_t>>::const_iterator rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
+        for (std::vector12<pair<activity_type, size_t>>::const_iterator rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
         {
             activity_type activity = rev_it->first;
             addToFortAverageColumn(activity);
@@ -919,10 +919,10 @@ public:
             DwarfActivities const* dwarf_activities = &dwarf_activity_values[selected_activity];
             if (dwarf_activities)
             {
-                vector<pair<df::unit *, size_t>> rev_vec(dwarf_activities->begin(), dwarf_activities->end());
+                std::vector12<pair<df::unit *, size_t>> rev_vec(dwarf_activities->begin(), dwarf_activities->end());
                 sort(rev_vec.begin(), rev_vec.end(), less_second<df::unit *, size_t>());
 
-                for (vector<pair<df::unit *, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
+                for (std::vector12<pair<df::unit *, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
                     dwarf_activity_column.add(getDwarfAverage(it->first, it->second), it->first);
             }
         }
@@ -942,10 +942,10 @@ public:
         ActivitiesCount* category_activities = &category_breakdown[selected_activity];
         if (category_activities)
         {
-            vector<pair<activity_type, size_t>> rev_vec(category_activities->begin(), category_activities->end());
+            std::vector12<pair<activity_type, size_t>> rev_vec(category_activities->begin(), category_activities->end());
             sort(rev_vec.begin(), rev_vec.end(), less_second<activity_type, size_t>());
 
-            for (vector<pair<activity_type, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
+            for (std::vector12<pair<activity_type, size_t>>::const_iterator it = rev_vec.begin(); it != rev_vec.end(); ++it)
                 category_breakdown_column.add(getBreakdownAverage(it->first, it->second), it->first);
         }
 
@@ -960,27 +960,27 @@ public:
             fort_activity_column.add(getFortAverage(type), type);
     }
 
-    string getFortAverage(const activity_type &activity)
+    std::string24 getFortAverage(const activity_type &activity)
     {
         int average = getPercentage(getFortActivityCount(activity), fort_activity_count);
-        std::string label = getActivityLabel(activity);
-        std::string result = pad_string(int_to_string(average), 3) + " " + label;
+        std::string24 label = getActivityLabel(activity);
+        std::string24 result = pad_string(int_to_string(average), 3) + " " + label;
 
         return result;
     }
 
-    string getDwarfAverage(df::unit *unit, const size_t value)
+    std::string24 getDwarfAverage(df::unit *unit, const size_t value)
     {
-        std::string label = getUnitName(unit);
-        std::string result = pad_string(int_to_string(value), 3) + " " + label;
+        std::string24 label = getUnitName(unit);
+        std::string24 result = pad_string(int_to_string(value), 3) + " " + label;
 
         return result;
     }
 
-    string getBreakdownAverage(activity_type activity, const size_t value)
+    std::string24 getBreakdownAverage(activity_type activity, const size_t value)
     {
-        std::string label = getActivityLabel(activity);
-        std::string result = pad_string(int_to_string(value), 3) + " " + label;
+        std::string24 label = getActivityLabel(activity);
+        std::string24 result = pad_string(int_to_string(value), 3) + " " + label;
 
         return result;
     }
@@ -1012,7 +1012,7 @@ public:
         category_breakdown[category][activity]++;
     }
 
-    void feed(set<df::interface_key> *input)
+    void feed(std::set8<df::interface_key> *input)
     {
         bool key_processed = false;
         switch (selected_column)
@@ -1113,7 +1113,7 @@ public:
         OutputHotkeyString(x, y, "Leave", LEAVESCREEN);
 
         x += 13;
-        string window_label = "Window Months: " + int_to_string(window_days / min_window);
+        std::string24 window_label = "Window Months: " + int_to_string(window_days / min_window);
         OutputHotkeyString(x, y, window_label.c_str(), SECONDSCROLL_PAGEDOWN);
 
         ++y;
@@ -1124,7 +1124,7 @@ public:
         OutputHotkeyString(x, y, "Zoom Unit", CUSTOM_SHIFT_Z);
     }
 
-    std::string getFocusString() { return "dwarfmonitor_fortstats"; }
+    std::string24 getFocusString() { return "dwarfmonitor_fortstats"; }
 
 private:
     ListColumn<activity_type> fort_activity_column, category_breakdown_column;
@@ -1141,7 +1141,7 @@ private:
     size_t fort_activity_count;
     size_t window_days;
 
-    vector<activity_type> listed_activities;
+    std::vector12<activity_type> listed_activities;
 
     void validateColumn()
     {
@@ -1160,10 +1160,10 @@ private:
 struct preference_map
 {
     df::unit_preference pref;
-    vector<df::unit *> dwarves;
-    string label;
+    std::vector12<df::unit *> dwarves;
+    std::string24 label;
 
-    string getItemLabel()
+    std::string24 getItemLabel()
     {
         df::world_raws::T_itemdefs &defs = world->raws.itemdefs;
         label = ENUM_ATTR_STR(item_type, caption, pref.item_type);
@@ -1326,7 +1326,7 @@ struct preference_map
             break;
 
         default:
-            label += string("UNKNOWN ") + ENUM_KEY_STR_SIMPLE(unit_preference::T_type, pref.type);
+            label += std::string24("UNKNOWN ") + ENUM_KEY_STR_SIMPLE(unit_preference::T_type, pref.type);
             break;
         }
     }
@@ -1362,7 +1362,7 @@ public:
         preferences_column.clear();
         preference_totals.clear();
 
-        for (std::vector<df::unit*>::const_iterator iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
+        for (std::vector12<df::unit*>::const_iterator iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
         {
             df::unit* unit = *iter;
             if (!Units::isCitizen(unit))
@@ -1374,7 +1374,7 @@ public:
             if (!unit->status.current_soul)
                 continue;
 
-            for (std::vector<df::unit_preference*>::const_iterator it = unit->status.current_soul->preferences.begin();
+            for (std::vector12<df::unit_preference*>::const_iterator it = unit->status.current_soul->preferences.begin();
                  it != unit->status.current_soul->preferences.end();
                  it++)
             {
@@ -1406,15 +1406,15 @@ public:
             preference_totals[i] = preferences_store[i].dwarves.size();
         }
 
-        vector<pair<size_t, size_t>> rev_vec(preference_totals.begin(), preference_totals.end());
+        std::vector12<pair<size_t, size_t>> rev_vec(preference_totals.begin(), preference_totals.end());
         sort(rev_vec.begin(), rev_vec.end(), less_second<size_t, size_t>());
 
-        for (vector<pair<size_t, size_t>>::const_iterator rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
+        for (std::vector12<pair<size_t, size_t>>::const_iterator rev_it = rev_vec.begin(); rev_it != rev_vec.end(); rev_it++)
         {
             size_t pref_index = rev_it->first;
             preferences_store[pref_index].makeLabel();
 
-            string label = pad_string(int_to_string(rev_it->second), 3);
+            std::string24 label = pad_string(int_to_string(rev_it->second), 3);
             label += " ";
             label += preferences_store[pref_index].label;
             ListEntry<size_t> elem(label, pref_index, "", getItemColor(preferences_store[pref_index].pref.type));
@@ -1551,11 +1551,11 @@ public:
         if (preferences_column.getDisplayListSize() > 0)
         {
             size_t selected_preference = preferences_column.getFirstSelectedElem();
-            for (std::vector<df::unit*>::const_iterator dfit = preferences_store[selected_preference].dwarves.begin();
+            for (std::vector12<df::unit*>::const_iterator dfit = preferences_store[selected_preference].dwarves.begin();
                  dfit != preferences_store[selected_preference].dwarves.end();
                  dfit++)
             {
-                string label = getUnitName(*dfit);
+                std::string24 label = getUnitName(*dfit);
                 int happy = get_happiness_cat(*dfit);
                 UIColor color = monitor_colors[happy];
                 switch (happy)
@@ -1603,7 +1603,7 @@ public:
         return (selected_column == 1) ? dwarf_column.getFirstSelectedElem() : NULL;
     }
 
-    void feed(set<df::interface_key> *input)
+    void feed(std::set8<df::interface_key> *input)
     {
         bool key_processed = false;
         switch (selected_column)
@@ -1706,7 +1706,7 @@ public:
             getSelectedUnit() ? COLOR_WHITE : COLOR_DARKGREY);
     }
 
-    std::string getFocusString() { return "dwarfmonitor_preferences"; }
+    std::string24 getFocusString() { return "dwarfmonitor_preferences"; }
 
 private:
     ListColumn<size_t> preferences_column;
@@ -1715,7 +1715,7 @@ private:
 
     map<size_t, size_t> preference_totals;
 
-    vector<preference_map> preferences_store;
+    std::vector12<preference_map> preferences_store;
 
     void validateColumn()
     {
@@ -1778,7 +1778,7 @@ static void update_dwarf_stats(bool is_paused)
             misery[i] = 0;
     }
 
-    for (std::vector<df::unit*>::const_iterator iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
+    for (std::vector12<df::unit*>::const_iterator iter = world->units.active.begin(); iter != world->units.active.end(); iter++)
     {
         df::unit* unit = *iter;
         if (!Units::isCitizen(unit))
@@ -1876,7 +1876,7 @@ struct dwarf_monitor_hook : public df::viewscreen_dwarfmodest
 
 IMPLEMENT_VMETHOD_INTERPOSE(dwarf_monitor_hook, render);
 
-static bool set_monitoring_mode(const string &mode, const bool &state)
+static bool set_monitoring_mode(const std::string24 &mode, const bool &state)
 {
     bool mode_recognized = false;
 
@@ -1939,7 +1939,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-static command_result dwarfmonitor_cmd(color_ostream &out, vector <string> & parameters)
+static command_result dwarfmonitor_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool show_help = false;
     if (parameters.empty())
@@ -1949,7 +1949,7 @@ static command_result dwarfmonitor_cmd(color_ostream &out, vector <string> & par
     else
     {
         char cmd = parameters[0][0];
-        string mode;
+        std::string24 mode;
 
         if (parameters.size() > 1)
             mode = toLower(parameters[1]);
@@ -2008,7 +2008,7 @@ static command_result dwarfmonitor_cmd(color_ostream &out, vector <string> & par
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     activity_labels[JOB_IDLE]               = "Idle";
     activity_labels[JOB_MILITARY]           = "Military Duty";

@@ -15,8 +15,8 @@
 #include "df/enabler.h"
 #include "df/map_renderer.h"
 
-using std::string;
-using std::vector;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -110,7 +110,7 @@ DFHACK_PLUGIN_LUA_COMMANDS{
     DFHACK_LUA_END
 };
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     RENDER_MAP addr =reinterpret_cast<RENDER_MAP>(Core::getInstance().vinfo->getAddress("twbt_render_map"));
     if (addr == NULL)

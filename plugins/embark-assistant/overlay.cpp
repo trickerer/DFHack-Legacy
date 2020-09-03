@@ -27,9 +27,9 @@ namespace embark_assist {
         const Screen::Pen green_x_pen = Screen::Pen('X', COLOR_BLACK, COLOR_GREEN, false);
 
         struct display_strings {
-            display_strings(Screen::Pen _pen, std::string _text) : pen(_pen), text(_text) {}
+            display_strings(Screen::Pen _pen, std::string24 _text) : pen(_pen), text(_text) {}
             Screen::Pen pen;
-            std::string text;
+            std::string24 text;
         };
 
         typedef Screen::Pen *pen_column;
@@ -61,7 +61,7 @@ namespace embark_assist {
             Screen::Pen site_grid[16][16];
             uint8_t current_site_grid;
 
-            std::vector<display_strings> embark_info;
+            std::vector12<display_strings> embark_info;
 
             Screen::Pen local_match_grid[16][16];
 
@@ -96,12 +96,12 @@ namespace embark_assist {
 
             void send_key(const df::interface_key &key)
             {
-                std::set< df::interface_key > keys;
+                std::set8< df::interface_key > keys;
                 keys.insert(key);
                 this->feed(&keys);
             }
 
-            DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+            DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
             {
 //                color_ostream_proxy out(Core::getInstance().getConsole());
                 if (input->count(df::interface_key::CUSTOM_Q)) {
@@ -385,12 +385,12 @@ void embark_assist::overlay::set_embark(embark_assist::defs::site_infos *site_in
     }
 
     if (site_info->aquifer != embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NONE) {
-        std::string none = "   ";
-        std::string light = "   ";
-        std::string heavy = "  ";
-        std::string no = "No ";
-        std::string lt = "Lt ";
-        std::string hv = "Hv";
+        std::string24 none = "   ";
+        std::string24 light = "   ";
+        std::string24 heavy = "  ";
+        std::string24 no = "No ";
+        std::string24 lt = "Lt ";
+        std::string24 hv = "Hv";
 
         switch (site_info->aquifer) {
         case embark_assist::defs::aquifer_sizes::AQUIFER_SIZE_NA:
@@ -439,11 +439,11 @@ void embark_assist::overlay::set_embark(embark_assist::defs::site_infos *site_in
         site_info->temporary_syndrome_rain ||
         site_info->reanimating ||
         site_info->thralling) {
-        std::string blood_rain;
-        std::string permanent_syndrome_rain;
-        std::string temporary_syndrome_rain;
-        std::string reanimating;
-        std::string thralling;
+        std::string24 blood_rain;
+        std::string24 permanent_syndrome_rain;
+        std::string24 temporary_syndrome_rain;
+        std::string24 reanimating;
+        std::string24 thralling;
 
         if (site_info->blood_rain) {
             blood_rain = "BR ";
@@ -488,14 +488,14 @@ void embark_assist::overlay::set_embark(embark_assist::defs::site_infos *site_in
     }
 
     //for (auto const& i : site_info->metals)
-    for (std::vector<uint16_t>::const_iterator ci = site_info->metals.begin(); ci != site_info->metals.end(); ++ci)
+    for (std::vector12<uint16_t>::const_iterator ci = site_info->metals.begin(); ci != site_info->metals.end(); ++ci)
     {
         const uint16_t& i = *ci;
         state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_GREY), world->raws.inorganics[i]->id ));
     }
 
     //for (auto const& i : site_info->economics)
-    for (std::vector<uint16_t>::const_iterator ci = site_info->economics.begin(); ci != site_info->economics.end(); ++ci)
+    for (std::vector12<uint16_t>::const_iterator ci = site_info->economics.begin(); ci != site_info->economics.end(); ++ci)
     {
         const uint16_t& i = *ci;
         state->embark_info.push_back(display_strings( Screen::Pen(' ', COLOR_WHITE), world->raws.inorganics[i]->id ));

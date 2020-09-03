@@ -13,14 +13,14 @@
 #include "df/item_type.h"
 #include "df/strain_type.h"
 
-using std::string;
-using std::vector;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
 using df::global::world;
 
-command_result df_dumpmats (color_ostream &out, vector<string> &parameters)
+command_result df_dumpmats (color_ostream &out, std::vector12<std::string24> &parameters)
 {
     if (!parameters.empty())
         return CR_WRONG_USAGE;
@@ -40,10 +40,10 @@ command_result df_dumpmats (color_ostream &out, vector<string> &parameters)
         int32_t def_color[6] = {-1,-1,-1,-1,-1,-1};
         bool name_all = false;
         bool name_all_solid = false;
-        string def_name[6];
+        std::string24 def_name[6];
         bool adj_all = false;
         bool adj_all_solid = false;
-        string def_adj[6];
+        std::string24 def_adj[6];
 
         int32_t solid_color = mat->state_color[matter_state::Solid];
         if (solid_color == mat->state_color[matter_state::Powder] ||
@@ -65,8 +65,8 @@ command_result df_dumpmats (color_ostream &out, vector<string> &parameters)
                 out.print("\t[STATE_COLOR:ALL_SOLID:%s]\n", world->raws.descriptors.colors[solid_color]->id.c_str());
         }
 
-        string solid_name = mat->state_name[matter_state::Solid];
-        string solid_adj = mat->state_adj[matter_state::Solid];
+        std::string24 solid_name = mat->state_name[matter_state::Solid];
+        std::string24 solid_adj = mat->state_adj[matter_state::Solid];
         if (solid_name == solid_adj)
         {
             if (solid_name == mat->state_name[matter_state::Powder] ||
@@ -229,7 +229,7 @@ command_result df_dumpmats (color_ostream &out, vector<string> &parameters)
         if (mat->block_name[0].size() || mat->block_name[1].size())
             out.print("\t[BLOCK_NAME:%s:%s]\n", mat->block_name[0].c_str(), mat->block_name[1].c_str());
 
-        for (std::string *s : mat->reaction_class)
+        for (std::string24 *s : mat->reaction_class)
             out.print("\t[REACTION_CLASS:%s]\n", s->c_str());
         for (size_t i = 0; i < mat->reaction_product.id.size(); i++)
         {
@@ -254,7 +254,7 @@ command_result df_dumpmats (color_ostream &out, vector<string> &parameters)
 
 DFHACK_PLUGIN("dumpmats");
 
-DFhackCExport command_result plugin_init ( Core * c, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( Core * c, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("dumpmats", "Dump raws for all hardcoded materials", df_dumpmats, false));
     return CR_OK;

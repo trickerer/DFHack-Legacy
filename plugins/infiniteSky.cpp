@@ -15,8 +15,8 @@
 #include "df/z_level_flags.h"
 
 #include <cstring>
-#include <string>
-#include <vector>
+
+
 
 using namespace std;
 
@@ -26,9 +26,9 @@ using namespace df::enums;
 DFHACK_PLUGIN("infiniteSky");
 REQUIRE_GLOBAL(world);
 
-command_result infiniteSky (color_ostream &out, std::vector <std::string> & parameters);
+command_result infiniteSky (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "infiniteSky",
@@ -161,7 +161,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-command_result infiniteSky (color_ostream &out, std::vector <std::string> & parameters)
+command_result infiniteSky (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if ( parameters.size() > 1 )
         return CR_WRONG_USAGE;

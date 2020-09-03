@@ -6,7 +6,7 @@
 #include <Export.h>
 #include <PluginManager.h>
 
-#include <vector>
+
 #include <algorithm>
 
 #include "modules/Units.h"
@@ -47,9 +47,9 @@
 #define ARRAY_COUNT(array) (sizeof(array)/sizeof((array)[0]))
 
 // I can see a reason for having all of these
-using std::string;
+
 using std::endl;
-using std::vector;
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -101,7 +101,7 @@ const static int DEFAULT_FRAME_SKIP = 30;
 static int frame_skip;
 
 // Don't know what this does
-command_result autohauler (color_ostream &out, std::vector <std::string> & parameters);
+command_result autohauler (color_ostream &out, std::vector12<std::string24> & parameters);
 
 // Don't know what this does either
 static bool isOptionEnabled(unsigned flag)
@@ -127,7 +127,7 @@ static void setOptionEnabled(ConfigFlags flag, bool on)
 }
 
 // This is a vector of states and number of dwarves in that state
-static std::vector<int> state_count(5);
+static std::vector12<int> state_count(5);
 
 // Employment status of dwarves
 enum dwarf_state {
@@ -445,7 +445,7 @@ struct labor_info
 };
 
 // This is a vector of all the current labor treatments
-static std::vector<struct labor_info> labor_infos;
+static std::vector12<struct labor_info> labor_infos;
 
 // This is just an array of all the labors, whether it should be untouched
 // (DISABLE) or treated as a last-resort job (HAULERS).
@@ -605,7 +605,7 @@ static void init_state()
      * from the world save */
 
     // This is a vector of all the persistent data items from config
-    std::vector<PersistentDataItem> items;
+    std::vector12<PersistentDataItem> items;
 
     // This populates the aforementioned vector
     World::GetPersistentData(&items, "autohauler/labors/", true);
@@ -615,12 +615,12 @@ static void init_state()
     labor_infos.resize(ARRAY_COUNT(default_labor_infos));
 
     // For every persistent data item...
-    for (std::vector<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
+    for (std::vector12<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
     {
-        // Load as a string the key associated with the persistent data item
-        string key = p->key();
+        // Load as a std::string24 the key associated with the persistent data item
+        std::string24 key = p->key();
 
-        // Translate the string into a labor defined by global dfhack constants
+        // Translate the std::string24 into a labor defined by global dfhack constants
         df::unit_labor labor = (df::unit_labor) atoi(key.substr(strlen("autohauler/labors/")).c_str());
 
         // Ensure that the labor is defined in the existing list
@@ -642,7 +642,7 @@ static void init_state()
             continue;
 
         // Not sure of the mechanics, but it seems to give an output stream
-        // giving a string for the new persistent data item
+        // giving a std::string24 for the new persistent data item
         std::stringstream name;
         name << "autohauler/labors/" << i;
 
@@ -687,7 +687,7 @@ static void enable_plugin(color_ostream &out)
 /**
  * Initialize the plugin
  */
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     // This seems to verify that the default labor list and the current labor
     // list are the same size
@@ -701,7 +701,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
     commands.push_back(PluginCommand(
         "autohauler", "Automatically manage hauling labors.",
         autohauler, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         "  autohauler enable\n"
         "  autohauler disable\n"
         "    Enables or disables the plugin.\n"
@@ -801,7 +801,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     uint32_t civ = ui->civ_id;
 
     // Create a vector of units. This will be populated in the following for loop.
-    std::vector<df::unit *> dwarfs;
+    std::vector12<df::unit *> dwarfs;
 
     // Scan the world and look for any citizens in the player's civilization.
     // Add these to the list of dwarves.
@@ -825,7 +825,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
     // This is a matching of assigned jobs with a dwarf's state
     // xxx but wouldn't it be better if this and "dwarfs" were in the same object?
-    std::vector<dwarf_info_t> dwarf_info(n_dwarfs);
+    std::vector12<dwarf_info_t> dwarf_info(n_dwarfs);
 
     // Reset the counter for number of dwarves in states to zero
     state_count.clear();
@@ -856,7 +856,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
         // Scan a dwarf's miscellaneous traits for on break or migrant status.
         // If either of these are present, disable hauling because we want them
         // to try to find real jobs first
-        for (std::vector<df::unit_misc_trait*>::const_iterator p = dwarfs[dwarf]->status.misc_traits.begin();
+        for (std::vector12<df::unit_misc_trait*>::const_iterator p = dwarfs[dwarf]->status.misc_traits.begin();
             p < dwarfs[dwarf]->status.misc_traits.end(); p++)
         {
             if ((*p)->id == misc_trait_type::Migrant)
@@ -917,7 +917,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     print_debug = false;
 
     // This is a vector of all the labors
-    std::vector<df::unit_labor> labors;
+    std::vector12<df::unit_labor> labors;
 
     // For every labor...
     FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
@@ -1024,7 +1024,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable )
  */
 void print_labor (df::unit_labor labor, color_ostream &out)
 {
-    string labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
+    std::string24 labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
     out << labor_name << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
@@ -1043,7 +1043,7 @@ void print_labor (df::unit_labor labor, color_ostream &out)
 /**
  * This responds to input from the command prompt.
  */
-command_result autohauler (color_ostream &out, std::vector <std::string> & parameters)
+command_result autohauler (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 

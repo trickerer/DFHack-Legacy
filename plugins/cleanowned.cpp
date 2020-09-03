@@ -4,16 +4,16 @@
 
 #include <sstream>
 #include <climits>
-#include <vector>
-#include <set>
+
+
 using namespace std;
 
 #include "Core.h"
 #include "Console.h"
 #include "Export.h"
 #include "PluginManager.h"
-#include <vector>
-#include <string>
+
+
 #include "modules/Items.h"
 #include "modules/Units.h"
 #include "modules/Translation.h"
@@ -26,9 +26,9 @@ using namespace df::enums;
 DFHACK_PLUGIN("cleanowned");
 REQUIRE_GLOBAL(world);
 
-command_result df_cleanowned (color_ostream &out, vector <string> & parameters);
+command_result df_cleanowned (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "cleanowned", "Confiscates and dumps garbage owned by dwarfs.",
@@ -55,7 +55,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result df_cleanowned (color_ostream &out, vector <string> & parameters)
+command_result df_cleanowned (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool dump_scattered = false;
     bool confiscate_all = false;
@@ -64,7 +64,7 @@ command_result df_cleanowned (color_ostream &out, vector <string> & parameters)
 
     for(std::size_t i = 0; i < parameters.size(); i++)
     {
-        string & param = parameters[i];
+        std::string24 & param = parameters[i];
         if(param == "dryrun")
             dry_run = true;
         else if(param == "scattered")
@@ -157,7 +157,7 @@ command_result df_cleanowned (color_ostream &out, vector <string> & parameters)
 
         if (confiscate)
         {
-            std::string description;
+            std::string24 description;
             item->getItemDescription(&description, 0);
             out.print(
                 "0x%p %s (wear %d)",

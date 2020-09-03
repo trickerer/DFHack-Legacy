@@ -25,7 +25,7 @@ using namespace DFHack;
 static int df_loadruby(void);
 static void df_unloadruby(void);
 static void df_rubythread(void*);
-static command_result df_rubyeval(color_ostream &out, std::vector <std::string> & parameters);
+static command_result df_rubyeval(color_ostream &out, std::vector12<std::string24> & parameters);
 static void ruby_bind_dfhack(void);
 
 // inter-thread communication stuff
@@ -45,7 +45,7 @@ static tthread::thread *r_thread;
 static int onupdate_active;
 static int onupdate_minyear, onupdate_minyeartick=-1, onupdate_minyeartickadv=-1;
 static color_ostream_proxy *console_proxy;
-static std::vector<std::string> *dfhack_run_queue;
+static std::vector12<std::string24> *dfhack_run_queue;
 
 
 DFHACK_PLUGIN("ruby")
@@ -60,7 +60,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
 }
 
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     onupdate_active = 0;
 
@@ -79,7 +79,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
     m_mutex = new tthread::mutex();
 
     // list of dfhack commands to run when the current ruby run is done (once locks are released)
-    dfhack_run_queue = new std::vector<std::string>;
+    dfhack_run_queue = new std::vector12<std::string24>;
 
     r_type = RB_INIT;
 
@@ -99,11 +99,11 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
         return CR_FAILURE;
 
     commands.push_back(PluginCommand("rb_eval",
-                "Ruby interpreter. Eval() a ruby string.",
+                "Ruby interpreter. Eval() a ruby std::string24.",
                 df_rubyeval));
 
     commands.push_back(PluginCommand("rb",
-                "Ruby interpreter. Eval() a ruby string.",
+                "Ruby interpreter. Eval() a ruby std::string24.",
                 df_rubyeval));
 
     return CR_OK;
@@ -199,7 +199,7 @@ DFhackCExport command_result plugin_eval_ruby( color_ostream &out, const char *c
 
     // if any dfhack command is queued for run, do it now
     while (!dfhack_run_queue->empty()) {
-        std::string cmd = dfhack_run_queue->at(0);
+        std::string24 cmd = dfhack_run_queue->at(0);
         // delete before running the command, which may be ruby and cause infinite loops
         dfhack_run_queue->erase(dfhack_run_queue->begin());
         Core::getInstance().runCommand(out, cmd);
@@ -235,7 +235,7 @@ DFhackCExport command_result plugin_onstatechange ( color_ostream &out, state_ch
     if (!r_thread)
         return CR_OK;
 
-    std::string cmd = "DFHack.onstatechange ";
+    std::string24 cmd = "DFHack.onstatechange ";
     switch (e) {
 #define SCASE(s) case SC_ ## s : cmd += ":" # s ; break
         case SC_UNKNOWN : return CR_OK;
@@ -256,7 +256,7 @@ DFhackCExport command_result plugin_onstatechange ( color_ostream &out, state_ch
     return plugin_eval_ruby(out, cmd.c_str());
 }
 
-static command_result df_rubyeval(color_ostream &out, std::vector <std::string> & parameters)
+static command_result df_rubyeval(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() == 1 && (parameters[0] == "help" || parameters[0] == "?"))
     {
@@ -265,7 +265,7 @@ static command_result df_rubyeval(color_ostream &out, std::vector <std::string> 
     }
 
     // reconstruct the text from dfhack console line
-    std::string full = "";
+    std::string24 full = "";
 
     for (unsigned i=0 ; i<parameters.size() ; ++i) {
         full += parameters[i];
@@ -718,7 +718,7 @@ static VALUE rb_dfget_selected_unit_id(VALUE self)
 // run a dfhack command, as if typed from the dfhack console
 static VALUE rb_dfhack_run(VALUE self, VALUE cmd)
 {
-    std::string s;
+    std::string24 s;
     int strlen = FIX2INT(rb_funcall(cmd, rb_intern("bytesize"), 0));
     s.assign(rb_string_value_ptr(&cmd), strlen);
     dfhack_run_queue->push_back(s);
@@ -821,7 +821,7 @@ static VALUE rb_dfmemory_write_double(VALUE self, VALUE addr, VALUE val)
 static VALUE rb_dfmemory_check(VALUE self, VALUE addr)
 {
     void *ptr = (void*)rb_num2ulong(addr);
-    std::vector<t_memrange> ranges;
+    std::vector12<t_memrange> ranges;
     Core::getInstance().proc->getMemRanges(ranges);
 
     unsigned i = 0;
@@ -831,7 +831,7 @@ static VALUE rb_dfmemory_check(VALUE self, VALUE addr)
     if (i >= ranges.size() || ranges[i].start > ptr || !ranges[i].valid)
         return Qnil;
 
-    std::string perm = "";
+    std::string24 perm = "";
     if (ranges[i].read)
         perm += "r";
     if (ranges[i].write)
@@ -900,32 +900,32 @@ static VALUE rb_dfmemory_pageprotect(VALUE self, VALUE ptr, VALUE len, VALUE pro
 }
 
 
-// stl::string
+// stl::std::string24
 static VALUE rb_dfmemory_stlstring_new(VALUE self)
 {
-    std::string *ptr = new std::string;
+    std::string24 *ptr = new std::string24;
     return rb_uint2inum((uintptr_t)ptr);
 }
 static VALUE rb_dfmemory_stlstring_delete(VALUE self, VALUE addr)
 {
-    std::string *ptr = (std::string*)rb_num2ulong(addr);
+    std::string24 *ptr = (std::string24*)rb_num2ulong(addr);
     if (ptr)
         delete ptr;
     return Qtrue;
 }
 static VALUE rb_dfmemory_stlstring_init(VALUE self, VALUE addr)
 {
-    new((void*)rb_num2ulong(addr)) std::string();
+    new((void*)rb_num2ulong(addr)) std::string24();
     return Qtrue;
 }
 static VALUE rb_dfmemory_read_stlstring(VALUE self, VALUE addr)
 {
-    std::string *s = (std::string*)rb_num2ulong(addr);
+    std::string24 *s = (std::string24*)rb_num2ulong(addr);
     return rb_str_new(s->c_str(), s->length());
 }
 static VALUE rb_dfmemory_write_stlstring(VALUE self, VALUE addr, VALUE val)
 {
-    std::string *s = (std::string*)rb_num2ulong(addr);
+    std::string24 *s = (std::string24*)rb_num2ulong(addr);
     int strlen = FIX2INT(rb_funcall(val, rb_intern("bytesize"), 0));
     s->assign(rb_string_value_ptr(&val), strlen);
     return Qtrue;
@@ -935,160 +935,160 @@ static VALUE rb_dfmemory_write_stlstring(VALUE self, VALUE addr, VALUE val)
 // vector access
 static VALUE rb_dfmemory_vec_new(VALUE self)
 {
-    std::vector<uint8_t> *ptr = new std::vector<uint8_t>;
+    std::vector12<uint8_t> *ptr = new std::vector12<uint8_t>;
     return rb_uint2inum((uintptr_t)ptr);
 }
 static VALUE rb_dfmemory_vec_delete(VALUE self, VALUE addr)
 {
-    std::vector<uint8_t> *ptr = (std::vector<uint8_t>*)rb_num2ulong(addr);
+    std::vector12<uint8_t> *ptr = (std::vector12<uint8_t>*)rb_num2ulong(addr);
     if (ptr)
         delete ptr;
     return Qtrue;
 }
 static VALUE rb_dfmemory_vec_init(VALUE self, VALUE addr)
 {
-    new((void*)rb_num2ulong(addr)) std::vector<uint8_t>();
+    new((void*)rb_num2ulong(addr)) std::vector12<uint8_t>();
     return Qtrue;
 }
-// vector<uint8>
+// vector12<uint8>
 static VALUE rb_dfmemory_vec8_length(VALUE self, VALUE addr)
 {
-    std::vector<uint8_t> *v = (std::vector<uint8_t>*)rb_num2ulong(addr);
+    std::vector12<uint8_t> *v = (std::vector12<uint8_t>*)rb_num2ulong(addr);
     return rb_uint2inum(v->size());
 }
 static VALUE rb_dfmemory_vec8_ptrat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint8_t> *v = (std::vector<uint8_t>*)rb_num2ulong(addr);
+    std::vector12<uint8_t> *v = (std::vector12<uint8_t>*)rb_num2ulong(addr);
     return rb_uint2inum((uintptr_t)&v->at(FIX2INT(idx)));
 }
 static VALUE rb_dfmemory_vec8_insertat(VALUE self, VALUE addr, VALUE idx, VALUE val)
 {
-    std::vector<uint8_t> *v = (std::vector<uint8_t>*)rb_num2ulong(addr);
+    std::vector12<uint8_t> *v = (std::vector12<uint8_t>*)rb_num2ulong(addr);
     v->insert(v->begin()+FIX2INT(idx), rb_num2ulong(val));
     return Qtrue;
 }
 static VALUE rb_dfmemory_vec8_deleteat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint8_t> *v = (std::vector<uint8_t>*)rb_num2ulong(addr);
+    std::vector12<uint8_t> *v = (std::vector12<uint8_t>*)rb_num2ulong(addr);
     v->erase(v->begin()+FIX2INT(idx));
     return Qtrue;
 }
 
-// vector<uint16>
+// vector12<uint16>
 static VALUE rb_dfmemory_vec16_length(VALUE self, VALUE addr)
 {
-    std::vector<uint16_t> *v = (std::vector<uint16_t>*)rb_num2ulong(addr);
+    std::vector12<uint16_t> *v = (std::vector12<uint16_t>*)rb_num2ulong(addr);
     return rb_uint2inum(v->size());
 }
 static VALUE rb_dfmemory_vec16_ptrat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint16_t> *v = (std::vector<uint16_t>*)rb_num2ulong(addr);
+    std::vector12<uint16_t> *v = (std::vector12<uint16_t>*)rb_num2ulong(addr);
     return rb_uint2inum((uintptr_t)&v->at(FIX2INT(idx)));
 }
 static VALUE rb_dfmemory_vec16_insertat(VALUE self, VALUE addr, VALUE idx, VALUE val)
 {
-    std::vector<uint16_t> *v = (std::vector<uint16_t>*)rb_num2ulong(addr);
+    std::vector12<uint16_t> *v = (std::vector12<uint16_t>*)rb_num2ulong(addr);
     v->insert(v->begin()+FIX2INT(idx), rb_num2ulong(val));
     return Qtrue;
 }
 static VALUE rb_dfmemory_vec16_deleteat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint16_t> *v = (std::vector<uint16_t>*)rb_num2ulong(addr);
+    std::vector12<uint16_t> *v = (std::vector12<uint16_t>*)rb_num2ulong(addr);
     v->erase(v->begin()+FIX2INT(idx));
     return Qtrue;
 }
 
-// vector<uint32>
+// vector12<uint32>
 static VALUE rb_dfmemory_vec32_length(VALUE self, VALUE addr)
 {
-    std::vector<uint32_t> *v = (std::vector<uint32_t>*)rb_num2ulong(addr);
+    std::vector12<uint32_t> *v = (std::vector12<uint32_t>*)rb_num2ulong(addr);
     return rb_uint2inum(v->size());
 }
 static VALUE rb_dfmemory_vec32_ptrat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint32_t> *v = (std::vector<uint32_t>*)rb_num2ulong(addr);
+    std::vector12<uint32_t> *v = (std::vector12<uint32_t>*)rb_num2ulong(addr);
     return rb_uint2inum((uintptr_t)&v->at(FIX2INT(idx)));
 }
 static VALUE rb_dfmemory_vec32_insertat(VALUE self, VALUE addr, VALUE idx, VALUE val)
 {
-    std::vector<uint32_t> *v = (std::vector<uint32_t>*)rb_num2ulong(addr);
+    std::vector12<uint32_t> *v = (std::vector12<uint32_t>*)rb_num2ulong(addr);
     v->insert(v->begin()+FIX2INT(idx), rb_num2ulong(val));
     return Qtrue;
 }
 static VALUE rb_dfmemory_vec32_deleteat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint32_t> *v = (std::vector<uint32_t>*)rb_num2ulong(addr);
+    std::vector12<uint32_t> *v = (std::vector12<uint32_t>*)rb_num2ulong(addr);
     v->erase(v->begin()+FIX2INT(idx));
     return Qtrue;
 }
 
-// vector<uint64>
+// vector12<uint64>
 static VALUE rb_dfmemory_vec64_length(VALUE self, VALUE addr)
 {
-    std::vector<uint64_t> *v = (std::vector<uint64_t>*)rb_num2ulong(addr);
+    std::vector12<uint64_t> *v = (std::vector12<uint64_t>*)rb_num2ulong(addr);
     return rb_uint2inum(v->size());
 }
 static VALUE rb_dfmemory_vec64_ptrat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint64_t> *v = (std::vector<uint64_t>*)rb_num2ulong(addr);
+    std::vector12<uint64_t> *v = (std::vector12<uint64_t>*)rb_num2ulong(addr);
     return rb_uint2inum((uintptr_t)&v->at(FIX2INT(idx)));
 }
 static VALUE rb_dfmemory_vec64_insertat(VALUE self, VALUE addr, VALUE idx, VALUE val)
 {
-    std::vector<uint64_t> *v = (std::vector<uint64_t>*)rb_num2ulong(addr);
+    std::vector12<uint64_t> *v = (std::vector12<uint64_t>*)rb_num2ulong(addr);
     v->insert(v->begin()+FIX2INT(idx), rb_num2ulong(val));
     return Qtrue;
 }
 static VALUE rb_dfmemory_vec64_deleteat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<uint64_t> *v = (std::vector<uint64_t>*)rb_num2ulong(addr);
+    std::vector12<uint64_t> *v = (std::vector12<uint64_t>*)rb_num2ulong(addr);
     v->erase(v->begin()+FIX2INT(idx));
     return Qtrue;
 }
 
-// vector<bool>
+// vector12<bool>
 static VALUE rb_dfmemory_vecbool_new(VALUE self)
 {
-    std::vector<bool> *ptr = new std::vector<bool>;
+    std::vector12<bool> *ptr = new std::vector12<bool>;
     return rb_uint2inum((uintptr_t)ptr);
 }
 static VALUE rb_dfmemory_vecbool_delete(VALUE self, VALUE addr)
 {
-    std::vector<bool> *ptr = (std::vector<bool>*)rb_num2ulong(addr);
+    std::vector12<bool> *ptr = (std::vector12<bool>*)rb_num2ulong(addr);
     if (ptr)
         delete ptr;
     return Qtrue;
 }
 static VALUE rb_dfmemory_vecbool_init(VALUE self, VALUE addr)
 {
-    new((void*)rb_num2ulong(addr)) std::vector<bool>();
+    new((void*)rb_num2ulong(addr)) std::vector12<bool>();
     return Qtrue;
 }
 static VALUE rb_dfmemory_vecbool_length(VALUE self, VALUE addr)
 {
-    std::vector<bool> *v = (std::vector<bool>*)rb_num2ulong(addr);
+    std::vector12<bool> *v = (std::vector12<bool>*)rb_num2ulong(addr);
     return rb_uint2inum(v->size());
 }
 static VALUE rb_dfmemory_vecbool_at(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<bool> *v = (std::vector<bool>*)rb_num2ulong(addr);
+    std::vector12<bool> *v = (std::vector12<bool>*)rb_num2ulong(addr);
     return v->at(FIX2INT(idx)) ? Qtrue : Qfalse;
 }
 static VALUE rb_dfmemory_vecbool_setat(VALUE self, VALUE addr, VALUE idx, VALUE val)
 {
-    std::vector<bool> *v = (std::vector<bool>*)rb_num2ulong(addr);
+    std::vector12<bool> *v = (std::vector12<bool>*)rb_num2ulong(addr);
     v->at(FIX2INT(idx)) = (BOOL_ISFALSE(val) ? 0 : 1);
     return Qtrue;
 }
 static VALUE rb_dfmemory_vecbool_insertat(VALUE self, VALUE addr, VALUE idx, VALUE val)
 {
-    std::vector<bool> *v = (std::vector<bool>*)rb_num2ulong(addr);
+    std::vector12<bool> *v = (std::vector12<bool>*)rb_num2ulong(addr);
     v->insert(v->begin()+FIX2INT(idx), (BOOL_ISFALSE(val) ? 0 : 1));
     return Qtrue;
 }
 static VALUE rb_dfmemory_vecbool_deleteat(VALUE self, VALUE addr, VALUE idx)
 {
-    std::vector<bool> *v = (std::vector<bool>*)rb_num2ulong(addr);
+    std::vector12<bool> *v = (std::vector12<bool>*)rb_num2ulong(addr);
     v->erase(v->begin()+FIX2INT(idx));
     return Qtrue;
 }
@@ -1117,17 +1117,17 @@ static VALUE rb_dfmemory_bitarray_set(VALUE self, VALUE addr, VALUE idx, VALUE v
     return Qtrue;
 }
 
-// add basic support for std::set<uint32> used for passing keyboard keys to viewscreens
-#include <set>
+// add basic support for std::set8<uint32> used for passing keyboard keys to viewscreens
+
 static VALUE rb_dfmemory_set_new(VALUE self)
 {
-    std::set<unsigned long> *ptr = new std::set<unsigned long>;
+    std::set8<unsigned long> *ptr = new std::set8<unsigned long>;
     return rb_uint2inum((uintptr_t)ptr);
 }
 
 static VALUE rb_dfmemory_set_delete(VALUE self, VALUE set)
 {
-    std::set<unsigned long> *ptr = (std::set<unsigned long>*)rb_num2ulong(set);
+    std::set8<unsigned long> *ptr = (std::set8<unsigned long>*)rb_num2ulong(set);
     if (ptr)
         delete ptr;
     return Qtrue;
@@ -1135,27 +1135,27 @@ static VALUE rb_dfmemory_set_delete(VALUE self, VALUE set)
 
 static VALUE rb_dfmemory_set_set(VALUE self, VALUE set, VALUE key)
 {
-    std::set<unsigned long> *ptr = (std::set<unsigned long>*)rb_num2ulong(set);
+    std::set8<unsigned long> *ptr = (std::set8<unsigned long>*)rb_num2ulong(set);
     ptr->insert(rb_num2ulong(key));
     return Qtrue;
 }
 
 static VALUE rb_dfmemory_set_isset(VALUE self, VALUE set, VALUE key)
 {
-    std::set<unsigned long> *ptr = (std::set<unsigned long>*)rb_num2ulong(set);
+    std::set8<unsigned long> *ptr = (std::set8<unsigned long>*)rb_num2ulong(set);
     return ptr->count(rb_num2ulong(key)) ? Qtrue : Qfalse;
 }
 
 static VALUE rb_dfmemory_set_deletekey(VALUE self, VALUE set, VALUE key)
 {
-    std::set<unsigned long> *ptr = (std::set<unsigned long>*)rb_num2ulong(set);
+    std::set8<unsigned long> *ptr = (std::set8<unsigned long>*)rb_num2ulong(set);
     ptr->erase(rb_num2ulong(key));
     return Qtrue;
 }
 
 static VALUE rb_dfmemory_set_clear(VALUE self, VALUE set)
 {
-    std::set<unsigned long> *ptr = (std::set<unsigned long>*)rb_num2ulong(set);
+    std::set8<unsigned long> *ptr = (std::set8<unsigned long>*)rb_num2ulong(set);
     ptr->clear();
     return Qtrue;
 }

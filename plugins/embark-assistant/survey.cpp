@@ -1,5 +1,5 @@
 #include <math.h>
-#include <vector>
+
 
 #include "Core.h"
 #include "Console.h"
@@ -78,7 +78,7 @@ namespace embark_assist {
             }
             uint16_t clay_reaction;
             uint16_t flux_reaction;
-            std::vector<uint16_t> coals;
+            std::vector12<uint16_t> coals;
             uint16_t x;
             uint16_t y;
             uint8_t local_min_x;
@@ -95,7 +95,7 @@ namespace embark_assist {
         bool geo_survey(embark_assist::defs::geo_data *geo_summary) {
             color_ostream_proxy out(Core::getInstance().getConsole());
             df::world_data *world_data = world->world_data;
-            std::vector<df::reaction*> const& reactions = df::reaction::get_vector();
+            std::vector12<df::reaction*> const& reactions = df::reaction::get_vector();
             bool non_soil_found;
             uint16_t size;
 
@@ -328,13 +328,13 @@ namespace embark_assist {
                             df::interaction_target_materialst* material = virtual_cast<df::interaction_target_materialst>(interaction->targets[k]);
                             if (material && DFHack::MaterialInfo(material->mat_type, material->mat_index).isInorganic())
                             {
-                                std::vector<df::syndrome*> const& syn_vec = world->raws.inorganics[material->mat_index]->material.syndrome;
+                                std::vector12<df::syndrome*> const& syn_vec = world->raws.inorganics[material->mat_index]->material.syndrome;
                                 //for (const auto &syndrome : world->raws.inorganics[material->mat_index]->material.syndrome)
-                                for (std::vector<df::syndrome*>::const_iterator ci = syn_vec.begin(); ci != syn_vec.end(); ++ci)
+                                for (std::vector12<df::syndrome*>::const_iterator ci = syn_vec.begin(); ci != syn_vec.end(); ++ci)
                                 {
-                                    std::vector<df::creature_interaction_effect*> const& cie_vec = (*ci)->ce;
+                                    std::vector12<df::creature_interaction_effect*> const& cie_vec = (*ci)->ce;
                                     //for (const auto &ce : syndrome->ce)
-                                    for (std::vector<df::creature_interaction_effect*>::const_iterator cit =
+                                    for (std::vector12<df::creature_interaction_effect*>::const_iterator cit =
                                         cie_vec.begin(); cit != cie_vec.end(); ++cit)
                                     {
                                         df::creature_interaction_effect* ce = *cit;
@@ -958,7 +958,7 @@ void embark_assist::survey::survey_mid_level_tile(embark_assist::defs::geo_data 
     df::world_data *world_data = world->world_data;
     df::world_region_details *details = world_data->region_details[0];
     df::region_map_entry *world_tile = &world_data->region_map[x][y];
-    std::vector <df::world_region_feature *> features;
+    std::vector12<df::world_region_feature *> features;
     uint8_t soil_erosion;
     uint16_t end_check_l;
     uint16_t end_check_m;
@@ -2244,9 +2244,9 @@ void embark_assist::survey::survey_embark(embark_assist::defs::mid_level_tiles *
     int16_t elevation = 0;
     uint16_t x = screen->location.region_pos.x;
     uint16_t y = screen->location.region_pos.y;
-    std::vector<bool> metals(state->max_inorganic);
-    std::vector<bool> economics(state->max_inorganic);
-    std::vector<bool> minerals(state->max_inorganic);
+    std::vector12<bool> metals(state->max_inorganic);
+    std::vector12<bool> economics(state->max_inorganic);
+    std::vector12<bool> minerals(state->max_inorganic);
     bool incursion_processing_failed = false;
     df::world_data *world_data = world->world_data;
 

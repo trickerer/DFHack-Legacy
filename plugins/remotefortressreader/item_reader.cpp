@@ -58,7 +58,7 @@ using namespace DFHack;
 using namespace df::enums;
 using namespace RemoteFortressReader;
 using namespace ItemdefInstrument;
-using namespace std;
+
 using namespace df::global;
 
 

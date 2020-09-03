@@ -85,9 +85,9 @@ static bool is_valid_pos(const df::coord pos)
     return true;
 }
 
-static vector<df::unit *> get_units_at(const df::coord pos, bool only_one)
+static std::vector12<df::unit *> get_units_at(const df::coord pos, bool only_one)
 {
-    vector<df::unit *> list;
+    std::vector12<df::unit *> list;
 
     size_t count = world->units.active.size();
     if (count > max_list_size)
@@ -116,9 +116,9 @@ static vector<df::unit *> get_units_at(const df::coord pos, bool only_one)
     return list;
 }
 
-static vector<df::item *> get_items_at(const df::coord pos, bool only_one)
+static std::vector12<df::item *> get_items_at(const df::coord pos, bool only_one)
 {
-    vector<df::item *> list;
+    std::vector12<df::item *> list;
     size_t count = world->items.other[items_other_id::IN_PLAY].size();
     if (count > max_list_size)
         return list;
@@ -155,7 +155,7 @@ static df::interface_key get_default_query_mode(const df::coord pos)
     bool fallback_to_building_query = false;
 
     // Check for unit under cursor
-    std::vector<df::unit*> ulist = get_units_at(pos, true);
+    std::vector12<df::unit*> ulist = get_units_at(pos, true);
     if (ulist.size() > 0)
         return df::interface_key::D_VIEWUNIT;
 
@@ -179,7 +179,7 @@ static df::interface_key get_default_query_mode(const df::coord pos)
     }
 
     // Check for items under cursor
-    std::vector<df::item*> ilist = get_items_at(pos, true);
+    std::vector12<df::item*> ilist = get_items_at(pos, true);
     if (ilist.size() > 0)
         return df::interface_key::D_LOOK;
 
@@ -192,7 +192,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
 
     void sendKey(const df::interface_key &key)
     {
-        set<df::interface_key> tmp;
+        std::set8<df::interface_key> tmp;
         tmp.insert(key);
         INTERPOSE_NEXT(feed)(&tmp);
     }
@@ -447,7 +447,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
         return false;
     }
 
-    bool handleMouse(const set<df::interface_key> *input)
+    bool handleMouse(const std::set8<df::interface_key> *input)
     {
         int32_t mx, my;
         df::coord mpos = get_mouse_pos(mx, my);
@@ -555,7 +555,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
         return isInTrackableMode();
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!plugin_enabled || !handleMouse(input))
             INTERPOSE_NEXT(feed)(input);
@@ -755,9 +755,9 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             return;
 
         // Display live query
-        std::vector<df::unit*> ulist = get_units_at(mpos, false);
+        std::vector12<df::unit*> ulist = get_units_at(mpos, false);
         df::building* bld = Buildings::findAtTile(mpos);
-        std::vector<df::item*> ilist = get_items_at(mpos, false);
+        std::vector12<df::item*> ilist = get_items_at(mpos, false);
 
         int look_list = ulist.size() + ((bld) ? 1 : 0) + ilist.size() + 1;
         set_to_limit(look_list, 8);
@@ -772,9 +772,9 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
         }
 
         int c = 0;
-        for (std::vector<df::unit*>::const_iterator it = ulist.begin(); it != ulist.end() && c < 8; it++, c++)
+        for (std::vector12<df::unit*>::const_iterator it = ulist.begin(); it != ulist.end() && c < 8; it++, c++)
         {
-            string label;
+            std::string24 label;
             df::language_name* name = Units::getVisibleName(*it);
             if (name->has_name)
                 label = Translation::TranslateName(name, false);
@@ -787,9 +787,9 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             OutputString(COLOR_WHITE, disp_x, disp_y, label, true, left_margin);
         }
 
-        for (std::vector<df::item*>::const_iterator it = ilist.begin(); it != ilist.end() && c < 8; it++, c++)
+        for (std::vector12<df::item*>::const_iterator it = ilist.begin(); it != ilist.end() && c < 8; it++, c++)
         {
-            std::string label = Items::getDescription(*it, 0, false);
+            std::string24 label = Items::getDescription(*it, 0, false);
             label = pad_string(label, look_width, false, true);
             OutputString(COLOR_YELLOW, disp_x, disp_y, label, true, left_margin);
         }
@@ -799,7 +799,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
 
         if (bld)
         {
-            string label;
+            std::string24 label;
             bld->getName(&label);
             label = pad_string(label, look_width, false, true);
             OutputString(COLOR_CYAN, disp_x, disp_y, label, true, left_margin);
@@ -816,7 +816,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
 IMPLEMENT_VMETHOD_INTERPOSE_PRIO(mousequery_hook, feed, 100);
 IMPLEMENT_VMETHOD_INTERPOSE_PRIO(mousequery_hook, render, 100);
 
-static command_result mousequery_cmd(color_ostream &out, vector <string> & parameters)
+static command_result mousequery_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool show_help = false;
     if (parameters.size() < 1)
@@ -825,8 +825,8 @@ static command_result mousequery_cmd(color_ostream &out, vector <string> & param
     }
     else
     {
-        std::string cmd = toLower(parameters[0]);
-        std::string state = (parameters.size() == 2) ? toLower(parameters[1]) : "-1";
+        std::string24 cmd = toLower(parameters[0]);
+        std::string24 state = (parameters.size() == 2) ? toLower(parameters[1]) : "-1";
         if (cmd[0] == 'v')
         {
             out << "MouseQuery" << endl << "Version: " << PLUGIN_VERSION << endl;
@@ -912,7 +912,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(
         PluginCommand(

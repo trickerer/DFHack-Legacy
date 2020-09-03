@@ -4,7 +4,7 @@
 #include <ctype.h>      //For toupper().
 #include <algorithm>    //for min().
 #include <map>
-#include <vector>
+
 #include "Core.h"
 #include "Console.h"
 #include "Export.h"
@@ -21,10 +21,10 @@ using namespace df::enums;
 typedef void (*checkTile)(DFCoord, MapExtras::MapCache &);
 
 //Forward Declarations for Commands
-command_result filltraffic(color_ostream &out, std::vector<std::string> & params);
-command_result alltraffic(color_ostream &out, std::vector<std::string> & params);
-command_result restrictLiquid(color_ostream &out, std::vector<std::string> & params);
-command_result restrictIce(color_ostream &out, std::vector<std::string> & params);
+command_result filltraffic(color_ostream &out, std::vector12<std::string24> & params);
+command_result alltraffic(color_ostream &out, std::vector12<std::string24> & params);
+command_result restrictLiquid(color_ostream &out, std::vector12<std::string24> & params);
+command_result restrictIce(color_ostream &out, std::vector12<std::string24> & params);
 
 //Forward Declarations for Utility Functions
 command_result setAllMatching(color_ostream &out, checkTile checkProc,
@@ -41,7 +41,7 @@ void restrictIceProc(DFCoord coord, MapExtras::MapCache &map);
 
 DFHACK_PLUGIN("filltraffic");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "filltraffic","Flood-fill selected traffic designation from cursor",
@@ -87,7 +87,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result filltraffic(color_ostream &out, std::vector<std::string> & params)
+command_result filltraffic(color_ostream &out, std::vector12<std::string24> & params)
 {
     // HOTKEY COMMAND; CORE ALREADY SUSPENDED
 
@@ -249,7 +249,7 @@ command_result filltraffic(color_ostream &out, std::vector<std::string> & params
 
 enum e_checktype {no_check, check_equal, check_nequal};
 
-command_result alltraffic(color_ostream &out, std::vector<std::string> & params)
+command_result alltraffic(color_ostream &out, std::vector12<std::string24> & params)
 {
     void (*proc)(DFCoord, MapExtras::MapCache &) = allNormal;
 
@@ -278,12 +278,12 @@ command_result alltraffic(color_ostream &out, std::vector<std::string> & params)
     return setAllMatching(out, proc);
 }
 
-command_result restrictLiquid(color_ostream &out, std::vector<std::string> & params)
+command_result restrictLiquid(color_ostream &out, std::vector12<std::string24> & params)
 {
   return setAllMatching(out, restrictLiquidProc);
 }
 
-command_result restrictIce(color_ostream &out, std::vector<std::string> & params)
+command_result restrictIce(color_ostream &out, std::vector12<std::string24> & params)
 {
     return setAllMatching(out, restrictIceProc);
 }

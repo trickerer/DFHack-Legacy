@@ -27,7 +27,7 @@ REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cursor);
 REQUIRE_GLOBAL(ui);
 
-static const string PERSISTENCE_KEY = "autotrade/stockpiles";
+static const std::string24 PERSISTENCE_KEY = "autotrade/stockpiles";
 
 /*
  * Depot Access
@@ -47,7 +47,7 @@ public:
             return true;
 
         reset();
-        for(std::vector<df::building*>::const_iterator bld_it = world->buildings.all.begin();
+        for(std::vector12<df::building*>::const_iterator bld_it = world->buildings.all.begin();
             bld_it != world->buildings.all.end(); bld_it++)
         {
             df::building* bld = *bld_it;
@@ -175,7 +175,7 @@ static bool is_valid_item(df::item *item)
     return true;
 }
 
-static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
+static void mark_all_in_stockpiles(std::vector12<PersistentStockpileInfo> &stockpiles)
 {
     if (!depot_info.findDepot())
         return;
@@ -194,7 +194,7 @@ static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
 
     size_t marked_count = 0;
     size_t error_count = 0;
-    for (vector<PersistentStockpileInfo>::iterator it = stockpiles.begin(); it != stockpiles.end(); it++)
+    for (std::vector12<PersistentStockpileInfo>::iterator it = stockpiles.begin(); it != stockpiles.end(); it++)
     {
         if (!it->isValid())
             continue;
@@ -211,10 +211,10 @@ static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
 
             // In case of container, check contained items for mandates
             bool mandates_ok = true;
-            vector<df::item*> contained_items;
+            std::vector12<df::item*> contained_items;
             Items::getContainedItems(item, &contained_items);
             //for (df::item *cit : contained_items)
-            for (vector<df::item*>::const_iterator ci = contained_items.begin(); ci != contained_items.end(); ++ci)
+            for (std::vector12<df::item*>::const_iterator ci = contained_items.begin(); ci != contained_items.end(); ++ci)
             {
                 df::item* cit = *ci;
                 if (!Items::checkMandates(cit))
@@ -261,7 +261,7 @@ class StockpileMonitor
 public:
     bool isMonitored(df::building_stockpilest *sp)
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
             it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
@@ -283,7 +283,7 @@ public:
 
     void remove(df::building_stockpilest *sp)
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
             {
@@ -299,7 +299,7 @@ public:
         if (!can_trade())
             return;
 
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end();)
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end();)
         {
             if (!it->isValid())
             {
@@ -316,10 +316,10 @@ public:
     void reset()
     {
         monitored_stockpiles.clear();
-        std::vector<PersistentDataItem> items;
+        std::vector12<PersistentDataItem> items;
         DFHack::World::GetPersistentData(&items, PERSISTENCE_KEY);
 
-        for (std::vector<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
+        for (std::vector12<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
         {
             PersistentStockpileInfo pile = PersistentStockpileInfo(*i, PERSISTENCE_KEY);
             if (pile.load())
@@ -331,7 +331,7 @@ public:
 
 
 private:
-    vector<PersistentStockpileInfo> monitored_stockpiles;
+    std::vector12<PersistentStockpileInfo> monitored_stockpiles;
 };
 
 static StockpileMonitor monitor;
@@ -363,7 +363,7 @@ struct trade_hook : public df::viewscreen_dwarfmodest
 {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
-    bool handleInput(set<df::interface_key> *input)
+    bool handleInput(std::set8<df::interface_key> *input)
     {
         if (Gui::inRenameBuilding())
             return false;
@@ -383,7 +383,7 @@ struct trade_hook : public df::viewscreen_dwarfmodest
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!handleInput(input))
             INTERPOSE_NEXT(feed)(input);
@@ -460,7 +460,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     return CR_OK;
 }

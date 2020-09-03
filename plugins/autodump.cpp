@@ -4,10 +4,10 @@
 #include <iomanip>
 #include <sstream>
 #include <climits>
-#include <vector>
-#include <string>
+
+
 #include <algorithm>
-#include <set>
+
 using namespace std;
 
 #include "Core.h"
@@ -41,11 +41,11 @@ REQUIRE_GLOBAL(gps);
 REQUIRE_GLOBAL(world);
 
 // Stockpile interface START
-static const string PERSISTENCE_KEY = "autodump/stockpiles";
+static const std::string24 PERSISTENCE_KEY = "autodump/stockpiles";
 
-static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
+static void mark_all_in_stockpiles(std::vector12<PersistentStockpileInfo> &stockpiles)
 {
-    std::vector<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
+    std::vector12<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
 
     // Precompute a bitmask with the bad flags
     df::item_flags bad_flags;
@@ -65,7 +65,7 @@ static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
         if (item->flags.whole & bad_flags.whole)
             continue;
 
-        for (vector<PersistentStockpileInfo>::iterator it = stockpiles.begin(); it != stockpiles.end(); it++)
+        for (std::vector12<PersistentStockpileInfo>::iterator it = stockpiles.begin(); it != stockpiles.end(); it++)
         {
             if (!it->inStockpile(item))
                 continue;
@@ -84,7 +84,7 @@ class StockpileMonitor
 public:
     bool isMonitored(df::building_stockpilest *sp)
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
             it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
@@ -106,7 +106,7 @@ public:
 
     void remove(df::building_stockpilest *sp)
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
             it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
@@ -120,7 +120,7 @@ public:
 
     void doCycle()
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin();
             it != monitored_stockpiles.end();)
         {
             if (!it->isValid())
@@ -135,10 +135,10 @@ public:
     void reset()
     {
         monitored_stockpiles.clear();
-        std::vector<PersistentDataItem> items;
+        std::vector12<PersistentDataItem> items;
         DFHack::World::GetPersistentData(&items, PERSISTENCE_KEY);
 
-        for (std::vector<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
+        for (std::vector12<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
         {
             PersistentStockpileInfo pile = PersistentStockpileInfo(*i, PERSISTENCE_KEY);
             if (pile.load())
@@ -150,7 +150,7 @@ public:
 
 
 private:
-    vector<PersistentStockpileInfo> monitored_stockpiles;
+    std::vector12<PersistentStockpileInfo> monitored_stockpiles;
 };
 
 static StockpileMonitor monitor;
@@ -178,7 +178,7 @@ struct dump_hook : public df::viewscreen_dwarfmodest
 {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
-    bool handleInput(set<df::interface_key> *input)
+    bool handleInput(std::set8<df::interface_key> *input)
     {
         if (Gui::inRenameBuilding())
             return false;
@@ -198,7 +198,7 @@ struct dump_hook : public df::viewscreen_dwarfmodest
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!handleInput(input))
             INTERPOSE_NEXT(feed)(input);
@@ -271,11 +271,11 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
 
 // Stockpile interface END
 
-command_result df_autodump(color_ostream &out, vector <string> & parameters);
-command_result df_autodump_destroy_here(color_ostream &out, vector <string> & parameters);
-command_result df_autodump_destroy_item(color_ostream &out, vector <string> & parameters);
+command_result df_autodump(color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_autodump_destroy_here(color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_autodump_destroy_item(color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "autodump", "Teleport items marked for dumping to the cursor.",
@@ -313,7 +313,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 
 typedef map <DFCoord, uint32_t> coordmap;
 
-static command_result autodump_main(color_ostream &out, vector <string> & parameters)
+static command_result autodump_main(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // Command line options
     bool destroy = false;
@@ -323,7 +323,7 @@ static command_result autodump_main(color_ostream &out, vector <string> & parame
     bool need_forbidden = false;
     for (size_t i = 0; i < parameters.size(); i++)
     {
-        string & p = parameters[i];
+        std::string24 & p = parameters[i];
         if(p == "destroy")
             destroy = true;
         else if (p == "destroy-here")
@@ -448,20 +448,20 @@ static command_result autodump_main(color_ostream &out, vector <string> & parame
     return CR_OK;
 }
 
-command_result df_autodump(color_ostream &out, vector <string> & parameters)
+command_result df_autodump(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
     return autodump_main(out, parameters);
 }
 
-command_result df_autodump_destroy_here(color_ostream &out, vector <string> & parameters)
+command_result df_autodump_destroy_here(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND; CORE ALREADY SUSPENDED
     if (!parameters.empty())
         return CR_WRONG_USAGE;
 
-    vector<string> args;
+    std::vector12<std::string24> args;
     args.push_back("destroy-here");
 
     return autodump_main(out, args);
@@ -470,7 +470,7 @@ command_result df_autodump_destroy_here(color_ostream &out, vector <string> & pa
 static map<int, df::item_flags> pending_destroy;
 static int last_frame = 0;
 
-command_result df_autodump_destroy_item(color_ostream &out, vector <string> & parameters)
+command_result df_autodump_destroy_item(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND; CORE ALREADY SUSPENDED
     if (!parameters.empty())

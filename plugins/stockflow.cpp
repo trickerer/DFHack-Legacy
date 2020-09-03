@@ -158,7 +158,7 @@ public:
         if (!Lua::SafeCall(out, L, 1, 0))
             return false;
 
-        // Invalidate the string cache.
+        // Invalidate the std::string24 cache.
         stockpile_id = -1;
 
         return true;
@@ -265,7 +265,7 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out) {
 struct stockflow_hook : public df::viewscreen_dwarfmodest {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
-    bool handleInput(set<df::interface_key> *input) {
+    bool handleInput(std::set8<df::interface_key> *input) {
         building_stockpilest *sp = get_selected_stockpile();
         if (!sp)
             return false;
@@ -289,7 +289,7 @@ struct stockflow_hook : public df::viewscreen_dwarfmodest {
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input)) {
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input)) {
         if (!handleInput(input))
             INTERPOSE_NEXT(feed)(input);
     }
@@ -326,7 +326,7 @@ static bool apply_hooks(color_ostream &out, bool enabling) {
     return true;
 }
 
-static command_result stockflow_cmd(color_ostream &out, vector <string> & parameters) {
+static command_result stockflow_cmd(color_ostream &out, std::vector12<std::string24> & parameters) {
     bool desired = enabled;
     if (parameters.size() == 1) {
         if (parameters[0] == "enable" || parameters[0] == "on" || parameters[0] == "1") {
@@ -403,7 +403,7 @@ DFhackCExport command_result plugin_enable(color_ostream& out, bool enable) {
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands) {
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands) {
     helper.init();
     if (AUTOENABLE) {
         if (!apply_hooks(out, true)) {

@@ -1,5 +1,5 @@
-#include <string>
-#include <vector>
+
+
 #include <algorithm>
 
 #include "Core.h"
@@ -30,8 +30,8 @@
 #include "uicommon.h"
 
 using std::map;
-using std::string;
-using std::vector;
+
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -87,14 +87,14 @@ struct SuspendedBuilding
 
 DFHACK_PLUGIN_IS_ENABLED(enabled);
 static bool buildings_scanned = false;
-static vector<SuspendedBuilding> suspended_buildings, resumed_buildings;
+static std::vector12<SuspendedBuilding> suspended_buildings, resumed_buildings;
 
 void scan_for_suspended_buildings()
 {
     if (buildings_scanned)
         return;
 
-    std::vector<df::building*>::const_iterator b;
+    std::vector12<df::building*>::const_iterator b;
     for (b = world->buildings.all.begin(); b != world->buildings.all.end(); b++)
     {
         df::building* bld = *b;
@@ -104,7 +104,7 @@ void scan_for_suspended_buildings()
             SuspendedBuilding sb(bld);
             sb.is_planned = job->job_items.size() == 1 && job->job_items[0]->item_type == item_type::NONE;
 
-            std::vector<SuspendedBuilding>::const_iterator it = resumed_buildings.begin();
+            std::vector12<SuspendedBuilding>::const_iterator it = resumed_buildings.begin();
 
             for (; it != resumed_buildings.end(); ++it)
                 if (it->bld == bld) break;
@@ -128,7 +128,7 @@ void show_suspended_buildings()
     int left_margin = vx + dims.map_x2;
     int bottom_margin = vy + dims.map_y2 - 1;
 
-    std::vector<SuspendedBuilding>::iterator sb;
+    std::vector12<SuspendedBuilding>::iterator sb;
     for (sb = suspended_buildings.begin(); sb != suspended_buildings.end();)
     {
         if (!sb->isValid())
@@ -165,7 +165,7 @@ void resume_suspended_buildings(color_ostream &out)
 {
     out << "Resuming all buildings." << endl;
 
-    std::vector<SuspendedBuilding>::iterator isb, sb;
+    std::vector12<SuspendedBuilding>::iterator isb, sb;
     for (isb = resumed_buildings.begin(); isb != resumed_buildings.end();)
     {
         if (isb->isValid())
@@ -235,7 +235,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable)
     return CR_OK;
 }
 
-static command_result resume_cmd(color_ostream &out, vector <string> & parameters)
+static command_result resume_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool show_help = false;
     if (parameters.empty())
@@ -275,7 +275,7 @@ static command_result resume_cmd(color_ostream &out, vector <string> & parameter
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(
         PluginCommand(

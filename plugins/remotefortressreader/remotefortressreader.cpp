@@ -3,7 +3,7 @@
 
 #include <cstdio>
 #include <time.h>
-#include <vector>
+
 
 #include "Console.h"
 #include "Core.h"
@@ -189,7 +189,7 @@ const char* growth_locations[] = {
 #include "df/art_image.h"
 #include "df/art_image_chunk.h"
 #include "df/art_image_ref.h"
-command_result loadArtImageChunk(color_ostream &out, vector <string> & parameters)
+command_result loadArtImageChunk(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() != 1)
         return CR_WRONG_USAGE;
@@ -210,7 +210,7 @@ command_result loadArtImageChunk(color_ostream &out, vector <string> & parameter
     return CR_OK;
 }
 
-command_result RemoteFortressReader_version(color_ostream &out, vector<string> &parameters)
+command_result RemoteFortressReader_version(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     out.print(RFR_VERSION);
     return CR_OK;
@@ -219,7 +219,7 @@ command_result RemoteFortressReader_version(color_ostream &out, vector<string> &
 DFHACK_PLUGIN_IS_ENABLED(enableUpdates);
 
 // Mandatory init function. If you have some global state, create it here.
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("RemoteFortressReader_version", "List the loaded RemoteFortressReader version", RemoteFortressReader_version, false, "This is used for plugin version checking."));
     commands.push_back(PluginCommand(
@@ -700,9 +700,9 @@ bool IsspatterChanged(DFCoord pos)
 {
     df::map_block * block = Maps::getBlock(pos);
     bool changed = false;
-    std::vector<df::block_square_event_material_spatterst *> materials;
+    std::vector12<df::block_square_event_material_spatterst *> materials;
 #if DF_VERSION_INT > 34011
-    std::vector<df::block_square_event_item_spatterst *> items;
+    std::vector12<df::block_square_event_item_spatterst *> items;
     if (!Maps::SortBlockEvents(block, NULL, NULL, &materials, NULL, NULL, NULL, &items))
         return false;
 #else
@@ -750,7 +750,7 @@ bool isItemChanged(int i)
     return false;
 }
 
-bool areItemsChanged(vector<int> * items)
+bool areItemsChanged(std::vector12<int> * items)
 {
     bool result = false;
     for (size_t i = 0; i < items->size(); i++)
@@ -1286,10 +1286,10 @@ void Copyspatters(df::map_block * DfBlock, RemoteFortressReader::MapBlock * NetB
     NetBlock->set_map_x(DfBlock->map_pos.x);
     NetBlock->set_map_y(DfBlock->map_pos.y);
     NetBlock->set_map_z(DfBlock->map_pos.z);
-    std::vector<df::block_square_event_material_spatterst *> materials;
+    std::vector12<df::block_square_event_material_spatterst *> materials;
 #if DF_VERSION_INT > 34011
-    std::vector<df::block_square_event_item_spatterst *> items;
-    std::vector<df::block_square_event_grassst *> grasses;
+    std::vector12<df::block_square_event_item_spatterst *> items;
+    std::vector12<df::block_square_event_grassst *> grasses;
     if (!Maps::SortBlockEvents(DfBlock, NULL, NULL, &materials, &grasses, NULL, NULL, &items))
         return;
 #else
@@ -1418,7 +1418,7 @@ static command_result GetBlockList(color_ostream &stream, const BlockRequest *in
                                 //stream.print("Got request for blocks from (%d, %d, %d) to (%d, %d, %d).\n", in->min_x(), in->min_y(), in->min_z(), in->max_x(), in->max_y(), in->max_z());
     for (int zz = max_z - 1; zz >= min_z; zz--)
     {
-        // (di, dj) is a vector - direction in which we move right now
+        // (di, dj) is a std::vector12 - direction in which we move right now
         int di = 1;
         int dj = 0;
         // length of current segment
@@ -1493,7 +1493,7 @@ static command_result GetBlockList(color_ostream &stream, const BlockRequest *in
                 }
             }
 
-            // make a step, add 'direction' vector (di, dj) to current position (i, j)
+            // make a step, add 'direction' std::vector12 (di, dj) to current position (i, j)
             i += di;
             j += dj;
             ++segment_passed;
@@ -1727,7 +1727,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
 
         send_unit->set_profession_id(unit->profession);
 
-        std::vector<Units::NoblePosition> pvec;
+        std::vector12<Units::NoblePosition> pvec;
 
         if (Units::getNoblePositions(&pvec, unit))
         {

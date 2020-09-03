@@ -48,11 +48,11 @@
 
 #include <df/world.h>
 
-#include <vector>
-#include <set>
+
+
 
 using namespace std;
-using std::string;
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -186,7 +186,7 @@ static df::unit_labor workshop_build_labor[] =
 
 static df::building* get_building_from_job(df::job* j)
 {
-    for (std::vector<df::general_ref*>::const_iterator r = j->general_refs.begin(); r != j->general_refs.end(); r++)
+    for (std::vector12<df::general_ref*>::const_iterator r = j->general_refs.begin(); r != j->general_refs.end(); r++)
     {
         if ((*r)->getType() == df::general_ref_type::BUILDING_HOLDER)
         {
@@ -209,7 +209,7 @@ static df::unit_labor construction_build_labor(df::building_actual* b)
     // Must check use mode b/c buildings may have items in them that are not part of the building
 
     df::item* i = 0;
-    for (std::vector<df::building_actual::T_contained_items*>::const_iterator p =
+    for (std::vector12<df::building_actual::T_contained_items*>::const_iterator p =
         b->contained_items.begin(); p != b->contained_items.end(); p++)
         if ((b->construction_stage > 0 && (*p)->use_mode == 2) ||
             (b->construction_stage == 0 && (*p)->use_mode == 0))
@@ -255,7 +255,7 @@ public:
         if (j->job_type == df::job_type::StoreItemInStockpile && j->item_subtype != -1)
             return (df::unit_labor) j->item_subtype;
 
-        for (std::vector<df::job_item_ref*>::const_iterator i = j->items.begin(); i != j->items.end(); i++)
+        for (std::vector12<df::job_item_ref*>::const_iterator i = j->items.begin(); i != j->items.end(); i++)
         {
             if ((*i)->role == 7)
             {
@@ -266,7 +266,7 @@ public:
 
         if (item && item->flags.bits.container)
         {
-            for (std::vector<df::general_ref*>::const_iterator a = item->general_refs.begin(); a != item->general_refs.end(); a++)
+            for (std::vector12<df::general_ref*>::const_iterator a = item->general_refs.begin(); a != item->general_refs.end(); a++)
             {
                 if ((*a)->getType() == df::general_ref_type::CONTAINS_ITEM)
                 {
@@ -620,8 +620,8 @@ public:
     df::unit_labor get_labor(df::job* j)
     {
         //for (auto r : df::reaction::get_vector())
-        std::vector<df::reaction*> const& reacVec = df::reaction::get_vector();
-        for (std::vector<df::reaction*>::const_iterator ci = reacVec.begin(); ci != reacVec.end(); ++ci)
+        std::vector12<df::reaction*> const& reacVec = df::reaction::get_vector();
+        for (std::vector12<df::reaction*>::const_iterator ci = reacVec.begin(); ci != reacVec.end(); ++ci)
         {
             df::reaction* r = *ci;
             if (r->code == j->reaction_name)
@@ -651,7 +651,7 @@ jlfunc* JobLaborMapper::jlf_const(df::unit_labor l) {
 
 JobLaborMapper::~JobLaborMapper()
 {
-    std::set<jlfunc*> log;
+    std::set8<jlfunc*> log;
 
     for (std::map<df::unit_labor, jlfunc*>::iterator i = jlf_cache.begin(); i != jlf_cache.end(); i++)
     {
@@ -938,8 +938,8 @@ df::unit_labor JobLaborMapper::find_job_labor(df::job* j)
     if (j->job_type == df::job_type::CustomReaction)
     {
         //for (auto r : df::reaction::get_vector())
-        std::vector<df::reaction*> const& reacVec = df::reaction::get_vector();
-        for (std::vector<df::reaction*>::const_iterator ci = reacVec.begin(); ci != reacVec.end(); ++ci)
+        std::vector12<df::reaction*> const& reacVec = df::reaction::get_vector();
+        for (std::vector12<df::reaction*>::const_iterator ci = reacVec.begin(); ci != reacVec.end(); ++ci)
         {
             df::reaction* r = *ci;
             if (r->code == j->reaction_name)

@@ -16,22 +16,22 @@ DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 REQUIRE_GLOBAL(init);
 
 // SDL frees the old window title when changed
-static std::string original_title;
+static std::string24 original_title;
 
 static DFLibrary *sdl_handle = NULL;
-//static const std::vector<std::string> sdl_libs {
+//static const std::vector12<std::string24> sdl_libs {
 //    "SDLreal.dll",
 //    "SDL.framework/Versions/A/SDL",
 //    "SDL.framework/SDL",
 //    "libSDL-1.2.so.0"
 //};
-static const std::string sdl_lib_strs[] = { 
+static const std::string24 sdl_lib_strs[] = { 
     "SDLreal.dll",
     "SDL.framework/Versions/A/SDL",
     "SDL.framework/SDL",
     "libSDL-1.2.so.0"
 };
-static const std::vector<std::string> sdl_libs(sdl_lib_strs, sdl_lib_strs + sizeof(sdl_lib_strs)/sizeof(sdl_lib_strs[0]));
+static const std::vector12<std::string24> sdl_libs(sdl_lib_strs, sdl_lib_strs + sizeof(sdl_lib_strs)/sizeof(sdl_lib_strs[0]));
 
 void (*_SDL_WM_GetCaption)(const char**, const char**) = NULL;
 void SDL_WM_GetCaption(const char **title, const char **icon) {
@@ -46,7 +46,7 @@ void SDL_WM_SetCaption(const char *title, const char *icon) {
 DFhackCExport command_result plugin_enable (color_ostream &out, bool state);
 DFhackCExport command_result plugin_shutdown (color_ostream &out);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (init->display.flag.is_set(init_display_flags::TEXT))
     {
@@ -54,7 +54,7 @@ DFhackCExport command_result plugin_init (color_ostream &out, std::vector <Plugi
         return CR_OK;
     }
 
-    for (std::vector<std::string>::const_iterator it = sdl_libs.begin(); it != sdl_libs.end(); ++it)
+    for (std::vector12<std::string24>::const_iterator it = sdl_libs.begin(); it != sdl_libs.end(); ++it)
     {
         if ((sdl_handle = OpenPlugin(it->c_str())))
             break;
@@ -131,18 +131,18 @@ DFhackCExport command_result plugin_enable (color_ostream &out, bool state)
             return CR_FAILURE;
         }
 
-        std::string path = Core::getInstance().proc->getPath();
-        std::string folder;
+        std::string24 path = Core::getInstance().proc->getPath();
+        std::string24 folder;
         size_t pos = path.find_last_of('/');
-        if (pos == std::string::npos)
+        if (pos == std::string24::npos)
             pos = path.find_last_of('\\');
 
-        if (pos != std::string::npos)
+        if (pos != std::string24::npos)
             folder = path.substr(pos + 1);
         else
             folder = path;
 
-        std::string title = original_title + " (" + folder + ")";
+        std::string24 title = original_title + " (" + folder + ")";
         SDL_WM_SetCaption(title.c_str(), NULL);
     }
     else

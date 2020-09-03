@@ -42,7 +42,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
 
     void send_key(const df::interface_key &key)
     {
-        set< df::interface_key > keys;
+        std::set8< df::interface_key > keys;
         keys.insert(key);
         this->feed(&keys);
     }
@@ -62,9 +62,9 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
             planner.isPlanableBuilding(ui_build_selector->building_type);
     }
 
-    std::vector<Units::NoblePosition> getNoblePositionOfSelectedBuildingOwner()
+    std::vector12<Units::NoblePosition> getNoblePositionOfSelectedBuildingOwner()
     {
-        std::vector<Units::NoblePosition> np;
+        std::vector12<Units::NoblePosition> np;
         if (ui->main.mode != df::ui_sidebar_mode::QueryBuilding ||
             !world->selected_building ||
             !world->selected_building->owner)
@@ -93,7 +93,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
             return false;
     }
 
-    bool handleInput(set<df::interface_key> *input)
+    bool handleInput(std::set8<df::interface_key> *input)
     {
         if (isInPlannedBuildingPlacementMode())
         {
@@ -197,7 +197,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
         {
             if (Gui::inRenameBuilding())
                 return false;
-            std::vector<Units::NoblePosition> np = getNoblePositionOfSelectedBuildingOwner();
+            std::vector12<Units::NoblePosition> np = getNoblePositionOfSelectedBuildingOwner();
             df::interface_key last_token = get_string_key(input);
             if (last_token >= interface_key::STRING_A048 && last_token <= interface_key::STRING_A058)
             {
@@ -212,7 +212,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!handleInput(input))
             INTERPOSE_NEXT(feed)(input);
@@ -229,11 +229,11 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                 ui_build_selector->stage = 1;
             }
 
-            for (std::vector<std::string*>::iterator iter = ui_build_selector->errors.begin(); iter != ui_build_selector->errors.end();)
+            for (std::vector12<std::string24*>::iterator iter = ui_build_selector->errors.begin(); iter != ui_build_selector->errors.end();)
             {
                 //FIXME Hide bags
-                if (((*iter)->find("Needs") != string::npos && **iter != "Needs adjacent wall")  ||
-                    (*iter)->find("No access") != string::npos)
+                if (((*iter)->find("Needs") != std::string24::npos && **iter != "Needs adjacent wall")  ||
+                    (*iter)->find("No access") != std::string24::npos)
                 {
                     iter = ui_build_selector->errors.erase(iter);
                 }
@@ -289,8 +289,8 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                     OutputToggleString(x, y, "Decorated Only: ", "D", filter->decorated_only, true, left_margin);
 
                     OutputHotkeyString(x, y, "Material Filter:", "M", true, left_margin);
-                    std::vector<std::string> filter_descriptions = filter->getMaterialFilterAsVector();
-                    for (std::vector<std::string>::iterator it = filter_descriptions.begin(); it != filter_descriptions.end(); ++it)
+                    std::vector12<std::string24> filter_descriptions = filter->getMaterialFilterAsVector();
+                    for (std::vector12<std::string24>::iterator it = filter_descriptions.begin(); it != filter_descriptions.end(); ++it)
                         OutputString(COLOR_BROWN, x, y, "   *" + *it, true, left_margin);
                 }
                 else
@@ -320,13 +320,13 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                 OutputString(COLOR_BLUE, x, y, "Decorated Only", true, left_margin);
 
             OutputString(COLOR_BROWN, x, y, "Materials:", true, left_margin);
-            std::vector<std::string> filters = filter->getMaterialFilterAsVector();
-            for (std::vector<std::string>::iterator it = filters.begin(); it != filters.end(); ++it)
+            std::vector12<std::string24> filters = filter->getMaterialFilterAsVector();
+            for (std::vector12<std::string24>::iterator it = filters.begin(); it != filters.end(); ++it)
                 OutputString(COLOR_BLUE, x, y, "*" + *it, true, left_margin);
         }
         else if (isInNobleRoomQueryMode())
         {
-            std::vector<Units::NoblePosition> np = getNoblePositionOfSelectedBuildingOwner();
+            std::vector12<Units::NoblePosition> np = getNoblePositionOfSelectedBuildingOwner();
             int y = 24;
             OutputString(COLOR_BROWN, x, y, "DFHack", true, left_margin);
             OutputString(COLOR_WHITE, x, y, "Auto-allocate to:", true, left_margin);
@@ -350,7 +350,7 @@ IMPLEMENT_VMETHOD_INTERPOSE(buildingplan_hook, feed);
 IMPLEMENT_VMETHOD_INTERPOSE(buildingplan_hook, render);
 
 
-static command_result buildingplan_cmd(color_ostream &out, vector <string> & parameters)
+static command_result buildingplan_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (!parameters.empty())
     {
@@ -389,7 +389,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(
         PluginCommand(

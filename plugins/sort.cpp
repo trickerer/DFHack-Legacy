@@ -31,8 +31,8 @@
 
 #include <stdlib.h>
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -50,10 +50,10 @@ REQUIRE_GLOBAL(ui_building_assign_items);
 static bool unit_list_hotkey(df::viewscreen *top);
 static bool item_list_hotkey(df::viewscreen *top);
 
-static command_result sort_units(color_ostream &out, vector <string> & parameters);
-static command_result sort_items(color_ostream &out, vector <string> & parameters);
+static command_result sort_units(color_ostream &out, std::vector12<std::string24> & parameters);
+static command_result sort_items(color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "sort-units", "Sort the visible unit list.", sort_units, unit_list_hotkey,
@@ -84,17 +84,17 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 }
 
 template<class T>
-void reorder_vector(std::vector<T> *pvec, const std::vector<unsigned> &order)
+void reorder_vector(std::vector12<T> *pvec, const std::vector12<unsigned> &order)
 {
     assert(pvec->size() == order.size());
 
-    std::vector<T> tmp(*pvec);
+    std::vector12<T> tmp(*pvec);
     for (size_t i = 0; i < order.size(); i++)
         (*pvec)[i] = tmp[order[i]];
 }
 
 template<class T>
-void reorder_cursor(T *cursor, const std::vector<unsigned> &order)
+void reorder_cursor(T *cursor, const std::vector12<unsigned> &order)
 {
     if (*cursor == 0)
         return;
@@ -109,7 +109,7 @@ void reorder_cursor(T *cursor, const std::vector<unsigned> &order)
     }
 }
 
-bool parse_ordering_spec(color_ostream &out, lua_State *L, std::string type, const std::vector<std::string> &params)
+bool parse_ordering_spec(color_ostream &out, lua_State *L, std::string24 type, const std::vector12<std::string24> &params)
 {
     if (!lua_checkstack(L, params.size() + 2))
         return false;
@@ -133,9 +133,9 @@ bool parse_ordering_spec(color_ostream &out, lua_State *L, std::string type, con
     return true;
 }
 
-bool read_order(color_ostream &out, lua_State *L, std::vector<unsigned> *order, size_t size)
+bool read_order(color_ostream &out, lua_State *L, std::vector12<unsigned> *order, size_t size)
 {
-    std::vector<char> found;
+    std::vector12<char> found;
 
     Lua::StackUnwinder frame(L, 1);
 
@@ -181,7 +181,7 @@ bool read_order(color_ostream &out, lua_State *L, std::vector<unsigned> *order, 
 }
 
 template<class T>
-bool compute_order(color_ostream &out, lua_State *L, int base, std::vector<unsigned> *order, const std::vector<T> &key)
+bool compute_order(color_ostream &out, lua_State *L, int base, std::vector12<unsigned> *order, const std::vector12<T> &key)
 {
     lua_pushvalue(L, base+1);
     Lua::PushVector(L, key, true);
@@ -193,7 +193,7 @@ bool compute_order(color_ostream &out, lua_State *L, int base, std::vector<unsig
     return read_order(out, L, order, key.size());
 }
 
-static bool ParseSpec(color_ostream &out, lua_State *L, const char *type, vector<string> &params)
+static bool ParseSpec(color_ostream &out, lua_State *L, const char *type, std::vector12<std::string24> &params)
 {
     if (!parse_ordering_spec(out, L, type, params))
     {
@@ -205,7 +205,7 @@ static bool ParseSpec(color_ostream &out, lua_State *L, const char *type, vector
 }
 
 #define PARSE_SPEC(type, params) \
-    std::vector<unsigned> order; \
+    std::vector12<unsigned> order; \
     if (!ParseSpec(*pout, L, type, params)) return;
 
 static bool prepare_sort(color_ostream *pout, lua_State *L)
@@ -222,9 +222,9 @@ static bool prepare_sort(color_ostream *pout, lua_State *L)
     return true;
 }
 
-static void sort_null_first(vector<string> &parameters)
+static void sort_null_first(std::vector12<std::string24> &parameters)
 {
-    vector_insert_at(parameters, 0, std::string("<exists"));
+    vector_insert_at(parameters, 0, std::string24("<exists"));
 }
 
 static df::layer_object_listst *getLayerList(df::viewscreen_layer *layer, int idx)
@@ -233,20 +233,20 @@ static df::layer_object_listst *getLayerList(df::viewscreen_layer *layer, int id
 }
 
 typedef void (*SortHandler)(color_ostream *pout, lua_State *L, int top,
-                            df::viewscreen *screen, vector<string> &parameters);
+                            df::viewscreen *screen, std::vector12<std::string24> &parameters);
 
 #define VIEWSCREEN(name) df::viewscreen_##name##st
 #define DEFINE_SORT_HANDLER(map, screen_type, tail, screen) \
     static void CONCAT_TOKENS(SortHandler_##screen_type,__LINE__)\
         (color_ostream *pout, lua_State *L, int top, \
-         VIEWSCREEN(screen_type) *screen, vector<string> &parameters); \
+         VIEWSCREEN(screen_type) *screen, std::vector12<std::string24> &parameters); \
     DFHACK_STATIC_ADD_TO_MAP(&map, #screen_type tail, \
         (SortHandler)CONCAT_TOKENS(SortHandler_##screen_type,__LINE__) ); \
     static void CONCAT_TOKENS(SortHandler_##screen_type,__LINE__)\
         (color_ostream *pout, lua_State *L, int top, \
-         VIEWSCREEN(screen_type) *screen, vector<string> &parameters)
+         VIEWSCREEN(screen_type) *screen, std::vector12<std::string24> &parameters)
 
-static std::map<std::string, SortHandler> unit_sorters;
+static std::map<std::string24, SortHandler> unit_sorters;
 
 /*
  * Sort units in the 'u'nit list screen.
@@ -274,7 +274,7 @@ DEFINE_SORT_HANDLER(unit_sorters, joblist, "", jobs)
 {
     PARSE_SPEC("units", parameters);
 
-    std::vector<df::unit*> units;
+    std::vector12<df::unit*> units;
     for (size_t i = 0; i < jobs->units.size(); i++)
     {
         df::unit* unit = jobs->units[i];
@@ -297,7 +297,7 @@ DEFINE_SORT_HANDLER(unit_sorters, joblist, "", jobs)
 
 DEFINE_SORT_HANDLER(unit_sorters, layer_military, "/Positions/Candidates", military)
 {
-    std::vector<df::unit*> &candidates = military->positions.candidates;
+    std::vector12<df::unit*> &candidates = military->positions.candidates;
     df::layer_object_listst* list3 = getLayerList(military, 2);
 
     PARSE_SPEC("units", parameters);
@@ -317,7 +317,7 @@ DEFINE_SORT_HANDLER(unit_sorters, layer_noblelist, "/Appoint", nobles)
     sort_null_first(parameters);
     PARSE_SPEC("units", parameters);
 
-    std::vector<df::unit*> units;
+    std::vector12<df::unit*> units;
     for (size_t i = 0; i < nobles->candidates.size(); i++)
         units.push_back(nobles->candidates[i]->unit);
 
@@ -336,7 +336,7 @@ DEFINE_SORT_HANDLER(unit_sorters, pet, "/List", animals)
 {
     PARSE_SPEC("units", parameters);
 
-    std::vector<df::unit*> units;
+    std::vector12<df::unit*> units;
     for (size_t i = 0; i < animals->animal.size(); i++)
         units.push_back(animals->is_vermin[i] ? NULL : animals->animal[i].unit);
 
@@ -461,11 +461,11 @@ DEFINE_SORT_HANDLER(unit_sorters, dwarfmode, "/ZonesPenInfo/Assign", screen)
 
 static bool unit_list_hotkey(df::viewscreen *screen)
 {
-    std::string focus = Gui::getFocusString(screen);
+    std::string24 focus = Gui::getFocusString(screen);
     return findPrefixInMap(unit_sorters, focus) != NULL;
 }
 
-static command_result sort_units(color_ostream &out, vector <string> &parameters)
+static command_result sort_units(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     if (parameters.empty())
         return CR_WRONG_USAGE;
@@ -479,9 +479,9 @@ static command_result sort_units(color_ostream &out, vector <string> &parameters
         return CR_WRONG_USAGE;
 
     //fix this crap
-    typedef void (__cdecl * hndl_T)(DFHack::color_ostream*,lua_State*,int,df::viewscreen*,std::vector<std::string>&);
+    typedef void (__cdecl * hndl_T)(DFHack::color_ostream*,lua_State*,int,df::viewscreen*,std::vector12<std::string24>&);
 
-    std::string focus = Gui::getFocusString(screen);
+    std::string24 focus = Gui::getFocusString(screen);
     hndl_T handler = findPrefixInMap(unit_sorters, focus);
 
     if (!handler)
@@ -492,7 +492,7 @@ static command_result sort_units(color_ostream &out, vector <string> &parameters
     return CR_OK;
 }
 
-static std::map<std::string, SortHandler> item_sorters;
+static std::map<std::string24, SortHandler> item_sorters;
 
 DEFINE_SORT_HANDLER(item_sorters, tradegoods, "/Items/Broker", trade)
 {
@@ -528,9 +528,9 @@ DEFINE_SORT_HANDLER(item_sorters, layer_assigntrade, "/Items", bring)
 
     PARSE_SPEC("items", parameters);
 
-    std::vector<int32> &vec = bring->lists[list_idx];
+    std::vector12<int32> &vec = bring->lists[list_idx];
 
-    std::vector<df::item*> items;
+    std::vector12<df::item*> items;
     for (size_t i = 0; i < vec.size(); i++)
         items.push_back(bring->info[vec[i]]->item);
 
@@ -554,11 +554,11 @@ DEFINE_SORT_HANDLER(item_sorters, stores, "/Items", stocks)
 
 static bool item_list_hotkey(df::viewscreen *screen)
 {
-    std::string focus = Gui::getFocusString(screen);
+    std::string24 focus = Gui::getFocusString(screen);
     return findPrefixInMap(item_sorters, focus) != NULL;
 }
 
-static command_result sort_items(color_ostream &out, vector <string> &parameters)
+static command_result sort_items(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     if (parameters.empty())
         return CR_WRONG_USAGE;
@@ -572,9 +572,9 @@ static command_result sort_items(color_ostream &out, vector <string> &parameters
         return CR_WRONG_USAGE;
 
     //... and this
-    typedef void (__cdecl * hndl_T)(DFHack::color_ostream*,lua_State*,int,df::viewscreen*,std::vector<std::string>&);
+    typedef void (__cdecl * hndl_T)(DFHack::color_ostream*,lua_State*,int,df::viewscreen*,std::vector12<std::string24>&);
 
-    std::string focus = Gui::getFocusString(screen);
+    std::string24 focus = Gui::getFocusString(screen);
     hndl_T handler = findPrefixInMap(item_sorters, focus);
 
     if (!handler)

@@ -123,7 +123,7 @@ private:
 
 public:
     tthread::mutex dataMutex;
-    std::vector<rgbf> lightGrid;
+    std::vector12<rgbf> lightGrid;
     renderer_light(renderer* parent):renderer_wrap(parent),light_adaptation(1)
     {
         reinitLightGrid();
@@ -249,19 +249,19 @@ class lightThreadDispatch
 public:
     DFHack::rect2d viewPort;
 
-    std::vector<lightThread*> threadPool;
-    std::vector<lightSource>& lights;
+    std::vector12<lightThread*> threadPool;
+    std::vector12<lightSource>& lights;
 
     tthread::mutex occlusionMutex;
     tthread::condition_variable occlusionDone; //all threads wait for occlusion to finish
     bool occlusionReady;
     tthread::mutex unprocessedMutex;
     std::stack<DFHack::rect2d> unprocessed; //stack of parts of map where lighting is not finished
-    std::vector<rgbf>& occlusion;
+    std::vector12<rgbf>& occlusion;
     int& num_diffusion;
 
     tthread::mutex writeLock; //mutex for lightMap
-    std::vector<rgbf>& lightMap;
+    std::vector12<rgbf>& lightMap;
 
     tthread::condition_variable writesDone;
     int writeCount;
@@ -278,7 +278,7 @@ public:
 };
 class lightThread
 {
-    std::vector<rgbf> canvas;
+    std::vector12<rgbf> canvas;
     lightThreadDispatch& dispatch;
     DFHack::rect2d myRect;
     void work(); //main light calculation function
@@ -348,10 +348,10 @@ private:
     void doSun(const lightSource& sky,MapExtras::MapCache& map);
     void doOcupancyAndLights();
     rgbf propogateSun(MapExtras::Block* b, int x,int y,const rgbf& in,bool lastLevel);
-    void doRay(std::vector<rgbf> & target, rgbf power,int cx,int cy,int tx,int ty);
+    void doRay(std::vector12<rgbf> & target, rgbf power,int cx,int cy,int tx,int ty);
     void doFovs();
-    void doLight(std::vector<rgbf> & target, int index);
-    rgbf lightUpCell(std::vector<rgbf> & target, rgbf power,int dx,int dy,int tx,int ty);
+    void doLight(std::vector12<rgbf> & target, int index);
+    rgbf lightUpCell(std::vector12<rgbf> & target, rgbf power,int dx,int dy,int tx,int ty);
     bool addLight(int tileId,const lightSource& light);
     void addOclusion(int tileId,const rgbf& c,float thickness);
 
@@ -374,9 +374,9 @@ private:
         return df::coord2d(index/h, index%h);
     }
     //maps
-    std::vector<rgbf> lightMap;
-    std::vector<rgbf> ocupancy;
-    std::vector<lightSource> lights;
+    std::vector12<rgbf> lightMap;
+    std::vector12<rgbf> ocupancy;
+    std::vector12<lightSource> lights;
 
     //Threading stuff
     int num_diffuse; //under same lock as ocupancy
@@ -395,7 +395,7 @@ private:
     //settings
     float daySpeed;
     float dayHour; //<0 to cycle
-    std::vector<rgbf> dayColors; // a gradient of colors, first to 0, last to 24
+    std::vector12<rgbf> dayColors; // a gradient of colors, first to 0, last to 24
     ///set up sane settings if setting file does not exist.
     void defaultSettings();
 

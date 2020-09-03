@@ -1,26 +1,26 @@
 #include "buildingplan-lib.h"
 #include <fstream>
-#include <vector>
+
 #include "modules/Filesystem.h"
 
 DFHACK_PLUGIN("fortplan");
 #define PLUGIN_VERSION 0.15
 
-command_result fortplan(color_ostream &out, vector<string> & params);
+command_result fortplan(color_ostream &out, std::vector12<std::string24> & params);
 
 struct BuildingInfo {
-    std::string code;
+    std::string24 code;
     df::building_type type;
     df::furnace_type furnaceType;
     df::workshop_type workshopType;
     df::trap_type trapType;
-    std::string name;
+    std::string24 name;
     bool variableSize;
     int defaultHeight;
     int defaultWidth;
     bool hasCustomOptions;
 
-    BuildingInfo(std::string theCode, df::building_type theType, std::string theName, int height, int width) {
+    BuildingInfo(std::string24 theCode, df::building_type theType, std::string24 theName, int height, int width) {
         code = theCode;
         type = theType;
         name = theName;
@@ -37,10 +37,10 @@ struct BuildingInfo {
 
 class MatchesCode
 {
-    std::string _code;
+    std::string24 _code;
 
 public:
-    MatchesCode(const std::string &code) : _code(code) {}
+    MatchesCode(const std::string24 &code) : _code(code) {}
 
     bool operator()(const BuildingInfo &check) const
     {
@@ -48,9 +48,9 @@ public:
     }
 };
 
-std::vector<BuildingInfo> buildings;
+std::vector12<BuildingInfo> buildings;
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands) {
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands) {
     commands.push_back(PluginCommand("fortplan","Lay out buildings from a Quickfort-style CSV file.",fortplan,false,
         "Lay out buildings in your fortress based on a Quickfort-style CSV input file.\n"
         "Usage: fortplan [filename]\n"));
@@ -113,14 +113,14 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-std::vector<std::vector<std::string>> tokenizeFile(std::string filename) {
+std::vector12<std::vector12<std::string24>> tokenizeFile(std::string24 filename) {
     std::ifstream infile(filename.c_str());
-    std::vector<std::vector<std::string>> fileTokens(128, std::vector<std::string>(128));
-    std::vector<std::vector<std::string>>::size_type x, y;
+    std::vector12<std::vector12<std::string24>> fileTokens(128, std::vector12<std::string24>(128));
+    std::vector12<std::vector12<std::string24>>::size_type x, y;
     if (!infile.good()) {
         throw -1;
     }
-    std::string line;
+    std::string24 line;
     y = 0;
     while (std::getline(infile, line)) {
         x = 0;
@@ -130,7 +130,7 @@ std::vector<std::vector<std::string>> tokenizeFile(std::string filename) {
         }
         int start = 0;
         size_t nextInd = line.find(',');
-        std::string curCell = line.substr(start,nextInd-start);
+        std::string24 curCell = line.substr(start,nextInd-start);
         do {
             fileTokens[y][x] = curCell;
             start = nextInd+1;
@@ -143,10 +143,10 @@ std::vector<std::vector<std::string>> tokenizeFile(std::string filename) {
     return fileTokens;
 }
 
-command_result fortplan(color_ostream &out, vector<string> & params) {
+command_result fortplan(color_ostream &out, std::vector12<std::string24> & params) {
 
     color_ostream & con = out;
-    std::vector<std::vector<std::string>> layout(128, std::vector<std::string>(128));
+    std::vector12<std::vector12<std::string24>> layout(128, std::vector12<std::string24>(128));
     if (params.size()) {
         coord32_t cursor;
         coord32_t userCursor;
@@ -158,8 +158,8 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
         DFHack::Gui::getCursorCoords(startCursor.x, startCursor.y, startCursor.z);
         userCursor = startCursor;
 
-        std::string cwd = Filesystem::getcwd();
-        std::string filename = cwd+"/"+params[0];
+        std::string24 cwd = Filesystem::getcwd();
+        std::string24 filename = cwd+"/"+params[0];
         con.print("Loading file '%s'...\n",filename.c_str());
         try {
             layout = tokenizeFile(filename);
@@ -171,7 +171,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
             plugin_enable(out, true);
         }
         con.print("Loaded.\n");
-        std::vector<std::vector<std::string>>::size_type x, y;
+        std::vector12<std::vector12<std::string24>>::size_type x, y;
         bool started = false;
         for (y = 0; y < layout.size(); y++) {
             x = 0;
@@ -181,12 +181,12 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                 if (startLoc != layout[y][x].npos) {
                     startLoc += 6;
                     size_t nextDelimiter = layout[y][x].find(";",startLoc);
-                    std::string startXStr = layout[y][x].substr(startLoc,nextDelimiter-startLoc);
+                    std::string24 startXStr = layout[y][x].substr(startLoc,nextDelimiter-startLoc);
                     //int startXOffset = std::stoi(startXStr);
                     int startXOffset = atoi(startXStr.c_str());
                     startLoc = nextDelimiter+1;
                     nextDelimiter = layout[y][x].find(";",startLoc);
-                    std::string startYStr = layout[y][x].substr(startLoc,nextDelimiter-startLoc);
+                    std::string24 startYStr = layout[y][x].substr(startLoc,nextDelimiter-startLoc);
                     //int startYOffset = std::stoi(startYStr);
                     int startYOffset = atoi(startYStr.c_str());
                     startCursor.x -= startXOffset;
@@ -197,7 +197,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                     size_t startEnd = layout[y][x].find(")",nextDelimiter);
 
                     con.print("Starting at (%d,%d,%d) which is described as: %s\n",startCursor.x,startCursor.y,startCursor.z,layout[y][x].substr(nextDelimiter+1,startEnd-nextDelimiter).c_str());
-                    std::string desc = layout[y][x].substr(startEnd+1);
+                    std::string24 desc = layout[y][x].substr(startEnd+1);
                     if (desc.size()>0) {
                         con.print("Description of this plan: %s\n",desc.c_str());
                     }
@@ -217,14 +217,14 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
 
                 if (strcmp(layout[y][x].c_str(),"`")!=0) {
                     size_t dataIndex = layout[y][x].find("(");
-                    std::string curCode;
-                    std::vector<std::string> curData;
+                    std::string24 curCode;
+                    std::vector12<std::string24> curData;
                     if (dataIndex != layout[y][x].npos) {
                         curCode = layout[y][x].substr(0,dataIndex);
                         int dataStart = dataIndex+1;
                         size_t nextDataStart = layout[y][x].find(",",dataStart);
                         while (nextDataStart!=layout[y][x].npos) {
-                            std::string nextData = layout[y][x].substr(dataStart,nextDataStart);
+                            std::string24 nextData = layout[y][x].substr(dataStart,nextDataStart);
                             if (strcmp(nextData.substr(nextData.size()-1,1).c_str(),")")==0) {
                                 nextData = nextData.substr(0,nextData.size()-1);
                             }
@@ -236,7 +236,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                         curCode = layout[y][x];
                     }
                     //con.print("Found a cell with '%s' in it (layout[y][x] %d:%d-%d)\n",layout[y][x].c_str(),lineNum,start,nextInd);
-                    std::vector<BuildingInfo>::const_iterator buildingIndex =
+                    std::vector12<BuildingInfo>::const_iterator buildingIndex =
                         std::find_if(buildings.begin(), buildings.end(), MatchesCode(curCode.c_str()));
 
                     // = std::find(validInstructions.begin(), validInstructions.end(), layout[y][x]);
@@ -255,7 +255,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                             if (!buildingInfo.variableSize) {
                                 bool single = true;
                                 bool block = true;
-                                std::vector<std::vector<std::string>>::size_type checkX, checkY;
+                                std::vector12<std::vector12<std::string24>>::size_type checkX, checkY;
                                 int yOffset = ((buildingInfo.defaultHeight-1)/2);
                                 int xOffset = ((buildingInfo.defaultWidth-1)/2);
                                 //con.print(" - Checking to see if it's a single, with %d<=x<%d and %d<=y<%d...\n",x-xOffset,x+xOffset,y-yOffset,y+yOffset);
@@ -266,7 +266,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                                             continue;
                                         }
                                         size_t checkDataIndex = layout[checkY][checkX].find("(");
-                                        std::string checkCode;
+                                        std::string24 checkCode;
                                         if (checkDataIndex != layout[checkY][checkX].npos) {
                                             checkCode = layout[checkY][checkX].substr(0,checkDataIndex);
                                         } else {
@@ -274,7 +274,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                                         }
 
                                         con.print(" - Code at (%zu,%zu) is '%s': ",checkX,checkY,checkCode.c_str());
-                                        std::vector<BuildingInfo>::const_iterator checkIndex =
+                                        std::vector12<BuildingInfo>::const_iterator checkIndex =
                                             std::find_if(buildings.begin(), buildings.end(), MatchesCode(checkCode.c_str()));
                                         //if (checkIndex == buildings.end()) {
                                         //    con.print("this is not a valid code, so we keep going.\n");
@@ -304,7 +304,7 @@ command_result fortplan(color_ostream &out, vector<string> & params) {
                                                 continue;
                                             }
                                             size_t checkDataIndex = layout[checkY][checkX].find("(");
-                                            std::string checkCode;
+                                            std::string24 checkCode;
                                             if (checkDataIndex != layout[checkY][checkX].npos) {
                                                 checkCode = layout[checkY][checkX].substr(0,checkDataIndex);
                                             } else {

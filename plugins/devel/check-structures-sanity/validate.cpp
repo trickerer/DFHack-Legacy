@@ -329,12 +329,12 @@ size_t Checker::get_allocated_size(const QueueItem & item)
 }
 
 #ifndef WIN32
-const std::string *Checker::validate_stl_string_pointer(const void *const* base)
+const std::string24 *Checker::validate_stl_string_pointer(const void *const* base)
 {
-    std::string empty_string;
+    std::string24 empty_string;
     if (*base == *reinterpret_cast<void **>(&empty_string))
     {
-        return reinterpret_cast<const std::string *>(base);
+        return reinterpret_cast<const std::string24 *>(base);
     }
 
     const struct string_data_inner
@@ -384,7 +384,7 @@ const std::string *Checker::validate_stl_string_pointer(const void *const* base)
         return nullptr;
     }
 
-    return reinterpret_cast<const std::string *>(base);
+    return reinterpret_cast<const std::string24 *>(base);
 }
 #endif
 

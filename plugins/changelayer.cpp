@@ -24,14 +24,14 @@ using namespace DFHack;
 using namespace df::enums;
 using namespace std;
 
-using std::vector;
-using std::string;
+
+
 
 DFHACK_PLUGIN("changelayer");
 REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cursor);
 
-const string changelayer_help =
+const std::string24 changelayer_help =
     "  Allows to change the material of whole geology layers.\n"
     "  Can have impact on all surrounding regions, not only your embark!\n"
     "  By default changing stone to soil and vice versa is not allowed.\n"
@@ -69,7 +69,7 @@ const string changelayer_help =
     "  changelayer MARBLE allbiomes alllayers\n"
     "    Convert all layers of all biomes into marble.\n";
 
-const string changelayer_trouble =
+const std::string24 changelayer_trouble =
     "Known problems with changelayer:\n\n"
     "  Nothing happens, the material stays the old.\n"
     "    Pause/unpause the game and/or move the cursor a bit. Then retry.\n"
@@ -81,14 +81,14 @@ const string changelayer_trouble =
     "    and stone layer type or the other way round.\n";
 
 
-command_result changelayer (color_ostream &out, std::vector <std::string> & parameters);
+command_result changelayer (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "changelayer", "Change a whole geology layer.",
         changelayer, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         changelayer_help.c_str()
     ));
     return CR_OK;
@@ -105,11 +105,11 @@ bool conversionAllowed(color_ostream &out, MaterialInfo mi, MaterialInfo ml, boo
 // in case multiple biomes and/or layers are going to be changed
 static bool warned = false;
 
-command_result changelayer (color_ostream &out, std::vector <std::string> & parameters)
+command_result changelayer (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
-    string material;
+    std::string24 material;
     bool force = false;
     bool all_biomes = false;
     bool all_layers = false;
@@ -219,7 +219,7 @@ command_result changelayer (color_ostream &out, std::vector <std::string> & para
 
     // no need to touch the same geology more than once
     // though it wouldn't matter much since there is not much data to be processed
-    vector<uint16_t> v_geoprocessed;
+    std::vector12<uint16_t> v_geoprocessed;
     v_geoprocessed.clear();
 
     // iterate over 8 surrounding regions + local region
@@ -282,7 +282,7 @@ command_result changelayer (color_ostream &out, std::vector <std::string> & para
             continue;
         }
 
-        vector <df::world_geo_layer*> &geolayers = geo_biome->layers;
+        std::vector12<df::world_geo_layer*> &geolayers = geo_biome->layers;
 
         // complain if layer is out of range
         // geology has up to 16 layers currently, but can have less!

@@ -453,9 +453,9 @@ cost_t getEdgeCostOld(color_ostream& out, df::coord pt1, df::coord pt2) {
 }
 */
 
-vector<Edge>* getEdgeSet(color_ostream &out, df::coord point, MapExtras::MapCache& cache, int32_t xMax, int32_t yMax, int32_t zMax, DigAbilities& abilities) {
-    //vector<Edge>* result = new vector<Edge>(26);
-    vector<Edge>* result = new vector<Edge>();
+std::vector12<Edge>* getEdgeSet(color_ostream &out, df::coord point, MapExtras::MapCache& cache, int32_t xMax, int32_t yMax, int32_t zMax, DigAbilities& abilities) {
+    //std::vector12<Edge>* result = new std::vector12<Edge>(26);
+    std::vector12<Edge>* result = new std::vector12<Edge>();
     result->reserve(26);
 
     //size_t count = 0;

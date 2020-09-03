@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <map>
-#include <string>
-#include <vector>
+
+
 
 #include "DataDefs.h"
 #include "Export.h"
@@ -29,13 +29,13 @@ REQUIRE_GLOBAL(cur_year);
 REQUIRE_GLOBAL(cur_year_tick);
 
 typedef df::unit_personality::T_emotions Emotion;
-typedef std::vector<Emotion*> emoVec;
+typedef std::vector12<Emotion*> emoVec;
 
 static int factor = 1;
 static int tick = 0;
 const int INTERVAL = 1000;
 
-command_result misery(color_ostream& out, vector<string>& parameters);
+command_result misery(color_ostream& out, std::vector12<std::string24>& parameters);
 void add_misery(df::unit *unit);
 void clear_misery(df::unit *unit);
 
@@ -134,8 +134,8 @@ DFhackCExport command_result plugin_onupdate(color_ostream& out) {
 
     //TODO: consider units.active
     //for (df::unit *unit : world->units.all) {
-    std::vector<df::unit*> const& ua_vec = world->units.all;
-    for (std::vector<df::unit*>::const_iterator cit = ua_vec.begin(); cit != ua_vec.end(); ++cit)
+    std::vector12<df::unit*> const& ua_vec = world->units.all;
+    for (std::vector12<df::unit*>::const_iterator cit = ua_vec.begin(); cit != ua_vec.end(); ++cit)
     {
         if (is_valid_unit(*cit)) {
             add_misery(*cit);
@@ -145,7 +145,7 @@ DFhackCExport command_result plugin_onupdate(color_ostream& out) {
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init(color_ostream& out, vector<PluginCommand> &commands) {
+DFhackCExport command_result plugin_init(color_ostream& out, std::vector12<PluginCommand> &commands) {
     commands.push_back(PluginCommand("misery", "increase the intensity of negative dwarven thoughts",
         &misery, false,
         "misery: When enabled, every new negative dwarven thought will be multiplied by a factor (2 by default).\n"
@@ -176,7 +176,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-command_result misery(color_ostream &out, vector<string>& parameters) {
+command_result misery(color_ostream &out, std::vector12<std::string24>& parameters) {
     if ( !world || !world->map.block_index ) {
         out.printerr("misery can only be enabled in fortress mode with a fully-loaded game.\n");
         return CR_FAILURE;
@@ -207,8 +207,8 @@ command_result misery(color_ostream &out, vector<string>& parameters) {
         tick = INTERVAL;
     } else if ( parameters[0] == "clear" ) {
         //for (df::unit *unit : world->units.all) {
-        std::vector<df::unit*> const& ua_vec = world->units.all;
-        for (std::vector<df::unit*>::const_iterator cit = ua_vec.begin(); cit != ua_vec.end(); ++cit)
+        std::vector12<df::unit*> const& ua_vec = world->units.all;
+        for (std::vector12<df::unit*>::const_iterator cit = ua_vec.begin(); cit != ua_vec.end(); ++cit)
         {
             if (is_valid_unit(*cit)) {
                 clear_misery(*cit);

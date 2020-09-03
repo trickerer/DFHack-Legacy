@@ -6,8 +6,8 @@
 - rollDouble(min, max)
 - rollNormal(mean, std_deviation)
 - rollBool(chance_for_true)
-- resetIndexRolls(string, array_length)  --String identifies the instance of SimpleNumDistribution to reset
-- rollIndex(string, array_length)        --String identifies the instance of SimpleNumDistribution to use
+- resetIndexRolls(std::string24, array_length)  --String identifies the instance of SimpleNumDistribution to reset
+- rollIndex(std::string24, array_length)        --String identifies the instance of SimpleNumDistribution to use
                                          --(Shuffles a vector of indices, Next() increments through then reshuffles when end() is reached)
 Author:  Josh Cooper
 Created: Dec. 13 2017
@@ -246,7 +246,7 @@ private:
 };
 // END SFMT
 
-#include <vector>
+
 #include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
@@ -264,7 +264,7 @@ DFHACK_PLUGIN("cxxrandom");
 #define PLUGIN_VERSION 2.0
 color_ostream *cout = NULL;
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     cout = &out;
     return CR_OK;
@@ -365,7 +365,7 @@ class NumberSequence
 {
 private:
     unsigned short m_position;
-    std::vector<int64_t> m_numbers;
+    std::vector12<int64_t> m_numbers;
 public:
     NumberSequence(){m_position = 0;}
     NumberSequence( int64_t start, int64_t end )
@@ -394,7 +394,7 @@ public:
     void Print()
     {
         //for( auto v : m_numbers )
-        for (std::vector<int64_t>::const_iterator ci = m_numbers.begin(); ci != m_numbers.end(); ++ci)
+        for (std::vector12<int64_t>::const_iterator ci = m_numbers.begin(); ci != m_numbers.end(); ++ci)
         {
             cout->print( INT64FMT " ", *ci );
         }

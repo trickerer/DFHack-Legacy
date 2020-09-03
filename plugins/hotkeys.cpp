@@ -13,13 +13,13 @@
 DFHACK_PLUGIN("hotkeys");
 #define PLUGIN_VERSION 0.1
 
-static map<string, string> current_bindings;
-static vector<string> sorted_keys;
+static map<std::string24, std::string24> current_bindings;
+static std::vector12<std::string24> sorted_keys;
 static bool show_usage = false;
 
-static bool can_invoke(string cmdline, df::viewscreen *screen)
+static bool can_invoke(std::string24 cmdline, df::viewscreen *screen)
 {
-    vector<string> cmd_parts;
+    std::vector12<std::string24> cmd_parts;
     split_string(&cmd_parts, cmdline, " ");
     if (toLower(cmd_parts[0]) == "hotkeys")
         return false;
@@ -27,14 +27,14 @@ static bool can_invoke(string cmdline, df::viewscreen *screen)
     return Core::getInstance().getPluginManager()->CanInvokeHotkey(cmd_parts[0], screen);
 }
 
-static void add_binding_if_valid(string sym, string cmdline, df::viewscreen *screen)
+static void add_binding_if_valid(std::string24 sym, std::string24 cmdline, df::viewscreen *screen)
 {
     if (!can_invoke(cmdline, screen))
         return;
 
     current_bindings[sym] = cmdline;
     sorted_keys.push_back(sym);
-    string keyspec = sym + "@dfhack/viewscreen_hotkeys";
+    std::string24 keyspec = sym + "@dfhack/viewscreen_hotkeys";
     Core::getInstance().AddKeyBinding(keyspec, "hotkeys invoke " + int_to_string(sorted_keys.size() - 1));
 }
 
@@ -43,10 +43,10 @@ static void find_active_keybindings(df::viewscreen *screen)
     current_bindings.clear();
     sorted_keys.clear();
 
-    vector<string> valid_keys;
+    std::vector12<std::string24> valid_keys;
     for (char c = 'A'; c <= 'Z'; c++)
     {
-        valid_keys.push_back(string(&c, 1));
+        valid_keys.push_back(std::string24(&c, 1));
     }
 
     for (int i = 1; i < 10; i++)
@@ -54,37 +54,37 @@ static void find_active_keybindings(df::viewscreen *screen)
         valid_keys.push_back("F" + int_to_string(i));
     }
 
-    std::string current_focus = Gui::getFocusString(screen);
+    std::string24 current_focus = Gui::getFocusString(screen);
     for (int shifted = 0; shifted < 2; shifted++)
     {
         for (int ctrl = 0; ctrl < 2; ctrl++)
         {
             for (int alt = 0; alt < 2; alt++)
             {
-                for (vector<string>::const_iterator it = valid_keys.begin(); it != valid_keys.end(); it++)
+                for (std::vector12<std::string24>::const_iterator it = valid_keys.begin(); it != valid_keys.end(); it++)
                 {
-                    string sym;
+                    std::string24 sym;
                     if (shifted) sym += "Shift-";
                     if (ctrl) sym += "Ctrl-";
                     if (alt) sym += "Alt-";
                     sym += *it;
 
-                    vector<string> list = Core::getInstance().ListKeyBindings(sym);
-                    for (vector<string>::const_iterator invoke_cmd = list.begin(); invoke_cmd != list.end(); invoke_cmd++)
+                    std::vector12<std::string24> list = Core::getInstance().ListKeyBindings(sym);
+                    for (std::vector12<std::string24>::const_iterator invoke_cmd = list.begin(); invoke_cmd != list.end(); invoke_cmd++)
                     {
                         bool add_temp_binding = false;
-                        if (invoke_cmd->find(":") == string::npos)
+                        if (invoke_cmd->find(":") == std::string24::npos)
                         {
                             add_binding_if_valid(sym, *invoke_cmd, screen);
                         }
                         else
                         {
-                            vector<string> tokens;
+                            std::vector12<std::string24> tokens;
                             split_string(&tokens, *invoke_cmd, ":");
-                            string focus = tokens[0].substr(1);
+                            std::string24 focus = tokens[0].substr(1);
                             if (prefix_matches(focus, current_focus))
                             {
-                                string cmdline = trim(tokens[1]);
+                                std::string24 cmdline = trim(tokens[1]);
                                 add_binding_if_valid(sym, cmdline, screen);
                             }
                         }
@@ -95,7 +95,7 @@ static void find_active_keybindings(df::viewscreen *screen)
     }
 }
 
-static bool clear_bindings(const string& sym)
+static bool clear_bindings(const std::string24& sym)
 {
     return Core::getInstance().ClearKeyBindings(sym + "@dfhack/viewscreen_hotkeys");
 }
@@ -107,7 +107,7 @@ static bool close_hotkeys_screen()
         return false;
 
     Screen::dismiss(Core::getTopViewscreen());
-    //for_each_(sorted_keys, [] (const string &sym)
+    //for_each_(sorted_keys, [] (const std::string24 &sym)
     //    { Core::getInstance().ClearKeyBindings(sym + "@dfhack/viewscreen_hotkeys"); });
     for_each_(sorted_keys, &clear_bindings);
     sorted_keys.clear();
@@ -120,7 +120,7 @@ static void invoke_command(const size_t index)
     if (sorted_keys.size() <= index)
         return;
 
-    string cmd = current_bindings[sorted_keys[index]];
+    std::string24 cmd = current_bindings[sorted_keys[index]];
     if (close_hotkeys_screen())
     {
         Core::getInstance().setHotkeyCmd(cmd);
@@ -130,7 +130,7 @@ static void invoke_command(const size_t index)
 struct GetMaxStringLen {
 public:
     explicit GetMaxStringLen(size_t* base_len) { len = base_len; }
-    void operator()(const string& sym) {
+    void operator()(const std::string24& sym) {
         if (sym.length() > *len) { *len = sym.length(); }
     }
 private:
@@ -157,14 +157,14 @@ public:
         hotkeys_column.clear();
 
         size_t max_key_length = 0;
-        //for_each_(sorted_keys, [&] (const string &sym)
+        //for_each_(sorted_keys, [&] (const std::string24 &sym)
         //{ if (sym.length() > max_key_length) { max_key_length = sym.length(); } });
         for_each_(sorted_keys, GetMaxStringLen(&max_key_length));
         int padding = max_key_length + 2;
 
         for (size_t i = 0; i < sorted_keys.size(); i++)
         {
-            string text = pad_string(sorted_keys[i], padding, false);
+            std::string24 text = pad_string(sorted_keys[i], padding, false);
             text += current_bindings[sorted_keys[i]];
             hotkeys_column.add(text, i+1);
 
@@ -174,7 +174,7 @@ public:
         hotkeys_column.filterDisplay();
     }
 
-    void feed(set<df::interface_key> *input)
+    void feed(std::set8<df::interface_key> *input)
     {
         if (hotkeys_column.feed(input))
             return;
@@ -226,12 +226,12 @@ public:
         x = help_start;
 
         int32 width = gps->dimx - help_start - 2;
-        vector <string> parts;
+        std::vector12<std::string24> parts;
         Core::cheap_tokenise(current_bindings[sorted_keys[hotkeys_column.highlighted_index]], parts);
         if(parts.size() == 0)
             return;
 
-        string first = parts[0];
+        std::string24 first = parts[0];
         parts.erase(parts.begin());
 
         if (first[0] == '#')
@@ -246,16 +246,16 @@ public:
                 if (pc.name == first)
                 {
                     OutputString(COLOR_BROWN, x, y, "Help", true, help_start);
-                    vector <string> lines;
-                    string help_text = pc.description;
+                    std::vector12<std::string24> lines;
+                    std::string24 help_text = pc.description;
                     if (show_usage)
                         help_text += "\n\n" + pc.usage;
 
                     split_string(&lines, help_text, "\n");
-                    for (vector<string>::const_iterator it = lines.begin(); it != lines.end() && y < gps->dimy - 4; it++)
+                    for (std::vector12<std::string24>::const_iterator it = lines.begin(); it != lines.end() && y < gps->dimy - 4; it++)
                     {
-                        vector<string> wrapped_lines = wrapString(*it, width);
-                        for (vector<string>::const_iterator wit =
+                        std::vector12<std::string24> wrapped_lines = wrapString(*it, width);
+                        for (std::vector12<std::string24>::const_iterator wit =
                             wrapped_lines.begin(); wit != wrapped_lines.end() && y < gps->dimy - 4; wit++)
                         {
                             OutputString(COLOR_WHITE, x, y, *wit, true, help_start);
@@ -267,7 +267,7 @@ public:
         }
     }
 
-    virtual std::string getFocusString()
+    virtual std::string24 getFocusString()
     {
         return "viewscreen_hotkeys";
     }
@@ -275,7 +275,7 @@ public:
 private:
     ListColumn<int> hotkeys_column;
     df::viewscreen *top_screen;
-    string focus;
+    std::string24 focus;
 
     int32_t help_start;
 
@@ -285,15 +285,15 @@ private:
         hotkeys_column.resize();
     }
 
-    static vector<string> wrapString(string str, int width)
+    static std::vector12<std::string24> wrapString(std::string24 str, int width)
     {
-        vector<string> result;
-        string excess;
+        std::vector12<std::string24> result;
+        std::string24 excess;
         if (int(str.length()) > width)
         {
-            string::size_type cut_space = str.rfind(' ', width-1);
+            std::string24::size_type cut_space = str.rfind(' ', width-1);
             int excess_start;
-            if (cut_space == string::npos)
+            if (cut_space == std::string24::npos)
             {
                 cut_space = width-1;
                 excess_start = cut_space;
@@ -303,10 +303,10 @@ private:
                 excess_start = cut_space + 1;
             }
 
-            string line = str.substr(0, cut_space);
+            std::string24 line = str.substr(0, cut_space);
             excess = str.substr(excess_start);
             result.push_back(line);
-            vector<string> excess_lines = wrapString(excess, width);
+            std::vector12<std::string24> excess_lines = wrapString(excess, width);
             result.insert(result.end(), excess_lines.begin(), excess_lines.end());
         }
         else
@@ -319,7 +319,7 @@ private:
 };
 
 
-static command_result hotkeys_cmd(color_ostream &out, vector <string> & parameters)
+static command_result hotkeys_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool show_help = false;
     if (parameters.empty())
@@ -359,7 +359,7 @@ static command_result hotkeys_cmd(color_ostream &out, vector <string> & paramete
 }
 
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (!gps)
         out.printerr("Could not insert hotkeys hooks!\n");

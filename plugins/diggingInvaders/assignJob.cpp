@@ -52,8 +52,8 @@ void getRidOfOldJob(df::unit* unit) {
     //delete job;
 }
 
-//int32_t assignJob(color_ostream& out, Edge firstImportantEdge, unordered_map<df::coord,df::coord,PointHash> parentMap, unordered_map<df::coord,cost_t,PointHash>& costMap, vector<int32_t>& invaders, unordered_set<df::coord,PointHash>& requiresZNeg, unordered_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities ) {
-int32_t assignJob(color_ostream& out, Edge firstImportantEdge, Points parentMap, Costs& costMap, vector<int32_t>& invaders, hash_set<df::coord,PointHash>& requiresZNeg, hash_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities) {
+//int32_t assignJob(color_ostream& out, Edge firstImportantEdge, unordered_map<df::coord,df::coord,PointHash> parentMap, unordered_map<df::coord,cost_t,PointHash>& costMap, std::vector12<int32_t>& invaders, unordered_set<df::coord,PointHash>& requiresZNeg, unordered_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities ) {
+int32_t assignJob(color_ostream& out, Edge firstImportantEdge, Points parentMap, Costs& costMap, std::vector12<int32_t>& invaders, hash_set<df::coord,PointHash>& requiresZNeg, hash_set<df::coord,PointHash>& requiresZPos, MapExtras::MapCache& cache, DigAbilities& abilities) {
     df::unit* firstInvader = df::unit::find(invaders[0]);
     if ( !firstInvader ) {
         return -1;
@@ -252,10 +252,10 @@ int32_t assignJob(color_ostream& out, Edge firstImportantEdge, Points parentMap,
             prod->count = 1;
             prod->product_dimension = 1;
 
-            vector<df::reaction_product*> out_products;
-            vector<df::item*> out_items;
-            vector<df::reaction_reagent*> in_reag;
-            vector<df::item*> in_items;
+            std::vector12<df::reaction_product*> out_products;
+            std::vector12<df::item*> out_items;
+            std::vector12<df::reaction_reagent*> in_reag;
+            std::vector12<df::item*> in_items;
             prod->produce(firstInvader, &out_products, &out_items, &in_reag, &in_items, 1, df::job_skill::NONE,
                 0, df::historical_entity::find(firstInvader->civ_id),
                 df::world_site::find(df::global::ui->site_id), NULL);

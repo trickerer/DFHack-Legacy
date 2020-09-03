@@ -1,5 +1,5 @@
 // (un)designate matching plants for gathering/cutting
-#include <set>
+
 
 #include "Core.h"
 #include "Console.h"
@@ -24,9 +24,9 @@
 #include "modules/Maps.h"
 #include "modules/Materials.h"
 
-using std::string;
-using std::vector;
-using std::set;
+
+
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -339,12 +339,12 @@ bool designate(const df::plant *plant, bool farming) {
     return false;
 }
 
-command_result df_getplants (color_ostream &out, vector <string> & parameters)
+command_result df_getplants (color_ostream &out, std::vector12<std::string24> & parameters)
 {
-    string plantMatStr = "";
-    std::vector<PlantSelectability> plantSelections;
-    std::vector<size_t> collectionCount;
-    set<string> plantNames;
+    std::string24 plantMatStr = "";
+    std::vector12<PlantSelectability> plantSelections;
+    std::vector12<size_t> collectionCount;
+    std::set8<std::string24> plantNames;
     bool deselect = false, exclude = false, treesonly = false, shrubsonly = false, all = false, verbose = false, farming = false;
     size_t maxCount = 999999;
     int count = 0;
@@ -470,7 +470,7 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
     if (plantNames.size() > 0)
     {
         out.printerr("Invalid plant ID(s):");
-        for (set<string>::const_iterator it = plantNames.begin(); it != plantNames.end(); it++)
+        for (std::set8<std::string24>::const_iterator it = plantNames.begin(); it != plantNames.end(); it++)
             out.printerr(" %s", it->c_str());
         out.printerr("\n");
         return CR_FAILURE;
@@ -587,7 +587,7 @@ command_result df_getplants (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "getplants", "Cut down trees or gather shrubs by ID",

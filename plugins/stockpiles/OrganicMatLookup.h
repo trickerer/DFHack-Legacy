@@ -29,18 +29,18 @@ public:
         df::caste_raw * caste;
         FoodMat() : material ( -1 ), creature ( 0 ), caste ( 0 ) {}
     };
-    static void food_mat_by_idx ( std::ostream &out, df::enums::organic_mat_category::organic_mat_category mat_category, std::vector<int16_t>::size_type food_idx, FoodMat & food_mat );
-    static std::string food_token_by_idx ( std::ostream &out, df::enums::organic_mat_category::organic_mat_category mat_category, std::vector<int16_t>::size_type idx );
+    static void food_mat_by_idx ( std::ostream &out, df::enums::organic_mat_category::organic_mat_category mat_category, std::vector12<int16_t>::size_type food_idx, FoodMat & food_mat );
+    static std::string24 food_token_by_idx ( std::ostream &out, df::enums::organic_mat_category::organic_mat_category mat_category, std::vector12<int16_t>::size_type idx );
 
     static size_t food_max_size ( df::enums::organic_mat_category::organic_mat_category mat_category );
     static void food_build_map ( std::ostream &out );
 
-    static int16_t food_idx_by_token ( std::ostream &out, df::enums::organic_mat_category::organic_mat_category mat_category, const std::string & token );
+    static int16_t food_idx_by_token ( std::ostream &out, df::enums::organic_mat_category::organic_mat_category mat_category, const std::string24 & token );
 
-    static DFHack::MaterialInfo food_mat_by_token ( std::ostream &out, const std::string & token );
+    static DFHack::MaterialInfo food_mat_by_token ( std::ostream &out, const std::string24 & token );
 
     static bool index_built;
-    static std::vector<FoodMatMap> food_index;
+    static std::vector12<FoodMatMap> food_index;
 private:
     OrganicMatLookup();
 };

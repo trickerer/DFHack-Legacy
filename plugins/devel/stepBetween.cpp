@@ -16,20 +16,20 @@ using namespace df::enums;
 
 
 
-command_result stepBetween (color_ostream &out, std::vector <std::string> & parameters);
+command_result stepBetween (color_ostream &out, std::vector12<std::string24> & parameters);
 
 // A plugin must be able to return its name and version.
-// The name string provided must correspond to the filename - skeleton.plug.so or skeleton.plug.dll in this case
+// The name std::string24 provided must correspond to the filename - skeleton.plug.so or skeleton.plug.dll in this case
 DFHACK_PLUGIN("stepBetween");
 
 // Mandatory init function. If you have some global state, create it here.
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     // Fill the command list with your commands.
     commands.push_back(PluginCommand(
         "stepBetween", "Do nothing, look pretty.",
         stepBetween, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         "  This command does nothing at all.\n"
     ));
     return CR_OK;
@@ -77,7 +77,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 df::coord prev;
 
 // A command! It sits around and looks pretty. And it's nice and friendly.
-command_result stepBetween (color_ostream &out, std::vector <std::string> & parameters)
+command_result stepBetween (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     df::coord bob = Gui::getCursorPos();
     out.print("(%d,%d,%d), (%d,%d,%d): canStepBetween = %d, canWalkBetween = %d\n", prev.x, prev.y, prev.z, bob.x, bob.y, bob.z, Maps::canStepBetween(prev, bob), Maps::canWalkBetween(prev,bob));

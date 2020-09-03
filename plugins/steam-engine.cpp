@@ -1,9 +1,9 @@
-#include <vector>
+
 #include <cstdio>
 #include <stack>
-#include <string>
+
 #include <cmath>
-#include <string.h>
+
 
 #include "Console.h"
 #include "Core.h"
@@ -113,10 +113,10 @@
  * being generated.
  */
 
-using std::vector;
-using std::string;
+
+
 using std::stack;
-using std::set;
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -140,13 +140,13 @@ struct steam_engine_workshop {
     int max_power, max_capacity;
     int wear_temp;
     // Special tiles (relative position)
-    std::vector<df::coord2d> gear_tiles;
+    std::vector12<df::coord2d> gear_tiles;
     df::coord2d hearth_tile;
     df::coord2d water_tile;
     df::coord2d magma_tile;
 };
 
-std::vector<steam_engine_workshop> engines;
+std::vector12<steam_engine_workshop> engines;
 
 steam_engine_workshop *find_steam_engine(int id)
 {
@@ -249,7 +249,7 @@ struct liquid_hook : df::item_liquid_miscst {
 
     static const uint32_t BOILING_FLAG = 0x80000000U;
 
-    DEFINE_VMETHOD_INTERPOSE(void, getItemDescription, (std::string *buf, int8_t mode))
+    DEFINE_VMETHOD_INTERPOSE(void, getItemDescription, (std::string24 *buf, int8_t mode))
     {
         if (mat_state.whole & BOILING_FLAG)
             buf->append("boiling ");
@@ -653,7 +653,7 @@ struct workshop_hook : df::building_workshopst {
     {
         if (get_steam_engine())
         {
-            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             insert_into_vector(vec, &df::building::id, (df::building*)this);
         }
 
@@ -664,7 +664,7 @@ struct workshop_hook : df::building_workshopst {
     {
         if (get_steam_engine())
         {
-            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             erase_from_vector(vec, &df::building::id, id);
         }
 
@@ -863,11 +863,11 @@ struct dwarfmode_hook : df::viewscreen_dwarfmodest
         if (error)
         {
             const char *msg = "Hanging - cover channels with down stairs.";
-            ui_build_selector->errors.push_back(new std::string(msg));
+            ui_build_selector->errors.push_back(new std::string24(msg));
         }
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         steam_engine_workshop *engine = get_steam_engine();
 
@@ -898,7 +898,7 @@ static bool find_engines(color_ostream &out)
 {
     engines.clear();
 
-    std::vector<df::building_def_workshopst*> &wslist = world->raws.buildings.workshops;
+    std::vector12<df::building_def_workshopst*> &wslist = world->raws.buildings.workshops;
 
     for (size_t i = 0; i < wslist.size(); i++)
     {
@@ -1001,7 +1001,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (Core::getInstance().isWorldLoaded())
         plugin_onstatechange(out, SC_WORLD_LOADED);

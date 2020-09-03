@@ -1,7 +1,7 @@
 //#include <mutex>
 #include <sstream>
-#include <string>
-#include <vector>
+
+
 
 #include "tinythread.h"
 
@@ -24,8 +24,8 @@ using df::viewscreen_dungeonmodest;
 using df::viewscreen_dwarfmodest;
 
 using namespace DFHack;
-using std::vector;
-using std::string;
+
+
 
 DFHACK_PLUGIN("rendermax");
 REQUIRE_GLOBAL(cur_year_tick);
@@ -46,9 +46,9 @@ enum RENDERER_MODE
 RENDERER_MODE current_mode=MODE_DEFAULT;
 lightingEngine *engine=NULL;
 
-static command_result rendermax(color_ostream &out, vector <string> & parameters);
+static command_result rendermax(color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "rendermax", "switch rendering engine.", rendermax, false,
@@ -328,7 +328,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 }
 
 
-static command_result rendermax(color_ostream &out, vector <string> & parameters)
+static command_result rendermax(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if(parameters.size()==0)
         return CR_WRONG_USAGE;
@@ -337,7 +337,7 @@ static command_result rendermax(color_ostream &out, vector <string> & parameters
         out.printerr("Sorry, this plugin needs open gl enabled printmode. Try STANDARD or other non-2D\n");
         return CR_FAILURE;
     }
-    string cmd=parameters[0];
+    std::string24 cmd=parameters[0];
     if(cmd=="trippy")
     {
         removeOld();
@@ -356,7 +356,7 @@ static command_result rendermax(color_ostream &out, vector <string> & parameters
             rgbf red(1,0,0),green(0,1,0),blue(0,0,1),white(1,1,1);
             rgbf cur=white;
             rgbf dim(0.2f,0.2f,0.2f);
-            string col=parameters[1];
+            std::string24 col=parameters[1];
             if(col=="red")
                 cur=red;
             else if(col=="green")

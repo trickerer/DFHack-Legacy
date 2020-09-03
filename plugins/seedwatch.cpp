@@ -2,8 +2,8 @@
 // With thanks to peterix for DFHack and Quietust for information http://www.bay12forums.com/smf/index.php?topic=91166.msg2605147#msg2605147
 
 #include <map>
-#include <string>
-#include <vector>
+
+
 #include "Console.h"
 #include "Core.h"
 #include "Export.h"
@@ -28,7 +28,7 @@ REQUIRE_GLOBAL(world);
 const int buffer = 20; // seed number buffer - 20 is reasonable
 
 // abbreviations for the standard plants
-map<string, string> abbreviations;
+map<std::string24, std::string24> abbreviations;
 
 bool ignoreSeeds(df::item_flags& f) // seeds with the following flags should not be counted
 {
@@ -68,7 +68,7 @@ void printHelp(color_ostream &out) // prints help
     if(!abbreviations.empty())
     {
         out.print("You can use these abbreviations for the plant tokens:\n");
-        for(map<string, string>::const_iterator i = abbreviations.begin(); i != abbreviations.end(); ++i)
+        for(map<std::string24, std::string24>::const_iterator i = abbreviations.begin(); i != abbreviations.end(); ++i)
         {
             out.print("%s -> %s\n", i->first.c_str(), i->second.c_str());
         }
@@ -87,7 +87,7 @@ void printHelp(color_ostream &out) // prints help
 };
 
 // searches abbreviations, returns expansion if so, returns original if not
-string searchAbbreviations(string in)
+std::string24 searchAbbreviations(std::string24 in)
 {
     if(abbreviations.count(in) > 0)
     {
@@ -105,11 +105,11 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-command_result df_seedwatch(color_ostream &out, vector<string>& parameters)
+command_result df_seedwatch(color_ostream &out, std::vector12<std::string24>& parameters)
 {
     CoreSuspender suspend;
 
-    map<string, t_materialIndex> materialsReverser;
+    map<std::string24, t_materialIndex> materialsReverser;
     for(size_t i = 0; i < world->raws.plants.all.size(); ++i)
     {
         materialsReverser[world->raws.plants.all[i]->id] = i;
@@ -126,7 +126,7 @@ command_result df_seedwatch(color_ostream &out, vector<string>& parameters)
         return CR_OK;
     }
 
-    string par;
+    std::string24 par;
     int limit;
     switch(parameters.size())
     {
@@ -207,7 +207,7 @@ command_result df_seedwatch(color_ostream &out, vector<string>& parameters)
         */
         else
         {
-            string token = searchAbbreviations(par);
+            std::string24 token = searchAbbreviations(par);
             if(materialsReverser.count(token) > 0)
             {
                 Kitchen::removeLimit(materialsReverser[token]);
@@ -224,14 +224,14 @@ command_result df_seedwatch(color_ostream &out, vector<string>& parameters)
         if(limit < 0) limit = 0;
         if(parameters[0] == "all")
         {
-            for(map<string, string>::const_iterator i = abbreviations.begin(); i != abbreviations.end(); ++i)
+            for(map<std::string24, std::string24>::const_iterator i = abbreviations.begin(); i != abbreviations.end(); ++i)
             {
                 if(materialsReverser.count(i->second) > 0) Kitchen::setLimit(materialsReverser[i->second], limit);
             }
         }
         else
         {
-            string token = searchAbbreviations(parameters[0]);
+            std::string24 token = searchAbbreviations(parameters[0]);
             if(materialsReverser.count(token) > 0)
             {
                 Kitchen::setLimit(materialsReverser[token], limit);
@@ -252,7 +252,7 @@ command_result df_seedwatch(color_ostream &out, vector<string>& parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init(color_ostream &out, vector<PluginCommand>& commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand>& commands)
 {
     commands.push_back(PluginCommand("seedwatch", "Toggles seed cooking based on quantity available", df_seedwatch));
     // fill in the abbreviations map, with abbreviations for the standard plants

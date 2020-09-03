@@ -72,16 +72,16 @@ DFhackCExport command_result plugin_enable (color_ostream &out, bool enable)
     return CR_OK;
 }
 
-command_result color(color_ostream &out, std::vector<std::string> &params)
+command_result color(color_ostream &out, std::vector12<std::string24> &params)
 {
     if (params.empty())
         return plugin_enable(out, true);
     for (auto it = params.begin(); it != params.end(); ++it)
     {
-        std::string p = toLower(*it);
+        std::string24 p = toLower(*it);
         if (!p.size())
             continue;
-        #define CHECK_COLOR(color_name) else if (p == toLower(std::string(#color_name))) \
+        #define CHECK_COLOR(color_name) else if (p == toLower(std::string24(#color_name))) \
             { config.flicker = false; config.color = COLOR_##color_name % 8; plugin_enable(out, true); }
         CHECK_COLOR(RED)
         CHECK_COLOR(GREEN)
@@ -120,7 +120,7 @@ command_result color(color_ostream &out, std::vector<std::string> &params)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "color-dfhack-text",

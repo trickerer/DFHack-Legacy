@@ -289,7 +289,7 @@ private:
     }
 public:
     tthread::mutex dataMutex;
-    std::vector<rgbf> lightGrid;
+    std::vector12<rgbf> lightGrid;
     renderer_test(renderer* parent):renderer_wrap(parent)
     {
         reinitLightGrid();
@@ -377,8 +377,8 @@ private:
     }
 public:
     tthread::mutex dataMutex;
-    std::vector<rgbf> foreOffset,foreMult;
-    std::vector<rgbf> backOffset,backMult;
+    std::vector12<rgbf> foreOffset,foreMult;
+    std::vector12<rgbf> backOffset,backMult;
     inline int xyToTile(int x, int y)
     {
        return x*(df::global::gps->dimy) + y;

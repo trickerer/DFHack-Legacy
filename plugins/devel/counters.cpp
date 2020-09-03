@@ -8,13 +8,13 @@
 #include "df/unit.h"
 #include "df/unit_misc_trait.h"
 
-using std::vector;
-using std::string;
+
+
 
 using namespace DFHack;
 using namespace df::enums;
 
-command_result df_counters (color_ostream &out, vector <string> & parameters)
+command_result df_counters (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
@@ -33,7 +33,7 @@ command_result df_counters (color_ostream &out, vector <string> & parameters)
 
 DFHACK_PLUGIN("counters");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("counters",
                                      "Display counters for currently selected creature",

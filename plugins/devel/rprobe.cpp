@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <map>
 #include <algorithm>
-#include <vector>
+
 
 using namespace std;
 #include "Core.h"
@@ -38,11 +38,11 @@ using df::coord2d;
 
 
 
-command_result rprobe (color_ostream &out, vector <string> & parameters);
+command_result rprobe (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("rprobe");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "rprobe", "Display region information from embark screen",
@@ -58,7 +58,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 }
 
 
-command_result rprobe (color_ostream &out, vector <string> & parameters)
+command_result rprobe (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 

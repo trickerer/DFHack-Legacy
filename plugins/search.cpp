@@ -40,9 +40,9 @@
 #include "df/viewscreen_workshop_profilest.h"
 
 using namespace std;
-using std::set;
-using std::vector;
-using std::string;
+
+
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -102,11 +102,11 @@ static bool is_live_screen(const df::viewscreen *screen)
     return false;
 }
 
-static string get_unit_description(df::unit *unit)
+static std::string24 get_unit_description(df::unit *unit)
 {
     if (!unit)
         return "";
-    string desc;
+    std::string24 desc;
     df::language_name* name = Units::getVisibleName(unit);
     if (name->has_name)
         desc = Translation::TranslateName(name, false);
@@ -115,10 +115,10 @@ static string get_unit_description(df::unit *unit)
     return desc;
 }
 
-static bool cursor_key_pressed (std::set<df::interface_key> *input)
+static bool cursor_key_pressed (std::set8<df::interface_key> *input)
 {
     // give text input (e.g. "2") priority over cursor keys
-    for (std::set<df::interface_key>::const_iterator it = input->begin(); it != input->end(); ++it)
+    for (std::set8<df::interface_key>::const_iterator it = input->begin(); it != input->end(); ++it)
     {
         if (Screen::keyToChar(*it) != -1)
             return false;
@@ -210,7 +210,7 @@ public:
     }
 
     // A new keystroke is received in a searchable screen
-    virtual bool process_input(set<df::interface_key> *input)
+    virtual bool process_input(std::set8<df::interface_key> *input)
     {
         // If the page has two search options (Trade screen), only allow one to operate
         // at a time
@@ -289,10 +289,10 @@ public:
     }
 
 protected:
-    virtual string get_element_description(T element) const = 0;
+    virtual std::string24 get_element_description(T element) const = 0;
     virtual void render() const = 0;
     virtual int32_t *get_viewscreen_cursor() = 0;
-    virtual vector<T> *get_primary_list() = 0;
+    virtual std::vector12<T> *get_primary_list() = 0;
 
     search_generic()
     {
@@ -396,7 +396,7 @@ protected:
 
         clear_viewscreen_vectors();
 
-        string search_string_l = toLower(search_string);
+        std::string24 search_string_l = toLower(search_string);
         for (size_t i = 0; i < saved_list1.size(); i++ )
         {
             if (force_in_search(i))
@@ -409,8 +409,8 @@ protected:
                 continue;
 
             T element = saved_list1[i];
-            string desc = toLower(get_element_description(element));
-            if (desc.find(search_string_l) != string::npos)
+            std::string24 desc = toLower(get_element_description(element));
+            if (desc.find(search_string_l) != std::string24::npos)
             {
                 add_to_filtered_list(i);
             }
@@ -422,7 +422,7 @@ protected:
             *cursor_pos = 0;
     }
 
-    virtual bool should_check_input(set<df::interface_key> *input)
+    virtual bool should_check_input(std::set8<df::interface_key> *input)
     {
         return true;
     }
@@ -434,7 +434,7 @@ protected:
         if (y == -1)
             y = dim.y - 2;
 
-        OutputString((entry_mode) ? 4 : 12, x, y, string(1, select_key));
+        OutputString((entry_mode) ? 4 : 12, x, y, std::string24(1, select_key));
         OutputString((entry_mode) ? 10 : 15, x, y, ": Search");
         if (search_string.length() > 0 || entry_mode)
             OutputString(15, x, y, ": " + search_string);
@@ -443,10 +443,10 @@ protected:
     }
 
     S *viewscreen;
-    vector <T> saved_list1, reference_list, *primary_list;
+    std::vector12<T> saved_list1, reference_list, *primary_list;
 
     //bool redo_search;
-    string search_string;
+    std::string24 search_string;
 
 protected:
     int *cursor_pos;
@@ -518,8 +518,8 @@ template < class S, class T, class PARENT = search_generic<S,T> >
 class search_multicolumn_modifiable_generic : public PARENT
 {
 protected:
-    vector <T> reference_list;
-    vector <int> saved_indexes;
+    std::vector12<T> reference_list;
+    std::vector12<int> saved_indexes;
     bool read_only;
 
     virtual void update_saved_secondary_list_item(size_t i, size_t j) = 0;
@@ -566,7 +566,7 @@ protected:
 
     virtual bool is_match(T &a, T &b) = 0;
 
-    virtual bool is_match(vector<T> &a, vector<T> &b) = 0;
+    virtual bool is_match(std::vector12<T> &a, std::vector12<T> &b) = 0;
 
     void do_pre_incremental_search()
     {
@@ -636,7 +636,7 @@ class search_multicolumn_modifiable : public search_multicolumn_modifiable_gener
         return a == b;
     }
 
-    bool is_match(vector<T> &a, vector<T> &b)
+    bool is_match(std::vector12<T> &a, std::vector12<T> &b)
     {
         return a == b;
     }
@@ -648,7 +648,7 @@ class search_twocolumn_modifiable : public search_multicolumn_modifiable<S, T, P
 {
 public:
 protected:
-    virtual vector<V> * get_secondary_list() = 0;
+    virtual std::vector12<V> * get_secondary_list() = 0;
 
     virtual void do_post_init()
     {
@@ -691,7 +691,7 @@ protected:
         *secondary_list = saved_secondary_list;
     }
 
-    vector<V> *secondary_list, saved_secondary_list;
+    std::vector12<V> *secondary_list, saved_secondary_list;
 };
 
 
@@ -704,7 +704,7 @@ struct generic_search_hook : T
 
     static V module;
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!module.init(this))
         {
@@ -789,7 +789,7 @@ private:
         return &viewscreen->cursor;
     }
 
-    vector<T_animal> *get_primary_list()
+    std::vector12<T_animal> *get_primary_list()
     {
         return &viewscreen->animal;
     }
@@ -801,7 +801,7 @@ private:
         is_adopting = &viewscreen->is_adopting;
     }
 
-    string get_element_description(df::viewscreen_petst::T_animal element) const
+    std::string24 get_element_description(df::viewscreen_petst::T_animal element) const
     {
         return get_unit_description(element.unit);
     }
@@ -870,7 +870,7 @@ private:
         return a.unit == b.unit;
     }
 
-    bool is_match(vector<T_animal> &a, vector<T_animal> &b)
+    bool is_match(std::vector12<T_animal> &a, std::vector12<T_animal> &b)
     {
         for (size_t i = 0; i < a.size(); i++)
         {
@@ -881,9 +881,9 @@ private:
         return true;
     }
 
-    std::vector<char > *is_vermin, is_vermin_s;
-    std::vector<char > *is_tame, is_tame_s;
-    std::vector<char > *is_adopting, is_adopting_s;
+    std::vector12<char > *is_vermin, is_vermin_s;
+    std::vector12<char > *is_tame, is_tame_s;
+    std::vector12<char > *is_adopting, is_adopting_s;
 };
 
 IMPLEMENT_HOOKS_WITH_ID(df::viewscreen_petst, pets_search, 1, 0);
@@ -918,15 +918,15 @@ private:
         return NULL;
     }
 
-    vector<int32_t> *get_primary_list()
+    std::vector12<int32_t> *get_primary_list()
     {
         return &viewscreen->known;
     }
 
-    string get_element_description(int32_t id) const
+    std::string24 get_element_description(int32_t id) const
     {
         df::creature_raw* craw = df::creature_raw::find(id);
-        string out;
+        std::string24 out;
         if (craw)
         {
             for (size_t i = 0; i < 3; ++i)
@@ -979,23 +979,23 @@ private:
         return &viewscreen->trainer_cursor;
     }
 
-    vector<df::unit*> *get_primary_list()
+    std::vector12<df::unit*> *get_primary_list()
     {
         return &viewscreen->trainer_unit;
     }
 
-    string get_element_description(df::unit *u) const
+    std::string24 get_element_description(df::unit *u) const
     {
         return get_unit_description(u);
     }
 
-    std::vector<T_trainer_mode> *get_secondary_list()
+    std::vector12<T_trainer_mode> *get_secondary_list()
     {
         return &viewscreen->trainer_mode;
     }
 
 public:
-    bool process_input(set<df::interface_key> *input)
+    bool process_input(std::set8<df::interface_key> *input)
     {
         if (input->count(interface_key::SELECT) && viewscreen->trainer_unit.empty() && !in_entry_mode())
             return true;
@@ -1031,7 +1031,7 @@ public:
         }
     }
 
-    bool process_input(set<df::interface_key> *input)
+    bool process_input(std::set8<df::interface_key> *input)
     {
         if (viewscreen->in_group_mode)
             return false;
@@ -1073,14 +1073,14 @@ private:
         return &viewscreen->item_cursor;
     }
 
-    virtual vector<df::item*> *get_primary_list()
+    virtual std::vector12<df::item*> *get_primary_list()
     {
         return &viewscreen->items;
     }
 
 
 private:
-    string get_element_description(df::item *element) const
+    std::string24 get_element_description(df::item *element) const
     {
         if (!element)
             return "";
@@ -1117,11 +1117,11 @@ private:
         read_only = true;
     }
 
-    static string get_non_work_description(df::unit *unit)
+    static std::string24 get_non_work_description(df::unit *unit)
     {
         if (!unit)
             return "";
-        for (std::vector<df::unit_misc_trait*>::const_iterator p = unit->status.misc_traits.begin(); p < unit->status.misc_traits.end(); p++)
+        for (std::vector12<df::unit_misc_trait*>::const_iterator p = unit->status.misc_traits.begin(); p < unit->status.misc_traits.end(); p++)
         {
             if ((*p)->id == misc_trait_type::Migrant)
             {
@@ -1142,11 +1142,11 @@ private:
         return ".idle.no job";
     }
 
-    string get_element_description(df::unit *unit) const
+    std::string24 get_element_description(df::unit *unit) const
     {
         if (!unit)
             return "Inactive";
-        string desc = get_unit_description(unit);
+        std::string24 desc = get_unit_description(unit);
         if (!unit->job.current_job)
         {
             desc += get_non_work_description(unit);
@@ -1155,7 +1155,7 @@ private:
         return desc;
     }
 
-    bool should_check_input(set<df::interface_key> *input)
+    bool should_check_input(std::set8<df::interface_key> *input)
     {
         if (input->count(interface_key::STANDARDSCROLL_LEFT) ||
             input->count(interface_key::STANDARDSCROLL_RIGHT) ||
@@ -1187,7 +1187,7 @@ private:
         return 'q';
     }
 
-    vector<df::job*> *get_secondary_list()
+    std::vector12<df::job*> *get_secondary_list()
     {
         return &viewscreen->jobs[viewscreen->page];
     }
@@ -1197,7 +1197,7 @@ private:
         return &viewscreen->cursor_pos[viewscreen->page];
     }
 
-    vector<df::unit*> *get_primary_list()
+    std::vector12<df::unit*> *get_primary_list()
     {
         return &viewscreen->units[viewscreen->page];
     }
@@ -1218,14 +1218,14 @@ class trade_search_base : public search_twocolumn_modifiable<df::viewscreen_trad
 {
 
 private:
-    string get_element_description(df::item *element) const
+    std::string24 get_element_description(df::item *element) const
     {
         if (!element)
             return "";
         return Items::getDescription(element, 0, true);
     }
 
-    bool should_check_input(set<df::interface_key> *input)
+    bool should_check_input(std::set8<df::interface_key> *input)
     {
         if (in_entry_mode())
             return true;
@@ -1280,13 +1280,13 @@ public:
             int32_t x = 2;
             int32_t y = gps->dimy - 3;
             make_text_dim(2, gps->dimx-2, y);
-            OutputString(COLOR_LIGHTRED, x, y, string(1, select_key + 'A' - 'a'));
+            OutputString(COLOR_LIGHTRED, x, y, std::string24(1, select_key + 'A' - 'a'));
             OutputString(COLOR_WHITE, x, y, ": Clear search to trade           ");
         }
     }
 
 private:
-    vector<char> *get_secondary_list()
+    std::vector12<char> *get_secondary_list()
     {
         return &viewscreen->trader_selected;
     }
@@ -1296,7 +1296,7 @@ private:
         return &viewscreen->trader_cursor;
     }
 
-    vector<df::item*> *get_primary_list()
+    std::vector12<df::item*> *get_primary_list()
     {
         return &viewscreen->trader_items;
     }
@@ -1330,13 +1330,13 @@ public:
         {
             int32_t y = gps->dimy - 3;
             make_text_dim(2, gps->dimx-2, y);
-            OutputString(COLOR_LIGHTRED, x, y, string(1, select_key + 'A' - 'a'));
+            OutputString(COLOR_LIGHTRED, x, y, std::string24(1, select_key + 'A' - 'a'));
             OutputString(COLOR_WHITE, x, y, ": Clear search to trade           ");
         }
     }
 
 private:
-    vector<char> *get_secondary_list()
+    std::vector12<char> *get_secondary_list()
     {
         return &viewscreen->broker_selected;
     }
@@ -1346,7 +1346,7 @@ private:
         return &viewscreen->broker_cursor;
     }
 
-    vector<df::item*> *get_primary_list()
+    std::vector12<df::item*> *get_primary_list()
     {
         return &viewscreen->broker_items;
     }
@@ -1367,8 +1367,8 @@ IMPLEMENT_HOOKS_WITH_ID(df::viewscreen_tradegoodsst, trade_search_fort, 2, 100);
 //
 // START: Stockpile screen search
 //
-typedef layered_search<df::viewscreen_layer_stockpilest, string *, 2> stocks_layer;
-class stockpile_search : public search_twocolumn_modifiable<df::viewscreen_layer_stockpilest, string *, bool *, stocks_layer>
+typedef layered_search<df::viewscreen_layer_stockpilest, std::string24 *, 2> stocks_layer;
+class stockpile_search : public search_twocolumn_modifiable<df::viewscreen_layer_stockpilest, std::string24 *, bool *, stocks_layer>
 {
 public:
     void update_saved_secondary_list_item(size_t i, size_t j)
@@ -1376,7 +1376,7 @@ public:
         *saved_secondary_list[i] = *(*secondary_list)[j];
     }
 
-    string get_element_description(string *element) const
+    std::string24 get_element_description(std::string24 *element) const
     {
         return *element;
     }
@@ -1386,17 +1386,17 @@ public:
         print_search_option(51, 23);
     }
 
-    vector<string *> *get_primary_list()
+    std::vector12<std::string24 *> *get_primary_list()
     {
         return &viewscreen->item_names;
     }
 
-    vector<bool *> *get_secondary_list()
+    std::vector12<bool *> *get_secondary_list()
     {
         return &viewscreen->item_status;
     }
 
-    bool should_check_input(set<df::interface_key> *input)
+    bool should_check_input(std::set8<df::interface_key> *input)
     {
         if (input->count(interface_key::STOCKPILE_SETTINGS_DISABLE) && !in_entry_mode() && !search_string.empty())
         {
@@ -1425,7 +1425,7 @@ class military_search : public military_search_base
 {
 public:
 
-    string get_element_description(df::unit *element) const
+    std::string24 get_element_description(df::unit *element) const
     {
         return get_unit_description(element);
     }
@@ -1450,18 +1450,18 @@ public:
         return true;
     }
 
-    vector<df::unit *> *get_primary_list()
+    std::vector12<df::unit *> *get_primary_list()
     {
         return &viewscreen->positions.candidates;
     }
 
-    bool should_check_input(set<df::interface_key> *input)
+    bool should_check_input(std::set8<df::interface_key> *input)
     {
         if (input->count(interface_key::SELECT) && !in_entry_mode() && !search_string.empty())
         {
             // About to make an assignment, so restore original list (it will be changed by the game)
             int32_t *cursor = get_viewscreen_cursor();
-            std::vector<df::unit*>* list = get_primary_list();
+            std::vector12<df::unit*>* list = get_primary_list();
             if (size_t(*cursor) >= list->size())
                 return false;
             df::unit *selected_unit = list->at(*cursor);
@@ -1506,26 +1506,26 @@ private:
         read_only = true;
     }
 
-    string get_element_description(df::building *bld) const
+    std::string24 get_element_description(df::building *bld) const
     {
         if (!bld)
             return "";
 
-        string desc;
+        std::string24 desc;
         desc.reserve(100);
         if (bld->owner)
             desc += get_unit_description(bld->owner);
 
         desc += ".";
 
-        string room_desc = Buildings::getRoomDescription(bld, NULL);
+        std::string24 room_desc = Buildings::getRoomDescription(bld, NULL);
         desc += room_desc;
         if (room_desc.empty())
         {
             if (!bld->owner)
                 desc += "no owner";
 
-            string name;
+            std::string24 name;
             bld->getName(&name);
             if (!name.empty())
             {
@@ -1536,7 +1536,7 @@ private:
         return desc;
     }
 
-    vector<int32_t> *get_secondary_list()
+    std::vector12<int32_t> *get_secondary_list()
     {
         return &viewscreen->room_value;
     }
@@ -1546,7 +1546,7 @@ private:
         return &viewscreen->cursor;
     }
 
-    vector<df::building*> *get_primary_list()
+    std::vector12<df::building*> *get_primary_list()
     {
         return &viewscreen->buildings;
     }
@@ -1577,14 +1577,14 @@ private:
         return &viewscreen->sel_idx;
     }
 
-    virtual vector<df::report *> *get_primary_list()
+    virtual std::vector12<df::report *> *get_primary_list()
     {
         return &viewscreen->reports;
     }
 
 
 private:
-    string get_element_description(df::report *element) const
+    std::string24 get_element_description(df::report *element) const
     {
         if (!element)
             return "";
@@ -1609,7 +1609,7 @@ class nobles_search : public nobles_search_base
 {
 public:
 
-    string get_element_description(T_candidates *element) const
+    std::string24 get_element_description(T_candidates *element) const
     {
         if (!element->unit)
             return "";
@@ -1635,7 +1635,7 @@ public:
         return nobles_search_base::can_init(screen);
     }
 
-    vector<T_candidates *> *get_primary_list()
+    std::vector12<T_candidates *> *get_primary_list()
     {
         return &viewscreen->candidates;
     }
@@ -1660,7 +1660,7 @@ public:
         return screen->tab == df::viewscreen_workshop_profilest::T_tab::Workers;
     }
 
-    string get_element_description(df::unit *element) const
+    std::string24 get_element_description(df::unit *element) const
     {
         return get_unit_description(element);
     }
@@ -1670,7 +1670,7 @@ public:
         print_search_option(2, gps->dimy - 5);
     }
 
-    vector<df::unit *> *get_primary_list()
+    std::vector12<df::unit *> *get_primary_list()
     {
         return &viewscreen->workers;
     }
@@ -1691,9 +1691,9 @@ IMPLEMENT_HOOKS(df::viewscreen_workshop_profilest, profiles_search);
 //
 // START: Job list search
 //
-void get_job_details(string &desc, df::job *job)
+void get_job_details(std::string24 &desc, df::job *job)
 {
-    string job_name = ENUM_KEY_STR_SIMPLE(job_type,job->job_type);
+    std::string24 job_name = ENUM_KEY_STR_SIMPLE(job_type,job->job_type);
     for (size_t i = 0; i < job_name.length(); i++)
     {
         char c = job_name[i];
@@ -1753,12 +1753,12 @@ private:
         read_only = true;
     }
 
-    string get_element_description(df::job *element) const
+    std::string24 get_element_description(df::job *element) const
     {
         if (!element)
             return "no job.idle";
 
-        string desc;
+        std::string24 desc;
         desc.reserve(100);
         get_job_details(desc, element);
         df::unit *worker = DFHack::Job::getWorker(element);
@@ -1775,7 +1775,7 @@ private:
         return 'q';
     }
 
-    vector<df::unit*> *get_secondary_list()
+    std::vector12<df::unit*> *get_secondary_list()
     {
         return &viewscreen->units;
     }
@@ -1785,7 +1785,7 @@ private:
         return &viewscreen->cursor_pos;
     }
 
-    vector<df::job*> *get_primary_list()
+    std::vector12<df::job*> *get_primary_list()
     {
         return &viewscreen->jobs;
     }
@@ -1817,9 +1817,9 @@ public:
         return false;
     }
 
-    string get_element_description(df::ui_look_list::T_items *element) const
+    std::string24 get_element_description(df::ui_look_list::T_items *element) const
     {
-        std::string desc = "";
+        std::string24 desc = "";
         switch (element->type)
         {
         case elt_type::Item:
@@ -1866,7 +1866,7 @@ public:
         print_search_option(x, y);
     }
 
-    vector<df::ui_look_list::T_items*> *get_primary_list()
+    std::vector12<df::ui_look_list::T_items*> *get_primary_list()
     {
         return &ui_look_list->items;
     }
@@ -1877,7 +1877,7 @@ public:
     }
 
 
-    bool should_check_input(set<df::interface_key> *input)
+    bool should_check_input(std::set8<df::interface_key> *input)
     {
         if (input->count(interface_key::SECONDSCROLL_UP)
             || input->count(interface_key::SECONDSCROLL_DOWN)
@@ -1923,7 +1923,7 @@ public:
         return false;
     }
 
-    string get_element_description(df::unit *element) const
+    std::string24 get_element_description(df::unit *element) const
     {
         return get_unit_description(element);
     }
@@ -1938,12 +1938,12 @@ public:
         print_search_option(x, y);
     }
 
-    vector<df::unit *> *get_primary_list()
+    std::vector12<df::unit *> *get_primary_list()
     {
         return &ui->burrows.list_units;
     }
 
-    vector<bool> *get_secondary_list()
+    std::vector12<bool> *get_secondary_list()
     {
         return &ui->burrows.sel_units;
     }
@@ -1954,7 +1954,7 @@ public:
     }
 
 
-    bool should_check_input(set<df::interface_key> *input)
+    bool should_check_input(std::set8<df::interface_key> *input)
     {
         if  (input->count(interface_key::SECONDSCROLL_UP) || input->count(interface_key::SECONDSCROLL_DOWN)
             || input->count(interface_key::SECONDSCROLL_PAGEUP) || input->count(interface_key::SECONDSCROLL_PAGEDOWN))
@@ -1992,7 +1992,7 @@ public:
         return false;
     }
 
-    string get_element_description(df::unit *element) const
+    std::string24 get_element_description(df::unit *element) const
     {
         return element ? get_unit_description(element) : "Nobody";
     }
@@ -2007,7 +2007,7 @@ public:
         print_search_option(x, y);
     }
 
-    vector<df::unit *> *get_primary_list()
+    std::vector12<df::unit *> *get_primary_list()
     {
         return ui_building_assign_units;
     }
@@ -2017,7 +2017,7 @@ public:
         return ui_building_item_cursor;
     }
 
-    bool should_check_input(set<df::interface_key> *input)
+    bool should_check_input(std::set8<df::interface_key> *input)
     {
         if  (input->count(interface_key::SECONDSCROLL_UP) || input->count(interface_key::SECONDSCROLL_DOWN)
             || input->count(interface_key::SECONDSCROLL_PAGEUP) || input->count(interface_key::SECONDSCROLL_PAGEDOWN))
@@ -2044,7 +2044,7 @@ typedef search_generic<df::viewscreen_topicmeeting_fill_land_holder_positionsst,
 class noble_suggest_search : public noble_suggest_search_base
 {
 public:
-    string get_element_description (int32_t hf_id) const
+    std::string24 get_element_description (int32_t hf_id) const
     {
         df::historical_figure *histfig = df::historical_figure::find(hf_id);
         if (!histfig)
@@ -2060,7 +2060,7 @@ public:
         print_search_option(2, gps->dimy - 4);
     }
 
-    vector<int32_t> *get_primary_list()
+    std::vector12<int32_t> *get_primary_list()
     {
         return &viewscreen->candidate_histfig_ids;
     }
@@ -2091,7 +2091,7 @@ public:
         return screen->menu == df::viewscreen_locationsst::AssignOccupation;
     }
 
-    string get_element_description (df::unit *unit) const
+    std::string24 get_element_description (df::unit *unit) const
     {
         return unit ? get_unit_description(unit) : "Nobody";
     }
@@ -2101,7 +2101,7 @@ public:
         print_search_option(37, gps->dimy - 3);
     }
 
-    vector<df::unit*> *get_primary_list()
+    std::vector12<df::unit*> *get_primary_list()
     {
         return &viewscreen->units;
     }
@@ -2123,12 +2123,12 @@ IMPLEMENT_HOOKS(df::viewscreen_locationsst, location_assign_occupation_search);
 // START: Kitchen preferences search
 //
 
-typedef search_multicolumn_modifiable<df::viewscreen_kitchenprefst, std::string*> kitchen_pref_search_base;
+typedef search_multicolumn_modifiable<df::viewscreen_kitchenprefst, std::string24*> kitchen_pref_search_base;
 class kitchen_pref_search : public kitchen_pref_search_base
 {
 public:
 
-    string get_element_description(string *s) const override
+    std::string24 get_element_description(std::string24 *s) const override
     {
         return s ? *s : "";
     }
@@ -2143,12 +2143,12 @@ public:
         return &viewscreen->cursor;
     }
 
-    vector<string*> *get_primary_list() override
+    std::vector12<std::string24*> *get_primary_list() override
     {
         return &viewscreen->item_str[viewscreen->page];
     }
 
-    bool should_check_input(set<df::interface_key> *input) override
+    bool should_check_input(std::set8<df::interface_key> *input) override
     {
         if (input->count(interface_key::CHANGETAB) || input->count(interface_key::SEC_CHANGETAB))
         {
@@ -2228,7 +2228,7 @@ public:
         #undef KVEC
     }
 
-    #define KVEC(type, name) vector<type> *name, name##_s
+    #define KVEC(type, name) std::vector12<type> *name, name##_s
     KITCHEN_VECTORS;
     #undef KVEC
 #undef KITCHEN_VECTORS
@@ -2254,17 +2254,17 @@ public:
         print_search_option(21, 23);
     }
 
-    vector<int32_t> *get_primary_list() override
+    std::vector12<int32_t> *get_primary_list() override
     {
         return &viewscreen->stone_type[viewscreen->type_tab];
     }
 
-    vector<bool*> *get_secondary_list() override
+    std::vector12<bool*> *get_secondary_list() override
     {
         return &viewscreen->stone_economic[viewscreen->type_tab];
     }
 
-    string get_element_description(int32_t stone_type) const override
+    std::string24 get_element_description(int32_t stone_type) const override
     {
         df::inorganic_raw* iraw = vector_get(world->raws.inorganics, stone_type);
         if (!iraw)
@@ -2272,7 +2272,7 @@ public:
         return iraw->material.stone_name + " " + iraw->material.state_name[0];
     }
 
-    bool should_check_input(set<df::interface_key> *input) override
+    bool should_check_input(std::set8<df::interface_key> *input) override
     {
         // if (in_update)
         //     return false;
@@ -2341,7 +2341,7 @@ public:
         return screen->cur_column == df::viewscreen_justicest::ConvictChoices;
     }
 
-    string get_element_description (df::unit *unit) const
+    std::string24 get_element_description (df::unit *unit) const
     {
         return get_unit_description(unit);
     }
@@ -2351,7 +2351,7 @@ public:
         print_search_option(37);
     }
 
-    vector<df::unit*> *get_primary_list()
+    std::vector12<df::unit*> *get_primary_list()
     {
         return &viewscreen->convict_choices;
     }
@@ -2381,7 +2381,7 @@ public:
         return screen->cur_column == df::viewscreen_justicest::InterrogateChoices;
     }
 
-    string get_element_description (df::unit *unit) const
+    std::string24 get_element_description (df::unit *unit) const
     {
         return get_unit_description(unit);
     }
@@ -2391,7 +2391,7 @@ public:
         print_search_option(37);
     }
 
-    vector<df::unit*> *get_primary_list()
+    std::vector12<df::unit*> *get_primary_list()
     {
         return &viewscreen->interrogate_choices;
     }
@@ -2456,7 +2456,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     return CR_OK;
 }

@@ -14,12 +14,12 @@
 #include <modules/Random.h>
 #include <LuaTools.h>
 #include <TileTypes.h>
-#include <vector>
+
 #include <cstdio>
 #include <stack>
-#include <string>
+
 #include <cmath>
-#include <string.h>
+
 
 #include <VTableInterpose.h>
 #include "df/building_drawbuffer.h"
@@ -60,8 +60,8 @@
 
 #include "MiscUtils.h"
 
-using std::vector;
-using std::string;
+
+
 using std::stack;
 using namespace DFHack;
 using namespace df::enums;
@@ -348,7 +348,7 @@ struct EngineInfo {
 
     int operator_id, operator_frame;
 
-    std::set<int> stockpiles;
+    std::set8<int> stockpiles;
     df::stockpile_links links;
     df::workshop_profile profile;
 
@@ -453,10 +453,10 @@ static void load_engines()
 {
     clear_engines();
 
-    std::vector<PersistentDataItem> vec;
+    std::vector12<PersistentDataItem> vec;
 
     World::GetPersistentData(&vec, "siege-engine/target/", true);
-    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector12<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
         EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine) continue;
@@ -465,7 +465,7 @@ static void load_engines()
     }
 
     World::GetPersistentData(&vec, "siege-engine/ammo/", true);
-    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector12<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
         EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine) continue;
@@ -474,7 +474,7 @@ static void load_engines()
     }
 
     World::GetPersistentData(&vec, "siege-engine/stockpiles/", true);
-    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector12<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
         EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine)
@@ -490,7 +490,7 @@ static void load_engines()
     }
 
     World::GetPersistentData(&vec, "siege-engine/profiles/", true);
-    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector12<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
         EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine) continue;
@@ -499,7 +499,7 @@ static void load_engines()
     }
 
     World::GetPersistentData(&vec, "siege-engine/profile-workers/", true);
-    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector12<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
         EngineInfo* engine = find_engine(df::building::find(it->ival(0)), true);
         if (!engine)
@@ -539,7 +539,7 @@ static void clearTargetArea(df::building_siegeenginest *bld)
     if (EngineInfo* engine = find_engine(bld))
         engine->target = coord_range();
 
-    std::string key = stl_sprintf("siege-engine/target/%d", bld->id);
+    std::string24 key = stl_sprintf("siege-engine/target/%d", bld->id);
     World::DeletePersistentData(World::GetPersistentData(key));
 }
 
@@ -552,7 +552,7 @@ static bool setTargetArea(df::building_siegeenginest *bld, df::coord target_min,
     if (!enable_plugin())
         return false;
 
-    std::string key = stl_sprintf("siege-engine/target/%d", bld->id);
+    std::string24 key = stl_sprintf("siege-engine/target/%d", bld->id);
     PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return false;
@@ -595,7 +595,7 @@ static int setAmmoItem(lua_State *L)
     if (!is_valid_enum_item_simple(item_type))
         luaL_argerror(L, 2, "invalid item type");
 
-    std::string key = stl_sprintf("siege-engine/ammo/%d", engine->id);
+    std::string24 key = stl_sprintf("siege-engine/ammo/%d", engine->id);
     PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return 0;
@@ -627,7 +627,7 @@ static void forgetStockpileLink(EngineInfo *engine, int pile_id)
 {
     engine->stockpiles.erase(pile_id);
 
-    std::string key = stl_sprintf("siege-engine/stockpiles/%d/%d", engine->id, pile_id);
+    std::string24 key = stl_sprintf("siege-engine/stockpiles/%d/%d", engine->id, pile_id);
     World::DeletePersistentData(World::GetPersistentData(key));
 }
 
@@ -635,7 +635,7 @@ static void update_stockpile_links(EngineInfo *engine)
 {
     engine->links.take_from_pile.clear();
 
-    for (std::set<int>::const_iterator it = engine->stockpiles.begin(); it != engine->stockpiles.end(); )
+    for (std::set8<int>::const_iterator it = engine->stockpiles.begin(); it != engine->stockpiles.end(); )
     {
         int id = *it; ++it;
         df::building* pile = df::building::find(id);
@@ -656,7 +656,7 @@ static int getStockpileLinks(lua_State *L)
 
     update_stockpile_links(engine);
 
-    std::vector<df::building*> &links = engine->links.take_from_pile;
+    std::vector12<df::building*> &links = engine->links.take_from_pile;
     lua_createtable(L, links.size(), 0);
 
     for (size_t i = 0; i < links.size(); i++)
@@ -687,7 +687,7 @@ static bool addStockpileLink(df::building_siegeenginest *bld, df::building_stock
     if (!enable_plugin())
         return false;
 
-    std::string key = stl_sprintf("siege-engine/stockpiles/%d/%d", bld->id, pile->id);
+    std::string24 key = stl_sprintf("siege-engine/stockpiles/%d/%d", bld->id, pile->id);
     PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return false;
@@ -724,7 +724,7 @@ static df::workshop_profile *saveWorkshopProfile(df::building_siegeenginest *bld
         return NULL;
 
     // Save skill limits
-    std::string key = stl_sprintf("siege-engine/profiles/%d", bld->id);
+    std::string24 key = stl_sprintf("siege-engine/profiles/%d", bld->id);
     PersistentDataItem entry = World::GetPersistentData(key, NULL);
     if (!entry.isValid())
         return NULL;
@@ -736,13 +736,13 @@ static df::workshop_profile *saveWorkshopProfile(df::building_siegeenginest *bld
     entry.ival(2) = engine->profile.max_level;
 
     // Save worker list
-    std::vector<PersistentDataItem> vec;
-    std::vector<int32> &workers = engine->profile.permitted_workers;
+    std::vector12<PersistentDataItem> vec;
+    std::vector12<int32> &workers = engine->profile.permitted_workers;
 
     key = stl_sprintf("siege-engine/profile-workers/%d", bld->id);
     World::GetPersistentData(&vec, key, true);
 
-    for (std::vector<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    for (std::vector12<PersistentDataItem>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
         if (linear_index(workers, it->ival(1)) < 0)
             World::DeletePersistentData(*it);
@@ -782,7 +782,7 @@ static df::unit *getOperatorUnit(df::building_siegeenginest *bld, bool force = f
         color_ostream_proxy out(Core::getInstance().getConsole());
         out.print("Forced siege operator search\n");
 
-        std::vector<df::unit*> &active = world->units.active;
+        std::vector12<df::unit*> &active = world->units.active;
         for (size_t i = 0; i < active.size(); i++)
             if (active[i]->pos == engine->center && Units::isCitizen(active[i]))
                 return active[i];
@@ -1101,7 +1101,7 @@ static TargetTileStatus calcTileStatus(EngineInfo *engine, df::coord target)
     return status;
 }
 
-static std::string getTileStatus(df::building_siegeenginest *bld, df::coord tile_pos)
+static std::string24 getTileStatus(df::building_siegeenginest *bld, df::coord tile_pos)
 {
     EngineInfo* engine = find_engine(bld, true);
     if (!engine)
@@ -1259,7 +1259,7 @@ struct UnitPath {
         return it->second;
     }
 
-    bool findHits(EngineInfo *engine, std::vector<Hit> *hit_points, float bias)
+    bool findHits(EngineInfo *engine, std::vector12<Hit> *hit_points, float bias)
     {
         df::coord origin = engine->center;
 
@@ -1356,9 +1356,9 @@ static bool canTargetUnit(df::unit *unit)
     return true;
 }
 
-static void proposeUnitHits(EngineInfo *engine, std::vector<UnitPath::Hit> *hits, float bias)
+static void proposeUnitHits(EngineInfo *engine, std::vector12<UnitPath::Hit> *hits, float bias)
 {
-    std::vector<df::unit*> &active = world->units.active;
+    std::vector12<df::unit*> &active = world->units.active;
 
     for (size_t i = 0; i < active.size(); i++)
     {
@@ -1379,7 +1379,7 @@ static int proposeUnitHits(lua_State *L)
     if (!engine->hasTarget())
         luaL_error(L, "target not set");
 
-    std::vector<UnitPath::Hit> hits;
+    std::vector12<UnitPath::Hit> hits;
     proposeUnitHits(engine, &hits, bias);
 
     lua_createtable(L, hits.size(), 0);
@@ -1407,8 +1407,8 @@ static int computeNearbyWeight(lua_State *L)
     luaL_checktype(L, 3, LUA_TTABLE);
     const char *fname = luaL_optstring(L, 4, "nearby_weight");
 
-    std::vector<UnitPath*> units;
-    std::vector<float> weights;
+    std::vector12<UnitPath*> units;
+    std::vector12<float> weights;
 
     lua_pushnil(L);
 
@@ -1479,14 +1479,14 @@ static bool isTired(df::unit *worker)
 static void releaseTiredWorker(EngineInfo *engine, df::job *job, df::unit *worker)
 {
     // If not in siege
-    std::vector<df::invasion_info*> &sieges = ui->invasions.list;
+    std::vector12<df::invasion_info*> &sieges = ui->invasions.list;
 
     for (size_t i = 0; i < sieges.size(); i++)
         if (sieges[i]->flags.bits.active)
             return;
 
     // And there is a free replacement
-    std::vector<df::unit*> &others = world->units.active;
+    std::vector12<df::unit*> &others = world->units.active;
 
     for (size_t i = 0; i < others.size(); i++)
     {
@@ -1741,7 +1741,7 @@ struct projectile_hook : df::proj_itemst {
         bool forbid_ammo = DF_GLOBAL_VALUE(standing_orders_forbid_used_ammo, false);
 
         MapExtras::MapCache mc;
-        std::vector<df::item*> contents;
+        std::vector12<df::item*> contents;
         Items::getContainedItems(item, &contents);
 
         for (size_t i = 0; i < contents.size(); i++)
@@ -2040,7 +2040,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     rng.init();
 

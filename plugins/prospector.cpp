@@ -11,7 +11,7 @@
 #include <map>
 #include <algorithm>
 #include <functional>
-#include <vector>
+
 
 using namespace std;
 #include "Core.h"
@@ -98,9 +98,9 @@ struct shallower : public binary_function<_Tp, _Tp, bool>
 
 
 typedef std::map<int16_t, matdata> MatMap;
-typedef std::vector< pair<int16_t, matdata> > MatSorter;
+typedef std::vector12< pair<int16_t, matdata> > MatSorter;
 
-typedef std::vector<df::plant *> PlantList;
+typedef std::vector12<df::plant *> PlantList;
 
 #define TO_PTR_VEC(obj_vec, ptr_vec) \
     ptr_vec.clear(); \
@@ -139,7 +139,7 @@ static int getValue(const df::plant_raw &info)
 }
 
 template <typename T, template <typename> class P>
-void printMats(color_ostream &con, MatMap &mat, std::vector<T*> &materials, bool show_value)
+void printMats(color_ostream &con, MatMap &mat, std::vector12<T*> &materials, bool show_value)
 {
     unsigned int total = 0;
     MatSorter sorting_vector;
@@ -206,9 +206,9 @@ void printVeins(color_ostream &con, MatMap &mat_map,
     printMats<df::inorganic_raw, std::greater>(con, rest, world->raws.inorganics, show_value);
 }
 
-command_result prospector (color_ostream &out, vector <string> & parameters);
+command_result prospector (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "prospect", "Show stats of available raw resources.",
@@ -302,7 +302,7 @@ bool estimate_underground(color_ostream &out, EmbarkTileLayout &tile, df::world_
 
     tile.base_z = tile.elevation-1;
 
-    std::vector<df::world_region_feature*> &features = details->features[x][y];
+    std::vector12<df::world_region_feature*> &features = details->features[x][y];
 
     // Collect global feature layer depths and apply penalties
     std::map<int, int> layer_bottom, layer_top;
@@ -557,7 +557,7 @@ static command_result embark_prospector(color_ostream &out, df::viewscreen_choos
     return CR_OK;
 }
 
-command_result prospector (color_ostream &con, vector <string> & parameters)
+command_result prospector (color_ostream &con, std::vector12<std::string24> & parameters)
 {
     bool showHidden = false;
     bool showPlants = true;
@@ -752,7 +752,7 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
                 if (showPlants)
                 {
                     df::map_block_column* block = Maps::getBlockColumn(b_x,b_y);
-                    vector<df::plant *> *plants = block ? &block->plants : NULL;
+                    std::vector12<df::plant *> *plants = block ? &block->plants : NULL;
                     if(plants)
                     {
                         for (PlantList::const_iterator it = plants->begin(); it != plants->end(); it++)

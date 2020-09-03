@@ -58,8 +58,8 @@
 #include <cstring>
 #include <iostream>
 #include <map>
-#include <set>
-#include <vector>
+
+
 //#include <hash_map>
 //#include <hash_set>
 //#include <cinttypes>
@@ -70,7 +70,7 @@ using namespace stdext;
 using namespace DFHack;
 using namespace df::enums;
 
-command_result diggingInvadersCommand(color_ostream &out, std::vector <std::string> & parameters);
+command_result diggingInvadersCommand(color_ostream &out, std::vector12<std::string24> & parameters);
 void watchForJobComplete(color_ostream& out, void* ptr);
 void newInvasionHandler(color_ostream& out, void* ptr);
 void clearDijkstra();
@@ -87,10 +87,10 @@ static int32_t lastInvasionDigger = -1;
 static int32_t edgesPerTick = 100;
 //static EventManager::EventHandler jobCompleteHandler(watchForJobComplete, 5);
 static bool activeDigging=false;
-static hash_set<string> diggingRaces;
+static hash_set<std::string24> diggingRaces;
 static hash_set<int32_t> invaderJobs;
 static df::coord lastDebugEdgeCostPoint;
-hash_map<string, DigAbilities> digAbilities;
+hash_map<std::string24, DigAbilities> digAbilities;
 
 typedef hash_map<df::coord, cost_t, PointHash> PointCostMap;
 
@@ -120,7 +120,7 @@ static int32_t jobDelayDefault[] = {
 100,
 };
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "diggingInvaders", "Makes invaders dig to your dwarves.",
@@ -221,7 +221,7 @@ public:
     }
 };
 
-//bool important(df::coord pos, map<df::coord, set<Edge> >& edges, df::coord prev, set<df::coord>& importantPoints, set<Edge>& importantEdges);
+//bool important(df::coord pos, map<df::coord, std::set8<Edge> >& edges, df::coord prev, std::set8<df::coord>& importantPoints, std::set8<Edge>& importantEdges);
 
 void newInvasionHandler(color_ostream& out, void* ptr) {
     if ( activeDigging )
@@ -230,7 +230,7 @@ void newInvasionHandler(color_ostream& out, void* ptr) {
     findAndAssignInvasionJob(out, (void*)0);
 }
 
-command_result diggingInvadersCommand(color_ostream& out, std::vector<std::string>& parameters) {
+command_result diggingInvadersCommand(color_ostream& out, std::vector12<std::string24>& parameters) {
     for ( size_t a = 0; a < parameters.size(); a++ ) {
         if ( parameters[a] == "1" || parameters[a] == "enable" ) {
             plugin_enable(out,true);
@@ -239,7 +239,7 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector<std::strin
         } else if ( parameters[a] == "add" || parameters[a] == "remove" ) {
             if ( a+1 >= parameters.size() )
                 return CR_WRONG_USAGE;
-            string race = parameters[a+1];
+            std::string24 race = parameters[a+1];
             if ( parameters[a] == "add" ) {
                 diggingRaces.insert(race);
                 DigAbilities& abilities = digAbilities[race];
@@ -255,7 +255,7 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector<std::strin
             if ( a+3 >= parameters.size() )
                 return CR_WRONG_USAGE;
 
-            string raceString = parameters[a+1];
+            std::string24 raceString = parameters[a+1];
             if ( digAbilities.find(raceString) == digAbilities.end() ) {
                 DigAbilities bob;
                 memset(&bob, 0xFF, sizeof(bob));
@@ -263,7 +263,7 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector<std::strin
             }
             DigAbilities& abilities = digAbilities[raceString];
 
-            string costStr = parameters[a+2];
+            std::string24 costStr = parameters[a+2];
             int32_t costDim = -1;
             if ( costStr == "walk" ) {
                 costDim = CostDimension::Walk;
@@ -296,7 +296,7 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector<std::strin
             if ( a+1 >= parameters.size() )
                 return CR_WRONG_USAGE;
 
-            string raceString = parameters[a+1];
+            std::string24 raceString = parameters[a+1];
 
             if ( digAbilities.find(raceString) == digAbilities.end() ) {
                 out.print("Race %s does not have dig abilities assigned.\n", raceString.c_str());
@@ -335,14 +335,14 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector<std::strin
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //dijkstra globals
-vector<int32_t> invaders;
+std::vector12<int32_t> invaders;
 hash_set<df::coord, PointHash> invaderPts;
 hash_set<df::coord, PointHash> localPts;
 hash_map<df::coord,df::coord,PointHash> parentMap;
 hash_map<df::coord,cost_t,PointHash> costMap;
 
 PointComp comp(&costMap);
-set<df::coord, PointComp> fringe(comp);
+std::set8<df::coord, PointComp> fringe(comp);
 EventManager::EventHandler findJobTickHandler(findAndAssignInvasionJob, 1);
 
 int32_t localPtsFound = 0;
@@ -358,7 +358,7 @@ void clearDijkstra() {
     parentMap.clear();
     costMap.clear();
     comp = PointComp(&costMap);
-    fringe = set<df::coord,PointComp>(comp);
+    fringe = std::set8<df::coord,PointComp>(comp);
     localPtsFound = edgeCount = 0;
     foundTarget = false;
     closedSet.clear();
@@ -506,9 +506,9 @@ void findAndAssignInvasionJob(color_ostream& out, void* tickTime) {
 
         cost_t myCost = costMap[pt];
         clock_t edgeTime = clock();
-        vector<Edge>* myEdges = getEdgeSet(out, pt, cache, xMax, yMax, zMax, abilities);
+        std::vector12<Edge>* myEdges = getEdgeSet(out, pt, cache, xMax, yMax, zMax, abilities);
         totalEdgeTime += (clock() - edgeTime);
-        for (vector<Edge>::iterator a = myEdges->begin(); a != myEdges->end(); a++ ) {
+        for (std::vector12<Edge>::iterator a = myEdges->begin(); a != myEdges->end(); a++ ) {
             Edge &e = *a;
             if ( e.p1 == df::coord() )
                 break;

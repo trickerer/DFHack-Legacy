@@ -32,7 +32,7 @@ using namespace df::enums;
 
 
 // A plugin must be able to return its name and version.
-// The name string provided must correspond to the filename -
+// The name std::string24 provided must correspond to the filename -
 // skeleton.plug.so, skeleton.plug.dylib, or skeleton.plug.dll in this case
 DFHACK_PLUGIN("autoclothing");
 
@@ -48,15 +48,15 @@ DFHACK_PLUGIN_IS_ENABLED(autoclothing_enabled);
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
 struct ClothingRequirement;
-command_result autoclothing(color_ostream &out, std::vector <std::string> & parameters);
+command_result autoclothing(color_ostream &out, std::vector12<std::string24> & parameters);
 static void init_state(color_ostream &out);
 static void save_state(color_ostream &out);
 static void cleanup_state(color_ostream &out);
 static void do_autoclothing();
 static bool validateMaterialCategory(ClothingRequirement * requirement);
-static bool setItem(std::string name, ClothingRequirement* requirement);
+static bool setItem(std::string24 name, ClothingRequirement* requirement);
 
-std::vector<ClothingRequirement>clothingOrders;
+std::vector12<ClothingRequirement>clothingOrders;
 
 struct ClothingRequirement
 {
@@ -80,7 +80,7 @@ struct ClothingRequirement
         return true;
     }
 
-    std::string Serialize()
+    std::string24 Serialize()
     {
         stringstream stream;
         stream << ENUM_KEY_STR_SIMPLE(job_type, jobType) << " ";
@@ -91,10 +91,10 @@ struct ClothingRequirement
         return stream.str();
     }
 
-    void Deserialize(std::string s)
+    void Deserialize(std::string24 s)
     {
         stringstream stream(s);
-        std::string loadedJob;
+        std::string24 loadedJob;
         stream >> loadedJob;
         FOR_ENUM_ITEMS_SIMPLE(job_type, job)
         {
@@ -104,7 +104,7 @@ struct ClothingRequirement
                 break;
             }
         }
-        std::string loadedItem;
+        std::string24 loadedItem;
         stream >> loadedItem;
         FOR_ENUM_ITEMS_SIMPLE(item_type, item)
         {
@@ -119,7 +119,7 @@ struct ClothingRequirement
         stream >> needed_per_citizen;
     }
 
-    bool SetFromParameters(color_ostream &out, std::vector <std::string> & parameters)
+    bool SetFromParameters(color_ostream &out, std::vector12<std::string24> & parameters)
     {
         if (!set_bitfield_field(&material_category, parameters[0], 1))
         {
@@ -138,12 +138,12 @@ struct ClothingRequirement
         return true;
     }
 
-    std::string ToReadableLabel()
+    std::string24 ToReadableLabel()
     {
         stringstream stream;
         stream << bitfield_to_string(material_category) << " ";
-        std::string adjective = "";
-        std::string name = "";
+        std::string24 adjective = "";
+        std::string24 name = "";
         switch (itemType)
         {
         case df::enums::item_type::ARMOR:
@@ -180,13 +180,13 @@ struct ClothingRequirement
 
 
 // Mandatory init function. If you have some global state, create it here.
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     // Fill the command list with your commands.
     commands.push_back(PluginCommand(
         "autoclothing", "Automatically manage clothing work orders",
         autoclothing, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         "  autoclothing <material> <item> [number]\n"
         "Example:\n"
         "  autoclothing cloth \"short skirt\" 10\n"
@@ -250,15 +250,15 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
     return CR_OK;
 }
 
-static bool setItemFromName(std::string name, ClothingRequirement* requirement)
+static bool setItemFromName(std::string24 name, ClothingRequirement* requirement)
 {
 //for (auto& itemdef : world->raws.itemdefs.rawType)
 #define SEARCH_ITEM_RAWS(rawType, job, item, st) \
-for (std::vector<df::st*>::iterator it = world->raws.itemdefs.rawType.begin(); \
+for (std::vector12<df::st*>::iterator it = world->raws.itemdefs.rawType.begin(); \
     it != world->raws.itemdefs.rawType.end(); ++it) \
 { \
     df::st* itemdef = *it; \
-    std::string fullName = itemdef->adjective.empty() ? itemdef->name : itemdef->adjective + " " + itemdef->name; \
+    std::string24 fullName = itemdef->adjective.empty() ? itemdef->name : itemdef->adjective + " " + itemdef->name; \
     if (fullName == name) \
     { \
         requirement->jobType = job_type::job; \
@@ -275,7 +275,7 @@ for (std::vector<df::st*>::iterator it = world->raws.itemdefs.rawType.begin(); \
     return false;
 }
 
-static bool setItemFromToken(std::string token, ClothingRequirement* requirement)
+static bool setItemFromToken(std::string24 token, ClothingRequirement* requirement)
 {
     ItemTypeInfo itemInfo;
     if (!itemInfo.find(token))
@@ -305,7 +305,7 @@ static bool setItemFromToken(std::string token, ClothingRequirement* requirement
     return true;
 }
 
-static bool setItem(std::string name, ClothingRequirement* requirement)
+static bool setItem(std::string24 name, ClothingRequirement* requirement)
 {
     if (setItemFromName(name, requirement))
         return true;
@@ -359,13 +359,13 @@ static bool validateMaterialCategory(ClothingRequirement * requirement)
 
 
 // A command! It sits around and looks pretty. And it's nice and friendly.
-command_result autoclothing(color_ostream &out, std::vector <std::string> & parameters)
+command_result autoclothing(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // It's nice to print a help message you get invalid options
     // from the user instead of just acting strange.
-    // This can be achieved by adding the extended help string to the
+    // This can be achieved by adding the extended help std::string24 to the
     // PluginCommand registration as show above, and then returning
-    // CR_WRONG_USAGE from the function. The same string will also
+    // CR_WRONG_USAGE from the function. The same std::string24 will also
     // be used by 'help your-command'.
     if (parameters.size() == 0)
     {
@@ -470,8 +470,8 @@ command_result autoclothing(color_ostream &out, std::vector <std::string> & para
 static void find_needed_clothing_items()
 {
     //for (auto& unit : world->units.active)
-    std::vector<df::unit*> const& u_vec = world->units.active;
-    for (std::vector<df::unit*>::const_iterator ci = u_vec.begin(); ci != u_vec.end(); ++ci)
+    std::vector12<df::unit*> const& u_vec = world->units.active;
+    for (std::vector12<df::unit*>::const_iterator ci = u_vec.begin(); ci != u_vec.end(); ++ci)
     {
         df::unit* unit = *ci;
         //obviously we don't care about illegal aliens.
@@ -480,7 +480,7 @@ static void find_needed_clothing_items()
 
         //now check each clothing order to see what the unit might be missing.
         //for (auto& clothingOrder : clothingOrders)
-        for (std::vector<ClothingRequirement>::iterator cit = clothingOrders.begin();
+        for (std::vector12<ClothingRequirement>::iterator cit = clothingOrders.begin();
             cit != clothingOrders.end(); ++cit)
         {
             ClothingRequirement &clothingOrder = *cit;
@@ -488,7 +488,7 @@ static void find_needed_clothing_items()
 
             //looping through the items first, then clothing order might be a little faster, but this way is cleaner.
             //for (auto& ownedItem : unit->owned_items)
-            for (std::vector<int32_t>::const_iterator citr = unit->owned_items.begin();
+            for (std::vector12<int32_t>::const_iterator citr = unit->owned_items.begin();
                 citr != unit->owned_items.end(); ++citr)
             {
                 int32_t ownedItem = *citr;
@@ -521,7 +521,7 @@ static void find_needed_clothing_items()
 static void remove_available_clothing()
 {
     //for (auto& item : world->items.all)
-    for (std::vector<df::item*>::const_iterator ci = world->items.all.begin(); ci != world->items.all.end(); ++ci)
+    for (std::vector12<df::item*>::const_iterator ci = world->items.all.begin(); ci != world->items.all.end(); ++ci)
     {
         df::item* item = *ci;
 
@@ -531,7 +531,7 @@ static void remove_available_clothing()
 
         //again, for each item, find if any clothing order matches
         //for (auto& clothingOrder : clothingOrders)
-        for (std::vector<ClothingRequirement>::iterator cit = clothingOrders.begin();
+        for (std::vector12<ClothingRequirement>::iterator cit = clothingOrders.begin();
             cit != clothingOrders.end(); ++cit)
         {
             ClothingRequirement& clothingOrder = *cit;
@@ -555,7 +555,7 @@ static void remove_available_clothing()
 static void add_clothing_orders()
 {
     //for (auto& clothingOrder : clothingOrders)
-    for (std::vector<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
+    for (std::vector12<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
     {
         ClothingRequirement& clothingOrder = *ci;
         //for (auto& orderNeeded : clothingOrder.total_needed_per_race)
@@ -572,7 +572,7 @@ static void add_clothing_orders()
 
             bool orderExistedAlready = false;
             //for (auto& managerOrder : world->manager_orders)
-            for (std::vector<df::manager_order*>::const_iterator citr = world->manager_orders.begin();
+            for (std::vector12<df::manager_order*>::const_iterator citr = world->manager_orders.begin();
                 citr != world->manager_orders.end(); ++citr)
             {
                 df::manager_order* managerOrder = *citr;
@@ -648,11 +648,11 @@ static void init_state(color_ostream &out)
 
 
     // Parse constraints
-    std::vector<PersistentDataItem> items;
+    std::vector12<PersistentDataItem> items;
     World::GetPersistentData(&items, "autoclothing/clothingItems");
 
     //for (auto& item : items)
-    for (std::vector<PersistentDataItem>::iterator ci = items.begin(); ci != items.end(); ++ci)
+    for (std::vector12<PersistentDataItem>::iterator ci = items.begin(); ci != items.end(); ++ci)
     {
         PersistentDataItem& item = *ci;
         if (!item.isValid())
@@ -672,7 +672,7 @@ static void save_state(color_ostream &out)
     enabled.ival(0) = autoclothing_enabled;
 
     //for (auto& order : clothingOrders)
-    for (std::vector<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
+    for (std::vector12<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
     {
         ClothingRequirement& order = *ci;
         PersistentDataItem orderSave = World::AddPersistentData("autoclothing/clothingItems");
@@ -681,7 +681,7 @@ static void save_state(color_ostream &out)
 
 
     // Parse constraints
-    std::vector<PersistentDataItem> items;
+    std::vector12<PersistentDataItem> items;
     World::GetPersistentData(&items, "autoclothing/clothingItems");
 
     for (size_t i = 0; i < items.size(); i++)

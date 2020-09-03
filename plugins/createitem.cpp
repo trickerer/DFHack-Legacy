@@ -27,8 +27,8 @@
 #include "df/reaction_product_itemst.h"
 #include "df/tool_uses.h"
 
-using std::string;
-using std::vector;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -40,9 +40,9 @@ REQUIRE_GLOBAL(gametype);
 
 int dest_container = -1, dest_building = -1;
 
-command_result df_createitem (color_ostream &out, vector <string> & parameters);
+command_result df_createitem (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("createitem", "Create arbitrary items.", df_createitem, false,
         "Syntax: createitem <item> <material> [count]\n"
@@ -71,10 +71,10 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 
 bool makeItem (df::reaction_product_itemst *prod, df::unit *unit, bool second_item = false, bool move_to_cursor = false)
 {
-    vector<df::reaction_product*> out_products;
-    vector<df::item *> out_items;
-    vector<df::reaction_reagent *> in_reag;
-    vector<df::item *> in_items;
+    std::vector12<df::reaction_product*> out_products;
+    std::vector12<df::item *> out_items;
+    std::vector12<df::reaction_reagent *> in_reag;
+    std::vector12<df::item *> in_items;
     bool is_gloves = (prod->item_type == item_type::GLOVES);
     bool is_shoes = (prod->item_type == item_type::SHOES);
 
@@ -130,9 +130,9 @@ bool makeItem (df::reaction_product_itemst *prod, df::unit *unit, bool second_it
     return true;
 }
 
-command_result df_createitem (color_ostream &out, vector <string> & parameters)
+command_result df_createitem (color_ostream &out, std::vector12<std::string24> & parameters)
 {
-    string item_str, material_str;
+    std::string24 item_str, material_str;
     df::item_type item_type = item_type::NONE;
     int16_t item_subtype = -1;
     int16_t mat_type = -1;
@@ -183,7 +183,7 @@ command_result df_createitem (color_ostream &out, vector <string> & parameters)
                 return CR_FAILURE;
             }
             dest_container = item->id;
-            string name;
+            std::string24 name;
             item->getItemDescription(&name, 0);
             out.print("Items created will be placed inside %s.\n", name.c_str());
             return CR_OK;
@@ -226,7 +226,7 @@ command_result df_createitem (color_ostream &out, vector <string> & parameters)
                 return CR_FAILURE;
             }
             dest_building = building->id;
-            string name;
+            std::string24 name;
             building->getName(&name);
             out.print("Items created will be placed inside %s.\n", name.c_str());
             return CR_OK;
@@ -254,7 +254,7 @@ command_result df_createitem (color_ostream &out, vector <string> & parameters)
 
     ItemTypeInfo item;
     MaterialInfo material;
-    vector<string> tokens;
+    std::vector12<std::string24> tokens;
 
     if (item.find(item_str))
     {
@@ -316,7 +316,7 @@ command_result df_createitem (color_ostream &out, vector <string> & parameters)
 
         for (size_t i = 0; i < world->raws.creatures.all.size(); i++)
         {
-            string castes = "";
+            std::string24 castes = "";
             df::creature_raw *creature = world->raws.creatures.all[i];
             if (creature->creature_id == tokens[0])
             {

@@ -23,7 +23,7 @@ REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cursor);
 REQUIRE_GLOBAL(ui);
 
-static const string PERSISTENCE_KEY = "automelt/stockpiles";
+static const std::string24 PERSISTENCE_KEY = "automelt/stockpiles";
 
 static int mark_item(df::item *item, df::item_flags bad_flags, int32_t stockpile_id)
 {
@@ -32,9 +32,9 @@ static int mark_item(df::item *item, df::item_flags bad_flags, int32_t stockpile
 
     if (item->isAssignedToThisStockpile(stockpile_id)) {
         size_t marked_count = 0;
-        std::vector<df::item*> contents;
+        std::vector12<df::item*> contents;
         Items::getContainedItems(item, &contents);
-        for (std::vector<df::item*>::const_iterator child = contents.begin(); child != contents.end(); child++)
+        for (std::vector12<df::item*>::const_iterator child = contents.begin(); child != contents.end(); child++)
         {
             marked_count += mark_item(*child, bad_flags, stockpile_id);
         }
@@ -53,7 +53,7 @@ static int mark_item(df::item *item, df::item_flags bad_flags, int32_t stockpile
     return 1;
 }
 
-static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
+static void mark_all_in_stockpiles(std::vector12<PersistentStockpileInfo> &stockpiles)
 {
     // Precompute a bitmask with the bad flags
     df::item_flags bad_flags;
@@ -67,7 +67,7 @@ static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
 #undef F
 
     size_t marked_count = 0;
-    for (vector<PersistentStockpileInfo>::iterator it = stockpiles.begin(); it != stockpiles.end(); it++)
+    for (std::vector12<PersistentStockpileInfo>::iterator it = stockpiles.begin(); it != stockpiles.end(); it++)
     {
         if (!it->isValid())
             continue;
@@ -93,7 +93,7 @@ class StockpileMonitor
 public:
     bool isMonitored(df::building_stockpilest *sp)
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
                 return true;
@@ -114,7 +114,7 @@ public:
 
     void remove(df::building_stockpilest *sp)
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end(); it++)
         {
             if (it->matches(sp))
             {
@@ -127,7 +127,7 @@ public:
 
     void doCycle()
     {
-        for (vector<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end();)
+        for (std::vector12<PersistentStockpileInfo>::iterator it = monitored_stockpiles.begin(); it != monitored_stockpiles.end();)
         {
             if (!it->isValid())
                 it = monitored_stockpiles.erase(it);
@@ -141,10 +141,10 @@ public:
     void reset()
     {
         monitored_stockpiles.clear();
-        std::vector<PersistentDataItem> items;
+        std::vector12<PersistentDataItem> items;
         DFHack::World::GetPersistentData(&items, PERSISTENCE_KEY);
 
-        for (std::vector<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
+        for (std::vector12<PersistentDataItem>::iterator i = items.begin(); i != items.end(); i++)
         {
             PersistentStockpileInfo pile = PersistentStockpileInfo(*i, PERSISTENCE_KEY);
             if (pile.load())
@@ -156,7 +156,7 @@ public:
 
 
 private:
-    vector<PersistentStockpileInfo> monitored_stockpiles;
+    std::vector12<PersistentStockpileInfo> monitored_stockpiles;
 };
 
 static StockpileMonitor monitor;
@@ -188,7 +188,7 @@ struct melt_hook : public df::viewscreen_dwarfmodest
 {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
-    bool handleInput(set<df::interface_key> *input)
+    bool handleInput(std::set8<df::interface_key> *input)
     {
         if (Gui::inRenameBuilding())
             return false;
@@ -208,7 +208,7 @@ struct melt_hook : public df::viewscreen_dwarfmodest
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!handleInput(input))
             INTERPOSE_NEXT(feed)(input);
@@ -250,7 +250,7 @@ IMPLEMENT_VMETHOD_INTERPOSE(melt_hook, feed);
 IMPLEMENT_VMETHOD_INTERPOSE(melt_hook, render);
 
 
-static command_result automelt_cmd(color_ostream &out, vector <string> & parameters)
+static command_result automelt_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (!parameters.empty())
     {
@@ -294,7 +294,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(
         PluginCommand(

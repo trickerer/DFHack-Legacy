@@ -29,10 +29,10 @@
 
 //  stl
 #include <functional>
-#include <vector>
 
-using std::vector;
-using std::string;
+
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -48,16 +48,16 @@ REQUIRE_GLOBAL(selection_rect);
 using df::building_stockpilest;
 //using std::placeholders::_1;
 
-static command_result copystock ( color_ostream &out, vector <string> & parameters );
+static command_result copystock ( color_ostream &out, std::vector12<std::string24> & parameters );
 static bool copystock_guard ( df::viewscreen *top );
 
-static command_result savestock ( color_ostream &out, vector <string> & parameters );
+static command_result savestock ( color_ostream &out, std::vector12<std::string24> & parameters );
 static bool savestock_guard ( df::viewscreen *top );
 
-static command_result loadstock ( color_ostream &out, vector <string> & parameters );
+static command_result loadstock ( color_ostream &out, std::vector12<std::string24> & parameters );
 static bool loadstock_guard ( df::viewscreen *top );
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands )
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands )
 {
     if ( world && ui )
     {
@@ -136,7 +136,7 @@ static bool copystock_guard ( df::viewscreen *top )
     }
 }
 
-static command_result copystock ( color_ostream &out, vector <string> & parameters )
+static command_result copystock ( color_ostream &out, std::vector12<std::string24> & parameters )
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
 
@@ -206,7 +206,7 @@ static bool loadstock_guard ( df::viewscreen *top )
 }
 
 //  exporting
-static command_result savestock ( color_ostream &out, vector <string> & parameters )
+static command_result savestock ( color_ostream &out, std::vector12<std::string24> & parameters )
 {
     building_stockpilest *sp = virtual_cast<building_stockpilest> ( world->selected_building );
     if ( !sp )
@@ -222,10 +222,10 @@ static command_result savestock ( color_ostream &out, vector <string> & paramete
     }
 
     bool debug = false;
-    std::string file;
+    std::string24 file;
     for ( size_t i = 0; i < parameters.size(); ++i )
     {
-        const std::string o = parameters.at ( i );
+        const std::string24 o = parameters.at ( i );
         if ( o == "--debug"  ||  o ==  "-d" )
             debug =  true;
         else  if ( !o.empty() && o[0] !=  '-' )
@@ -263,7 +263,7 @@ static command_result savestock ( color_ostream &out, vector <string> & paramete
 
 
 // importing
-static command_result loadstock ( color_ostream &out, vector <string> & parameters )
+static command_result loadstock ( color_ostream &out, std::vector12<std::string24> & parameters )
 {
     building_stockpilest *sp = virtual_cast<building_stockpilest> ( world->selected_building );
     if ( !sp )
@@ -279,10 +279,10 @@ static command_result loadstock ( color_ostream &out, vector <string> & paramete
     }
 
     bool debug = false;
-    std::string file;
+    std::string24 file;
     for ( size_t i = 0; i < parameters.size(); ++i )
     {
-        const std::string o = parameters.at ( i );
+        const std::string24 o = parameters.at ( i );
         if ( o == "--debug"  ||  o ==  "-d" )
             debug =  true;
         else  if ( !o.empty() && o[0] !=  '-' )
@@ -346,7 +346,7 @@ bool manage_settings ( building_stockpilest *sp )
     return true;
 }
 
-bool show_message_box ( const std::string & title,  const std::string & msg,  bool is_error = false )
+bool show_message_box ( const std::string24 & title,  const std::string24 & msg,  bool is_error = false )
 {
     lua_State* L = Lua::Core::State;
     color_ostream_proxy out ( Core::getInstance().getConsole() );
@@ -374,7 +374,7 @@ struct stockpiles_import_hook : public df::viewscreen_dwarfmodest
 {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
-    bool handleInput ( set<df::interface_key> *input )
+    bool handleInput ( std::set8<df::interface_key> *input )
     {
         if ( Gui::inRenameBuilding() )
             return false;
@@ -392,7 +392,7 @@ struct stockpiles_import_hook : public df::viewscreen_dwarfmodest
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE ( void, feed, ( set<df::interface_key> *input ) )
+    DEFINE_VMETHOD_INTERPOSE ( void, feed, ( std::set8<df::interface_key> *input ) )
     {
         if ( !handleInput ( input ) )
             INTERPOSE_NEXT ( feed ) ( input );
@@ -449,28 +449,28 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable )
     return CR_OK;
 }
 
-static std::vector<std::string> list_dir ( const std::string &path, bool recursive = false )
+static std::vector12<std::string24> list_dir ( const std::string24 &path, bool recursive = false )
 {
 //     color_ostream_proxy out ( Core::getInstance().getConsole() );
-    std::vector<std::string> files;
-    std::stack<std::string> dirs;
+    std::vector12<std::string24> files;
+    std::stack<std::string24> dirs;
     dirs.push(path);
 //     out <<  "list_dir start" <<  endl;
     while (!dirs.empty() ) {
-        const std::string current = dirs.top();
+        const std::string24 current = dirs.top();
 //         out <<  "\t walking " <<  current << endl;
         dirs.pop();
-        std::vector<std::string> entries;
+        std::vector12<std::string24> entries;
         const int res = DFHack::getdir(current,  entries);
         if ( res !=  0 )
             continue;
-        for ( std::vector<std::string>::iterator it = entries.begin() ; it != entries.end(); ++it )
+        for ( std::vector12<std::string24>::iterator it = entries.begin() ; it != entries.end(); ++it )
         {
             if ( (*it).empty() ||  (*it)[0] ==  '.' ) continue;
             //  shitty cross platform c++ we've got to construct the actual path manually
             std::ostringstream child_path_s;
             child_path_s <<  current <<  "/" <<  *it;
-            const std::string child = child_path_s.str();
+            const std::string24 child = child_path_s.str();
             if ( recursive && Filesystem::isdir ( child ) )
             {
 //                 out <<  "\t\tgot child dir: " <<  child <<  endl;
@@ -478,7 +478,7 @@ static std::vector<std::string> list_dir ( const std::string &path, bool recursi
             }
             else if ( Filesystem::isfile ( child ) )
             {
-                const std::string  rel_path ( child.substr ( std::string ( "./"+path).length()-1 ) );
+                const std::string24  rel_path ( child.substr ( std::string24 ( "./"+path).length()-1 ) );
 //                 out <<  "\t\t adding file: " <<  child << "  as   " <<  rel_path  <<  endl;
                 files.push_back ( rel_path );
             }
@@ -488,28 +488,28 @@ static std::vector<std::string> list_dir ( const std::string &path, bool recursi
     return files;
 }
 
-bool is_not_dfstockfile(const std::string &f)
+bool is_not_dfstockfile(const std::string24 &f)
 {
     return !is_dfstockfile(f);
 }
 
-std::string drop_filename_ext(const std::string &f)
+std::string24 drop_filename_ext(const std::string24 &f)
 {
     return f.substr(0, f.find_last_of("."));
 }
 
-static std::vector<std::string> clean_dfstock_list ( const std::string &path )
+static std::vector12<std::string24> clean_dfstock_list ( const std::string24 &path )
 {
     if ( !Filesystem::exists ( path ) )
     {
-        return std::vector<std::string>();
+        return std::vector12<std::string24>();
     }
-    std::vector<std::string> files ( list_dir ( path,  true) );
-    //files.erase ( std::remove_if ( files.begin(), files.end(), [] ( const std::string &f )
+    std::vector12<std::string24> files ( list_dir ( path,  true) );
+    //files.erase ( std::remove_if ( files.begin(), files.end(), [] ( const std::string24 &f )
     //{
     //    return !is_dfstockfile ( f );
     //} ),  files.end() );
-    //std::transform ( files.begin(), files.end(), files.begin(), [] ( const std::string &f )
+    //std::transform ( files.begin(), files.end(), files.begin(), [] ( const std::string24 &f )
     //{
     //    return f.substr ( 0, f.find_last_of ( "." ) );
     //} );
@@ -529,17 +529,17 @@ static int stockpiles_list_settings ( lua_State *L )
         lua_error ( L );
         return 0;
     }
-    std::vector<std::string> files = clean_dfstock_list ( path );
+    std::vector12<std::string24> files = clean_dfstock_list ( path );
     Lua::PushVector ( L, files, true );
     return 1;
 }
 
-const std::string err_title = "Stockpile Settings Error";
-const std::string err_help = "Does the folder exist?\nCheck the console for more information.";
+const std::string24 err_title = "Stockpile Settings Error";
+const std::string24 err_help = "Does the folder exist?\nCheck the console for more information.";
 
-static void stockpiles_load ( color_ostream &out, std::string filename )
+static void stockpiles_load ( color_ostream &out, std::string24 filename )
 {
-    std::vector<std::string> params;
+    std::vector12<std::string24> params;
     params.push_back ( filename );
     command_result r = loadstock ( out, params );
     if ( r !=  CR_OK )
@@ -547,9 +547,9 @@ static void stockpiles_load ( color_ostream &out, std::string filename )
 }
 
 
-static void stockpiles_save ( color_ostream &out, std::string filename )
+static void stockpiles_save ( color_ostream &out, std::string24 filename )
 {
-    std::vector<std::string> params;
+    std::vector12<std::string24> params;
     params.push_back ( filename );
     command_result r = savestock ( out, params );
     if ( r !=  CR_OK )

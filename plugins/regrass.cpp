@@ -17,17 +17,17 @@
 #include "df/block_square_event_grassst.h"
 #include "TileTypes.h"
 
-using std::string;
-using std::vector;
+
+
 using namespace std;
 using namespace DFHack;
 
 DFHACK_PLUGIN("regrass");
 REQUIRE_GLOBAL(world);
 
-command_result df_regrass (color_ostream &out, vector <string> & parameters);
+command_result df_regrass (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("regrass", "Regrows surface grass.", df_regrass, false,
         "Specify parameter 'max' to set all grass types to full density, otherwise only one type of grass will be restored per tile.\n"));
@@ -39,7 +39,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result df_regrass (color_ostream &out, vector <string> & parameters)
+command_result df_regrass (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool max = false;
     if (!parameters.empty())
@@ -136,7 +136,7 @@ command_result df_regrass (color_ostream &out, vector <string> & parameters)
                     // refresh random grass event in the map block
                     if(!regrew)
                     {
-                        vector <df::block_square_event_grassst *> gr_evs;
+                        std::vector12<df::block_square_event_grassst *> gr_evs;
                         for(size_t e=0; e<cur->block_events.size(); e++)
                         {
                             df::block_square_event * blev = cur->block_events[e];

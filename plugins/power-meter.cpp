@@ -1,9 +1,9 @@
-#include <vector>
+
 #include <cstdio>
 #include <stack>
-#include <string>
+
 #include <cmath>
-#include <string.h>
+
 
 #include "Console.h"
 #include "Core.h"
@@ -34,8 +34,8 @@
 #include "df/viewscreen_dwarfmodest.h"
 #include "df/world.h"
 
-using std::vector;
-using std::string;
+
+
 using std::stack;
 using namespace DFHack;
 using namespace df::enums;
@@ -77,7 +77,7 @@ struct trap_hook : df::building_trapst {
         return getBuildStage() >= getMaxBuildStage();
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, getName, (std::string *buf))
+    DEFINE_VMETHOD_INTERPOSE(void, getName, (std::string24 *buf))
     {
         if (is_power_meter())
         {
@@ -98,7 +98,7 @@ struct trap_hook : df::building_trapst {
             if (pdsgn)
             {
                 bool active = false;
-                std::vector<df::building*> &gears = world->buildings.other[buildings_other_id::GEAR_ASSEMBLY];
+                std::vector12<df::building*> &gears = world->buildings.other[buildings_other_id::GEAR_ASSEMBLY];
 
                 for (size_t i = 0; i < gears.size(); i++)
                 {
@@ -221,7 +221,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (Core::getInstance().isWorldLoaded())
         plugin_onstatechange(out, SC_WORLD_LOADED);

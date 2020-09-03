@@ -19,8 +19,8 @@
 #include "df/map_block.h"
 #include "df/world.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -40,7 +40,7 @@ bool setTileMaterial(df::tiletype &tile, const df::tiletype_material mat)
     return false;
 }
 
-command_result df_fixveins (color_ostream &out, vector <string> & parameters)
+command_result df_fixveins (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size())
         return CR_WRONG_USAGE;
@@ -101,7 +101,7 @@ command_result df_fixveins (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("fixveins",
         "Remove invalid references to mineral inclusions and restore missing ones.",

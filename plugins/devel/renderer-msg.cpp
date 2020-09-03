@@ -24,7 +24,7 @@ struct scdata {
 
 struct renderer_msg : public Renderer::renderer_wrap {
     virtual void update_tile (int32_t x, int32_t y) {
-        static std::string str = std::string("DFHack: ") + plugin_name + " active";
+        static std::string24 str = std::string24("DFHack: ") + plugin_name + " active";
         Screen::paintString(Screen::Pen(' ', 9, 0), 0, gps->dimy - 1, str);
         for (int32_t i = 0; i < gps->dimx; ++i)
             ((scdata*)screen)[i * gps->dimy + gps->dimy - 1].bg = 2;
@@ -32,7 +32,7 @@ struct renderer_msg : public Renderer::renderer_wrap {
     };
 };
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     return CR_OK;
 }

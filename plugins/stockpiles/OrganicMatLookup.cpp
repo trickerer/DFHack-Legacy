@@ -23,7 +23,7 @@ using std::endl;
  * and their index in the stockpile_settings structures.
  */
 
-void OrganicMatLookup::food_mat_by_idx ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, std::vector<int16_t>::size_type food_idx, FoodMat & food_mat )
+void OrganicMatLookup::food_mat_by_idx ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, std::vector12<int16_t>::size_type food_idx, FoodMat & food_mat )
 {
     out << "food_lookup: food_idx(" << food_idx << ") ";
     df::world_raws &raws = world->raws;
@@ -44,7 +44,7 @@ void OrganicMatLookup::food_mat_by_idx ( std::ostream &out, organic_mat_category
         out << " type(" << type << ") index("<< main_idx <<") token(" << food_mat.material.getToken() <<  ")" << endl;
     }
 }
-std::string OrganicMatLookup::food_token_by_idx ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, std::vector<int16_t>::size_type idx )
+std::string24 OrganicMatLookup::food_token_by_idx ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, std::vector12<int16_t>::size_type idx )
 {
     FoodMat food_mat;
     food_mat_by_idx ( out, mat_category, idx, food_mat );
@@ -56,7 +56,7 @@ std::string OrganicMatLookup::food_token_by_idx ( std::ostream &out, organic_mat
     {
         return food_mat.creature->creature_id + ":" + food_mat.caste->caste_id;
     }
-    return std::string();
+    return std::string24();
 }
 
 size_t OrganicMatLookup::food_max_size ( organic_mat_category::organic_mat_category mat_category )
@@ -84,7 +84,7 @@ void OrganicMatLookup::food_build_map ( std::ostream &out )
     index_built = true;
 }
 
-int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, const std::string & token )
+int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, const std::string24 & token )
 {
     int16_t food_idx = -1;
     df::world_raws &raws = world->raws;
@@ -94,7 +94,7 @@ int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_cat
             mat_category == organic_mat_category::UnpreparedFish ||
             mat_category == organic_mat_category::Eggs )
     {
-        std::vector<std::string> tokens;
+        std::vector12<std::string24> tokens;
         split_string ( &tokens, token, ":" );
         if ( tokens.size() != 2 )
         {
@@ -144,7 +144,7 @@ int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_cat
     return food_idx;
 }
 
-MaterialInfo OrganicMatLookup::food_mat_by_token ( std::ostream &out, const std::string & token )
+MaterialInfo OrganicMatLookup::food_mat_by_token ( std::ostream &out, const std::string24 & token )
 {
     MaterialInfo mat_info;
     mat_info.find ( token );
@@ -152,4 +152,4 @@ MaterialInfo OrganicMatLookup::food_mat_by_token ( std::ostream &out, const std:
 }
 
 bool OrganicMatLookup::index_built = false;
-std::vector<OrganicMatLookup::FoodMatMap> OrganicMatLookup::food_index = std::vector<OrganicMatLookup::FoodMatMap> ( 37 );
+std::vector12<OrganicMatLookup::FoodMatMap> OrganicMatLookup::food_index = std::vector12<OrganicMatLookup::FoodMatMap> ( 37 );

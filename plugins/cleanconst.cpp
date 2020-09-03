@@ -19,7 +19,7 @@ using namespace DFHack;
 DFHACK_PLUGIN("cleanconst");
 REQUIRE_GLOBAL(world);
 
-command_result df_cleanconst(color_ostream &out, vector <string> & parameters)
+command_result df_cleanconst(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
@@ -68,7 +68,7 @@ command_result df_cleanconst(color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "cleanconst", "Cleans up construction materials.",

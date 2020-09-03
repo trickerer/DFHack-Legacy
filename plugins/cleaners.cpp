@@ -18,8 +18,8 @@
 #include "df/unit.h"
 #include "df/world.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -93,7 +93,7 @@ command_result cleanitems (color_ostream &out)
         df::item_actual *item = (df::item_actual *)world->items.all[i];
         if (item->contaminants && item->contaminants->size())
         {
-            std::vector<df::spatter*> saved;
+            std::vector12<df::spatter*> saved;
             for (size_t j = 0; j < item->contaminants->size(); j++)
             {
                 df::spatter* obj = (*item->contaminants)[j];
@@ -155,7 +155,7 @@ command_result cleanplants (color_ostream &out)
     return CR_OK;
 }
 
-command_result spotclean (color_ostream &out, vector <string> & parameters)
+command_result spotclean (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
     if (cursor->x == -30000)
@@ -187,7 +187,7 @@ command_result spotclean (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result clean (color_ostream &out, vector <string> & parameters)
+command_result clean (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool map = false;
     bool snow = false;
@@ -238,7 +238,7 @@ command_result clean (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "clean","Remove contaminants from tiles, items and creatures.",

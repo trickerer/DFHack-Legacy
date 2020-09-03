@@ -2,8 +2,8 @@
 #include <cstdio>
 #include <cstring>
 #include <stack>
-#include <string>
-#include <vector>
+
+
 
 #include "Core.h"
 #include "Console.h"
@@ -19,8 +19,8 @@
 #include "df/viewscreen_titlest.h"
 #include "uicommon.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 
 DFHACK_PLUGIN("title-version");
@@ -31,7 +31,7 @@ void draw_version(int start_x, int start_y) {
     int x = start_x,
         y = start_y;
 
-    OutputString(COLOR_WHITE, x, y, string("DFHack ") + DFHACK_VERSION);
+    OutputString(COLOR_WHITE, x, y, std::string24("DFHack ") + DFHACK_VERSION);
     if (!DFHACK_IS_RELEASE)
     {
         OutputString(COLOR_WHITE, x, y, " (dev)");
@@ -96,7 +96,7 @@ DFhackCExport command_result plugin_enable (color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init (color_ostream &out, vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     return CR_OK;
 }

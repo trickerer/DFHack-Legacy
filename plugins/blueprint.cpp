@@ -25,9 +25,9 @@
 #include "df/building_water_wheelst.h"
 #include "df/building_workshopst.h"
 
-using std::string;
+
 using std::endl;
-using std::vector;
+
 using std::ofstream;
 using std::swap;
 using std::find;
@@ -39,9 +39,9 @@ DFHACK_PLUGIN("blueprint");
 
 enum phase {DIG=1, BUILD=2, PLACE=4, QUERY=8};
 
-command_result blueprint(color_ostream &out, vector <string> &parameters);
+command_result blueprint(color_ostream &out, std::vector12<std::string24> &parameters);
 
-DFhackCExport command_result plugin_init(color_ostream &out, vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("blueprint", "Convert map tiles into a blueprint", blueprint, false));
     return CR_OK;
@@ -106,7 +106,7 @@ char get_tile_dig(MapExtras::MapCache mc, int32_t x, int32_t y, int32_t z)
     }
 }
 
-string get_tile_build(uint32_t x, uint32_t y, df::building* b)
+std::string24 get_tile_build(uint32_t x, uint32_t y, df::building* b)
 {
     if (! b)
         return " ";
@@ -487,7 +487,7 @@ string get_tile_build(uint32_t x, uint32_t y, df::building* b)
     }
 }
 
-string get_tile_place(uint32_t x, uint32_t y, df::building* b)
+std::string24 get_tile_place(uint32_t x, uint32_t y, df::building* b)
 {
     if (! b || b->getType() != building_type::Stockpile)
         return " ";
@@ -553,14 +553,14 @@ string get_tile_place(uint32_t x, uint32_t y, df::building* b)
     return out.str();
 }
 
-string get_tile_query(df::building* b)
+std::string24 get_tile_query(df::building* b)
 {
     if (b && b->is_room)
         return "r+";
     return " ";
 }
 
-void init_stream(ofstream &out, std::string basename, std::string target)
+void init_stream(ofstream &out, std::string24 basename, std::string24 target)
 {
     std::ostringstream out_path;
     out_path << basename << "-" << target << ".csv";
@@ -568,11 +568,11 @@ void init_stream(ofstream &out, std::string basename, std::string target)
     out << "#" << target << endl;
 }
 
-command_result do_transform(DFCoord start, DFCoord end, string name, uint32_t phases, std::ostringstream &err)
+command_result do_transform(DFCoord start, DFCoord end, std::string24 name, uint32_t phases, std::ostringstream &err)
 {
     ofstream dig, build, place, query;
 
-    std::string basename = "blueprints/" + name;
+    std::string24 basename = "blueprints/" + name;
 
 #ifdef _WIN32
     // normalize to forward slashes
@@ -580,7 +580,7 @@ command_result do_transform(DFCoord start, DFCoord end, string name, uint32_t ph
 #endif
 
     size_t last_slash = basename.find_last_of("/");
-    std::string parent_path = basename.substr(0, last_slash);
+    std::string24 parent_path = basename.substr(0, last_slash);
 
     // create output directory if it doesn't already exist
     //std::error_code ec;
@@ -678,12 +678,12 @@ command_result do_transform(DFCoord start, DFCoord end, string name, uint32_t ph
     return CR_OK;
 }
 
-bool cmd_option_exists(vector<string>& parameters, const string& option)
+bool cmd_option_exists(std::vector12<std::string24>& parameters, const std::string24& option)
 {
     return  find(parameters.begin(), parameters.end(), option) != parameters.end();
 }
 
-command_result blueprint(color_ostream &out, vector<string> &parameters)
+command_result blueprint(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     if (parameters.size() < 4 || parameters.size() > 8)
         return help(out);
@@ -734,7 +734,7 @@ static int create(lua_State *L, uint32_t options) {
     Lua::CheckDFAssign(L, &end, 2);
     if (!end.isValid())
         luaL_argerror(L, 2, "invalid end position");
-    string filename(lua_tostring(L, 3));
+    std::string24 filename(lua_tostring(L, 3));
 
     std::ostringstream err;
     DFHack::command_result result = do_transform(start, end, filename, options, err);

@@ -67,7 +67,7 @@
 using namespace DFHack;
 using namespace df::enums;
 using namespace RemoteFortressReader;
-using namespace std;
+
 
 DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const DFHack::EmptyMessage *in, RemoteFortressReader::BuildingList *out)
 {

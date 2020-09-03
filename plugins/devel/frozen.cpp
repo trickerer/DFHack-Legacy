@@ -10,8 +10,8 @@
 #include "df/map_block.h"
 #include "df/world.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -43,7 +43,7 @@ int changeLiquid (df::tile_liquid type)
     return tiles;
 }
 
-command_result df_frozenlava (color_ostream &out, vector <string> & parameters)
+command_result df_frozenlava (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size())
         return CR_WRONG_USAGE;
@@ -62,7 +62,7 @@ command_result df_frozenlava (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result df_frozenwater (color_ostream &out, vector <string> & parameters)
+command_result df_frozenwater (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size())
         return CR_WRONG_USAGE;
@@ -83,7 +83,7 @@ command_result df_frozenwater (color_ostream &out, vector <string> & parameters)
 
 DFHACK_PLUGIN("frozen");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("frozenlava", "Changes all ice into frozen magma.", df_frozenlava));
     commands.push_back(PluginCommand("frozenwater", "Changes all ice into frozen water.", df_frozenwater));

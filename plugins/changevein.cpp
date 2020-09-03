@@ -14,8 +14,8 @@
 #include "df/block_square_event_mineralst.h"
 #include "df/map_block.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -23,7 +23,7 @@ DFHACK_PLUGIN("changevein");
 REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cursor);
 
-command_result df_changevein (color_ostream &out, vector <string> & parameters)
+command_result df_changevein (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() != 1)
         return CR_WRONG_USAGE;
@@ -82,7 +82,7 @@ command_result df_changevein (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("changevein",
         "Changes the material of a mineral inclusion.",

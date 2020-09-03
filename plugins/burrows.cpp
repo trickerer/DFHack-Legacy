@@ -30,8 +30,8 @@
 
 #include <stdlib.h>
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -46,12 +46,12 @@ REQUIRE_GLOBAL(gamemode);
  * Initialization.
  */
 
-static command_result burrow(color_ostream &out, vector <string> & parameters);
+static command_result burrow(color_ostream &out, std::vector12<std::string24> & parameters);
 
 static void init_map(color_ostream &out);
 static void deinit_map(color_ostream &out);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "burrow", "Miscellaneous burrow control.", burrow, false,
@@ -189,7 +189,7 @@ static void detect_digging(color_ostream &out)
             ++it;
     }
 
-    std::vector<df::job*> jvec;
+    std::vector12<df::job*> jvec;
 
     if (Job::listNewlyCreated(&jvec, &next_job_id_save))
     {
@@ -224,7 +224,7 @@ static void detect_digging(color_ostream &out)
 DFHACK_PLUGIN_IS_ENABLED(active);
 
 static bool auto_grow = false;
-static std::vector<int> grow_burrows;
+static std::vector12<int> grow_burrows;
 
 DFhackCExport command_result plugin_onupdate(color_ostream &out)
 {
@@ -243,11 +243,11 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
  * Config and processing
  */
 
-static std::map<std::string,int> name_lookup;
+static std::map<std::string24,int> name_lookup;
 
 static void parse_names()
 {
-    std::vector<df::burrow*> const &list = ui->burrows.list;
+    std::vector12<df::burrow*> const &list = ui->burrows.list;
 
     grow_burrows.clear();
     name_lookup.clear();
@@ -256,7 +256,7 @@ static void parse_names()
     {
         df::burrow* burrow = list[i];
 
-        std::string name = burrow->name;
+        std::string24 name = burrow->name;
 
         if (!name.empty())
         {
@@ -341,13 +341,13 @@ static void handle_burrow_rename(color_ostream &out, df::burrow *burrow)
     parse_names();
 }
 
-static void add_to_burrows(std::vector<df::burrow*> &burrows, df::coord pos)
+static void add_to_burrows(std::vector12<df::burrow*> &burrows, df::coord pos)
 {
     for (size_t i = 0; i < burrows.size(); i++)
         Burrows::setAssignedTile(burrows[i], pos, true);
 }
 
-static void add_walls_to_burrows(color_ostream &out, std::vector<df::burrow*> &burrows,
+static void add_walls_to_burrows(color_ostream &out, std::vector12<df::burrow*> &burrows,
                                 MapExtras::MapCache &mc, df::coord pos1, df::coord pos2)
 {
     for (int x = pos1.x; x <= pos2.x; x++)
@@ -373,7 +373,7 @@ static void handle_dig_complete(color_ostream &out, df::job_type job, df::coord 
     if (!isWalkable(new_tile))
         return;
 
-    std::vector<df::burrow*> to_grow;
+    std::vector12<df::burrow*> to_grow;
 
     for (size_t i = 0; i < grow_burrows.size(); i++)
     {
@@ -421,7 +421,7 @@ static void handle_dig_complete(color_ostream &out, df::job_type job, df::coord 
         Job::checkDesignationsNow();
 }
 
-static void renameBurrow(color_ostream &out, df::burrow *burrow, std::string name)
+static void renameBurrow(color_ostream &out, df::burrow *burrow, std::string24 name)
 {
     CHECK_NULL_POINTER(burrow);
 
@@ -432,7 +432,7 @@ static void renameBurrow(color_ostream &out, df::burrow *burrow, std::string nam
     onBurrowRename(out, burrow);
 }
 
-static df::burrow *findByName(color_ostream &out, std::string name, bool silent = false)
+static df::burrow *findByName(color_ostream &out, std::string24 name, bool silent = false)
 {
     int id = -1;
     if (name_lookup.count(name))
@@ -478,7 +478,7 @@ static void copyTiles(df::burrow *target, df::burrow *source, bool enable)
         return;
     }
 
-    std::vector<df::map_block*> pvec;
+    std::vector12<df::map_block*> pvec;
     Burrows::listBlocks(&pvec, source);
 
     for (size_t i = 0; i < pvec.size(); i++)
@@ -513,7 +513,7 @@ static void setTilesByDesignation(df::burrow *target, df::tile_designation d_mas
 {
     CHECK_NULL_POINTER(target);
 
-    std::vector<df::map_block*> const &blocks = world->map.map_blocks;
+    std::vector12<df::map_block*> const &blocks = world->map.map_blocks;
 
     for (size_t i = 0; i < blocks.size(); i++)
     {
@@ -543,7 +543,7 @@ static void setTilesByDesignation(df::burrow *target, df::tile_designation d_mas
     }
 }
 
-static bool setTilesByKeyword(df::burrow *target, std::string name, bool enable)
+static bool setTilesByKeyword(df::burrow *target, std::string24 name, bool enable)
 {
     CHECK_NULL_POINTER(target);
 
@@ -588,7 +588,7 @@ DFHACK_PLUGIN_LUA_EVENTS {
     DFHACK_LUA_END
 };
 
-static command_result burrow(color_ostream &out, vector <string> &parameters)
+static command_result burrow(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     CoreSuspender suspend;
 
@@ -598,7 +598,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
         return CR_FAILURE;
     }
 
-    string cmd;
+    std::string24 cmd;
     if (!parameters.empty())
         cmd = parameters[0];
 
@@ -611,7 +611,7 @@ static command_result burrow(color_ostream &out, vector <string> &parameters)
 
         for (size_t i = 1; i < parameters.size(); i++)
         {
-            string &option = parameters[i];
+            std::string24 &option = parameters[i];
 
             if (option == "auto-grow")
                 enable_auto_grow(out, state);

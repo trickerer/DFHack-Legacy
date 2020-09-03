@@ -4,10 +4,10 @@
 #include <iomanip>
 #include <sstream>
 #include <climits>
-#include <vector>
-#include <string>
+
+
 #include <algorithm>
-#include <set>
+
 using namespace std;
 
 #include "Core.h"
@@ -35,9 +35,9 @@ using MapExtras::MapCache;
 DFHACK_PLUGIN("changeitem");
 REQUIRE_GLOBAL(world);
 
-command_result df_changeitem(color_ostream &out, vector <string> & parameters);
+command_result df_changeitem(color_ostream &out, std::vector12<std::string24> & parameters);
 
-const string changeitem_help =
+const std::string24 changeitem_help =
     "Changeitem allows to change some item attributes.\n"
     "By default the item currently selected in the UI will be changed\n"
     "(you can select items in the 'k' list or inside containers/inventory).\n"
@@ -61,7 +61,7 @@ const string changeitem_help =
     "    change currently selected item to masterpiece quality\n";
 
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "changeitem", "Change item attributes (material, quality).",
@@ -79,7 +79,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 
 // probably there is some method in the library which does the same
 // todo: look for it :)
-string describeQuality(int q)
+std::string24 describeQuality(int q)
 {
     switch(q)
     {
@@ -103,11 +103,11 @@ string describeQuality(int q)
 command_result changeitem_execute(
     color_ostream &out, df::item * item,
     bool info, bool force,
-    bool change_material, string new_material,
+    bool change_material, std::string24 new_material,
     bool change_quality, int new_quality,
-    bool change_subtype, string new_subtype);
+    bool change_subtype, std::string24 new_subtype);
 
-command_result df_changeitem(color_ostream &out, vector <string> & parameters)
+command_result df_changeitem(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
@@ -116,17 +116,17 @@ command_result df_changeitem(color_ostream &out, vector <string> & parameters)
     bool force = false;
 
     bool change_material = false;
-    string new_material = "none";
+    std::string24 new_material = "none";
 
     bool change_subtype = false;
-    string new_subtype = "NONE";
+    std::string24 new_subtype = "NONE";
 
     bool change_quality = false;
     int new_quality = 0;
 
     for (size_t i = 0; i < parameters.size(); i++)
     {
-        string & p = parameters[i];
+        std::string24 & p = parameters[i];
 
         if (p == "help" || p == "?")
         {
@@ -148,7 +148,7 @@ command_result df_changeitem(color_ostream &out, vector <string> & parameters)
         else if (p == "material" || p == "m" )
         {
             // must be followed by material RAW id
-            // (string like 'INORGANIC:GRANITE', 'PLANT:MAPLE:WOOD', ...)
+            // (std::string24 like 'INORGANIC:GRANITE', 'PLANT:MAPLE:WOOD', ...)
             if(i == parameters.size()-1)
             {
                 out.printerr("no material specified!\n");
@@ -166,7 +166,7 @@ command_result df_changeitem(color_ostream &out, vector <string> & parameters)
                 out.printerr("no quality specified!\n");
                 return CR_WRONG_USAGE;
             }
-            string & q = parameters[i+1];
+            std::string24 & q = parameters[i+1];
             // meh. should use a stringstream instead. but it's only 6 numbers
             if(q == "0")
                 new_quality = 0;
@@ -192,7 +192,7 @@ command_result df_changeitem(color_ostream &out, vector <string> & parameters)
         else if (p == "subtype" || p == "s" )
         {
             // must be followed by subtype RAW id
-            // (string like 'ITEM_GLOVES_GAUNTLETS', 'ITEM_WEAPON_DAGGER_LARGE', 'ITEM_TOOL_KNIFE_MEAT_CLEAVER', ...)
+            // (std::string24 like 'ITEM_GLOVES_GAUNTLETS', 'ITEM_WEAPON_DAGGER_LARGE', 'ITEM_TOOL_KNIFE_MEAT_CLEAVER', ...)
             if(i == parameters.size()-1)
             {
                 out.printerr("no subtype specified!\n");
@@ -287,9 +287,9 @@ command_result df_changeitem(color_ostream &out, vector <string> & parameters)
 command_result changeitem_execute(
     color_ostream &out, df::item * item,
     bool info, bool force,
-    bool change_material, string new_material,
+    bool change_material, std::string24 new_material,
     bool change_quality, int new_quality,
-    bool change_subtype, string new_subtype )
+    bool change_subtype, std::string24 new_subtype )
 {
     MaterialInfo mat_new;
     MaterialInfo mat_old;
@@ -307,7 +307,7 @@ command_result changeitem_execute(
         sub_old.decode(item);
     if(change_subtype)
     {
-        string new_type = ENUM_KEY_STR_SIMPLE(item_type, item->getType()) + ":" + new_subtype;
+        std::string24 new_type = ENUM_KEY_STR_SIMPLE(item_type, item->getType()) + ":" + new_subtype;
         if (new_subtype == "NONE")
             new_subtype_id = -1;
         else if (sub_new.find(new_type))

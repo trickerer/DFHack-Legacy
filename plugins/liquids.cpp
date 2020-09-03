@@ -24,14 +24,14 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <set>
+
 #include <sstream>
 #include <stack>
-#include <vector>
-using std::vector;
-using std::string;
+
+
+
 using std::endl;
-using std::set;
+
 
 #include "Console.h"
 #include "Core.h"
@@ -57,10 +57,10 @@ REQUIRE_GLOBAL(world);
 
 CommandHistory liquids_hist;
 
-command_result df_liquids (color_ostream &out, vector <string> & parameters);
-command_result df_liquids_here (color_ostream &out, vector <string> & parameters);
+command_result df_liquids (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_liquids_here (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     liquids_hist.load("liquids.history");
     commands.push_back(PluginCommand(
@@ -158,7 +158,7 @@ static void print_prompt(std::ostream &str, OperationMode &cur_mode)
         << "]";
 }
 
-command_result df_liquids (color_ostream &out_, vector <string> & parameters)
+command_result df_liquids (color_ostream &out_, std::vector12<std::string24> & parameters)
 {
     if(!out_.is_console())
         return CR_FAILURE;
@@ -176,14 +176,14 @@ command_result df_liquids (color_ostream &out_, vector <string> & parameters)
         return CR_FAILURE;
     }
 
-    std::vector<std::string> commands;
+    std::vector12<std::string24> commands;
     bool end = false;
 
     out << "Welcome to the liquid spawner.\nType 'help' or '?' for a list of available commands, 'q' to quit.\nPress return after a command to confirm." << std::endl;
 
     while(!end)
     {
-        string input = "";
+        std::string24 input = "";
 
         std::stringstream str;
         print_prompt(str, cur_mode);
@@ -197,7 +197,7 @@ command_result df_liquids (color_ostream &out_, vector <string> & parameters)
 
         commands.clear();
         Core::cheap_tokenise(input, commands);
-        string command =  commands.empty() ? "" : commands[0];
+        std::string24 command =  commands.empty() ? "" : commands[0];
 
         if(command=="help" || command == "?")
         {
@@ -376,7 +376,7 @@ command_result df_liquids (color_ostream &out_, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result df_liquids_here (color_ostream &out, vector <string> & parameters)
+command_result df_liquids_here (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     for(size_t i = 0; i < parameters.size();i++)
     {
@@ -532,7 +532,7 @@ command_result df_liquids_execute(color_ostream &out, OperationMode &cur_mode, d
     case P_WATER:
     case P_FLOW_BITS:
         {
-            set <Block *> seen_blocks;
+            std::set8<Block *> seen_blocks;
             coord_vec::iterator iter = all_tiles.begin();
             while (iter != all_tiles.end())
             {
@@ -614,7 +614,7 @@ command_result df_liquids_execute(color_ostream &out, OperationMode &cur_mode, d
                 seen_blocks.insert(block);
                 iter++;
             }
-            set <Block *>::iterator biter = seen_blocks.begin();
+            std::set8<Block *>::iterator biter = seen_blocks.begin();
             while (biter != seen_blocks.end())
             {
                 switch (cur_mode.flowmode)

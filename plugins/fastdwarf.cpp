@@ -13,8 +13,8 @@
 #include "df/units_other_id.h"
 #include "df/world.h"
 
-using std::string;
-using std::vector;
+
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -187,7 +187,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     return CR_OK;
 }
 
-static command_result fastdwarf (color_ostream &out, vector <string> & parameters)
+static command_result fastdwarf (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() > 2)
         return CR_WRONG_USAGE;
@@ -254,7 +254,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable )
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("fastdwarf",
         "let dwarves teleport and/or finish jobs instantly",

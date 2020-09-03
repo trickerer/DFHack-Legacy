@@ -89,7 +89,7 @@ struct uo_opts {
     {}
 };
 
-command_result cmd_fix_unit_occupancy (color_ostream &out, std::vector <std::string> & parameters);
+command_result cmd_fix_unit_occupancy (color_ostream &out, std::vector12<std::string24> & parameters);
 
 unsigned fix_unit_occupancy (color_ostream &out, uo_opts &opts)
 {
@@ -134,7 +134,7 @@ unsigned fix_unit_occupancy (color_ostream &out, uo_opts &opts)
         }
     }
 
-    for (std::vector<df::unit*>::const_iterator it = world->units.active.begin(); it != world->units.active.end(); ++it)
+    for (std::vector12<df::unit*>::const_iterator it = world->units.active.begin(); it != world->units.active.end(); ++it)
     {
         df::unit *u = *it;
         if (!u || u->flags1.bits.caged || u->pos.x < 0)
@@ -179,7 +179,7 @@ unsigned fix_unit_occupancy (color_ostream &out)
     return fix_unit_occupancy(out, tmp);
 }
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "fix-unit-occupancy",
@@ -230,13 +230,13 @@ DFhackCExport command_result plugin_onstatechange (color_ostream &out, state_cha
     return CR_OK;
 }
 
-command_result cmd_fix_unit_occupancy (color_ostream &out, std::vector <std::string> & parameters)
+command_result cmd_fix_unit_occupancy (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
     uo_opts opts;
     bool ok = true;
 
-    if (parameters.size() >= 1 && (parameters[0] == "-i" || parameters[0].find("interval") != std::string::npos))
+    if (parameters.size() >= 1 && (parameters[0] == "-i" || parameters[0].find("interval") != std::string24::npos))
     {
         if (parameters.size() >= 2)
         {
@@ -255,15 +255,15 @@ command_result cmd_fix_unit_occupancy (color_ostream &out, std::vector <std::str
             return CR_WRONG_USAGE;
     }
 
-    for (std::vector<std::string>::const_iterator opt = parameters.begin(); opt != parameters.end(); ++opt)
+    for (std::vector12<std::string24>::const_iterator opt = parameters.begin(); opt != parameters.end(); ++opt)
     {
-        if (*opt == "-n" || opt->find("dry") != std::string::npos)
+        if (*opt == "-n" || opt->find("dry") != std::string24::npos)
             opts.dry_run = true;
-        else if (*opt == "-h" || opt->find("cursor") != std::string::npos || opt->find("here") != std::string::npos)
+        else if (*opt == "-h" || opt->find("cursor") != std::string24::npos || opt->find("here") != std::string24::npos)
             opts.use_cursor = true;
-        else if (opt->find("enable") != std::string::npos)
+        else if (opt->find("enable") != std::string24::npos)
             plugin_enable(out, true);
-        else if (opt->find("disable") != std::string::npos)
+        else if (opt->find("disable") != std::string24::npos)
             plugin_enable(out, false);
         else
         {

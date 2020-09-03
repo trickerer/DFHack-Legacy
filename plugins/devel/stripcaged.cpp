@@ -2,9 +2,9 @@
 #include <iostream>
 #include <iomanip>
 #include <climits>
-#include <vector>
+
 #include <algorithm>
-#include <string>
+
 #include <sstream>
 #include <ctime>
 #include <cstdio>
@@ -28,8 +28,8 @@ using namespace std;
 #include <df/creature_raw.h>
 #include <df/caste_raw.h>
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 using df::global::world;
@@ -38,7 +38,7 @@ using df::global::ui;
 
 using namespace DFHack::Gui;
 
-command_result df_stripcaged(color_ostream &out, vector <string> & parameters);
+command_result df_stripcaged(color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("stripcaged");
 
@@ -59,7 +59,7 @@ bool isContainedInItem(df::unit* unit)
     return contained;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "stripcaged", "strip caged units of all items",
@@ -74,7 +74,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result df_stripcaged(color_ostream &out, vector <string> & parameters)
+command_result df_stripcaged(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
     bool keeparmor = true;
@@ -98,7 +98,7 @@ command_result df_stripcaged(color_ostream &out, vector <string> & parameters)
                 {
                     if (keeparmor && (uii->item->isArmorNotClothing() || uii->item->isClothing()))
                         continue;
-                    std::string desc;
+                    std::string24 desc;
                     uii->item->getItemDescription(&desc,0);
                     out << "Item " << desc << " dumped." << endl;
                     uii->item->flags.bits.forbid = 0;

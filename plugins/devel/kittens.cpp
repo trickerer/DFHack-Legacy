@@ -1,8 +1,8 @@
 #include <array>
 #include <atomic>
-#include <vector>
+
 #include <random>
-#include <string>
+
 #include <thread>
 
 #include "Console.h"
@@ -26,8 +26,8 @@
 #define _DISABLE_EXTENDED_ALIGNED_STORAGE
 #endif
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 
 DFHACK_PLUGIN("kittens");
@@ -50,15 +50,15 @@ int32_t last_mouse[2] = {-1, -1};
 df::ui_sidebar_mode last_menu = df::ui_sidebar_mode::Default;
 uint64_t timeLast = 0;
 
-command_result kittens (color_ostream &out, vector <string> & parameters);
-command_result ktimer (color_ostream &out, vector <string> & parameters);
-command_result trackmenu (color_ostream &out, vector <string> & parameters);
-command_result trackpos (color_ostream &out, vector <string> & parameters);
-command_result trackstate (color_ostream &out, vector <string> & parameters);
-command_result colormods (color_ostream &out, vector <string> & parameters);
-command_result sharedsignal (color_ostream &out, vector <string> & parameters);
+command_result kittens (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result ktimer (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result trackmenu (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result trackpos (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result trackstate (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result colormods (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result sharedsignal (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("nyan","NYAN CAT INVASION!",kittens));
     commands.push_back(PluginCommand("ktimer","Measure time between game updates and console lag.",ktimer));
@@ -147,7 +147,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     return CR_OK;
 }
 
-command_result trackmenu (color_ostream &out, vector <string> & parameters)
+command_result trackmenu (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool is_running = trackmenu_flg.exchange(false);
     if(is_running)
@@ -163,20 +163,20 @@ command_result trackmenu (color_ostream &out, vector <string> & parameters)
         return CR_OK;
     }
 }
-command_result trackpos (color_ostream &out, vector <string> & parameters)
+command_result trackpos (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     trackpos_flg.fetch_xor(1);
     is_enabled = true;
     return CR_OK;
 }
 
-command_result trackstate ( color_ostream& out, vector< string >& parameters )
+command_result trackstate ( color_ostream& out, std::vector12<std::string24 >& parameters )
 {
     statetrack.fetch_xor(1);
     return CR_OK;
 }
 
-command_result colormods (color_ostream &out, vector <string> & parameters)
+command_result colormods (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
     auto & vec = world->raws.creatures.alphabetic;
@@ -192,7 +192,7 @@ command_result colormods (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result ktimer (color_ostream &out, vector <string> & parameters)
+command_result ktimer (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool is_running = timering.exchange(false);
     if(is_running)
@@ -309,7 +309,7 @@ struct Connected : public ClearMem<Connected> {
     }
 };
 
-command_result sharedsignal (color_ostream &out, vector <string> & parameters)
+command_result sharedsignal (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     using rng_t = std::linear_congruential_engine<uint32_t, 747796405U, 2891336453U, 0>;
     rng_t rng(std::random_device{}());
@@ -379,7 +379,7 @@ command_result sharedsignal (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result kittens (color_ostream &out, vector <string> & parameters)
+command_result kittens (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() >= 1)
     {

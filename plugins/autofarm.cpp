@@ -24,10 +24,10 @@
 
 #include <queue>
 
-using std::vector;
-using std::string;
+
+
 using std::map;
-using std::set;
+
 using std::queue;
 using std::endl;
 using namespace DFHack;
@@ -36,7 +36,7 @@ using namespace df::enums;
 using df::global::world;
 using df::global::ui;
 
-static command_result autofarm(color_ostream &out, vector <string> & parameters);
+static command_result autofarm(color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("autofarm");
 
@@ -158,7 +158,7 @@ public:
     }
 
 private:
-    map<int, set<df::biome_type>> plantable_plants;
+    map<int, std::set8<df::biome_type>> plantable_plants;
 
 public:
     void find_plantable_plants()
@@ -177,8 +177,8 @@ public:
 #undef F
 
         //for (auto ii : world->items.other[df::items_other_id::SEEDS])
-        std::vector<df::item*> const& seed_vec = world->items.other[df::items_other_id::SEEDS];
-        for (std::vector<df::item*>::const_iterator ci = seed_vec.begin(); ci != seed_vec.end(); ++ci)
+        std::vector12<df::item*> const& seed_vec = world->items.other[df::items_other_id::SEEDS];
+        for (std::vector12<df::item*>::const_iterator ci = seed_vec.begin(); ci != seed_vec.end(); ++ci)
         {
             df::item* ii = *ci;
             df::item_plantst* i = (df::item_plantst*)ii;
@@ -203,7 +203,7 @@ public:
         }
     }
 
-    void set_farms(color_ostream& out, set<int> plants, vector<df::building_farmplotst*> farms)
+    void set_farms(color_ostream& out, std::set8<int> plants, std::vector12<df::building_farmplotst*> farms)
     {
         // this algorithm attempts to change as few farms as possible, while ensuring that
         // the number of farms planting each eligible plant is "as equal as possible"
@@ -223,7 +223,7 @@ public:
         toChange.empty();
 
         //for (auto farm : farms)
-        for (vector<df::building_farmplotst*>::const_iterator ci = farms.begin(); ci != farms.end(); ++ci)
+        for (std::vector12<df::building_farmplotst*>::const_iterator ci = farms.begin(); ci != farms.end(); ++ci)
         {
             df::building_farmplotst* farm = *ci;
             int o = farm->plant_id[season];
@@ -238,7 +238,7 @@ public:
         }
 
         //for (auto n : plants)
-        for (set<int>::const_iterator ci = plants.begin(); ci != plants.end(); ++ci)
+        for (std::set8<int>::const_iterator ci = plants.begin(); ci != plants.end(); ++ci)
         {
             int n = *ci;
             int c = counters[n];
@@ -276,9 +276,9 @@ public:
         F(in_building); F(construction); F(artifact);
 #undef F
 
-        std::vector<df::item*> const& plant_vec = world->items.other[df::items_other_id::PLANT];
+        std::vector12<df::item*> const& plant_vec = world->items.other[df::items_other_id::PLANT];
         //for (auto ii : world->items.other[df::items_other_id::PLANT])
-        for (std::vector<df::item*>::const_iterator ci = plant_vec.begin(); ci != plant_vec.end(); ++ci)
+        for (std::vector12<df::item*>::const_iterator ci = plant_vec.begin(); ci != plant_vec.end(); ++ci)
         {
             df::item* ii = *ci;
             df::item_plantst* i = (df::item_plantst*)ii;
@@ -289,30 +289,30 @@ public:
             }
         }
 
-        map<df::biome_type, set<int>> plants;
+        map<df::biome_type, std::set8<int>> plants;
         plants.clear();
 
         //for (auto plantable : plantable_plants)
-        for (map<int, set<df::biome_type>>::const_iterator ci = plantable_plants.begin();
+        for (map<int, std::set8<df::biome_type>>::const_iterator ci = plantable_plants.begin();
             ci != plantable_plants.end(); ++ci)
         {
-            map<int, set<df::biome_type>>::value_type const& plantable = *ci;
+            map<int, std::set8<df::biome_type>>::value_type const& plantable = *ci;
             df::plant_raw* plant = world->raws.plants.all[plantable.first];
             if (lastCounts[plant->index] < getThreshold(plant->index))
                 //for (auto biome : plantable.second)
-                for (set<df::biome_type>::const_iterator cit = plantable.second.begin();
+                for (std::set8<df::biome_type>::const_iterator cit = plantable.second.begin();
                     cit != plantable.second.end(); ++cit)
                 {
                     plants[*cit].insert(plant->index);
                 }
         }
 
-        map<df::biome_type, vector<df::building_farmplotst*>> farms;
+        map<df::biome_type, std::vector12<df::building_farmplotst*>> farms;
         farms.clear();
 
         //for (auto bb : world->buildings.other[df::buildings_other_id::FARM_PLOT])
-        std::vector<df::building*> const& plot_vec = world->buildings.other[df::buildings_other_id::FARM_PLOT];
-        for (std::vector<df::building*>::const_iterator ci = plot_vec.begin(); ci != plot_vec.end(); ++ci)
+        std::vector12<df::building*> const& plot_vec = world->buildings.other[df::buildings_other_id::FARM_PLOT];
+        for (std::vector12<df::building*>::const_iterator ci = plot_vec.begin(); ci != plot_vec.end(); ++ci)
         {
             df::building* bb = *ci;
             df::building_farmplotst* farm = (df::building_farmplotst*) bb;
@@ -330,7 +330,7 @@ public:
         }
 
         //for (auto ff : farms)
-        for (map<df::biome_type, vector<df::building_farmplotst*>>::const_iterator ci = farms.begin();
+        for (map<df::biome_type, std::vector12<df::building_farmplotst*>>::const_iterator ci = farms.begin();
             ci != farms.end(); ++ci)
         {
             set_farms(out, plants[ci->first], ci->second);
@@ -362,7 +362,7 @@ public:
 static AutoFarm* autofarmInstance;
 
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (world && ui) {
         commands.push_back(
@@ -410,17 +410,17 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-static command_result setThresholds(color_ostream& out, vector<string> & parameters)
+static command_result setThresholds(color_ostream& out, std::vector12<std::string24> & parameters)
 {
     int val = atoi(parameters[1].c_str());
     for (size_t i = 2; i < parameters.size(); i++)
     {
-        string id = parameters[i];
+        std::string24 id = parameters[i];
         transform(id.begin(), id.end(), id.begin(), ::toupper);
 
         bool ok = false;
         //for (auto plant : world->raws.plants.all)
-        for (std::vector<df::plant_raw*>::const_iterator ci = world->raws.plants.all.begin();
+        for (std::vector12<df::plant_raw*>::const_iterator ci = world->raws.plants.all.begin();
             ci != world->raws.plants.all.end(); ++ci)
         {
             df::plant_raw* plant = *ci;
@@ -440,7 +440,7 @@ static command_result setThresholds(color_ostream& out, vector<string> & paramet
     return CR_OK;
 }
 
-static command_result autofarm(color_ostream &out, vector <string> & parameters)
+static command_result autofarm(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 

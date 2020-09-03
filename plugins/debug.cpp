@@ -33,7 +33,7 @@ redistribute it freely, subject to the following restrictions:
 #include <algorithm>
 //#include <array>
 #include <map>
-#include <set>
+
 //#include <mutex>
 //#include <regex>
 #include <cwchar>
@@ -75,12 +75,12 @@ redistribute it freely, subject to the following restrictions:
 //
 //namespace Json {
 //template<typename ET>
-//ET get(Json::Value& ar, const std::string &key, const ET& default_)
+//ET get(Json::Value& ar, const std::string24 &key, const ET& default_)
 //{
 //    return static_cast<ET>(as<UInt64>(ar.get(key, static_cast<uint64_t>(default_))));
 //}
 ////typename std::enable_if<std::is_enum<ET>::value, ET>::type
-////get(Json::Value& ar, const std::string &key, const ET& default_)
+////get(Json::Value& ar, const std::string24 &key, const ET& default_)
 ////{
 ////    return static_cast<ET>(as<UInt64>(ar.get(key, static_cast<uint64_t>(default_))));
 ////}
@@ -190,14 +190,14 @@ redistribute it freely, subject to the following restrictions:
 //struct CommandDispatch {
 //    //! Store handler function pointer and help message for commands
 //    struct Command {
-//        using handler_t = command_result(*)(color_ostream&,std::vector<std::string>&);
+//        using handler_t = command_result(*)(color_ostream&,std::vector12<std::string24>&);
 //        Command(handler_t handler, const char* help) :
 //            handler_(handler),
 //            help_(help)
 //        {}
 //
 //        command_result operator()(color_ostream& out,
-//                std::vector<std::string>& parameters) const noexcept
+//                std::vector12<std::string24>& parameters) const noexcept
 //        {
 //            return handler_(out, parameters);
 //        }
@@ -211,46 +211,46 @@ redistribute it freely, subject to the following restrictions:
 //        handler_t handler_;
 //        const char* help_;
 //    };
-//    using dispatch_t = const std::map<std::string, Command>;
+//    using dispatch_t = const std::map<std::string24, Command>;
 //    //! Name to handler function and help message mapping
 //    static dispatch_t dispatch;
 //};
 //
 //struct LevelName {
 //    //static constexpr auto regex_opt = std::regex::icase | std::regex::optimize | std::regex::nosubs;
-//    LevelName(const std::string& name) :
+//    LevelName(const std::string24& name) :
 //        name_{name},
 //        match_{name, regex_opt}
 //    {}
 //
-//    bool match(const std::string& value) const
+//    bool match(const std::string24& value) const
 //    {
 //        return std::regex_match(value, match_);
 //    }
 //
-//    operator const std::string&() const noexcept
+//    operator const std::string24&() const noexcept
 //    {
 //        return name_;
 //    }
 //
-//    const std::string& str() const noexcept
+//    const std::string24& str() const noexcept
 //    {
 //        return name_;
 //    }
 //
 //    template<typename T>
-//    std::string operator+(const T& v) const
+//    std::string24 operator+(const T& v) const
 //    {
 //        return name_ + v;
 //    }
 //private:
-//    std::string name_;
+//    std::string24 name_;
 //    std::regex match_;
 //};
 //
-//std::string operator+(const std::string& a, const LevelName& b)
+//std::string24 operator+(const std::string24& a, const LevelName& b)
 //{
-//    return a + static_cast<const std::string&>(b);
+//    return a + static_cast<const std::string24&>(b);
 //}
 //
 ////! List of DebugCategory::level's in human readable form
@@ -265,7 +265,7 @@ redistribute it freely, subject to the following restrictions:
 //static const LevelName names_arr[] =
 //{ LevelName("Trace"), LevelName("Debug"), LevelName("Info"), LevelName("Warning"), LevelName("Error") };
 //
-//static const std::vector<const LevelName> levelNames(names_arr, names_arr + sizeof(names_arr)/sizeof(names_arr[0]));
+//static const std::vector12<const LevelName> levelNames(names_arr, names_arr + sizeof(names_arr)/sizeof(names_arr[0]));
 //
 ///*!
 // * Filter applies a runtime filter to matching  DFHack::DebugCategory 's.
@@ -275,16 +275,16 @@ redistribute it freely, subject to the following restrictions:
 // */
 //struct Filter {
 //    explicit Filter(DebugCategory::level level,
-//            const std::string& categoryText,
+//            const std::string24& categoryText,
 //            const std::regex& category,
-//            const std::string& pluginText,
+//            const std::string24& pluginText,
 //            const std::regex& plugin,
 //            bool persistent = true,
 //            bool enabled = true) noexcept;
 //
 //    explicit Filter(DebugCategory::level level,
-//            const std::string& categoryText,
-//            const std::string& pluginText,
+//            const std::string24& categoryText,
+//            const std::string24& pluginText,
 //            bool persistent = true,
 //            bool enabled = true);
 //
@@ -311,9 +311,9 @@ redistribute it freely, subject to the following restrictions:
 //    //! Add matches count for the initial category filter matching
 //    void addMatch() noexcept {++matches_;}
 //    //! Return the category filter text
-//    const std::string& categoryText() const noexcept {return categoryText_;}
+//    const std::string24& categoryText() const noexcept {return categoryText_;}
 //    //! Return the plugin filter text
-//    const std::string& pluginText() const noexcept {return pluginText_;}
+//    const std::string24& pluginText() const noexcept {return pluginText_;}
 //
 //    //! Load Filter from configuration file. Second parameter would be version
 //    //! number if format changes in future to include more fields. Then new
@@ -351,14 +351,14 @@ redistribute it freely, subject to the following restrictions:
 //    size_t matches_;
 //    bool persistent_;
 //    bool enabled_;
-//    std::string categoryText_;
-//    std::string pluginText_;
+//    std::string24 categoryText_;
+//    std::string24 pluginText_;
 //};
 //
 //Filter::Filter(DebugCategory::level level,
-//        const std::string& categoryText,
+//        const std::string24& categoryText,
 //        const std::regex& category,
-//        const std::string& pluginText,
+//        const std::string24& pluginText,
 //        const std::regex& plugin,
 //        bool persistent,
 //        bool enabled) noexcept :
@@ -373,8 +373,8 @@ redistribute it freely, subject to the following restrictions:
 //{}
 //
 //Filter::Filter(DebugCategory::level level,
-//        const std::string& categoryText,
-//        const std::string& pluginText,
+//        const std::string24& categoryText,
+//        const std::string24& pluginText,
 //        bool persistent,
 //        bool enabled) :
 //    Filter{
@@ -598,10 +598,10 @@ redistribute it freely, subject to the following restrictions:
 //    return {connection_};
 //}
 //
-////! \brief Helper to parse optional regex string safely
+////! \brief Helper to parse optional regex std::string24 safely
 //static command_result parseRegexParam(std::regex& target,
 //        color_ostream& out,
-//        std::vector<std::string>& parameters,
+//        std::vector12<std::string24>& parameters,
 //        size_t pos)
 //{
 //    if (parameters.size() <= pos)
@@ -628,7 +628,7 @@ redistribute it freely, subject to the following restrictions:
 // */
 //template<typename Callable1, typename Callable2, typename Callable3>
 //static command_result applyCategoryFilters(color_ostream& out,
-//        std::vector<std::string>& parameters,
+//        std::vector12<std::string24>& parameters,
 //        size_t pos, Callable1 header,
 //        Callable2 categoryMatch,
 //        Callable3 listComplete)
@@ -685,7 +685,7 @@ redistribute it freely, subject to the following restrictions:
 //        printCategoryListHeader(out);
 //    // Output matching categories.
 //    out.color((line++ & 1) == 0 ? COLOR_CYAN : COLOR_LIGHTCYAN);
-//    const std::string& level = (old != static_cast<DebugCategory::level>(-1)) ?
+//    const std::string24& level = (old != static_cast<DebugCategory::level>(-1)) ?
 //        levelNames[static_cast<unsigned>(old)] + "->" +
 //            levelNames[static_cast<unsigned>(cat.allowed())] :
 //        levelNames[static_cast<unsigned>(cat.allowed())].str();
@@ -696,7 +696,7 @@ redistribute it freely, subject to the following restrictions:
 //
 ////! Handler for debugfilter category
 //static command_result listCategories(color_ostream& out,
-//        std::vector<std::string>& parameters)
+//        std::vector12<std::string24>& parameters)
 //{
 //    unsigned line = 0;
 //    return applyCategoryFilters(out, parameters, 1u,
@@ -712,15 +712,15 @@ redistribute it freely, subject to the following restrictions:
 //            []() {return CR_OK;});
 //}
 //
-////! Type that prints parameter string in center of output stream field
+////! Type that prints parameter std::string24 in center of output stream field
 //template<typename CT, typename TT = std::char_traits<CT>>
 //struct center {
-//    using string = std::basic_string<CT, TT>;
-//    center(const string& str) :
+//    using std::string24 = std::basic_string<CT, TT>;
+//    center(const std::string24& str) :
 //        str_(str)
 //    {}
 //
-//    const string& str_;
+//    const std::string24& str_;
 //};
 //
 ///*!
@@ -735,13 +735,13 @@ redistribute it freely, subject to the following restrictions:
 //    return {str};
 //}
 //
-////! c++14 string conversion literal to std::string
-//std::string operator "" _s(const char* cstr, size_t len)
+////! c++14 std::string24 conversion literal to std::string24
+//std::string24 operator "" _s(const char* cstr, size_t len)
 //{
 //    return {cstr, len};
 //}
 //
-////! Output centered string, the stream must be using std::ios::right
+////! Output centered std::string24, the stream must be using std::ios::right
 ////! \sa DFHack::debugPlugin::centered
 //template<typename CT, typename TT>
 //std::basic_ostream<CT, TT>& operator<<(std::basic_ostream<CT, TT>& os, const center<CT, TT>& toCenter)
@@ -772,14 +772,14 @@ redistribute it freely, subject to the following restrictions:
 //    } else {
 //        // Truncate characters to the width of field
 //        os.write(&str[0], std::distance(str.begin(), iter));
-//        // Reset the field width because we wrote the string with write
+//        // Reset the field width because we wrote the std::string24 with write
 //        os << std::setw(0);
 //    }
 //    return os;
 //}
 //
 //static FilterManager::iterator parseFilterId(color_ostream& out,
-//        const std::string& parameter)
+//        const std::string24& parameter)
 //{
 //    unsigned long id = 0;
 //    try {
@@ -829,7 +829,7 @@ redistribute it freely, subject to the following restrictions:
 //
 ////! Handler for debugfilter filter
 //static command_result listFilters(color_ostream& out,
-//        std::vector<std::string>& parameters)
+//        std::vector12<std::string24>& parameters)
 //{
 //    if (1u < parameters.size()) {
 //        auto& catMan = DebugManager::getInstance();
@@ -871,11 +871,11 @@ redistribute it freely, subject to the following restrictions:
 //    return CR_OK;
 //}
 //
-//static const std::string persistent("persistent");
+//static const std::string24 persistent("persistent");
 //
 ////! Handler for debugfilter set
 //static command_result setFilter(color_ostream& out,
-//        std::vector<std::string>& parameters)
+//        std::vector12<std::string24>& parameters)
 //{
 //    bool persist = false;
 //    size_t pos = 1u;
@@ -888,7 +888,7 @@ redistribute it freely, subject to the following restrictions:
 //        ERR(command,out).print("set requires at least the level parameter\n");
 //        return CR_WRONG_USAGE;
 //    }
-//    const std::string& level = parameters[pos];
+//    const std::string24& level = parameters[pos];
 //    auto iter = std::find_if(levelNames.begin(), levelNames.end(),
 //            [&level](const LevelName& v) -> bool {
 //                return v.match(level);
@@ -934,7 +934,7 @@ redistribute it freely, subject to the following restrictions:
 //
 //template<typename HighlightRed,typename ListComplete>
 //static command_result applyFilterIds(color_ostream& out,
-//        std::vector<std::string>& parameters,
+//        std::vector12<std::string24>& parameters,
 //        const char* name,
 //        HighlightRed hlRed,
 //        ListComplete listComplete)
@@ -951,7 +951,7 @@ redistribute it freely, subject to the following restrictions:
 //        unsigned line = 0;
 //        for (size_t pos = 1; pos < parameters.size(); ++pos)
 //        {
-//            const std::string& p = parameters[pos];
+//            const std::string24& p = parameters[pos];
 //            auto iter = parseFilterId(out, p);
 //            if (iter == filMan.end())
 //                continue;
@@ -969,9 +969,9 @@ redistribute it freely, subject to the following restrictions:
 //
 ////! Handler for debugfilter disable
 //static command_result disableFilter(color_ostream& out,
-//        std::vector<std::string>& parameters)
+//        std::vector12<std::string24>& parameters)
 //{
-//    std::set<DebugCategory*> modified;
+//    std::set8<DebugCategory*> modified;
 //    bool mustSave = false;
 //    return applyFilterIds(out,parameters,"disable",
 //            // Per item
@@ -1006,9 +1006,9 @@ redistribute it freely, subject to the following restrictions:
 //}
 //
 ////! Handler for debugfilter enable
-//static command_result enableFilter(color_ostream& out, std::vector<std::string>& parameters)
+//static command_result enableFilter(color_ostream& out, std::vector12<std::string24>& parameters)
 //{
-//    std::set<DebugCategory*> modified;
+//    std::set8<DebugCategory*> modified;
 //    bool mustSave = false;
 //    return applyFilterIds(out,parameters,"enable",
 //        // Per item
@@ -1051,10 +1051,10 @@ redistribute it freely, subject to the following restrictions:
 //
 ////! Handler for debugfilter unset
 //static command_result unsetFilter(color_ostream& out,
-//        std::vector<std::string>& parameters)
+//        std::vector12<std::string24>& parameters)
 //{
-//    std::set<DebugCategory*> modified;
-//    std::vector<FilterManager::iterator> toErase;
+//    std::set8<DebugCategory*> modified;
+//    std::vector12<FilterManager::iterator> toErase;
 //    return applyFilterIds(out,parameters,"unset",
 //            // Per item
 //            [&modified, &toErase](FilterManager::iterator& iter) -> bool {
@@ -1094,7 +1094,7 @@ redistribute it freely, subject to the following restrictions:
 //using DFHack::debugPlugin::CommandDispatch;
 //
 //static command_result printHelp(color_ostream& out,
-//        std::vector<std::string>& parameters)
+//        std::vector12<std::string24>& parameters)
 //{
 //    const char* help = commandHelp;
 //    auto iter = CommandDispatch::dispatch.end();
@@ -1118,7 +1118,7 @@ redistribute it freely, subject to the following restrictions:
 //
 ////! Dispatch command handling to the subcommand or help
 //static command_result commandDebugFilter(color_ostream& out,
-//        std::vector<std::string>& parameters)
+//        std::vector12<std::string24>& parameters)
 //{
 //    DEBUG(command,out).print("debugfilter %s, parameter count %zu\n",
 //            parameters.size() > 0 ? parameters[0].c_str() : "",
@@ -1135,7 +1135,7 @@ redistribute it freely, subject to the following restrictions:
 //} } /* namespace debug */
 //
 //DFhackCExport DFHack::command_result plugin_init(DFHack::color_ostream& out,
-//        std::vector<DFHack::PluginCommand>& commands)
+//        std::vector12<DFHack::PluginCommand>& commands)
 //{
 //    commands.emplace_back(
 //            "debugfilter",

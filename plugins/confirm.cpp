@@ -1,5 +1,5 @@
 #include <map>
-#include <set>
+
 #include <queue>
 
 #include "Console.h"
@@ -27,32 +27,32 @@ using namespace DFHack;
 using namespace df::enums;
 using std::map;
 using std::queue;
-using std::string;
-using std::vector;
+
+
 
 DFHACK_PLUGIN("confirm");
 DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 REQUIRE_GLOBAL(gps);
 REQUIRE_GLOBAL(ui);
 
-typedef std::set<df::interface_key> ikey_set;
-command_result df_confirm (color_ostream &out, vector <string> & parameters);
+typedef std::set8<df::interface_key> ikey_set;
+command_result df_confirm (color_ostream &out, std::vector12<std::string24> & parameters);
 
 struct conf_wrapper;
-typedef map<string, conf_wrapper*> ConfirmMap;
+typedef map<std::string24, conf_wrapper*> ConfirmMap;
 static ConfirmMap confirmations;
-string active_id;
-queue<string> cmds;
+std::string24 active_id;
+queue<std::string24> cmds;
 
 template <typename VT, typename FT>
-inline bool in_vector (std::vector<VT> &vec, FT item)
+inline bool in_vector (std::vector12<VT> &vec, FT item)
 {
     return std::find(vec.begin(), vec.end(), item) != vec.end();
 }
 
-string char_replace (string s, char a, char b)
+std::string24 char_replace (std::string24 s, char a, char b)
 {
-    string res = s;
+    std::string24 res = s;
     size_t i = res.size();
     while (i--)
         if (res[i] == a)
@@ -60,15 +60,15 @@ string char_replace (string s, char a, char b)
     return res;
 }
 
-bool set_conf_state (string name, bool state);
+bool set_conf_state (std::string24 name, bool state);
 
 class confirmation_base {
 public:
     enum cstate { INACTIVE, ACTIVE, SELECTED };
-    virtual string get_id() = 0;
+    virtual std::string24 get_id() = 0;
     virtual bool set_state(cstate) = 0;
 
-    static bool set_state(string id, cstate state)
+    static bool set_state(std::string24 id, cstate state)
     {
         if (active && active->get_id() == id)
         {
@@ -82,7 +82,7 @@ protected:
 };
 confirmation_base *confirmation_base::active = NULL;
 
-typedef std::set<VMethodInterposeLinkBase*> HooksMap;
+typedef std::set8<VMethodInterposeLinkBase*> HooksMap;
 struct conf_wrapper {
 private:
     bool enabled;
@@ -113,10 +113,10 @@ public:
 };
 
 namespace trade {
-    static bool goods_selected (const std::vector<char> &selected)
+    static bool goods_selected (const std::vector12<char> &selected)
     {
         //for (char c : selected)
-        for (std::vector<char>::const_iterator c = selected.begin(); c != selected.end(); ++c)
+        for (std::vector12<char>::const_iterator c = selected.begin(); c != selected.end(); ++c)
             if (*c)
                 return true;
         return false;
@@ -132,7 +132,7 @@ namespace trade {
         return goods_selected(screen->broker_selected);
     }
 
-    static bool goods_all_selected(const std::vector<char> &selected, const std::vector<df::item*> &items)  \
+    static bool goods_all_selected(const std::vector12<char> &selected, const std::vector12<df::item*> &items)  \
     {
         for (size_t i = 0; i < selected.size(); ++i)
         {
@@ -142,7 +142,7 @@ namespace trade {
                 // (if the container is not selected, it will be detected separately)
                 bool in_container = false;
                 //for (auto ref : items[i]->general_refs)
-                for (std::vector<df::general_ref*>::const_iterator ci = items[i]->general_refs.begin();
+                for (std::vector12<df::general_ref*>::const_iterator ci = items[i]->general_refs.begin();
                     ci != items[i]->general_refs.end(); ++ci)
                 {
                     if (virtual_cast<df::general_ref_contained_in_itemst>(*ci))
@@ -325,7 +325,7 @@ public:
         return state == ACTIVE;
     }
     void render() {
-        static vector<string> lines;
+        static std::vector12<std::string24> lines;
         Screen::Pen corner_ul = Screen::Pen((char)201, COLOR_GREY, COLOR_BLACK);
         Screen::Pen corner_ur = Screen::Pen((char)187, COLOR_GREY, COLOR_BLACK);
         Screen::Pen corner_dl = Screen::Pen((char)200, COLOR_GREY, COLOR_BLACK);
@@ -336,8 +336,8 @@ public:
         {
             split_string(&lines, get_message(), "\n");
             size_t max_length = 40;
-            //for (string line : lines)
-            for (std::vector<std::string>::const_iterator ci = lines.begin(); ci != lines.end(); ++ci)
+            //for (std::string24 line : lines)
+            for (std::vector12<std::string24>::const_iterator ci = lines.begin(); ci != lines.end(); ++ci)
                 max_length = std::max<size_t>(max_length, (*ci).size());
             int width = max_length + 4;
             int height = lines.size() + 4;
@@ -359,7 +359,7 @@ public:
             Screen::paintTile(corner_ur, x2, y1);
             Screen::paintTile(corner_dl, x1, y2);
             Screen::paintTile(corner_dr, x2, y2);
-            string title = " " + get_title() + " ";
+            std::string24 title = " " + get_title() + " ";
             Screen::paintString(Screen::Pen(' ', COLOR_DARKGREY, COLOR_BLACK),
                 x2 - 6, y1, "DFHack");
             Screen::paintString(Screen::Pen(' ', COLOR_BLACK, COLOR_GREY),
@@ -388,7 +388,7 @@ public:
             set_state(INACTIVE);
         }
     }
-    virtual string get_id() override = 0;
+    virtual std::string24 get_id() override = 0;
     #define CONF_LUA_START using namespace conf_lua; Lua::StackUnwinder unwind(l_state); push(screen); push(get_id());
     bool intercept_key (df::interface_key key)
     {
@@ -399,7 +399,7 @@ public:
         else
             return false;
     };
-    string get_title()
+    std::string24 get_title()
     {
         CONF_LUA_START;
         if (call("get_title", 2, 1) && lua_isstring(l_state, -1))
@@ -407,7 +407,7 @@ public:
         else
             return "Confirm";
     }
-    string get_message()
+    std::string24 get_message()
     {
         CONF_LUA_START;
         if (call("get_message", 2, 1) && lua_isstring(l_state, -1))
@@ -430,12 +430,12 @@ protected:
 };
 
 template<typename T>
-int conf_register(confirmation<T> *c, const vector<VMethodInterposeLinkBase*> &hooks)
+int conf_register(confirmation<T> *c, const std::vector12<VMethodInterposeLinkBase*> &hooks)
 {
     conf_wrapper *w = new conf_wrapper();
     confirmations[c->get_id()] = w;
     //for (auto hook : hooks)
-    for (vector<VMethodInterposeLinkBase*>::const_iterator ci = hooks.begin(); ci != hooks.end(); ++ci)
+    for (std::vector12<VMethodInterposeLinkBase*>::const_iterator ci = hooks.begin(); ci != hooks.end(); ++ci)
         w->add_hook(*ci);
     return 0;
 }
@@ -470,7 +470,7 @@ static VMethodInterposeLinkBase* cls##_link_bases[] = { \
     &INTERPOSE_HOOK(cls##_hooks, key_conflict), \
 }; \
 static int conf_register_##cls = conf_register(&cls##_instance, \
-    std::vector<VMethodInterposeLinkBase*>(cls##_link_bases, \
+    std::vector12<VMethodInterposeLinkBase*>(cls##_link_bases, \
     cls##_link_bases + sizeof(cls##_link_bases)/sizeof(cls##_link_bases[0])));
 //static int conf_register_##cls = conf_register(&cls##_instance, {\
 //    &INTERPOSE_HOOK(cls##_hooks, feed), \
@@ -480,7 +480,7 @@ static int conf_register_##cls = conf_register(&cls##_instance, \
 
 #define DEFINE_CONFIRMATION(cls, screen) \
     class confirmation_##cls : public confirmation<df::screen> { \
-        virtual string get_id() { static string id = char_replace(#cls, '_', '-'); return id; } \
+        virtual std::string24 get_id() { static std::string24 id = char_replace(#cls, '_', '-'); return id; } \
     }; \
     IMPLEMENT_CONFIRMATION_HOOKS(confirmation_##cls, 0);
 
@@ -503,7 +503,7 @@ DEFINE_CONFIRMATION(route_delete,       viewscreen_dwarfmodest);
 DEFINE_CONFIRMATION(location_retire,    viewscreen_locationsst);
 DEFINE_CONFIRMATION(convict,            viewscreen_justicest);
 
-DFhackCExport command_result plugin_init (color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (!conf_lua::init(out))
         return CR_FAILURE;
@@ -564,7 +564,7 @@ DFhackCExport command_result plugin_onupdate (color_ostream &out)
     return CR_OK;
 }
 
-bool set_conf_state (string name, bool state)
+bool set_conf_state (std::string24 name, bool state)
 {
     bool found = false;
     //for (auto it : confirmations)
@@ -586,13 +586,13 @@ bool set_conf_state (string name, bool state)
     return found;
 }
 
-void enable_conf (color_ostream &out, string name, bool state)
+void enable_conf (color_ostream &out, std::string24 name, bool state)
 {
     if (!set_conf_state(name, state))
         out.printerr("Unrecognized option: %s\n", name.c_str());
 }
 
-command_result df_confirm (color_ostream &out, vector <string> & parameters)
+command_result df_confirm (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
     bool state = true;
@@ -604,10 +604,10 @@ command_result df_confirm (color_ostream &out, vector <string> & parameters)
             out.print("  %20s: %s\n", ci->first.c_str(), ci->second->is_enabled() ? "enabled" : "disabled");
         return CR_OK;
     }
-    //for (string param : parameters)
-    for (vector<string>::const_iterator cit = parameters.begin(); cit != parameters.end(); ++cit)
+    //for (std::string24 param : parameters)
+    for (std::vector12<std::string24>::const_iterator cit = parameters.begin(); cit != parameters.end(); ++cit)
     {
-        string param = *cit;
+        std::string24 param = *cit;
         if (param == "enable")
             state = true;
         else if (param == "disable")

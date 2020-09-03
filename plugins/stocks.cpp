@@ -47,7 +47,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
  * Utility
  */
 
-static string get_quality_name(const df::item_quality quality)
+static std::string24 get_quality_name(const df::item_quality quality)
 {
     if (gps->dimx - SIDEBAR_WIDTH < 60)
         return int_to_string(quality);
@@ -83,7 +83,7 @@ public:
     void prepareTradeVariables()
     {
         reset();
-        for(std::vector<df::building*>::const_iterator bld_it = world->buildings.all.begin(); bld_it != world->buildings.all.end(); bld_it++)
+        for(std::vector12<df::building*>::const_iterator bld_it = world->buildings.all.begin(); bld_it != world->buildings.all.end(); bld_it++)
         {
             df::building* bld = *bld_it;
             if (!isUsableDepot(bld))
@@ -96,9 +96,9 @@ public:
         }
     }
 
-    bool assignItem(vector<df::item *> &entries)
+    bool assignItem(std::vector12<df::item *> &entries)
     {
-        for (vector<df::item*>::const_iterator it = entries.begin(); it != entries.end(); it++)
+        for (std::vector12<df::item*>::const_iterator it = entries.begin(); it != entries.end(); it++)
         {
             df::item* item = *it;
             item = get_container_of(item);
@@ -206,9 +206,9 @@ static bool is_item_in_cage_cache(df::item *item)
     return items_in_cages.find(item) != items_in_cages.end();
 }
 
-static string get_keywords(df::item *item)
+static std::string24 get_keywords(df::item *item)
 {
-    string keywords;
+    std::string24 keywords;
 
     if (item->flags.bits.in_job)
         keywords += "job ";
@@ -246,9 +246,9 @@ static string get_keywords(df::item *item)
     return keywords;
 }
 
-static string get_item_label(df::item *item, bool trim = false)
+static std::string24 get_item_label(df::item *item, bool trim = false)
 {
-    std::string label = Items::getBookTitle(item);
+    std::string24 label = Items::getBookTitle(item);
     if (label == "")
     {
         label = Items::getDescription(item, 0, false);
@@ -256,7 +256,7 @@ static string get_item_label(df::item *item, bool trim = false)
     if (trim && item->getType() == item_type::BIN)
     {
         size_t pos = label.find("<#");
-        if (pos != string::npos)
+        if (pos != std::string24::npos)
         {
             label = label.substr(0, pos-1);
         }
@@ -265,7 +265,7 @@ static string get_item_label(df::item *item, bool trim = false)
     int16_t wear = item->getWear();
     if (wear > 0)
     {
-        string wearX;
+        std::string24 wearX;
         switch (wear)
         {
         case 1:
@@ -296,9 +296,9 @@ static string get_item_label(df::item *item, bool trim = false)
 
 struct item_grouped_entry
 {
-    std::vector<df::item *> entries;
+    std::vector12<df::item *> entries;
 
-    string getLabel(bool grouped) const
+    std::string24 getLabel(bool grouped) const
     {
         if (entries.size() == 0)
             return "";
@@ -306,7 +306,7 @@ struct item_grouped_entry
         return get_item_label(entries[0], grouped);
     }
 
-    string getKeywords() const
+    std::string24 getKeywords() const
     {
         return get_keywords(entries[0]);
     }
@@ -344,7 +344,7 @@ struct item_grouped_entry
 
     void setFlags(const df::item_flags flags, const bool state)
     {
-        for (std::vector<df::item*>::const_iterator it = entries.begin(); it != entries.end(); it++)
+        for (std::vector12<df::item*>::const_iterator it = entries.begin(); it != entries.end(); it++)
         {
             if (state)
                 (*it)->flags.whole |= flags.whole;
@@ -377,7 +377,7 @@ struct extra_filters
 };
 
 static bool cages_populated = false;
-static vector<df::building_cagest *> cages;
+static std::vector12<df::building_cagest *> cages;
 
 static void find_cages()
 {
@@ -399,7 +399,7 @@ static void find_cages()
 static df::building_cagest *is_in_cage(df::unit *unit)
 {
     find_cages();
-    for (vector<df::building_cagest*>::const_iterator it = cages.begin(); it != cages.end(); it++)
+    for (std::vector12<df::building_cagest*>::const_iterator it = cages.begin(); it != cages.end(); it++)
     {
         df::building_cagest* cage = *it;
         for (size_t c = 0; c < cage->assigned_units.size(); c++)
@@ -521,7 +521,7 @@ class StockListColumn : public ListColumn<T>
         default:
             break;
         }
-        string &search_string = ListColumn<T>::search_string;
+        std::string24 &search_string = ListColumn<T>::search_string;
         if (c == '^' && !search_string.size())
             return true;
         else if (c == '$' && search_string.size())
@@ -534,9 +534,9 @@ class StockListColumn : public ListColumn<T>
         return ListColumn<T>::validSearchInput(c);
     }
 
-    std::string getRawSearch(const std::string s)
+    std::string24 getRawSearch(const std::string24 s)
     {
-        string raw_search = s;
+        std::string24 raw_search = s;
         if (raw_search.size() && raw_search[0] == '^')
             raw_search.erase(0, 1);
         if (raw_search.size() && raw_search[raw_search.size() - 1] == '$')
@@ -544,20 +544,20 @@ class StockListColumn : public ListColumn<T>
         return toLower(raw_search);
     }
 
-    virtual void tokenizeSearch (vector<string> *dest, const string search)
+    virtual void tokenizeSearch (std::vector12<std::string24> *dest, const std::string24 search)
     {
-        string raw_search = getRawSearch(search);
+        std::string24 raw_search = getRawSearch(search);
         ListColumn<T>::tokenizeSearch(dest, raw_search);
     }
 
-    virtual bool showEntry (const ListEntry<T> *entry, const vector<string> &search_tokens)
+    virtual bool showEntry (const ListEntry<T> *entry, const std::vector12<std::string24> &search_tokens)
     {
-        string &search_string = ListColumn<T>::search_string;
+        std::string24 &search_string = ListColumn<T>::search_string;
         if (!search_string.size())
             return true;
 
         bool match_start = false, match_end = false;
-        string raw_search = getRawSearch(search_string);
+        std::string24 raw_search = getRawSearch(search_string);
         if (search_string.size() && search_string[0] == '^')
             match_start = true;
         if (search_string.size() && search_string[search_string.size() - 1] == '$')
@@ -566,7 +566,7 @@ class StockListColumn : public ListColumn<T>
         if (!ListColumn<T>::showEntry(entry, search_tokens))
             return false;
 
-        string item_name = toLower(Items::getBookTitle(entry->elem->entries[0]));
+        std::string24 item_name = toLower(Items::getBookTitle(entry->elem->entries[0]));
         if (item_name == "")
         {
             item_name = toLower(Items::getDescription(entry->elem->entries[0], 0, false));
@@ -586,7 +586,7 @@ class StockListColumn : public ListColumn<T>
 class search_help : public dfhack_viewscreen
 {
 public:
-    void feed (std::set<df::interface_key> *input)
+    void feed (std::set8<df::interface_key> *input)
     {
         if (input->count(interface_key::HELP))
             return;
@@ -598,7 +598,7 @@ public:
     }
     void render()
     {
-        static std::string text =
+        static std::string24 text =
             "\7 Flag names can be\n"
             "  searched for - e.g. job,\n"
             "  inventory, dump, forbid\n"
@@ -615,12 +615,12 @@ public:
         Screen::fillRect(Screen::Pen(' ', 0, 0), left_margin - 1, 1, left_margin - 1, gps->dimy - 2);
         OutputString(COLOR_WHITE, x, y, "Search help", true, left_margin);
         ++y;
-        vector<string> lines;
+        std::vector12<std::string24> lines;
         split_string(&lines, text, "\n");
-        for (std::vector<std::string>::const_iterator line = lines.begin(); line != lines.end(); ++line)
+        for (std::vector12<std::string24>::const_iterator line = lines.begin(); line != lines.end(); ++line)
             OutputString(COLOR_WHITE, x, y, line->c_str(), true, left_margin);
     }
-    std::string getFocusString() { return "stocks_view/search_help"; }
+    std::string24 getFocusString() { return "stocks_view/search_help"; }
 };
 
 class ViewscreenStocks : public dfhack_viewscreen
@@ -675,7 +675,7 @@ public:
         depot_info.reset();
     }
 
-    void feed(set<df::interface_key> *input)
+    void feed(std::set8<df::interface_key> *input)
     {
         if (input->count(interface_key::LEAVESCREEN))
         {
@@ -865,8 +865,8 @@ public:
         {
             if (depot_info.canTrade())
             {
-                std::vector<item_grouped_entry*> selected = getSelectedItems();
-                for (std::vector<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
+                std::vector12<item_grouped_entry*> selected = getSelectedItems();
+                for (std::vector12<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
                 {
                     depot_info.assignItem((*it)->entries);
                 }
@@ -900,7 +900,7 @@ public:
 
     void send_key(const df::interface_key &key)
     {
-        set< df::interface_key > keys;
+        std::set8< df::interface_key > keys;
         keys.insert(key);
         Gui::getCurViewscreen(true)->feed(&keys);
     }
@@ -973,13 +973,13 @@ public:
         OutputHotkeyString(x, y, "Search help", interface_key::HELP, true, left_margin);
     }
 
-    std::string getFocusString() { return "stocks_view"; }
+    std::string24 getFocusString() { return "stocks_view"; }
 
     df::item *getSelectedItem() override
     {
         if (is_grouped)
             return NULL;
-        vector<item_grouped_entry*> items = getSelectedItems();
+        std::vector12<item_grouped_entry*> items = getSelectedItems();
         if (items.size() != 1)
             return NULL;
         if (items[0]->entries.size() != 1)
@@ -997,7 +997,7 @@ private:
     bool is_grouped;
     std::list<item_grouped_entry> grouped_items_store;
     df::item *last_selected_item;
-    string last_selected_hash;
+    std::string24 last_selected_hash;
     int last_display_offset;
     df::building_stockpilest *sp;
 
@@ -1066,9 +1066,9 @@ private:
     void toggleMelt()
     {
         int set_to_melt = -1;
-        std::vector<item_grouped_entry*> selected = getSelectedItems();
-        vector<df::item *> items;
-        for (std::vector<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
+        std::vector12<item_grouped_entry*> selected = getSelectedItems();
+        std::vector12<df::item *> items;
+        for (std::vector12<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
         {
             item_grouped_entry* item_group = *it;
 
@@ -1088,8 +1088,8 @@ private:
             items.insert(items.end(), item_group->entries.begin(), item_group->entries.end());
         }
 
-        std::vector<df::item*> &melting_items = world->items.other[items_other_id::ANY_MELT_DESIGNATED];
-        for (std::vector<df::item*>::const_iterator it = items.begin(); it != items.end(); it++)
+        std::vector12<df::item*> &melting_items = world->items.other[items_other_id::ANY_MELT_DESIGNATED];
+        for (std::vector12<df::item*>::const_iterator it = items.begin(); it != items.end(); it++)
         {
             df::item* item = *it;
             if (set_to_melt)
@@ -1099,7 +1099,7 @@ private:
             }
             else
             {
-                for (std::vector<df::item*>::iterator mit = melting_items.begin(); mit != melting_items.end(); mit++)
+                for (std::vector12<df::item*>::iterator mit = melting_items.begin(); mit != melting_items.end(); mit++)
                 {
                     if (item != *mit)
                         continue;
@@ -1115,8 +1115,8 @@ private:
     void toggleFlag(const df::item_flags flags)
     {
         int state_to_apply = -1;
-        std::vector<item_grouped_entry*> selected = getSelectedItems();
-        for (std::vector<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
+        std::vector12<item_grouped_entry*> selected = getSelectedItems();
+        for (std::vector12<item_grouped_entry*>::const_iterator it = selected.begin(); it != selected.end(); it++)
         {
             item_grouped_entry* grouped_entry = (*it);
             df::item* item = grouped_entry->getFirstItem();
@@ -1127,12 +1127,12 @@ private:
         }
     }
 
-    vector<item_grouped_entry *> getSelectedItems()
+    std::vector12<item_grouped_entry *> getSelectedItems()
     {
-        vector<item_grouped_entry *> result;
+        std::vector12<item_grouped_entry *> result;
         if (apply_to_all)
         {
-            vector<ListEntry<item_grouped_entry*>*>::const_iterator it;
+            std::vector12<ListEntry<item_grouped_entry*>*>::const_iterator it;
             for (it = items_column.getDisplayList().begin(); it != items_column.getDisplayList().end(); it++)
             {
                 item_grouped_entry* item_group = (*it)->elem;
@@ -1186,8 +1186,8 @@ private:
 
         depot_info.prepareTradeVariables();
 
-        std::vector<df::item *> &items = world->items.other[items_other_id::IN_PLAY];
-        std::map<string, item_grouped_entry *> grouped_items;
+        std::vector12<df::item *> &items = world->items.other[items_other_id::IN_PLAY];
+        std::map<std::string24, item_grouped_entry *> grouped_items;
         grouped_items_store.clear();
         item_grouped_entry *next_selected_group = NULL;
         StockpileInfo spInfo;
@@ -1246,7 +1246,7 @@ private:
 
             if (is_grouped)
             {
-                std::string hash = getItemHash(item);
+                std::string24 hash = getItemHash(item);
                 if (grouped_items.find(hash) == grouped_items.end())
                 {
                     grouped_items_store.push_back(item_grouped_entry());
@@ -1266,7 +1266,7 @@ private:
                 item_grouped_entry* item_group = &grouped_items_store.back();
                 item_group->entries.push_back(item);
 
-                std::string label = get_item_label(item);
+                std::string24 label = get_item_label(item);
                 ListEntry<item_grouped_entry*> entry(label, item_group, item_group->getKeywords());
                 items_column.add(entry);
 
@@ -1281,7 +1281,7 @@ private:
 
         if (is_grouped)
         {
-            std::map<string, item_grouped_entry*>::const_iterator groups_iter;
+            std::map<std::string24, item_grouped_entry*>::const_iterator groups_iter;
             for (groups_iter = grouped_items.begin(); groups_iter != grouped_items.end(); groups_iter++)
             {
                 item_grouped_entry* item_group = groups_iter->second;
@@ -1304,13 +1304,13 @@ private:
         }
     }
 
-    string getItemHash(df::item *item)
+    std::string24 getItemHash(df::item *item)
     {
-        std::string label = get_item_label(item, true);
+        std::string24 label = get_item_label(item, true);
         df::item_quality quality = static_cast<df::item_quality>(item->getQuality());
         df::item_quality quality_enum = static_cast<df::item_quality>(quality);
-        std::string quality_string = ENUM_KEY_STR_SIMPLE(item_quality, quality_enum);
-        std::string hash = label + quality_string + int_to_string(item->flags.whole & checked_flags.whole) + " " +
+        std::string24 quality_string = ENUM_KEY_STR_SIMPLE(item_quality, quality_enum);
+        std::string24 hash = label + quality_string + int_to_string(item->flags.whole & checked_flags.whole) + " " +
             int_to_string(item->hasImprovements());
 
         return hash;
@@ -1347,7 +1347,7 @@ struct stocks_hook : public df::viewscreen_storesst
 {
     typedef df::viewscreen_storesst interpose_base;
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (input->count(interface_key::CUSTOM_E))
         {
@@ -1376,7 +1376,7 @@ struct stocks_stockpile_hook : public df::viewscreen_dwarfmodest
 {
     typedef df::viewscreen_dwarfmodest interpose_base;
 
-    bool handleInput(set<df::interface_key> *input)
+    bool handleInput(std::set8<df::interface_key> *input)
     {
         if (Gui::inRenameBuilding())
             return false;
@@ -1394,7 +1394,7 @@ struct stocks_stockpile_hook : public df::viewscreen_dwarfmodest
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!handleInput(input))
             INTERPOSE_NEXT(feed)(input);
@@ -1450,7 +1450,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-static command_result stocks_cmd(color_ostream &out, vector <string> & parameters)
+static command_result stocks_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (!parameters.empty())
     {
@@ -1469,7 +1469,7 @@ static command_result stocks_cmd(color_ostream &out, vector <string> & parameter
     return CR_WRONG_USAGE;
 }
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(
         PluginCommand(

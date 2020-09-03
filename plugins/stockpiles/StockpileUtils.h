@@ -7,7 +7,7 @@
 #include "df/creature_raw.h"
 #include "df/plant_raw.h"
 
-#include <string>
+
 #include <algorithm>
 #include <functional>
 
@@ -27,10 +27,10 @@ static inline df::creature_raw* find_creature ( int32_t idx )
 }
 
 /**
- * Retrieve creature index from id string
+ * Retrieve creature index from id std::string24
  * @return -1 if not found
  */
-static inline int16_t find_creature ( const std::string &creature_id )
+static inline int16_t find_creature ( const std::string24 &creature_id )
 {
     return linear_index ( df::global::world->raws.creatures.all, &df::creature_raw::creature_id, creature_id );
 }
@@ -44,10 +44,10 @@ static inline df::plant_raw* find_plant ( size_t idx )
 }
 
 /**
- * Retrieve plant index from id string
+ * Retrieve plant index from id std::string24
  * @return -1 if not found
  */
-static inline size_t find_plant ( const std::string &plant_id )
+static inline size_t find_plant ( const std::string24 &plant_id )
 {
     return linear_index ( df::global::world->raws.plants.all, &df::plant_raw::id, plant_id );
 }
@@ -60,7 +60,7 @@ struct less_than_no_case: public std::binary_function< char,char,bool >
    }
 };
 
-static inline bool CompareNoCase(const std::string &a, const std::string &b)
+static inline bool CompareNoCase(const std::string24 &a, const std::string24 &b)
 {
     return std::lexicographical_compare( a.begin(),a.end(), b.begin(),b.end(), less_than_no_case() );
 }
@@ -70,9 +70,9 @@ static inline bool CompareNoCase(const std::string &a, const std::string &b)
  * Checks if the parameter has the dfstock extension.
  * Doesn't check if the file exists or not.
  */
-static inline bool is_dfstockfile ( const std::string& filename )
+static inline bool is_dfstockfile ( const std::string24& filename )
 {
-    return filename.rfind ( ".dfstock" ) !=  std::string::npos;
+    return filename.rfind ( ".dfstock" ) !=  std::string24::npos;
 }
 
 // }}} utility Functions

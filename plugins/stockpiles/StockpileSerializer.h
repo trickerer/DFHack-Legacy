@@ -17,7 +17,7 @@
 
 //  stl
 #include <functional>
-#include <vector>
+
 #include <ostream>
 #include <istream>
 
@@ -71,7 +71,7 @@ public:
   * Will serialize stockpile settings to a file (overwrites existing files)
   * @return success/failure
   */
- bool serialize_to_file ( const std::string & file );
+ bool serialize_to_file ( const std::string24 & file );
 
  /**
   * Again, copied from message.cc
@@ -82,7 +82,7 @@ public:
  /**
   * Read stockpile settings from file
   */
- bool unserialize_from_file ( const std::string & file );
+ bool unserialize_from_file ( const std::string24 & file );
 
 private:
 
@@ -91,11 +91,11 @@ private:
  NullStream mNull;
  df::building_stockpilest * mPile;
  dfstockpiles::StockpileSettings mBuffer;
- std::map<int, std::string> mOtherMatsFurniture;
- std::map<int, std::string> mOtherMatsFinishedGoods;
- std::map<int, std::string> mOtherMatsBars;
- std::map<int, std::string> mOtherMatsBlocks;
- std::map<int, std::string> mOtherMatsWeaponsArmor;
+ std::map<int, std::string24> mOtherMatsFurniture;
+ std::map<int, std::string24> mOtherMatsFinishedGoods;
+ std::map<int, std::string24> mOtherMatsBars;
+ std::map<int, std::string24> mOtherMatsBlocks;
+ std::map<int, std::string24> mOtherMatsWeaponsArmor;
 
 
  std::ostream & debug();
@@ -109,13 +109,13 @@ private:
  void read ();
 
  /**
-  * Find an enum's value based off the string label.
+  * Find an enum's value based off the std::string24 label.
   * @param traits the enum's trait struct
-  * @param token the string value in key_table
+  * @param token the std::string24 value in key_table
   * @return the enum's value,  -1 if not found
   */
  template<typename E>
- static typename df::enum_traits<E>::base_type linear_index ( std::ostream & out, df::enum_traits<E> traits, const std::string &token )
+ static typename df::enum_traits<E>::base_type linear_index ( std::ostream & out, df::enum_traits<E> traits, const std::string24 &token )
  {
   df::enum_traits<E>::base_type j = traits.first_item_value;
   df::enum_traits<E>::base_type limit = traits.last_item_value;
@@ -135,9 +135,9 @@ private:
  }
 
  //  read the token from the serailized list during import
- //typedef std::function<std::string ( const size_t& ) > FuncReadImport;
+ //typedef std::function<std::string24 ( const size_t& ) > FuncReadImport;
  //  add the token to the serialized list during export
- //typedef std::function<void ( const std::string & ) > FuncWriteExport;
+ //typedef std::function<void ( const std::string24 & ) > FuncWriteExport;
  //  are item's of item_type allowed?
  //typedef std::function<bool ( df::enums::item_type::item_type ) > FuncItemAllowed;
  //  is this material allowed?
@@ -226,7 +226,7 @@ public:
     FuncReadImport(dfstockpiles::StockpileSettings* _buf, IEDataType _cat) : buf(_buf), cat(_cat) {}
     FuncReadImport() : buf(NULL), cat(ITEM_C_MEAT) {} //validity checked in food_pair()
 
-    std::string operator()(const size_t& idx) const;
+    std::string24 operator()(const size_t& idx) const;
 
 private:
     dfstockpiles::StockpileSettings* buf;
@@ -238,7 +238,7 @@ public:
     FuncWriteExport(dfstockpiles::StockpileSettings* _buf, IEDataType _cat) : buf(_buf), cat(_cat) {}
     FuncWriteExport() : buf(NULL), cat(ITEM_C_MEAT) {} //validity checked in food_pair()
 
-    void operator()(const std::string &id);
+    void operator()(const std::string24 &id);
 
 private:
     dfstockpiles::StockpileSettings* buf;
@@ -320,13 +320,13 @@ friend struct FuncMaterialAllowed; //calling private functions here
  {
   // exporting
   FuncWriteExport set_value;
-  std::vector<char> * stockpile_values;
+  std::vector12<char> * stockpile_values;
   // importing
   FuncReadImport get_value;
   size_t serialized_count;
   bool valid;
 
-  food_pair ( FuncWriteExport s, std::vector<char>* sp_v, FuncReadImport g, size_t count )
+  food_pair ( FuncWriteExport s, std::vector12<char>* sp_v, FuncReadImport g, size_t count )
  : set_value ( s )
  , stockpile_values ( sp_v )
  , get_value ( g )
@@ -349,35 +349,35 @@ friend struct FuncMaterialAllowed; //calling private functions here
   *
   * The unserialization process is the same in reverse.
   */
- void serialize_list_organic_mat ( FuncWriteExport add_value, const std::vector<char> * list, df::enums::organic_mat_category::organic_mat_category cat );
+ void serialize_list_organic_mat ( FuncWriteExport add_value, const std::vector12<char> * list, df::enums::organic_mat_category::organic_mat_category cat );
 
  /**
   * @see serialize_list_organic_mat
   */
- void unserialize_list_organic_mat ( FuncReadImport get_value, size_t list_size, std::vector<char> *pile_list,  df::enums::organic_mat_category::organic_mat_category cat );
-
-
- /**
-  * @see serialize_list_organic_mat
-  */
- void serialize_list_item_type ( FuncItemAllowed is_allowed,  FuncWriteExport add_value,  const std::vector<char> &list );
+ void unserialize_list_organic_mat ( FuncReadImport get_value, size_t list_size, std::vector12<char> *pile_list,  df::enums::organic_mat_category::organic_mat_category cat );
 
 
  /**
   * @see serialize_list_organic_mat
   */
- void unserialize_list_item_type ( FuncItemAllowed is_allowed, FuncReadImport read_value,  int32_t list_size,  std::vector<char> *pile_list );
+ void serialize_list_item_type ( FuncItemAllowed is_allowed,  FuncWriteExport add_value,  const std::vector12<char> &list );
 
 
  /**
   * @see serialize_list_organic_mat
   */
- void serialize_list_material ( FuncMaterialAllowed is_allowed,  FuncWriteExport add_value,  const std::vector<char> &list );
+ void unserialize_list_item_type ( FuncItemAllowed is_allowed, FuncReadImport read_value,  int32_t list_size,  std::vector12<char> *pile_list );
+
 
  /**
   * @see serialize_list_organic_mat
   */
- void unserialize_list_material ( FuncMaterialAllowed is_allowed, FuncReadImport read_value,  int32_t list_size,  std::vector<char> *pile_list );
+ void serialize_list_material ( FuncMaterialAllowed is_allowed,  FuncWriteExport add_value,  const std::vector12<char> &list );
+
+ /**
+  * @see serialize_list_organic_mat
+  */
+ void unserialize_list_material ( FuncMaterialAllowed is_allowed, FuncReadImport read_value,  int32_t list_size,  std::vector12<char> *pile_list );
 
  /**
   * @see serialize_list_organic_mat
@@ -399,39 +399,39 @@ friend struct FuncMaterialAllowed; //calling private functions here
  /**
   * @see serialize_list_organic_mat
   */
- void serialize_list_other_mats ( const std::map<int, std::string> other_mats, FuncWriteExport add_value,  std::vector<char> list );
+ void serialize_list_other_mats ( const std::map<int, std::string24> other_mats, FuncWriteExport add_value,  std::vector12<char> list );
 
  /**
   * @see serialize_list_organic_mat
   */
- void unserialize_list_other_mats ( const std::map<int, std::string> other_mats, FuncReadImport read_value,  int32_t list_size, std::vector<char> *pile_list );
-
-
- /**
-  * @see serialize_list_organic_mat
-  */
- void serialize_list_itemdef ( FuncWriteExport add_value,  std::vector<char> list,  std::vector<df::itemdef *> items,  df::enums::item_type::item_type type );
+ void unserialize_list_other_mats ( const std::map<int, std::string24> other_mats, FuncReadImport read_value,  int32_t list_size, std::vector12<char> *pile_list );
 
 
  /**
   * @see serialize_list_organic_mat
   */
- void unserialize_list_itemdef ( FuncReadImport read_value,  int32_t list_size, std::vector<char> *pile_list, df::enums::item_type::item_type type );
+ void serialize_list_itemdef ( FuncWriteExport add_value,  std::vector12<char> list,  std::vector12<df::itemdef *> items,  df::enums::item_type::item_type type );
+
+
+ /**
+  * @see serialize_list_organic_mat
+  */
+ void unserialize_list_itemdef ( FuncReadImport read_value,  int32_t list_size, std::vector12<char> *pile_list, df::enums::item_type::item_type type );
 
 
  /**
   * Given a list of other_materials and an index,  return its corresponding token
-  * @return empty string if not found
+  * @return empty std::string24 if not found
   * @see other_mats_token
   */
- std::string other_mats_index ( const std::map<int, std::string> other_mats,  int idx );
+ std::string24 other_mats_index ( const std::map<int, std::string24> other_mats,  int idx );
 
  /**
   * Given a list of other_materials and a token,  return its corresponding index
   * @return -1 if not found
   * @see other_mats_index
   */
- int other_mats_token ( const std::map<int, std::string> other_mats,  const std::string & token );
+ int other_mats_token ( const std::map<int, std::string24> other_mats,  const std::string24 & token );
 
  void write_general();
  void read_general();
@@ -455,16 +455,16 @@ friend struct FuncMaterialAllowed; //calling private functions here
  bool refuse_creature_is_allowed ( const df::creature_raw *raw );
 
 
- //void refuse_write_helper ( std::function<void ( const std::string & ) > add_value, const std::vector<char> & list );
- void refuse_write_helper ( FuncWriteExport add_value, const std::vector<char> & list );
+ //void refuse_write_helper ( std::function<void ( const std::string24 & ) > add_value, const std::vector12<char> & list );
+ void refuse_write_helper ( FuncWriteExport add_value, const std::vector12<char> & list );
 
 
  bool refuse_type_is_allowed ( df::enums::item_type::item_type type );
 
 
  void write_refuse();
- //void refuse_read_helper ( std::function<std::string ( const size_t& ) > get_value, size_t list_size, std::vector<char>* pile_list );
- void refuse_read_helper ( FuncReadImport get_value, size_t list_size, std::vector<char>* pile_list );
+ //void refuse_read_helper ( std::function<std::string24 ( const size_t& ) > get_value, size_t list_size, std::vector12<char>* pile_list );
+ void refuse_read_helper ( FuncReadImport get_value, size_t list_size, std::vector12<char>* pile_list );
 
  void read_refuse();
 

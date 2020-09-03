@@ -5,18 +5,18 @@ using namespace std;
 #include "Console.h"
 #include "Export.h"
 #include "PluginManager.h"
-#include <vector>
-#include <string>
+
+
 #include "modules/World.h"
 #include <stdlib.h>
 using namespace DFHack;
 using namespace df::enums;
 
-command_result mode (color_ostream &out, vector <string> & parameters);
+command_result mode (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("mode");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "mode","View, change and track game mode.",
@@ -87,18 +87,18 @@ void printCurrentModes(t_gamemodes gm, Console & con)
     }
 }
 
-command_result mode (color_ostream &out_, vector <string> & parameters)
+command_result mode (color_ostream &out_, std::vector12<std::string24> & parameters)
 {
     if(!out_.is_console())
         return CR_FAILURE;
     Console &out = static_cast<Console&>(out_);
 
-    string command = "";
+    std::string24 command = "";
     bool set = false;
     bool abuse = false;
     int rv = 0;
     t_gamemodes gm;
-    for(vector<string>::const_iterator iter = parameters.begin(); iter != parameters.end(); iter++)
+    for(std::vector12<std::string24>::const_iterator iter = parameters.begin(); iter != parameters.end(); iter++)
     {
         if((*iter) == "set")
         {
@@ -137,7 +137,7 @@ command_result mode (color_ostream &out_, vector <string> & parameters)
                    << "c = cancel/do nothing" << endl;
             uint32_t select=99;
 
-            string selected;
+            std::string24 selected;
             input_again:
             CommandHistory hist;
             while((rv = out.lineedit("Enter new mode: ",selected, hist))
@@ -179,7 +179,7 @@ command_result mode (color_ostream &out_, vector <string> & parameters)
         else
         {
             CommandHistory hist;
-            string selected;
+            std::string24 selected;
             while ((rv = out.lineedit("Enter new game mode number (c for exit): ",selected, hist))
                     == Console::RETRY);
             if(rv <= Console::FAILURE || selected == "c")

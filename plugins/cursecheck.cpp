@@ -18,8 +18,8 @@
 #include <iostream>
 #include <iomanip>
 #include <climits>
-#include <vector>
-#include <string>
+
+
 #include <sstream>
 #include <ctime>
 #include <cstdio>
@@ -46,8 +46,8 @@ using namespace std;
 #include "df/world_raws.h"
 #include "df/incident.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -66,7 +66,7 @@ enum CurseTypes : int8_t
     CURSE_TYPE_VAMPIRE
 };
 
-//std::vector<string> curse_names = {
+//std::vector12<std::string24> curse_names = {
 //    "none",
 //    "unknown",
 //    "ghost",
@@ -75,7 +75,7 @@ enum CurseTypes : int8_t
 //    "werebeast",
 //    "vampire"
 //};
-std::string curs_str[] = {
+std::string24 curs_str[] = {
     "none",
     "unknown",
     "ghost",
@@ -84,11 +84,11 @@ std::string curs_str[] = {
     "werebeast",
     "vampire"
 };
-std::vector<string> curse_names(curs_str, curs_str + sizeof(curs_str)/sizeof(curs_str[0]));
+std::vector12<std::string24> curse_names(curs_str, curs_str + sizeof(curs_str)/sizeof(curs_str[0]));
 
-command_result cursecheck (color_ostream &out, vector <string> & parameters);
+command_result cursecheck (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("cursecheck",
         "Check for cursed creatures (undead, necromancers...)",
@@ -150,7 +150,7 @@ CurseTypes determineCurse(df::unit * unit)
     return cursetype;
 }
 
-command_result cursecheck (color_ostream &out, vector <string> & parameters)
+command_result cursecheck (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
     int32_t cursorX, cursorY, cursorZ;
@@ -233,8 +233,8 @@ command_result cursecheck (color_ostream &out, vector <string> & parameters)
             {
                 if (unit->name.has_name)
                 {
-                    string firstname = unit->name.first_name;
-                    string restofname = Translation::TranslateName(&unit->name, false);
+                    std::string24 firstname = unit->name.first_name;
+                    std::string24 restofname = Translation::TranslateName(&unit->name, false);
                     firstname[0] = toupper(firstname[0]);
 
                     // if creature has no nickname, restofname will already contain firstname

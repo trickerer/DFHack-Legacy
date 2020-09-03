@@ -20,7 +20,7 @@
 
 //Needed for writing the protobuff stuff to a file.
 #include <fstream>
-#include <string>
+
 #include <iomanip>
 
 #include "isoworldremote.pb.h"
@@ -39,7 +39,7 @@ REQUIRE_GLOBAL(cur_season);
 
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
-command_result isoWorldRemote (color_ostream &out, std::vector <std::string> & parameters);
+command_result isoWorldRemote (color_ostream &out, std::vector12<std::string24> & parameters);
 
 static command_result GetEmbarkTile(color_ostream &stream, const TileRequest *in, EmbarkTile *out);
 static command_result GetEmbarkInfo(color_ostream &stream, const MapRequest *in, MapReply *out);
@@ -49,13 +49,13 @@ bool gather_embark_tile_layer(int EmbX, int EmbY, int EmbZ, EmbarkTileLayer * ti
 bool gather_embark_tile(int EmbX, int EmbY, EmbarkTile * tile, MapExtras::MapCache * MP);
 
 // Mandatory init function. If you have some global state, create it here.
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     //// Fill the command list with your commands.
     //commands.push_back(PluginCommand(
     //    "isoworldremote", "Dump north-west embark tile to text file for debug purposes.",
     //    isoWorldRemote, false, /* true means that the command can't be used from non-interactive user interface */
-    //    // Extended help string. Used by CR_WRONG_USAGE and the help command:
+    //    // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
     //    "  This command does nothing at all.\n"
     //    "Example:\n"
     //    "  isoworldremote\n"
@@ -113,13 +113,13 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 */
 
 //// A command! It sits around and looks pretty. And it's nice and friendly.
-//command_result isoWorldRemote (color_ostream &out, std::vector <std::string> & parameters)
+//command_result isoWorldRemote (color_ostream &out, std::vector12<std::string24> & parameters)
 //{
 //    // It's nice to print a help message you get invalid options
 //    // from the user instead of just acting strange.
-//    // This can be achieved by adding the extended help string to the
+//    // This can be achieved by adding the extended help std::string24 to the
 //    // PluginCommand registration as show above, and then returning
-//    // CR_WRONG_USAGE from the function. The same string will also
+//    // CR_WRONG_USAGE from the function. The same std::string24 will also
 //    // be used by 'help your-command'.
 //    if (!parameters.empty())
 //        return CR_WRONG_USAGE;
@@ -141,7 +141,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 //
 //    //load it again to verify.
 //    std::ifstream input_file("tile.p", std::ios_base::binary);
-//    std::string input_string( (std::istreambuf_iterator<char>(input_file) ),
+//    std::string24 input_string( (std::istreambuf_iterator<char>(input_file) ),
 //                       (std::istreambuf_iterator<char>()    ) );
 //    EmbarkTile verify_tile;
 //    verify_tile.ParseFromString(input_string);

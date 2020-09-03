@@ -16,7 +16,7 @@
 #include "df/world.h"
 
 #include <map>
-#include <vector>
+
 
 using namespace DFHack;
 using namespace std;
@@ -30,9 +30,9 @@ static int32_t howOften = 10000;
 static int32_t popcap = 100;
 static int32_t pregtime = 200000;
 
-command_result petcapRemover (color_ostream &out, std::vector <std::string> & parameters);
+command_result petcapRemover (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "petcapRemover",
@@ -58,10 +58,10 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 
 bool impregnate(df::unit* female, df::unit* male);
 void impregnateMany() {
-    map<int32_t, vector<int32_t> > males;
-    map<int32_t, vector<int32_t> > females;
+    map<int32_t, std::vector12<int32_t> > males;
+    map<int32_t, std::vector12<int32_t> > females;
     map<int32_t, int32_t> popcount;
-    std::vector<df::unit*> units = world->units.all;
+    std::vector12<df::unit*> units = world->units.all;
     for ( size_t a = 0; a < units.size(); a++ ) {
         df::unit* unit = units[a];
         if ( !Units::isActive(unit) || unit->flags1.bits.active_invader || unit->flags2.bits.underworld || unit->flags2.bits.visitor_uninvited || unit->flags2.bits.visitor )
@@ -91,19 +91,19 @@ void impregnateMany() {
             females[unit->race].push_back(a);
     }
 
-    for (map<int32_t, vector<int32_t> >::iterator i = females.begin(); i != females.end(); i++ ) {
+    for (map<int32_t, std::vector12<int32_t> >::iterator i = females.begin(); i != females.end(); i++ ) {
         int32_t race = i->first;
-        vector<int32_t>& femalesList = i->second;
+        std::vector12<int32_t>& femalesList = i->second;
         for ( size_t a = 0; a < femalesList.size(); a++ ) {
             if ( popcap > 0 && popcount[race] >= popcap )
                 break;
-            vector<int32_t> compatibles;
+            std::vector12<int32_t> compatibles;
             df::coord pos1 = units[femalesList[a]]->pos;
 
             if ( males.find(i->first) == males.end() )
                 continue;
 
-            vector<int32_t>& malesList = males[i->first];
+            std::vector12<int32_t>& malesList = males[i->first];
             for ( size_t b = 0; b < malesList.size(); b++ ) {
                 df::coord pos2 = units[malesList[b]]->pos;
                 if ( Maps::canWalkBetween(pos1,pos2) )
@@ -144,7 +144,7 @@ void tickHandler(color_ostream& out, void* data) {
     EventManager::registerTick(handle, howOften, plugin_self);
 }
 
-command_result petcapRemover (color_ostream &out, std::vector <std::string> & parameters)
+command_result petcapRemover (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 

@@ -9,10 +9,10 @@
 #include "modules/Screen.h"
 #include "modules/Gui.h"
 
-#include <set>
+
 #include <list>
 #include <utility>
-#include <vector>
+
 
 #include "df/interface_key.h"
 #include "df/ui.h"
@@ -27,9 +27,9 @@ REQUIRE_GLOBAL(ui);
 REQUIRE_GLOBAL(gps);
 REQUIRE_GLOBAL(enabler);
 
-std::vector<std::string> command_history;
+std::vector12<std::string24> command_history;
 
-typedef std::list<std::pair<color_value,std::string> > ResponseList;
+typedef std::list<std::pair<color_value,std::string24> > ResponseList;
 
 class viewscreen_commandpromptst;
 class prompt_ostream:public buffered_color_ostream
@@ -43,7 +43,7 @@ class prompt_ostream:public buffered_color_ostream
 };
 class viewscreen_commandpromptst : public dfhack_viewscreen {
 public:
-    void feed(std::set<df::interface_key> *events);
+    void feed(std::set8<df::interface_key> *events);
 
     void logic() {
         dfhack_viewscreen::logic();
@@ -58,8 +58,8 @@ public:
     df::building* getSelectedBuilding() { return Gui::getAnyBuilding(parent); }
     df::plant* getSelectedPlant() { return Gui::getAnyPlant(parent); }
 
-    std::string getFocusString() { return "commandprompt"; }
-    viewscreen_commandpromptst(std::string entry):submitted(false), is_response(false)
+    std::string24 getFocusString() { return "commandprompt"; }
+    viewscreen_commandpromptst(std::string24 entry):submitted(false), is_response(false)
     {
         show_fps=gps->display_frames;
         gps->display_frames=0;
@@ -81,26 +81,26 @@ public:
         gps->display_frames=show_fps;
     }
 
-    void add_response(color_value v, std::string s)
+    void add_response(color_value v, std::string24 s)
     {
         std::stringstream ss(s);
-        std::string part;
+        std::string24 part;
         while (std::getline(ss, part))
         {
             responses.push_back(std::make_pair(v, part + '\n'));
         }
     }
-    std::string get_entry()
+    std::string24 get_entry()
     {
         return command_history[history_idx];
     }
-    void set_entry(std::string entry)
+    void set_entry(std::string24 entry)
     {
         command_history[history_idx] = entry;
     }
     void back_word()
     {
-        std::string entry = get_entry();
+        std::string24 entry = get_entry();
         if (cursor_pos == 0)
             return;
         cursor_pos--;
@@ -113,7 +113,7 @@ public:
     }
     void forward_word()
     {
-        std::string entry = get_entry();
+        std::string24 entry = get_entry();
         int len = entry.size();
         if (cursor_pos == len)
             return;
@@ -162,16 +162,16 @@ void viewscreen_commandpromptst::render()
         for(int i=0;i<dim.y && it!=responses.end();i++,it++)
         {
             Screen::fillRect(Screen::Pen(' ', 7, 0),0,i,dim.x,i);
-            std::string cur_line=it->second;
+            std::string24 cur_line=it->second;
             Screen::paintString(Screen::Pen(' ',it->first,0),0,i,cur_line.substr(0,cur_line.size()-1));
         }
     }
     else
     {
-        std::string entry = get_entry();
+        std::string24 entry = get_entry();
         Screen::fillRect(Screen::Pen(' ', 7, 0),0,0,dim.x,0);
         Screen::paintString(Screen::Pen(' ', 7, 0), 0, 0,"[DFHack]#");
-        std::string cursor = (frame < enabler->gfps / 2) ? "_" : " ";
+        std::string24 cursor = (frame < enabler->gfps / 2) ? "_" : " ";
         if(cursor_pos < (dim.x - 10))
         {
             Screen::paintString(Screen::Pen(' ', 7, 0), 10,0 , entry);
@@ -213,10 +213,10 @@ void viewscreen_commandpromptst::submit()
         is_response=true;
     }
 }
-void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
+void viewscreen_commandpromptst::feed(std::set8<df::interface_key> *events)
 {
     int old_pos = cursor_pos;
-    std::string entry = get_entry();
+    std::string24 entry = get_entry();
     bool leave_all = events->count(interface_key::LEAVESCREEN_ALL);
     if (leave_all || events->count(interface_key::LEAVESCREEN))
     {
@@ -239,7 +239,7 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
     }
     if (is_response)
         return;
-    for (std::set<df::interface_key>::const_iterator it = events->begin(); it != events->end(); ++it)
+    for (std::set8<df::interface_key>::const_iterator it = events->begin(); it != events->end(); ++it)
     {
         df::interface_key key = *it;
         if (key==interface_key::STRING_A000) //delete?
@@ -315,14 +315,14 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
 
 }
 
-command_result show_prompt(color_ostream &out, std::vector <std::string> & parameters)
+command_result show_prompt(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (Gui::getCurFocus(true) == "dfhack/commandprompt")
     {
         Screen::dismiss(Gui::getCurViewscreen(true));
         return CR_OK;
     }
-    std::string params;
+    std::string24 params;
     for(size_t i=0;i<parameters.size();i++)
         params+=parameters[i]+" ";
     //Screen::show(dts::make_unique<viewscreen_commandpromptst>(params), plugin_self);
@@ -333,7 +333,7 @@ bool hotkey_allow_all(df::viewscreen *top)
 {
     return true;
 }
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "command-prompt","Shows a command prompt on window.",show_prompt,hotkey_allow_all,

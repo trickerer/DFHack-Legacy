@@ -21,15 +21,15 @@
 #include "df/unit.h"
 #include "df/building.h"
 
-using std::string;
-using std::vector;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
 DFHACK_PLUGIN("showmood");
 REQUIRE_GLOBAL(world);
 
-command_result df_showmood (color_ostream &out, vector <string> & parameters)
+command_result df_showmood (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (!parameters.empty())
         return CR_WRONG_USAGE;
@@ -162,7 +162,7 @@ command_result df_showmood (color_ostream &out, vector <string> & parameters)
             out.print("She has ");
         if (building)
         {
-            string name;
+            std::string24 name;
             building->getName(&name);
             out.print("claimed a %s and wants", name.c_str());
         }
@@ -177,7 +177,7 @@ command_result df_showmood (color_ostream &out, vector <string> & parameters)
 
             MaterialInfo matinfo(item->mat_type, item->mat_index);
 
-            string mat_name = matinfo.toString();
+            std::string24 mat_name = matinfo.toString();
 
             switch (item->item_type)
             {
@@ -295,7 +295,7 @@ command_result df_showmood (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("showmood", "Shows items needed for current strange mood.", df_showmood, false,
         "Run this command without any parameters to display information on the currently active Strange Mood."));

@@ -4,14 +4,14 @@
 #include "MemAccess.h"
 #include "MiscUtils.h"
 #include <tinythread.h> //not sure if correct
-#include <string>
-#include <vector>
+
+
 #include <sstream>
 
 #include "memutils.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 
 uint64_t timeLast=0;
@@ -26,24 +26,24 @@ struct memory_data
     size_t refresh;
     int state;
     uint8_t *buf,*lbuf;
-    vector<t_memrange> ranges;
+    std::vector12<t_memrange> ranges;
 }memdata;
 enum HEXVIEW_STATES
 {
     STATE_OFF,STATE_ON
 };
-command_result memview (color_ostream &out, vector <string> & parameters);
+command_result memview (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("memview");
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("memview","Shows DF memory in real time.",memview,false,"Shows memory in real time.\nParams: adrr length refresh_rate. If addr==0 then stop viewing."));
     memdata.state=STATE_OFF;
     mymutex=new tthread::mutex;
     return CR_OK;
 }
-size_t convert(const std::string& p,bool ishex=false)
+size_t convert(const std::string24& p,bool ishex=false)
 {
     size_t ret;
     std::stringstream conv;
@@ -53,14 +53,14 @@ size_t convert(const std::string& p,bool ishex=false)
     conv>>ret;
     return ret;
 }
-bool isAddr(void *trg, vector<t_memrange> &ranges)
+bool isAddr(void *trg, std::vector12<t_memrange> &ranges)
 {
     for (auto &r : ranges)
         if (r.isInRange(trg))
             return true;
     return false;
 }
-bool isAddrAt(uintptr_t *trg, vector<t_memrange> &ranges)
+bool isAddrAt(uintptr_t *trg, std::vector12<t_memrange> &ranges)
 {
     if(trg[0]%4==0)
         for(size_t i=0;i<ranges.size();i++)
@@ -69,7 +69,7 @@ bool isAddrAt(uintptr_t *trg, vector<t_memrange> &ranges)
 
     return false;
 }
-void outputHex(uint8_t *buf,uint8_t *lbuf,size_t len,size_t start,color_ostream &con,vector<t_memrange> & ranges)
+void outputHex(uint8_t *buf,uint8_t *lbuf,size_t len,size_t start,color_ostream &con,std::vector12<t_memrange> & ranges)
 {
     const size_t page_size=16;
 
@@ -154,7 +154,7 @@ DFhackCExport command_result plugin_onupdate (color_ostream &out)
     return CR_OK;
 
 }
-command_result memview (color_ostream &out, vector <string> & parameters)
+command_result memview (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     mymutex->lock();
     Core::getInstance().p->getMemRanges(memdata.ranges);
@@ -195,7 +195,7 @@ command_result memview (color_ostream &out, vector <string> & parameters)
         is_enabled = true;
         memdata.state=STATE_ON;
     }
-    if (vector_get(parameters, 1, string("a")).substr(0, 1) == "a")
+    if (vector_get(parameters, 1, std::string24("a")).substr(0, 1) == "a")
         memdata.len = detect_size(memdata.addr);
     else if (parameters.size()>1)
         memdata.len=convert(parameters[1]);

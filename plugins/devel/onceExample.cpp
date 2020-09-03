@@ -10,11 +10,11 @@
 using namespace DFHack;
 using namespace df::enums;
 
-command_result onceExample (color_ostream &out, std::vector <std::string> & parameters);
+command_result onceExample (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("onceExample");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "onceExample", "Test the doOnce command.",
@@ -24,7 +24,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
     return CR_OK;
 }
 
-command_result onceExample (color_ostream &out, std::vector <std::string> & parameters)
+command_result onceExample (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     out.print("Already done = %d.\n", DFHack::Once::alreadyDone("onceExample_1"));
     if ( DFHack::Once::doOnce("onceExample_1") ) {

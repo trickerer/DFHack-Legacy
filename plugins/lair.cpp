@@ -1,7 +1,7 @@
 #include "common.h"
 #include <iostream>
 #include <map>
-#include <vector>
+
 #include "Core.h"
 #include "Console.h"
 #include "Export.h"
@@ -25,10 +25,10 @@ enum state
     LAIR_SET,
 };
 
-command_result lair(color_ostream &out, std::vector<std::string> & params)
+command_result lair(color_ostream &out, std::vector12<std::string24> & params)
 {
     state do_what = LAIR_SET;
-    for(std::vector<std::string>::const_iterator iter = params.begin(); iter != params.end(); iter++)
+    for(std::vector12<std::string24>::const_iterator iter = params.begin(); iter != params.end(); iter++)
     {
         if(*iter == "reset")
             do_what = LAIR_RESET;
@@ -59,7 +59,7 @@ command_result lair(color_ostream &out, std::vector<std::string> & params)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("lair","Mark the map as a monster lair (avoids item scatter)",lair, false,
         "Usage: 'lair' to mark entire map as monster lair, 'lair reset' to undo the operation.\n"));

@@ -19,7 +19,7 @@ REQUIRE_GLOBAL(window_x);
 REQUIRE_GLOBAL(window_y);
 REQUIRE_GLOBAL(window_z);
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     return CR_OK;
 }

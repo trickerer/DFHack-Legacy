@@ -22,14 +22,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
-#include <set>
-#include <sstream>
-#include <vector>
 
-using std::vector;
-using std::string;
+#include <sstream>
+
+
+
+
 using std::endl;
-using std::set;
+
 
 #include "Console.h"
 #include "Core.h"
@@ -55,12 +55,12 @@ REQUIRE_GLOBAL(world);
 
 CommandHistory tiletypes_hist;
 
-command_result df_tiletypes (color_ostream &out, vector <string> & parameters);
-command_result df_tiletypes_command (color_ostream &out, vector <string> & parameters);
-command_result df_tiletypes_here (color_ostream &out, vector <string> & parameters);
-command_result df_tiletypes_here_point (color_ostream &out, vector <string> & parameters);
+command_result df_tiletypes (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_tiletypes_command (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_tiletypes_here (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_tiletypes_here_point (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     tiletypes_hist.load("tiletypes.history");
     commands.push_back(PluginCommand("tiletypes", "Paint map tiles freely, similar to liquids.", df_tiletypes, true));
@@ -76,9 +76,9 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-void help( color_ostream & out, std::vector<std::string> &commands, int start, int end)
+void help( color_ostream & out, std::vector12<std::string24> &commands, int start, int end)
 {
-    std::string option = commands.size() > size_t(start) ? commands[start] : "";
+    std::string24 option = commands.size() > size_t(start) ? commands[start] : "";
     if (option.empty())
     {
         out << "Commands:" << std::endl
@@ -420,7 +420,7 @@ void printState(color_ostream &out)
 
 //zilpin: These two functions were giving me compile errors in VS2008, so I cheated with the C style loop below, just to get it to build.
 //Original code is commented out.
-void tolower(std::string &str)
+void tolower(std::string24 &str)
 {
     //The C++ way...
     //std::transform(str.begin(), str.end(), str.begin(), std::bind2nd(std::ptr_fun(&std::tolower<char> ), std::locale("")));
@@ -432,7 +432,7 @@ void tolower(std::string &str)
     }
 }
 
-void toupper(std::string &str)
+void toupper(std::string24 &str)
 {
     //std::transform(str.begin(), str.end(), str.begin(), std::bind2nd(std::ptr_fun(&std::toupper<char>), std::locale("")));
     for(char *c=(char *)str.c_str(); *c; ++c)
@@ -441,7 +441,7 @@ void toupper(std::string &str)
     }
 }
 
-int toint(const std::string &str, int failValue = 0)
+int toint(const std::string24 &str, int failValue = 0)
 {
     std::istringstream ss(str);
     int valInt;
@@ -453,7 +453,7 @@ int toint(const std::string &str, int failValue = 0)
     return valInt;
 }
 
-bool tryShape(std::string value, TileType &paint)
+bool tryShape(std::string24 value, TileType &paint)
 {
     FOR_ENUM_ITEMS_SIMPLE(tiletype_shape,i)
     {
@@ -466,7 +466,7 @@ bool tryShape(std::string value, TileType &paint)
     return false;
 }
 
-bool tryMaterial(std::string value, TileType &paint)
+bool tryMaterial(std::string24 value, TileType &paint)
 {
     FOR_ENUM_ITEMS_SIMPLE(tiletype_material, i)
     {
@@ -479,7 +479,7 @@ bool tryMaterial(std::string value, TileType &paint)
     return false;
 }
 
-bool trySpecial(std::string value, TileType &paint)
+bool trySpecial(std::string24 value, TileType &paint)
 {
     FOR_ENUM_ITEMS_SIMPLE(tiletype_special, i)
     {
@@ -492,7 +492,7 @@ bool trySpecial(std::string value, TileType &paint)
     return false;
 }
 
-bool tryVariant(std::string value, TileType &paint)
+bool tryVariant(std::string24 value, TileType &paint)
 {
     FOR_ENUM_ITEMS_SIMPLE(tiletype_variant, i)
     {
@@ -505,7 +505,7 @@ bool tryVariant(std::string value, TileType &paint)
     return false;
 }
 
-bool processTileType(color_ostream & out, TileType &paint, std::vector<std::string> &params, int start, int end)
+bool processTileType(color_ostream & out, TileType &paint, std::vector12<std::string24> &params, int start, int end)
 {
     if (start == end)
     {
@@ -514,8 +514,8 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector<std::stri
     }
 
     int loc = start;
-    std::string option = params[loc++];
-    std::string value = end <= loc ? "" : params[loc++];
+    std::string24 option = params[loc++];
+    std::string24 value = end <= loc ? "" : params[loc++];
     tolower(option);
     toupper(value);
     int valInt;
@@ -673,7 +673,7 @@ bool processTileType(color_ostream & out, TileType &paint, std::vector<std::stri
         loc--;
         for (; loc < end; loc++)
         {
-            std::string param = params[loc];
+            std::string24 param = params[loc];
             toupper(param);
 
             if (!(tryShape(param, paint) || tryMaterial(param, paint) ||
@@ -892,7 +892,7 @@ command_result executePaintJob(color_ostream &out)
     }
 }
 
-command_result processCommand(color_ostream &out, std::vector<std::string> &commands, int start, int end, bool & endLoop, bool hasConsole = false)
+command_result processCommand(color_ostream &out, std::vector12<std::string24> &commands, int start, int end, bool & endLoop, bool hasConsole = false)
 {
     if (commands.size() == size_t(start))
     {
@@ -901,7 +901,7 @@ command_result processCommand(color_ostream &out, std::vector<std::string> &comm
 
     int loc = start;
 
-    std::string command = commands[loc++];
+    std::string24 command = commands[loc++];
     tolower(command);
 
     if (command == "help" || command == "?")
@@ -957,7 +957,7 @@ command_result processCommand(color_ostream &out, std::vector<std::string> &comm
     return CR_OK;
 }
 
-command_result df_tiletypes (color_ostream &out_, vector <string> & parameters)
+command_result df_tiletypes (color_ostream &out_, std::vector12<std::string24> & parameters)
 {
     for(size_t i = 0; i < parameters.size();i++)
     {
@@ -975,7 +975,7 @@ command_result df_tiletypes (color_ostream &out_, vector <string> & parameters)
         return CR_FAILURE;
     Console &out = static_cast<Console&>(out_);
 
-    std::vector<std::string> commands;
+    std::vector12<std::string24> commands;
     bool end = false;
     out << "Welcome to the tiletype tool.\nType 'help' or '?' for a list of available commands, 'q' to quit.\nPress return after a command to confirm." << std::endl;
     out.printerr("THIS TOOL CAN BE DANGEROUS. YOU'VE BEEN WARNED.\n");
@@ -983,7 +983,7 @@ command_result df_tiletypes (color_ostream &out_, vector <string> & parameters)
     {
         printState(out);
 
-        std::string input = "";
+        std::string24 input = "";
         int rv = 0;
 
         while ((rv = out.lineedit("tiletypes> ",input,tiletypes_hist))
@@ -1005,7 +1005,7 @@ command_result df_tiletypes (color_ostream &out_, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result df_tiletypes_command (color_ostream &out, vector <string> & parameters)
+command_result df_tiletypes_command (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool dummy;
     int start = 0, end = 0;
@@ -1028,7 +1028,7 @@ command_result df_tiletypes_command (color_ostream &out, vector <string> & param
     return CR_OK;
 }
 
-command_result df_tiletypes_here (color_ostream &out, vector <string> & parameters)
+command_result df_tiletypes_here (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     for(size_t i = 0; i < parameters.size();i++)
     {
@@ -1046,7 +1046,7 @@ command_result df_tiletypes_here (color_ostream &out, vector <string> & paramete
     return executePaintJob(out);
 }
 
-command_result df_tiletypes_here_point (color_ostream &out, vector <string> & parameters)
+command_result df_tiletypes_here_point (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     for(size_t i = 0; i < parameters.size();i++)
     {

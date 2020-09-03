@@ -5,7 +5,7 @@
 #include "PluginManager.h"
 #include <csignal>
 #include <map>
-#include <vector>
+
 #include "modules/Gui.h"
 #include "modules/Screen.h"
 #include "modules/World.h"
@@ -16,11 +16,11 @@ using namespace DFHack;
 DFHACK_PLUGIN("zoom");
 REQUIRE_GLOBAL(enabler);
 
-command_result df_zoom (color_ostream &out, std::vector <std::string> & parameters);
-command_result df_gzoom (color_ostream &out, std::vector <std::string> & parameters);
+command_result df_zoom (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_gzoom (color_ostream &out, std::vector12<std::string24> & parameters);
 
-std::map<std::string, df::zoom_commands> zcmap;
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+std::map<std::string24, df::zoom_commands> zcmap;
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("zoom", "adjust screen zoom", df_zoom, false, "zoom [command]"));
     commands.push_back(PluginCommand("gzoom", "zoom to grid location", df_gzoom, false, "gzoom x y z"));
@@ -37,7 +37,7 @@ DFhackCExport command_result plugin_shutdown (color_ostream &out)
     return CR_OK;
 }
 
-command_result df_zoom (color_ostream &out, std::vector <std::string> & parameters)
+command_result df_zoom (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() < 1)
         return CR_WRONG_USAGE;
@@ -59,7 +59,7 @@ command_result df_zoom (color_ostream &out, std::vector <std::string> & paramete
     return CR_OK;
 }
 
-command_result df_gzoom (color_ostream &out, std::vector<std::string> & parameters)
+command_result df_gzoom (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if(parameters.size() < 3)
         return CR_WRONG_USAGE;

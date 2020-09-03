@@ -39,8 +39,8 @@
 
 #include <stdlib.h>
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -55,9 +55,9 @@ REQUIRE_GLOBAL(world);
 
 DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_change_event event);
 
-static command_result rename(color_ostream &out, vector <string> & parameters);
+static command_result rename(color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (world && ui) {
         commands.push_back(PluginCommand(
@@ -117,13 +117,13 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 #define BUILDING(code, cname, tag) \
     struct cname##_hook : df::cname { \
         typedef df::cname interpose_base; \
-        DEFINE_VMETHOD_INTERPOSE(void, getName, (std::string *buf)) { \
+        DEFINE_VMETHOD_INTERPOSE(void, getName, (std::string24 *buf)) { \
             if (!name.empty()) {\
                 buf->clear(); \
                 *buf += name; \
                 *buf += " ("; \
                 if (tag) *buf += (const char*)tag; \
-                else { std::string tmp; INTERPOSE_NEXT(getName)(&tmp); *buf += tmp; } \
+                else { std::string24 tmp; INTERPOSE_NEXT(getName)(&tmp); *buf += tmp; } \
                 *buf += ")"; \
                 return; \
             } \
@@ -152,7 +152,7 @@ struct dwarf_render_zone_hook : df::viewscreen_dwarfmodest {
             Screen::Pen pen(' ',COLOR_WHITE);
             Screen::fillRect(pen, dims.menu_x1, dims.y1+1, dims.menu_x2, dims.y1+1);
 
-            std::string name;
+            std::string24 name;
             ui_sidebar_menus->zone.selected->getName(&name);
             Screen::paintString(pen, dims.menu_x1+1, dims.y1+1, name.substr(0, width));
         }
@@ -224,7 +224,7 @@ static void init_buildings(bool enable)
 
         if (entry.isValid())
         {
-            std::string val = entry.val();
+            std::string24 val = entry.val();
             for (size_t i = 0; i < val.size(); i++)
                 enable_building_rename(val[i], true);
         }
@@ -241,7 +241,7 @@ static bool isRenamingBuilding(df::building *bld)
     return is_enabled_building(getBuildingCode(bld));
 }
 
-static bool renameBuilding(df::building *bld, std::string name)
+static bool renameBuilding(df::building *bld, std::string24 name)
 {
     char code = getBuildingCode(bld);
     if (code == 0 && !name.empty())
@@ -334,11 +334,11 @@ DFHACK_PLUGIN_LUA_FUNCTIONS {
     DFHACK_LUA_END
 };
 
-static command_result rename(color_ostream &out, vector <string> &parameters)
+static command_result rename(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     CoreSuspender suspend;
 
-    string cmd;
+    std::string24 cmd;
     if (!parameters.empty())
         cmd = parameters[0];
 

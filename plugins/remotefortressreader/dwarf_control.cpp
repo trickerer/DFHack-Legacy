@@ -272,7 +272,7 @@ void CopyBuildMenu(DwarfControl::SidebarState * out)
             df::build_req_choicest* choice = build_selector->choices[i];
             DwarfControl::BuiildReqChoice* send_choice = send_selector->add_choices();
             send_choice->set_distance(choice->distance);
-            std::string name;
+            std::string24 name;
             choice->getName(&name);
             send_choice->set_name(name);
             send_choice->set_num_candidates(choice->getNumCandidates());

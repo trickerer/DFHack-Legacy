@@ -10,15 +10,15 @@
 #include "df/map_block.h"
 #include "df/tile_liquid.h"
 
-using std::string;
-using std::vector;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
 DFHACK_PLUGIN("flows");
 REQUIRE_GLOBAL(world);
 
-command_result df_flows (color_ostream &out, vector <string> & parameters)
+command_result df_flows (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
@@ -57,7 +57,7 @@ command_result df_flows (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("flows",
         "Counts map blocks with flowing liquids.",

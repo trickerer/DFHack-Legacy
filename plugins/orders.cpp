@@ -38,9 +38,9 @@ DFHACK_PLUGIN("orders");
 
 REQUIRE_GLOBAL(world);
 
-static command_result orders_command(color_ostream & out, std::vector<std::string> & parameters);
+static command_result orders_command(color_ostream & out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init(color_ostream & out, std::vector<PluginCommand> & commands)
+DFhackCExport command_result plugin_init(color_ostream & out, std::vector12<PluginCommand> & commands)
 {
     commands.push_back(PluginCommand(
         "orders",
@@ -63,11 +63,11 @@ DFhackCExport command_result plugin_shutdown(color_ostream & out)
     return CR_OK;
 }
 
-static command_result orders_export_command(color_ostream & out, const std::string & name);
-static command_result orders_import_command(color_ostream & out, const std::string & name);
+static command_result orders_export_command(color_ostream & out, const std::string24 & name);
+static command_result orders_import_command(color_ostream & out, const std::string24 & name);
 static command_result orders_clear_command(color_ostream & out);
 
-static command_result orders_command(color_ostream & out, std::vector<std::string> & parameters)
+static command_result orders_command(color_ostream & out, std::vector12<std::string24> & parameters)
 {
     class color_ostream_resetter
     {
@@ -101,7 +101,7 @@ static command_result orders_command(color_ostream & out, std::vector<std::strin
     return CR_WRONG_USAGE;
 }
 
-static bool is_safe_filename(color_ostream & out, const std::string & name)
+static bool is_safe_filename(color_ostream & out, const std::string24 & name)
 {
     if (name.empty())
     {
@@ -131,11 +131,11 @@ static bool is_safe_filename(color_ostream & out, const std::string & name)
 template<typename B>
 static void bitfield_to_json_array(Json::Value & out, B bits)
 {
-    std::vector<std::string> names;
+    std::vector12<std::string24> names;
     bitfield_to_string(&names, bits);
 
     //for (auto & it : names)
-    for (std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end(); ++cit)
+    for (std::vector12<std::string24>::const_iterator cit = names.begin(); cit != names.end(); ++cit)
     {
         out.append(*cit);
     }
@@ -156,7 +156,7 @@ static void json_array_to_bitfield(B & bits, Json::Value & arr)
             continue;
         }
 
-        std::string str(arr[i - 1].asString());
+        std::string24 str(arr[i - 1].asString());
 
         int current;
         if (get_bitfield_field(&current, bits, str))
@@ -177,13 +177,13 @@ static df::itemdef *get_itemdef(int16_t subtype)
 }
 
 template<typename D>
-static df::itemdef *get_itemdef(const std::string & subtype)
+static df::itemdef *get_itemdef(const std::string24 & subtype)
 {
     //for (auto it : D::get_vector())
     //for (st)
     //df::itemdef a = D::get_vector();
-    std::vector<D*> const& dVec = D::get_vector();
-    for (std::vector<D*>::const_iterator cit = dVec.begin(); cit != dVec.end(); ++cit)
+    std::vector12<D*> const& dVec = D::get_vector();
+    for (std::vector12<D*>::const_iterator cit = dVec.begin(); cit != dVec.end(); ++cit)
     {
         //if (it->id == subtype)
         //{
@@ -234,7 +234,7 @@ static df::itemdef *get_itemdef(color_ostream & out, df::item_type type, ST subt
     }
 }
 
-static command_result orders_export_command(color_ostream & out, const std::string & name)
+static command_result orders_export_command(color_ostream & out, const std::string24 & name)
 {
     if (!is_safe_filename(out, name))
     {
@@ -247,7 +247,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
         CoreSuspender suspend;
 
         //for (auto it : world->manager_orders)
-        for (std::vector<df::manager_order*>::const_iterator cit = world->manager_orders.begin();
+        for (std::vector12<df::manager_order*>::const_iterator cit = world->manager_orders.begin();
             cit != world->manager_orders.end(); ++cit)
         {
             df::manager_order* it = *cit;
@@ -336,7 +336,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
                 Json::Value conditions(Json::arrayValue);
 
                 //for (auto it2 : it->item_conditions)
-                for (std::vector<df::manager_order_condition_item*>::const_iterator ci = it->item_conditions.begin();
+                for (std::vector12<df::manager_order_condition_item*>::const_iterator ci = it->item_conditions.begin();
                     ci != it->item_conditions.end(); ++ci)
                 {
                     df::manager_order_condition_item* it2 = *ci;
@@ -405,7 +405,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
                 Json::Value conditions(Json::arrayValue);
 
                 //for (auto it2 : it->order_conditions)
-                for (std::vector<df::manager_order_condition_order*>::const_iterator ci = it->order_conditions.begin();
+                for (std::vector12<df::manager_order_condition_order*>::const_iterator ci = it->order_conditions.begin();
                     ci != it->order_conditions.end(); ++ci)
                 {
                     df::manager_order_condition_order* it2 = *ci;
@@ -430,7 +430,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
     Filesystem::mkdir("dfhack-config/orders");
 
-    std::string ordersJsonFileName = "dfhack-config/orders/";
+    std::string24 ordersJsonFileName = "dfhack-config/orders/";
     ordersJsonFileName += name + ".json";
     std::ofstream file(ordersJsonFileName.c_str());
 
@@ -442,17 +442,17 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 struct InorganicRawCompare
 {
 public:
-    explicit InorganicRawCompare(const std::string init) : _my(init) {}
+    explicit InorganicRawCompare(const std::string24 init) : _my(init) {}
 
     bool operator()(const df::inorganic_raw* s2) const
     {
         return s2->id == _my;
     }
 
-    const std::string _my;
+    const std::string24 _my;
 };
 
-static command_result orders_import_command(color_ostream & out, const std::string & name)
+static command_result orders_import_command(color_ostream & out, const std::string24 & name)
 {
     if (!is_safe_filename(out, name))
     {
@@ -462,7 +462,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
     Json::Value orders;
 
     {
-        std::string ordersJsonFileName = "dfhack-config/orders/";
+        std::string24 ordersJsonFileName = "dfhack-config/orders/";
         ordersJsonFileName += name + ".json";
         std::ifstream file(ordersJsonFileName.c_str());
 
@@ -748,8 +748,8 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
                 if (it2.isMember("bearing"))
                 {
-                    std::string bearing(it2["bearing"].asString());
-                    std::vector<df::inorganic_raw*>::const_iterator found =
+                    std::string24 bearing(it2["bearing"].asString());
+                    std::vector12<df::inorganic_raw*>::const_iterator found =
                         std::find_if(world->raws.inorganics.begin(), world->raws.inorganics.end(),
                         InorganicRawCompare(bearing));
                     if (found == world->raws.inorganics.end())

@@ -14,9 +14,9 @@
 #include "df/tile_dig_designation.h"
 #include "df/world.h"
 
-#include <set>
-#include <string>
-#include <vector>
+
+
+
 
 using namespace DFHack;
 using namespace std;
@@ -24,16 +24,16 @@ using namespace std;
 DFHACK_PLUGIN("digFlood");
 REQUIRE_GLOBAL(world);
 
-command_result digFlood (color_ostream &out, std::vector <std::string> & parameters);
+command_result digFlood (color_ostream &out, std::vector12<std::string24> & parameters);
 
 void onDig(color_ostream& out, void* ptr);
-void maybeExplore(color_ostream& out, MapExtras::MapCache& cache, df::coord pt, set<df::coord>& jobLocations);
+void maybeExplore(color_ostream& out, MapExtras::MapCache& cache, df::coord pt, std::set8<df::coord>& jobLocations);
 EventManager::EventHandler digHandler(onDig, 0);
 
 //bool enabled = false;
 DFHACK_PLUGIN_IS_ENABLED(enabled);
 bool digAll = false;
-set<string> autodigMaterials;
+std::set8<std::string24> autodigMaterials;
 
 DFhackCExport command_result plugin_enable(color_ostream& out, bool enable) {
     if (enabled == enable)
@@ -48,7 +48,7 @@ DFhackCExport command_result plugin_enable(color_ostream& out, bool enable) {
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "digFlood", "Automatically dig out veins as you discover them.",
@@ -88,7 +88,7 @@ void onDig(color_ostream& out, void* ptr) {
          job->job_type != df::enums::job_type::DigChannel )
         return;
 
-    set<df::coord> jobLocations;
+    std::set8<df::coord> jobLocations;
     for ( df::job_list_link* link = &world->jobs.list; link != NULL; link = link->next ) {
         if ( link->item == NULL )
             continue;
@@ -114,7 +114,7 @@ void onDig(color_ostream& out, void* ptr) {
     cache.trash();
 }
 
-void maybeExplore(color_ostream& out, MapExtras::MapCache& cache, df::coord pt, set<df::coord>& jobLocations) {
+void maybeExplore(color_ostream& out, MapExtras::MapCache& cache, df::coord pt, std::set8<df::coord>& jobLocations) {
     if ( !Maps::isValidTilePos(pt) ) {
         return;
     }
@@ -159,10 +159,10 @@ void maybeExplore(color_ostream& out, MapExtras::MapCache& cache, df::coord pt, 
 //    *process_jobs = true;
 }
 
-command_result digFlood (color_ostream &out, std::vector <std::string> & parameters)
+command_result digFlood (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool adding = true;
-    set<string> toAdd, toRemove;
+    std::set8<std::string24> toAdd, toRemove;
     for ( size_t a = 0; a < parameters.size(); a++ ) {
         int32_t i = (int32_t)strtol(parameters[a].c_str(), NULL, 0);
         if ( i == 0 && parameters[a] == "0" ) {
@@ -207,7 +207,7 @@ command_result digFlood (color_ostream &out, std::vector <std::string> & paramet
     }
 
     autodigMaterials.insert(toAdd.begin(), toAdd.end());
-    for (std::set<std::string>::const_iterator a = toRemove.begin(); a != toRemove.end(); a++ )
+    for (std::set8<std::string24>::const_iterator a = toRemove.begin(); a != toRemove.end(); a++ )
         autodigMaterials.erase(*a);
 
     return CR_OK;

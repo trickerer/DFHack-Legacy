@@ -65,7 +65,7 @@ struct trackstop_hook : public df::viewscreen_dwarfmodest {
             return NULL;
         }
 
-        for (std::vector<df::job*>::const_iterator it = ts->jobs.begin(); it != ts->jobs.end(); it++) {
+        for (std::vector12<df::job*>::const_iterator it = ts->jobs.begin(); it != ts->jobs.end(); it++) {
             df::job* job = *it;
             if (job->job_type == df::job_type::DestroyBuilding) {
                 // Slated for removal.
@@ -76,7 +76,7 @@ struct trackstop_hook : public df::viewscreen_dwarfmodest {
         return ts;
     }
 
-    bool handleInput(set<df::interface_key> *input) {
+    bool handleInput(std::set8<df::interface_key> *input) {
         building_trapst *ts = get_selected_trackstop();
         if (!ts) {
             return false;
@@ -138,7 +138,7 @@ struct trackstop_hook : public df::viewscreen_dwarfmodest {
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input)) {
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input)) {
         if (!handleInput(input)) {
             INTERPOSE_NEXT(feed)(input);
         }
@@ -216,7 +216,7 @@ struct roller_hook : public df::viewscreen_dwarfmodest {
             return NULL;
         }
 
-        for (std::vector<df::job*>::const_iterator it = roller->jobs.begin(); it != roller->jobs.end(); it++) {
+        for (std::vector12<df::job*>::const_iterator it = roller->jobs.begin(); it != roller->jobs.end(); it++) {
             df::job* job = *it;
             if (job->job_type == df::job_type::DestroyBuilding) {
                 // Slated for removal.
@@ -227,7 +227,7 @@ struct roller_hook : public df::viewscreen_dwarfmodest {
         return roller;
     }
 
-    bool handleInput(set<df::interface_key> *input) {
+    bool handleInput(std::set8<df::interface_key> *input) {
         building_rollersst *roller = get_selected_roller();
         if (!roller) {
             return false;
@@ -258,7 +258,7 @@ struct roller_hook : public df::viewscreen_dwarfmodest {
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input)) {
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input)) {
         if (!handleInput(input)) {
             INTERPOSE_NEXT(feed)(input);
         }
@@ -324,7 +324,7 @@ DFhackCExport command_result plugin_enable(color_ostream& out, bool enable) {
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands) {
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands) {
     return plugin_enable(out, AUTOENABLE);
 }
 

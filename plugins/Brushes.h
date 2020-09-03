@@ -1,17 +1,17 @@
 #pragma once
 #include <llimits.h>
 #include <sstream>
-#include <string>
-#include <stack>
-#include <set>
 
-typedef vector <df::coord> coord_vec;
+#include <stack>
+
+
+typedef std::vector12<df::coord> coord_vec;
 class Brush
 {
 public:
     virtual ~Brush(){};
     virtual coord_vec points(MapExtras::MapCache & mc,DFHack::DFCoord start) = 0;
-    virtual std::string str() const {
+    virtual std::string24 str() const {
         return "unknown";
     }
 };
@@ -64,7 +64,7 @@ public:
         return v;
     };
     ~RectangleBrush(){};
-    std::string str() const {
+    std::string24 str() const {
         if (x_ == 1 && y_ == 1 && z_ == 1)
         {
             return "point";
@@ -109,7 +109,7 @@ public:
         }
         return v;
     };
-    std::string str() const {
+    std::string24 str() const {
         return "block";
     }
 };
@@ -140,7 +140,7 @@ public:
         }
         return v;
     };
-    std::string str() const {
+    std::string24 str() const {
         return "column";
     }
 };
@@ -162,7 +162,7 @@ public:
         std::stack<DFCoord> to_flood;
         to_flood.push(start);
 
-        std::set<DFCoord> seen;
+        std::set8<DFCoord> seen;
 
         while (!to_flood.empty()) {
             DFCoord xy = to_flood.top();
@@ -195,7 +195,7 @@ public:
 
         return v;
     }
-    std::string str() const {
+    std::string24 str() const {
         return "flood";
     }
 private:
@@ -209,7 +209,7 @@ private:
 };
 
 DFHack::command_result parseRectangle(DFHack::color_ostream & out,
-                              vector<string>  & input, int start, int end,
+                              std::vector12<std::string24>  & input, int start, int end,
                               int & width, int & height, int & zLevels,
                               bool hasConsole = true)
 {
@@ -227,7 +227,7 @@ DFHack::command_result parseRectangle(DFHack::color_ostream & out,
         }
     }
 
-    string command = "";
+    std::string24 command = "";
     std::stringstream str;
     CommandHistory hist;
 

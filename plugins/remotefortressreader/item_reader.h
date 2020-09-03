@@ -25,7 +25,7 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
 void CopyItem(RemoteFortressReader::Item * NetItem, df::item * DfItem);
 void ConvertDFColorDescriptor(int16_t index, RemoteFortressReader::ColorDefinition * out);
 
-typedef df::art_image_chunk * (*GET_ART_IMAGE_CHUNK)(std::vector<df::art_image_chunk* > *, int);
+typedef df::art_image_chunk * (*GET_ART_IMAGE_CHUNK)(std::vector12<df::art_image_chunk* > *, int);
 
 void CopyImage(const df::art_image * image, RemoteFortressReader::ArtImage * netImage);
 

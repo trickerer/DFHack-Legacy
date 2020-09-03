@@ -10,12 +10,12 @@
 #include "modules/Units.h"
 #include "TileTypes.h"
 
-#include <vector>
+
 #include <cstdio>
 #include <stack>
-#include <string>
+
 #include <cmath>
-#include <string.h>
+
 
 #include "VTableInterpose.h"
 #include "df/item_liquid_miscst.h"
@@ -36,8 +36,8 @@
 
 #include "MiscUtils.h"
 
-using std::vector;
-using std::string;
+
+
 using std::stack;
 using namespace DFHack;
 using namespace df::enums;
@@ -59,7 +59,7 @@ struct ReagentSource {
 
 struct MaterialSource : ReagentSource {
     bool product;
-    std::string product_name;
+    std::string24 product_name;
 
     int mat_type, mat_index;
 
@@ -81,21 +81,21 @@ struct ProductInfo {
 struct ReactionInfo {
     df::reaction *react;
 
-    std::vector<ProductInfo> products;
+    std::vector12<ProductInfo> products;
 };
 
-typedef std::map<std::string, ReactionInfo> ReactionInfoMap;
+typedef std::map<std::string24, ReactionInfo> ReactionInfoMap;
 typedef std::map<df::reaction_product*, ProductInfo*> PruductInfoMap;
 static ReactionInfoMap reactions;
 static PruductInfoMap products;
 
-static ReactionInfo *find_reaction(const std::string &name)
+static ReactionInfo *find_reaction(const std::string24 &name)
 {
     ReactionInfoMap::iterator it = reactions.find(name);
     return (it != reactions.end()) ? &it->second : NULL;
 }
 
-static bool is_add_spatter(const std::string &name)
+static bool is_add_spatter(const std::string24 &name)
 {
     return name.size() > 12 && memcmp(name.data(), "SPATTER_ADD_", 12) == 0;
 }
@@ -127,7 +127,7 @@ static void find_material(int *type, int *index, df::item *input, MaterialSource
 
 static int has_contaminant(df::item_actual *item, int type, int index)
 {
-    std::vector<df::spatter*> const* cont = item->contaminants;
+    std::vector12<df::spatter*> const* cont = item->contaminants;
     if (!cont)
         return 0;
 
@@ -147,7 +147,7 @@ static int has_contaminant(df::item_actual *item, int type, int index)
  * Hooks
  */
 
-typedef std::map<int, std::vector<df::item*> > item_table;
+typedef std::map<int, std::vector12<df::item*> > item_table;
 
 static void index_items(item_table &table, df::job *job, ReactionInfo *info)
 {
@@ -163,7 +163,7 @@ static void index_items(item_table &table, df::job *job, ReactionInfo *info)
         }
         else
         {
-            std::vector<df::item*> contents;
+            std::vector12<df::item*> contents;
             Items::getContainedItems(iref->item, &contents);
 
             for (int j = contents.size()-1; j >= 0; j--)
@@ -230,8 +230,8 @@ IMPLEMENT_VMETHOD_INTERPOSE(item_hook, isImprovable);
 
 df::item* find_item(
     ReagentSource &info,
-    std::vector<df::reaction_reagent*> *in_reag,
-    std::vector<df::item*> *in_items
+    std::vector12<df::reaction_reagent*> *in_reag,
+    std::vector12<df::item*> *in_items
 ) {
     if (!info.reagent)
         return NULL;
@@ -247,12 +247,12 @@ struct product_hook : improvement_product {
     DEFINE_VMETHOD_INTERPOSE(
         void, produce,
         (df::unit *unit,
-         std::vector<df::reaction_product*> *out_products,
-         std::vector<df::item*> *out_items,
-         std::vector<df::reaction_reagent*> *in_reag,
-         std::vector<df::item*> *in_items,
+         std::vector12<df::reaction_product*> *out_products,
+         std::vector12<df::item*> *out_items,
+         std::vector12<df::reaction_reagent*> *in_reag,
+         std::vector12<df::item*> *in_items,
          int32_t quantity, df::job_skill skill,
-         int32_t quality, df::historical_entity *entity, df::world_site *site, std::vector<void *> *unk2)
+         int32_t quality, df::historical_entity *entity, df::world_site *site, std::vector12<void *> *unk2)
     ) {
         if (ProductInfo* product = products[this])
         {
@@ -309,7 +309,7 @@ IMPLEMENT_VMETHOD_INTERPOSE(product_hook, produce);
  */
 
 static void find_reagent(
-    color_ostream &out, ReagentSource &info, df::reaction *react, std::string name
+    color_ostream &out, ReagentSource &info, df::reaction *react, std::string24 name
 ) {
     for (size_t i = 0; i < react->reagents.size(); i++)
     {
@@ -359,7 +359,7 @@ static bool find_reactions(color_ostream &out)
     reactions.clear();
     products.clear();
 
-    std::vector<df::reaction*> &rlist = df::reaction::get_vector();
+    std::vector12<df::reaction*> &rlist = df::reaction::get_vector();
 
     for (size_t i = 0; i < rlist.size(); i++)
     {
@@ -371,8 +371,8 @@ static bool find_reactions(color_ostream &out)
 
     for (ReactionInfoMap::iterator it = reactions.begin(); it != reactions.end(); ++it)
     {
-        std::vector<df::reaction_product*> const &prod = it->second.react->products;
-        std::vector<ProductInfo> &out_prod = it->second.products;
+        std::vector12<df::reaction_product*> const &prod = it->second.react->products;
+        std::vector12<ProductInfo> &out_prod = it->second.products;
 
         for (size_t i = 0; i < prod.size(); i++)
         {
@@ -424,7 +424,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (Core::getInstance().isWorldLoaded())
         plugin_onstatechange(out, SC_WORLD_LOADED);

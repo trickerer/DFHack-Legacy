@@ -46,7 +46,7 @@ struct workshop_hack_data
     df::power_info powerInfo;
     bool needs_power;
     //animation
-    std::vector<std::vector<graphic_tile> > frames;
+    std::vector12<std::vector12<graphic_tile> > frames;
     bool machine_timing; //6 frames used in vanilla
     int frame_skip; // e.g. 2 means have to ticks between frames
     //updateCallback:
@@ -170,7 +170,7 @@ struct work_hook : df::building_workshopst{
     {
         if (find_def())
         {
-            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             insert_into_vector(vec, &df::building::id, (df::building*)this);
         }
 
@@ -181,7 +181,7 @@ struct work_hook : df::building_workshopst{
     {
         if (find_def())
         {
-            std::vector<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
+            std::vector12<df::building*> &vec = world->buildings.other[buildings_other_id::ANY_MACHINE];
             erase_from_vector(vec, &df::building::id, id);
         }
 
@@ -286,7 +286,7 @@ struct work_hook : df::building_workshopst{
                 }
             }
             int w=db->x2-db->x1+1;
-            std::vector<graphic_tile> &cur_frame=def->frames[frame];
+            std::vector12<graphic_tile> &cur_frame=def->frames[frame];
             for(size_t i=0;i<cur_frame.size();i++)
             {
                 if(cur_frame[i].tile>=0)
@@ -329,7 +329,7 @@ static void loadFrames(lua_State* L,workshop_hack_data& def,int stack_pos)
     while (lua_next(L, -2) != 0) {
         luaL_checktype(L,-1,LUA_TTABLE);
         lua_pushnil(L);
-        std::vector<graphic_tile> frame;
+        std::vector12<graphic_tile> frame;
         while (lua_next(L, -2) != 0) {
             graphic_tile t;
             lua_pushnumber(L,1);
@@ -482,7 +482,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
     return CR_OK;
 }
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     enable_hooks(true);
     return CR_OK;

@@ -10,7 +10,7 @@
 #include "df/coord.h"
 
 //#include <unordered_map>
-#include <vector>
+
 
 #include <hash_map>
 
@@ -34,7 +34,7 @@ struct DigAbilities {
 
 //extern cost_t costWeight[costDim];
 //extern int32_t jobDelay[costDim];
-extern stdext::hash_map<std::string, DigAbilities> digAbilities;
+extern stdext::hash_map<std::string24, DigAbilities> digAbilities;
 /*
 const cost_t costWeight[] = {
 //Distance
@@ -105,5 +105,5 @@ struct PointHash {
 };
 
 cost_t getEdgeCost(DFHack::color_ostream& out, df::coord pt1, df::coord pt2, DigAbilities& abilities);
-std::vector<Edge>* getEdgeSet(DFHack::color_ostream &out, df::coord point, MapExtras::MapCache& cache, int32_t xMax, int32_t yMax, int32_t zMax, DigAbilities& abilities);
+std::vector12<Edge>* getEdgeSet(DFHack::color_ostream &out, df::coord point, MapExtras::MapCache& cache, int32_t xMax, int32_t yMax, int32_t zMax, DigAbilities& abilities);
 

@@ -14,8 +14,8 @@
 #include "df/world.h"
 #include "df/job.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -40,7 +40,7 @@ static void doDeramp(df::map_block* block, df::map_block* above, int x, int y, d
         above->tiletype[x][y] = tiletype::OpenSpace; // open space
 }
 
-command_result df_deramp (color_ostream &out, vector <string> & parameters)
+command_result df_deramp (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (!parameters.empty())
         return CR_WRONG_USAGE;
@@ -107,7 +107,7 @@ command_result df_deramp (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "deramp", "Replace all ramps marked for removal with floors.",

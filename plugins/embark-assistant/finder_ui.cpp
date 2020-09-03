@@ -90,14 +90,14 @@ namespace embark_assist {
         fields last_fields = fields::FIELDS_NEIGHBORS;
 
         struct display_map_elements {
-            display_map_elements(std::string _t, int16_t _k) : text(_t), key(_k) {}
+            display_map_elements(std::string24 _t, int16_t _k) : text(_t), key(_k) {}
             display_map_elements() : key(0) {}
-            std::string text;
+            std::string24 text;
             int16_t key;
         };
 
-        typedef std::vector <display_map_elements> display_maps;
-        typedef std::vector <display_map_elements> name_lists;
+        typedef std::vector12<display_map_elements> display_maps;
+        typedef std::vector12<display_map_elements> name_lists;
         typedef std::list   <display_map_elements> sort_lists;
 
         struct ui_lists {
@@ -116,7 +116,7 @@ namespace embark_assist {
                                              //  or underlying enum value).
         };
 
-        typedef std::vector <ui_lists*> uis;
+        typedef std::vector12<ui_lists*> uis;
 
         const DFHack::Screen::Pen active_pen(' ', COLOR_YELLOW);
         const DFHack::Screen::Pen passive_pen(' ', COLOR_DARKGREY);
@@ -125,10 +125,10 @@ namespace embark_assist {
         const DFHack::Screen::Pen lr_pen(' ', COLOR_LIGHTRED);
 
         struct civ_entities {
-            civ_entities(int16_t _id, std::string _d) : id(_id), description(_d) {}
+            civ_entities(int16_t _id, std::string24 _d) : id(_id), description(_d) {}
             civ_entities() : id(0) {}
             int16_t id;
-            std::string description;
+            std::string24 description;
         };
 
         //==========================================================================================================
@@ -146,7 +146,7 @@ namespace embark_assist {
             uint16_t finder_list_focus;
             bool finder_list_active;
             uint16_t max_inorganic;
-            std::vector<civ_entities> civs;
+            std::vector12<civ_entities> civs;
         };
 
         static states *state = NULL;
@@ -916,7 +916,7 @@ namespace embark_assist {
                     sort_lists::iterator iterator;
 
                     FOR_ENUM_ITEMS_SIMPLE(biome_type, iter) {
-                        std::string s = ENUM_KEY_STR_SIMPLE(biome_type, iter);
+                        std::string24 s = ENUM_KEY_STR_SIMPLE(biome_type, iter);
 
                         if (s.substr(0, 4) != "POOL" &&
                             s.substr(0, 5) != "RIVER" &&
@@ -1631,18 +1631,18 @@ namespace embark_assist {
         public:
             ViewscreenFindUi();
 
-            void feed(std::set<df::interface_key> *input);
+            void feed(std::set8<df::interface_key> *input);
 
             void render();
 
-            std::string getFocusString() { return "Finder UI"; }
+            std::string24 getFocusString() { return "Finder UI"; }
 
         private:
         };
 
         //===============================================================================
 
-        void ViewscreenFindUi::feed(std::set<df::interface_key> *input) {
+        void ViewscreenFindUi::feed(std::set8<df::interface_key> *input) {
             if (input->count(df::interface_key::LEAVESCREEN))
             {
                 input->clear();

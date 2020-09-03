@@ -32,11 +32,11 @@
 #include "modules/Screen.h"
 #include "modules/World.h"
 
-#include <set>
 
-using std::string;
-using std::vector;
-using std::set;
+
+
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -86,12 +86,12 @@ struct WatchedBurrow
 class WatchedBurrows
 {
 public:
-    string getSerialisedIds()
+    std::string24 getSerialisedIds()
     {
         validate();
         stringstream burrow_ids;
         bool append_started = false;
-        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
+        for (std::vector12<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
         {
             if (append_started)
                 burrow_ids << " ";
@@ -116,7 +116,7 @@ public:
         burrows.push_back(wb);
     }
 
-    void add(const string burrow_ids)
+    void add(const std::string24 burrow_ids)
     {
         istringstream iss(burrow_ids);
         int id;
@@ -132,7 +132,7 @@ public:
         if (!burrows.size())
             return true;
 
-        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
+        for (std::vector12<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
         {
             df::burrow *burrow = it->burrow;
             if (Burrows::isAssignedTile(burrow, plant_pos))
@@ -145,7 +145,7 @@ public:
     bool isBurrowWatched(const df::burrow *burrow)
     {
         validate();
-        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
+        for (std::vector12<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end(); it++)
         {
             if (it->burrow == burrow)
                 return true;
@@ -167,7 +167,7 @@ private:
 
     void validate()
     {
-        for (vector<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end();)
+        for (std::vector12<WatchedBurrow>::const_iterator it = burrows.begin(); it != burrows.end();)
         {
             if (!isValidBurrow(it->id))
                 it = burrows.erase(it);
@@ -176,12 +176,12 @@ private:
         }
     }
 
-    vector<WatchedBurrow> burrows;
+    std::vector12<WatchedBurrow> burrows;
 };
 
 static WatchedBurrows watchedBurrows;
 
-static int string_to_int(string s, int default_ = 0)
+static int string_to_int(std::string24 s, int default_ = 0)
 {
     try
     {
@@ -268,8 +268,8 @@ static bool skip_plant(const df::plant * plant, bool *restricted)
     if (skip.food_trees || skip.cook_trees)
     {
         //for (df::material * mat : plant_raw->material)
-        std::vector<df::material*> const& plm_vec = plant_raw->material;
-        for (std::vector<df::material*>::const_iterator ci = plm_vec.begin(); ci != plm_vec.end(); ++ci)
+        std::vector12<df::material*> const& plm_vec = plant_raw->material;
+        for (std::vector12<df::material*>::const_iterator ci = plm_vec.begin(); ci != plm_vec.end(); ++ci)
         {
             df::material* mat = *ci;
             if (skip.food_trees && mat->flags.is_set(material_flags::EDIBLE_RAW))
@@ -385,7 +385,7 @@ static bool is_valid_item(df::item *item)
 
 static int get_log_count()
 {
-    std::vector<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
+    std::vector12<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
 
     // Pre-compute a bitmask with the bad flags
     df::item_flags bad_flags;
@@ -477,10 +477,10 @@ public:
         burrows_column.clear();
 
         //for (df::burrow *burrow : ui->burrows.list)
-        for (std::vector<df::burrow*>::const_iterator ci = ui->burrows.list.begin(); ci != ui->burrows.list.end(); ++ci)
+        for (std::vector12<df::burrow*>::const_iterator ci = ui->burrows.list.begin(); ci != ui->burrows.list.end(); ++ci)
         {
             df::burrow* burrow = *ci;
-            string name = burrow->name;
+            std::string24 name = burrow->name;
             if (name.empty())
                 name = "Burrow " + int_to_string(burrow->id + 1);
             ListEntry<df::burrow *> elem = ListEntry<df::burrow *>(name, burrow);
@@ -517,11 +517,11 @@ public:
             min_logs = max_logs;
     }
 
-    void feed(set<df::interface_key> *input)
+    void feed(std::set8<df::interface_key> *input)
     {
         if (edit_mode != EDIT_NONE)
         {
-            string entry = int_to_string(edit_mode == EDIT_MIN ? min_logs : max_logs);
+            std::string24 entry = int_to_string(edit_mode == EDIT_MIN ? min_logs : max_logs);
             if (input->count(interface_key::LEAVESCREEN) || input->count(interface_key::SELECT))
             {
                 if (edit_mode == EDIT_MIN)
@@ -537,7 +537,7 @@ public:
             }
             else if (entry.size() < 5)
             {
-                for (set<df::interface_key>::const_iterator k = input->begin(); k != input->end(); ++k)
+                for (std::set8<df::interface_key>::const_iterator k = input->begin(); k != input->end(); ++k)
                 {
                     char ch = char(Screen::keyToChar(*k));
                     if (ch >= '0' && ch <= '9')
@@ -761,7 +761,7 @@ public:
         OutputString(COLOR_GREEN, x, y, int_to_string(marked_tree_count), true, left_margin);
     }
 
-    std::string getFocusString() { return "autochop"; }
+    std::string24 getFocusString() { return "autochop"; }
 
     static void addToWatchedBurrows(df::burrow *b)
     {
@@ -771,7 +771,7 @@ public:
     void updateAutochopBurrows()
     {
         watchedBurrows.clear();
-        vector<df::burrow *> v = burrows_column.getSelectedElems();
+        std::vector12<df::burrow *> v = burrows_column.getSelectedElems();
         //for_each_<df::burrow *>(v, [] (df::burrow *b) { watchedBurrows.add(b->id); });
         for_each_<df::burrow *>(v, &ViewscreenAutochop::addToWatchedBurrows);
     }
@@ -783,7 +783,7 @@ private:
     int marked_tree_count;
     int skipped_tree_count;
     MapExtras::MapCache mcache;
-    string message;
+    std::string24 message;
     enum { EDIT_NONE, EDIT_MIN, EDIT_MAX } edit_mode;
 
     void validateColumn()
@@ -810,12 +810,12 @@ struct autochop_hook : public df::viewscreen_dwarfmodest
 
     void sendKey(const df::interface_key &key)
     {
-        set<df::interface_key> tmp;
+        std::set8<df::interface_key> tmp;
         tmp.insert(key);
         INTERPOSE_NEXT(feed)(&tmp);
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (isInDesignationMenu() && input->count(interface_key::CUSTOM_C))
         {
@@ -852,7 +852,7 @@ IMPLEMENT_VMETHOD_INTERPOSE_PRIO(autochop_hook, feed, 100);
 IMPLEMENT_VMETHOD_INTERPOSE_PRIO(autochop_hook, render, 100);
 
 
-command_result df_autochop (color_ostream &out, vector <string> & parameters)
+command_result df_autochop (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     for (size_t i = 0; i < parameters.size(); i++)
     {
@@ -907,7 +907,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "autochop", "Auto-harvest trees when low on stockpiled logs",

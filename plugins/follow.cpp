@@ -22,13 +22,13 @@ DFHACK_PLUGIN("follow");
 DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 REQUIRE_GLOBAL(world);
 
-command_result follow (color_ostream &out, std::vector <std::string> & parameters);
+command_result follow (color_ostream &out, std::vector12<std::string24> & parameters);
 
 df::unit *followedUnit;
 int32_t prevX, prevY, prevZ;
 uint8_t prevMenuWidth;
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "follow", "Make the screen follow the selected unit",
@@ -136,7 +136,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     return CR_OK;
 }
 
-command_result follow (color_ostream &out, std::vector <std::string> & parameters)
+command_result follow (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
 

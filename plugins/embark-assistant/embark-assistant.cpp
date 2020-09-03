@@ -133,7 +133,7 @@ namespace embark_assist {
 
 //=======================================================================================
 
-command_result embark_assistant (color_ostream &out, std::vector <std::string> & parameters);
+command_result embark_assistant (color_ostream &out, std::vector12<std::string24> & parameters);
 
 //=======================================================================================
 
@@ -153,7 +153,7 @@ struct start_site_hook : df::viewscreen_choose_start_sitest {
         OutputString(COLOR_WHITE, x, y, dims.x > 82 ? "Assistant" : "Asst.");
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (!embark_assist::main::state && input->count(interface_key::CUSTOM_A))
         {
@@ -169,12 +169,12 @@ IMPLEMENT_VMETHOD_INTERPOSE(start_site_hook, feed);
 
 //=======================================================================================
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "embark-assistant", "Embark site selection support.",
         embark_assistant, false, /* false means that the command can be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         "  This command starts the embark-assist plugin that provides embark site\n"
         "  selection help. It has to be called while the pre-embark screen is\n"
         "  displayed and shows extended (and correct(?)) resource information for\n"
@@ -251,7 +251,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
 //=======================================================================================
 
-command_result embark_assistant(color_ostream &out, std::vector <std::string> & parameters)
+command_result embark_assistant(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool fileresult = false;
 

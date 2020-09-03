@@ -17,8 +17,8 @@
 #include "modules/Items.h"
 
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -29,11 +29,11 @@ using df::global::selection_rect;
 
 using df::building_stockpilest;
 
-static command_result stockcheck(color_ostream &out, vector <string> & parameters);
+static command_result stockcheck(color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("stockcheck");
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (world && ui) {
         commands.push_back(
@@ -114,11 +114,11 @@ public:
     int getId() { return sp->id; }
 };
 
-static command_result stockcheck(color_ostream &out, vector <string> & parameters)
+static command_result stockcheck(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
-    std::vector<StockpileInfo*> stockpiles;
+    std::vector12<StockpileInfo*> stockpiles;
 
     for (df::building *build : world->buildings.all)
     {
@@ -132,7 +132,7 @@ static command_result stockcheck(color_ostream &out, vector <string> & parameter
 
     }
 
-    std::vector<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
+    std::vector12<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
 
     // Precompute a bitmask with the bad flags
     df::item_flags bad_flags;
@@ -245,16 +245,16 @@ static command_result stockcheck(color_ostream &out, vector <string> & parameter
         if (current)
             continue;
 
-        std::string description;
+        std::string24 description;
         item->getItemDescription(&description, 0);
         out << " * " << description;
 
         if (container) {
-            std::string containerDescription;
+            std::string24 containerDescription;
             container->getItemDescription(&containerDescription, 0);
             out << ", in container " << containerDescription;
             if (lastcontainer) {
-                std::string lastcontainerDescription;
+                std::string24 lastcontainerDescription;
                 lastcontainer->getItemDescription(&lastcontainerDescription, 0);
                 out << ", in container " << lastcontainerDescription;
             }

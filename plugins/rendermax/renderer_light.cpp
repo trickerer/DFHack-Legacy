@@ -2,8 +2,8 @@
 
 #include <functional>
 #include <math.h>
-#include <string>
-#include <vector>
+
+
 
 #include "tinythread.h"
 
@@ -390,9 +390,9 @@ rgbf getStandartColor(int colorId)
         df::global::enabler->ccolor[colorId][1]/255.0f,
         df::global::enabler->ccolor[colorId][2]/255.0f);
 }
-int getPlantNumber(const std::string& id)
+int getPlantNumber(const std::string24& id)
 {
-    std::vector<df::plant_raw*>& vec=df::plant_raw::get_vector();
+    std::vector12<df::plant_raw*>& vec=df::plant_raw::get_vector();
     for(size_t i=0;i<vec.size();i++)
     {
         if(vec[i]->id==id)
@@ -400,7 +400,7 @@ int getPlantNumber(const std::string& id)
     }
     return -1;
 }
-void addPlant(const std::string& id,std::map<int,lightSource>& map,const lightSource& v)
+void addPlant(const std::string24& id,std::map<int,lightSource>& map,const lightSource& v)
 {
     int nId=getPlantNumber(id);
     if(nId>0)
@@ -810,7 +810,7 @@ void lightingEngineViewscreen::doOcupancyAndLights()
     //items
     if(itemDefs.size()>0)
     {
-        std::vector<df::item*>& vec=df::global::world->items.other[items_other_id::IN_PLAY];
+        std::vector12<df::item*>& vec=df::global::world->items.other[items_other_id::IN_PLAY];
         for(size_t i=0;i<vec.size();i++)
         {
             df::item* curItem=vec[i];
@@ -1172,7 +1172,7 @@ void lightingEngineViewscreen::defaultSettings()
 }
 void lightingEngineViewscreen::loadSettings()
 {
-    std::string rawFolder;
+    std::string24 rawFolder;
     if(df::global::world->cur_savegame.save_dir!="")
     {
         rawFolder= "data/save/" + (df::global::world->cur_savegame.save_dir) + "/raw/";
@@ -1181,7 +1181,7 @@ void lightingEngineViewscreen::loadSettings()
     {
         rawFolder= "raw/";
     }
-    const std::string settingsfile=rawFolder+"rendermax.lua";
+    const std::string24 settingsfile=rawFolder+"rendermax.lua";
 
     CoreSuspender lock;
     color_ostream_proxy out(Core::getInstance().getConsole());

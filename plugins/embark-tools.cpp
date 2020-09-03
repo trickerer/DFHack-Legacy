@@ -9,7 +9,7 @@
 #include "modules/Gui.h"
 #include <algorithm>
 #include <map>
-#include <set>
+
 
 #include "VTableInterpose.h"
 #include "ColorText.h"
@@ -24,14 +24,14 @@ using df::global::gps;
 DFHACK_PLUGIN("embark-tools");
 DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
-#define FOR_ITER_TOOLS(iter) for(std::map<std::string, EmbarkTool*>::iterator iter = tools.begin(); iter != tools.end(); iter++)
+#define FOR_ITER_TOOLS(iter) for(std::map<std::string24, EmbarkTool*>::iterator iter = tools.begin(); iter != tools.end(); iter++)
 
 void update_embark_sidebar (df::viewscreen_choose_start_sitest * screen)
 {
     bool is_top = false;
     if (screen->location.embark_pos_min.y == 0)
         is_top = true;
-    std::set<df::interface_key> keys;
+    std::set8<df::interface_key> keys;
     keys.insert(df::interface_key::SETUP_LOCAL_Y_MUP);
     screen->feed(&keys);
     if (!is_top)
@@ -66,7 +66,7 @@ void set_embark_pos (df::viewscreen_choose_start_sitest * screen,
     get_embark_pos(screen, a, b, c, d, e, f);
 
 typedef df::viewscreen_choose_start_sitest start_sitest;
-typedef std::set<df::interface_key> ikey_set;
+typedef std::set8<df::interface_key> ikey_set;
 
 class EmbarkTool
 {
@@ -79,9 +79,9 @@ public:
     virtual bool getEnabled() { return enabled; }
     virtual void setEnabled(bool state) { enabled = state; }
     virtual void toggleEnabled() { setEnabled(!enabled); }
-    virtual std::string getId() = 0;
-    virtual std::string getName() = 0;
-    virtual std::string getDesc() = 0;
+    virtual std::string24 getId() = 0;
+    virtual std::string24 getName() = 0;
+    virtual std::string24 getDesc() = 0;
     virtual df::interface_key getToggleKey() = 0;
     virtual void before_render(start_sitest* screen) { };
     virtual void after_render(start_sitest* screen) { };
@@ -89,15 +89,15 @@ public:
     virtual void after_feed(start_sitest* screen, ikey_set* input) { };
     virtual void after_mouse_event(start_sitest* screen) { };
 };
-std::map<std::string, EmbarkTool*> tools;
+std::map<std::string24, EmbarkTool*> tools;
 
 /*
 
 class SampleTool : public EmbarkTool
 {
-    virtual std::string getId() { return "id"; }
-    virtual std::string getName() { return "Name"; }
-    virtual std::string getDesc() { return "Description"; }
+    virtual std::string24 getId() { return "id"; }
+    virtual std::string24 getName() { return "Name"; }
+    virtual std::string24 getDesc() { return "Description"; }
     virtual df::interface_key getToggleKey() { return df::interface_key::KEY; }
     virtual void before_render(start_sitest* screen) { }
     virtual void after_render(start_sitest* screen) { }
@@ -110,9 +110,9 @@ class SampleTool : public EmbarkTool
 class EmbarkAnywhere : public EmbarkTool
 {
 public:
-    virtual std::string getId() { return "anywhere"; }
-    virtual std::string getName() { return "Embark anywhere"; }
-    virtual std::string getDesc() { return "Allows embarking anywhere on the world map"; }
+    virtual std::string24 getId() { return "anywhere"; }
+    virtual std::string24 getName() { return "Embark anywhere"; }
+    virtual std::string24 getDesc() { return "Allows embarking anywhere on the world map"; }
     virtual df::interface_key getToggleKey() { return df::interface_key::CUSTOM_A; }
     virtual void after_render(start_sitest* screen)
     {
@@ -137,7 +137,7 @@ class SandIndicator : public EmbarkTool
 {
 protected:
     bool dirty;
-    std::string indicator;
+    std::string24 indicator;
     void update_indicator()
     {
         CoreSuspendClaimer suspend;
@@ -147,8 +147,8 @@ protected:
         indicator = "";
         for (std::list<buffered_color_ostream::fragment_type>::const_iterator iter = fragments.begin(); iter != fragments.end(); iter++)
         {
-            std::string fragment = iter->second;
-            if (fragment.find("SAND_") != std::string::npos)
+            std::string24 fragment = iter->second;
+            if (fragment.find("SAND_") != std::string24::npos)
             {
                 indicator = "Sand";
                 break;
@@ -167,9 +167,9 @@ public:
         EmbarkTool::setEnabled(state);
         dirty = true;
     }
-    virtual std::string getId() { return "sand"; }
-    virtual std::string getName() { return "Sand indicator"; }
-    virtual std::string getDesc() { return "Displays an indicator when sand is present on the given embark site"; }
+    virtual std::string24 getId() { return "sand"; }
+    virtual std::string24 getName() { return "Sand indicator"; }
+    virtual std::string24 getDesc() { return "Displays an indicator when sand is present on the given embark site"; }
     virtual df::interface_key getToggleKey() { return df::interface_key::CUSTOM_S; }
     virtual void after_render(start_sitest* screen)
     {
@@ -231,9 +231,9 @@ public:
         prev_position[2] = 3;
         prev_position[3] = 3;
     }
-    virtual std::string getId() { return "sticky"; }
-    virtual std::string getName() { return "Stable position"; }
-    virtual std::string getDesc() { return "Maintains the selected local area while navigating the world map"; }
+    virtual std::string24 getId() { return "sticky"; }
+    virtual std::string24 getName() { return "Stable position"; }
+    virtual std::string24 getDesc() { return "Maintains the selected local area while navigating the world map"; }
     virtual df::interface_key getToggleKey() { return df::interface_key::CUSTOM_P; }
     virtual void before_render(start_sitest* screen) {
         if (moved_position)
@@ -243,7 +243,7 @@ public:
         }
     }
     virtual void before_feed(start_sitest* screen, ikey_set* input, bool &cancel) {
-        for (std::set<df::interface_key>::iterator iter = input->begin(); iter != input->end(); iter++)
+        for (std::set8<df::interface_key>::iterator iter = input->begin(); iter != input->end(); iter++)
         {
             df::interface_key key = *iter;
             bool is_motion = false;
@@ -474,9 +474,9 @@ public:
         local_overshoot_y1(0),
         local_overshoot_y2(0)
     { }
-    virtual std::string getId() { return "mouse"; }
-    virtual std::string getName() { return "Mouse control"; }
-    virtual std::string getDesc() { return "Implements mouse controls on the embark screen"; }
+    virtual std::string24 getId() { return "mouse"; }
+    virtual std::string24 getName() { return "Mouse control"; }
+    virtual std::string24 getDesc() { return "Implements mouse controls on the embark screen"; }
     virtual df::interface_key getToggleKey() { return df::interface_key::CUSTOM_M; }
     virtual void after_render(start_sitest* screen)
     {
@@ -574,7 +574,7 @@ public:
     embark_tools_settings () { };
     ~embark_tools_settings () { };
     void help () { };
-    std::string getFocusString () { return "embark-tools/options"; };
+    std::string24 getFocusString () { return "embark-tools/options"; };
     void render ()
     {
         parent->render();
@@ -588,7 +588,7 @@ public:
             max_y = min_y + height;
         Screen::fillRect(Screen::Pen(' ', COLOR_BLACK, COLOR_DARKGREY), min_x, min_y, max_x, max_y);
         Screen::fillRect(Screen::Pen(' ', COLOR_BLACK, COLOR_BLACK), min_x + 1, min_y + 1, max_x - 1, max_y - 1);
-        std::string title = "  Embark tools (DFHack)  ";
+        std::string24 title = "  Embark tools (DFHack)  ";
         Screen::paintString(Screen::Pen(' ', COLOR_BLACK, COLOR_GREY), min_x + ((max_x - min_x - title.size()) / 2), min_y, title);
         x = min_x + 2;
         y = max_y - 2;
@@ -608,14 +608,14 @@ public:
             y++;
         }
     };
-    void feed (std::set<df::interface_key> * input)
+    void feed (std::set8<df::interface_key> * input)
     {
         if (input->count(df::interface_key::SELECT) || input->count(df::interface_key::LEAVESCREEN))
         {
             Screen::dismiss(this);
             return;
         }
-        for (std::set<df::interface_key>::const_iterator iter = input->begin(); iter != input->end(); iter++)
+        for (std::set8<df::interface_key>::const_iterator iter = input->begin(); iter != input->end(); iter++)
         {
             df::interface_key key = *iter;
             FOR_ITER_TOOLS(iter)
@@ -635,19 +635,19 @@ void add_tool (EmbarkTool *t)
     tools[t->getId()] = t;
 }
 
-bool tool_exists (std::string tool_name)
+bool tool_exists (std::string24 tool_name)
 {
     return tools.find(tool_name) != tools.end();
 }
 
-bool tool_enabled (std::string tool_name)
+bool tool_enabled (std::string24 tool_name)
 {
     if (tool_exists(tool_name))
         return tools[tool_name]->getEnabled();
     return false;
 }
 
-bool tool_enable (std::string tool_name, bool enable_state)
+bool tool_enable (std::string24 tool_name, bool enable_state)
 {
     int n = 0;
     FOR_ITER_TOOLS(iter)
@@ -673,7 +673,7 @@ struct choose_start_site_hook : df::viewscreen_choose_start_sitest
             y = dim.y - 5;
         OutputString(COLOR_LIGHTRED, x, y, Screen::getKeyDisplay(df::interface_key::CUSTOM_S));
         OutputString(COLOR_WHITE, x, y, ": Enabled: ");
-        std::vector<std::string> parts;
+        std::vector12<std::string24> parts;
         FOR_ITER_TOOLS(it)
         {
             EmbarkTool *t = it->second;
@@ -682,7 +682,7 @@ struct choose_start_site_hook : df::viewscreen_choose_start_sitest
         }
         if (parts.size())
         {
-            std::string label = join_strings(", ", parts);
+            std::string24 label = join_strings(", ", parts);
             if (int16_t(label.size()) > dim.x - x - 1)
             {
                 label.resize(dim.x - x - 1 - 3);
@@ -705,7 +705,7 @@ struct choose_start_site_hook : df::viewscreen_choose_start_sitest
         return (page >= 0 && page <= 4);
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         bool cancel = false;
         FOR_ITER_TOOLS(iter)
@@ -747,15 +747,15 @@ struct choose_start_site_hook : df::viewscreen_choose_start_sitest
 IMPLEMENT_VMETHOD_INTERPOSE(choose_start_site_hook, feed);
 IMPLEMENT_VMETHOD_INTERPOSE(choose_start_site_hook, render);
 
-command_result embark_tools_cmd (color_ostream &out, std::vector <std::string> & parameters);
+command_result embark_tools_cmd (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     add_tool(new EmbarkAnywhere);
     add_tool(new MouseControl);
     add_tool(new SandIndicator);
     add_tool(new StablePosition);
-    std::string help = "";
+    std::string24 help = "";
     help += "embark-tools (enable/disable) tool [tool...]\n"
             "Tools:\n";
     FOR_ITER_TOOLS(iter)
@@ -825,7 +825,7 @@ DFhackCExport command_result plugin_onupdate (color_ostream &out)
     return CR_OK;
 }
 
-command_result embark_tools_cmd (color_ostream &out, std::vector <std::string> & parameters)
+command_result embark_tools_cmd (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
     if (parameters.size())

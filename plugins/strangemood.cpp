@@ -31,8 +31,8 @@
 #include "df/unit_soul.h"
 #include "df/world.h"
 
-using std::string;
-using std::vector;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -71,7 +71,7 @@ df::job_skill getMoodSkill (df::unit *unit)
         return job_skill::STONECRAFT;
     df::historical_entity *civ = df::historical_entity::find(unit->civ_id);
     df::unit_soul *soul = unit->status.current_soul;
-    vector<df::job_skill> skills;
+    std::vector12<df::job_skill> skills;
     df::skill_rating level = skill_rating::Dabbling;
     for (size_t i = 0; i < soul->skills.size(); i++)
     {
@@ -402,7 +402,7 @@ void generateName(df::language_name &output, int language, df::language_name_typ
     }
 }
 
-command_result df_strangemood (color_ostream &out, vector <string> & parameters)
+command_result df_strangemood (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (!Translation::IsValid())
     {
@@ -543,7 +543,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     }
 
     // See which units are eligible to enter moods
-    vector<df::unit *> moodable_units;
+    std::vector12<df::unit *> moodable_units;
     bool mood_available = false;
     for (size_t i = 0; i < world->units.active.size(); i++)
     {
@@ -611,7 +611,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     // Randomly select a unit to enter a mood
     if (!unit)
     {
-        vector<int32_t> tickets;
+        std::vector12<int32_t> tickets;
         for (size_t i = 0; i < moodable_units.size(); i++)
         {
             df::unit *cur = moodable_units[i];
@@ -704,7 +704,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     // Display announcement and start setting up the mood job
     int color = 0;
     bool bright = false;
-    string msg = Translation::TranslateName(&unit->name, false) + ", " + Units::getProfessionName(unit);
+    std::string24 msg = Translation::TranslateName(&unit->name, false) + ", " + Units::getProfessionName(unit);
 
     switch (type)
     {
@@ -1052,7 +1052,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
                 job->job_items.push_back(item = new df::job_item());
                 item->item_type = item_type::BAR;
                 item->mat_type = 0;
-                vector<int32_t> mats;
+                std::vector12<int32_t> mats;
                 if (soul)
                 {
                     for (size_t i = 0; i < soul->preferences.size(); i++)
@@ -1102,7 +1102,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
             }
             if (!found_pref)
             {
-                vector<int32_t> mats;
+                std::vector12<int32_t> mats;
                 mats.push_back(builtin_mats::GLASS_GREEN);
                 if (have_glass[1])
                     mats.push_back(builtin_mats::GLASS_CLEAR);
@@ -1362,7 +1362,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("strangemood", "Force a strange mood to happen.", df_strangemood, false,
         "Options:\n"

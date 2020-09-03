@@ -110,9 +110,9 @@
 #include "tweaks/tradereq-pet-gender.h"
 #include "tweaks/reaction-gloves.h"
 
-using std::set;
-using std::vector;
-using std::string;
+
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -138,24 +138,24 @@ using namespace DFHack::Gui;
 class tweak_onupdate_hookst {
 public:
     typedef void(*T_callback)(void);
-tweak_onupdate_hookst(std::string name_, T_callback cb)
+tweak_onupdate_hookst(std::string24 name_, T_callback cb)
         :enabled(false), name(name_), callback(cb) {}
     bool enabled;
-    std::string name;
+    std::string24 name;
     T_callback callback;
 };
-static command_result tweak(color_ostream &out, vector <string> & parameters);
-typedef std::multimap<std::string, VMethodInterposeLinkBase> HooksMMap;
-static std::multimap<std::string, VMethodInterposeLinkBase> tweak_hooks;
-typedef std::multimap<std::string, tweak_onupdate_hookst> OnUpdateHooksMMap;
+static command_result tweak(color_ostream &out, std::vector12<std::string24> & parameters);
+typedef std::multimap<std::string24, VMethodInterposeLinkBase> HooksMMap;
+static std::multimap<std::string24, VMethodInterposeLinkBase> tweak_hooks;
+typedef std::multimap<std::string24, tweak_onupdate_hookst> OnUpdateHooksMMap;
 static OnUpdateHooksMMap tweak_onupdate_hooks;
 
-#define TWEAK_HOOK(tweak, cls, func) tweak_hooks.insert(std::pair<std::string, VMethodInterposeLinkBase>\
+#define TWEAK_HOOK(tweak, cls, func) tweak_hooks.insert(std::pair<std::string24, VMethodInterposeLinkBase>\
     (tweak, INTERPOSE_HOOK(cls, func)))
 #define TWEAK_ONUPDATE_HOOK(tweak, func) tweak_onupdate_hooks.insert(\
-    std::pair<std::string, tweak_onupdate_hookst>(tweak, tweak_onupdate_hookst(#func, func)))
+    std::pair<std::string24, tweak_onupdate_hookst>(tweak, tweak_onupdate_hookst(#func, func)))
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     is_enabled = true; // Allow plugin_onupdate to work (subcommands are enabled individually)
     commands.push_back(PluginCommand(
@@ -757,7 +757,7 @@ struct military_training_id_hook : df::activity_event_individual_skill_drillst {
 IMPLEMENT_VMETHOD_INTERPOSE(military_training_id_hook, process);
 */
 
-static void enable_hook(color_ostream &out, VMethodInterposeLinkBase &hook, vector <string> &parameters)
+static void enable_hook(color_ostream &out, VMethodInterposeLinkBase &hook, std::vector12<std::string24> &parameters)
 {
     if (vector_get(parameters, 1) == "disable")
     {
@@ -777,10 +777,10 @@ static void enable_hook(color_ostream &out, VMethodInterposeLinkBase &hook, vect
     }
 }
 
-static command_result enable_tweak(string tweak, color_ostream &out, vector <string> &parameters)
+static command_result enable_tweak(std::string24 tweak, color_ostream &out, std::vector12<std::string24> &parameters)
 {
     bool recognized = false;
-    string cmd = parameters[0];
+    std::string24 cmd = parameters[0];
     for (HooksMMap::iterator it = tweak_hooks.begin(); it != tweak_hooks.end(); ++it)
     {
         if (it->first == cmd)
@@ -810,14 +810,14 @@ static command_result enable_tweak(string tweak, color_ostream &out, vector <str
     return CR_OK;
 }
 
-static command_result tweak(color_ostream &out, vector <string> &parameters)
+static command_result tweak(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     CoreSuspender suspend;
 
     if (parameters.empty())
         return CR_WRONG_USAGE;
 
-    string cmd = parameters[0];
+    std::string24 cmd = parameters[0];
 
     if (cmd == "clear-missing")
     {

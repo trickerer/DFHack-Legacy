@@ -154,8 +154,8 @@ void do_scan(color_ostream& out)
     // scan for useable clothing
 
     //for (auto i : world->items.other[df::items_other_id::ANY_GENERIC37]) // GENERIC37 is "clothing"
-    std::vector<df::item*> const& ovec = world->items.other[df::items_other_id::ANY_GENERIC37];
-    for (std::vector<df::item*>::const_iterator ci = ovec.begin(); ci != ovec.end(); ++ci)
+    std::vector12<df::item*> const& ovec = world->items.other[df::items_other_id::ANY_GENERIC37];
+    for (std::vector12<df::item*>::const_iterator ci = ovec.begin(); ci != ovec.end(); ++ci)
     {
         df::item* i = *ci;
         if (i->flags.whole & bad_flags.whole)
@@ -173,8 +173,8 @@ void do_scan(color_ostream& out)
     // scan for clothing raw materials
 
     //for (auto i : world->items.other[df::items_other_id::CLOTH])
-    std::vector<df::item*> const& cvec = world->items.other[df::items_other_id::CLOTH];
-    for (std::vector<df::item*>::const_iterator ci = cvec.begin(); ci != cvec.end(); ++ci)
+    std::vector12<df::item*> const& cvec = world->items.other[df::items_other_id::CLOTH];
+    for (std::vector12<df::item*>::const_iterator ci = cvec.begin(); ci != cvec.end(); ++ci)
     {
         df::item* i = *ci;
         if (i->flags.whole & bad_flags.whole)
@@ -196,8 +196,8 @@ void do_scan(color_ostream& out)
     }
 
     //for (auto i : world->items.other[df::items_other_id::SKIN_TANNED])
-    std::vector<df::item*> const& stvec = world->items.other[df::items_other_id::SKIN_TANNED];
-    for (std::vector<df::item*>::const_iterator ci = stvec.begin(); ci != stvec.end(); ++ci)
+    std::vector12<df::item*> const& stvec = world->items.other[df::items_other_id::SKIN_TANNED];
+    for (std::vector12<df::item*>::const_iterator ci = stvec.begin(); ci != stvec.end(); ++ci)
     {
         if ((*ci)->flags.whole & bad_flags.whole)
             continue;
@@ -209,8 +209,8 @@ void do_scan(color_ostream& out)
     // scan for units who need replacement clothing
 
     //for (auto u : world->units.active)
-    std::vector<df::unit*> const& aunits = world->units.active;
-    for (std::vector<df::unit*>::const_iterator ci = aunits.begin(); ci != aunits.end(); ++ci)
+    std::vector12<df::unit*> const& aunits = world->units.active;
+    for (std::vector12<df::unit*>::const_iterator ci = aunits.begin(); ci != aunits.end(); ++ci)
     {
         df::unit* u = *ci;
         if (!Units::isOwnCiv(u) ||
@@ -219,14 +219,14 @@ void do_scan(color_ostream& out)
             Units::isBaby(u))
             continue; // skip units we don't control
 
-        set <df::item_type> wearing;
+        std::set8<df::item_type> wearing;
         wearing.empty();
 
-        deque<df::item*> worn;
+        std::deque20<df::item*> worn;
         worn.empty();
 
         //for (auto inv : u->inventory)
-        for (std::vector<df::unit_inventory_item*>::const_iterator cit = u->inventory.begin(); cit != u->inventory.end(); ++cit)
+        for (std::vector12<df::unit_inventory_item*>::const_iterator cit = u->inventory.begin(); cit != u->inventory.end(); ++cit)
         {
             df::unit_inventory_item* inv = *cit;
             if (inv->mode != df::unit_inventory_item::Worn)
@@ -240,7 +240,7 @@ void do_scan(color_ostream& out)
         int size = world->raws.creatures.all[u->race]->adultsize;
         sizes[size] = u->race;
 
-        //for (auto ty : set<df::item_type>{ df::item_type::ARMOR, df::item_type::PANTS, df::item_type::SHOES })
+        //for (auto ty : std::set8<df::item_type>{ df::item_type::ARMOR, df::item_type::PANTS, df::item_type::SHOES })
         static const df::item_type apstypes[3] = { df::item_type::ARMOR, df::item_type::PANTS, df::item_type::SHOES };
         for (uint8 i = 0; i < 3; ++i)
         {
@@ -250,7 +250,7 @@ void do_scan(color_ostream& out)
         }
 
         //for (auto w : worn)
-        for (std::deque<df::item*>::const_iterator cit = worn.begin(); cit != worn.end(); ++cit)
+        for (std::deque20<df::item*>::const_iterator cit = worn.begin(); cit != worn.end(); ++cit)
         {
             df::item* w = *cit;
             df::item_type ty = w->getType();
@@ -260,7 +260,7 @@ void do_scan(color_ostream& out)
             df::job_type o = oo->second;
 
             int size = world->raws.creatures.all[w->getMakerRace()]->adultsize;
-            std::string description;
+            std::string24 description;
             w->getItemDescription(&description, 0);
 
             if (available[make_pair(ty, size)] > 0)
@@ -305,7 +305,7 @@ void do_scan(color_ostream& out)
         int count = a.second;
 
         int sub = 0;
-        vector<int16_t> v;
+        std::vector12<int16_t> v;
 
         switch (ty) {
         case df::item_type::ARMOR:  v = entity->resources.armor_type; break;
@@ -317,7 +317,7 @@ void do_scan(color_ostream& out)
         }
 
         //for (auto vv : v)
-        for (vector<int16_t>::const_iterator cit = v.begin(); cit != v.end(); ++cit)
+        for (std::vector12<int16_t>::const_iterator cit = v.begin(); cit != v.end(); ++cit)
         {
             uint16 vv = *cit;
             bool isClothing = false;
@@ -342,7 +342,7 @@ void do_scan(color_ostream& out)
     // scan orders
 
     //for (auto o : world->manager_orders)
-    for (std::vector<df::manager_order*>::const_iterator ci = world->manager_orders.begin(); ci != world->manager_orders.end(); ++ci)
+    for (std::vector12<df::manager_order*>::const_iterator ci = world->manager_orders.begin(); ci != world->manager_orders.end(); ++ci)
     {
         df::manager_order const* o = *ci;
         map<df::job_type, df::item_type>::const_iterator f = jobTypeMap.find(o->job_type);
@@ -377,9 +377,9 @@ void do_scan(color_ostream& out)
 
         if (count > 0)
         {
-            vector<int16_t> v;
+            std::vector12<int16_t> v;
             BitArray<df::armor_general_flags>* fl;
-            string name_s, name_p;
+            std::string24 name_s, name_p;
 
             switch (ty) {
             case df::job_type::MakeArmor:
@@ -418,7 +418,7 @@ void do_scan(color_ostream& out)
 
             bool can_make = false;
             //for (auto vv : v)
-            for (vector<int16_t>::const_iterator cit = v.begin(); cit != v.end(); ++cit)
+            for (std::vector12<int16_t>::const_iterator cit = v.begin(); cit != v.end(); ++cit)
             {
                 if ((*cit) == sub)
                 {
@@ -526,7 +526,7 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
     return CR_OK;
 }
 
-static command_result tailor_cmd(color_ostream &out, vector <string> & parameters) {
+static command_result tailor_cmd(color_ostream &out, std::vector12<std::string24> & parameters) {
     bool desired = enabled;
     if (parameters.size() == 1)
     {
@@ -574,7 +574,7 @@ DFhackCExport command_result plugin_enable(color_ostream& out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (AUTOENABLE) {
         enabled = true;

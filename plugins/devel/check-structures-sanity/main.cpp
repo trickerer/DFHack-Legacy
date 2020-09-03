@@ -5,9 +5,9 @@
 
 DFHACK_PLUGIN("check-structures-sanity");
 
-static command_result command(color_ostream &, std::vector<std::string> &);
+static command_result command(color_ostream &, std::vector12<std::string24> &);
 
-DFhackCExport command_result plugin_init(color_ostream &, std::vector<PluginCommand> & commands)
+DFhackCExport command_result plugin_init(color_ostream &, std::vector12<PluginCommand> & commands)
 {
     commands.push_back(PluginCommand(
         "check-structures-sanity",
@@ -44,7 +44,7 @@ bool check_malloc_perturb()
     return ret;
 }
 
-static command_result command(color_ostream & out, std::vector<std::string> & parameters)
+static command_result command(color_ostream & out, std::vector12<std::string24> & parameters)
 {
     if (!check_malloc_perturb())
     {

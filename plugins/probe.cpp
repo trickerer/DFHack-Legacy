@@ -6,8 +6,8 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
+
+
 using namespace std;
 
 #include "Console.h"
@@ -33,8 +33,8 @@ using namespace std;
 #include "df/world_data.h"
 #include "df/world_raws.h"
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -42,11 +42,11 @@ DFHACK_PLUGIN("probe");
 REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cursor);
 
-command_result df_probe (color_ostream &out, vector <string> & parameters);
-command_result df_cprobe (color_ostream &out, vector <string> & parameters);
-command_result df_bprobe (color_ostream &out, vector <string> & parameters);
+command_result df_probe (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_cprobe (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result df_bprobe (color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("probe",
                                      "A tile probe",
@@ -71,7 +71,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result df_cprobe (color_ostream &out, vector <string> & parameters)
+command_result df_cprobe (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
     int32_t cursorX, cursorY, cursorZ;
@@ -139,7 +139,7 @@ void describeTile(color_ostream &out, df::tiletype tiletype)
     out.print("\n");
 }
 
-command_result df_probe (color_ostream &out, vector <string> & parameters)
+command_result df_probe (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     //bool showBlock, showDesig, showOccup, showTile, showMisc;
 
@@ -156,7 +156,7 @@ command_result df_probe (color_ostream &out, vector <string> & parameters)
 
     DFHack::Materials *Materials = Core::getInstance().getMaterials();
 
-    std::vector<t_matglossInorganic> inorganic;
+    std::vector12<t_matglossInorganic> inorganic;
     bool hasmats = Materials->CopyInorganicMaterials(inorganic);
 
     if (!Maps::IsValid())
@@ -386,7 +386,7 @@ command_result df_probe (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result df_bprobe (color_ostream &out, vector <string> & parameters)
+command_result df_bprobe (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
@@ -405,7 +405,7 @@ command_result df_bprobe (color_ostream &out, vector <string> & parameters)
             int32_t(building.y1) > cursor->y || cursor->y > int32_t(building.y2) ||
             int32_t(building.z) != cursor->z)
             continue;
-        string name;
+        std::string24 name;
         building.origin->getName(&name);
         out.print("Building %i - \"%s\" - type %s (%i)",
                   building.origin->id,

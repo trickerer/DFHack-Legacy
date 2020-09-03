@@ -1,15 +1,15 @@
 #pragma once
 
 //#include <array>
-#include <string>
-#include <vector>
+
+
 #include "df/world_region_type.h"
 
 using namespace std;
 //using std::array;
 using std::ostringstream;
-using std::string;
-using std::vector;
+
+
 
 #define fileresult_file_name "./data/init/embark_assistant_fileresult.txt"
 
@@ -109,13 +109,13 @@ namespace embark_assist {
             tree_levels trees;
             uint8_t savagery_level;  // 0 - 2
             uint8_t evilness_level;  // 0 - 2
-            std::vector<bool> metals;
-            std::vector<bool> economics;
-            std::vector<bool> minerals;
+            std::vector12<bool> metals;
+            std::vector12<bool> economics;
+            std::vector12<bool> minerals;
         };
 
         //typedef std::array<std::array<mid_level_tile, 16>, 16> mid_level_tiles;
-        typedef std::vector<std::vector<mid_level_tile> > mid_level_tiles;
+        typedef std::vector12<std::vector12<mid_level_tile> > mid_level_tiles;
 
         struct region_tile_datum {
             region_tile_datum() {
@@ -209,10 +209,10 @@ namespace embark_assist {
             bool thralling_full;
             uint16_t savagery_count[3];
             uint16_t evilness_count[3];
-            std::vector<bool> metals;
-            std::vector<bool> economics;
-            std::vector<bool> minerals;
-            std::vector<int16_t> neighbors;  //  entity_raw indices
+            std::vector12<bool> metals;
+            std::vector12<bool> economics;
+            std::vector12<bool> minerals;
+            std::vector12<int16_t> neighbors;  //  entity_raw indices
             uint8_t necro_neighbors;
             mid_level_tile north_row[16];
             mid_level_tile south_row[16];
@@ -247,12 +247,12 @@ namespace embark_assist {
             bool sand_absent;
             bool flux_absent;
             bool coal_absent;
-            std::vector<bool> possible_metals;
-            std::vector<bool> possible_economics;
-            std::vector<bool> possible_minerals;
+            std::vector12<bool> possible_metals;
+            std::vector12<bool> possible_economics;
+            std::vector12<bool> possible_minerals;
         };
 
-        typedef std::vector<geo_datum> geo_data;
+        typedef std::vector12<geo_datum> geo_data;
 
         struct sites {
             sites(uint8_t _x, uint8_t _y, char _t) : x(_x), y(_y), type(_y) {}
@@ -296,17 +296,17 @@ namespace embark_assist {
             bool temporary_syndrome_rain;
             bool reanimating;
             bool thralling;
-            std::vector<uint16_t> metals;
-            std::vector<uint16_t> economics;
-            std::vector<uint16_t> minerals;
+            std::vector12<uint16_t> metals;
+            std::vector12<uint16_t> economics;
+            std::vector12<uint16_t> minerals;
             //  Could add savagery, evilness, and biomes, but DF provides those easily.
-            std::vector<int16_t> neighbors;  //  entity_raw indices
+            std::vector12<int16_t> neighbors;  //  entity_raw indices
             uint8_t necro_neighbors;
         };
 
-        typedef std::vector<sites> site_lists;
+        typedef std::vector12<sites> site_lists;
 
-        typedef std::vector<std::vector<region_tile_datum> > world_tile_data;
+        typedef std::vector12<std::vector12<region_tile_datum> > world_tile_data;
 
         typedef bool mlt_matches[16][16];
         //  An embark region match is indicated by marking the top left corner
@@ -326,7 +326,7 @@ namespace embark_assist {
             mlt_matches mlt_match;
         };
 
-        typedef std::vector<std::vector<matches> > match_results;
+        typedef std::vector12<std::vector12<matches> > match_results;
 
         //  matcher types
         //
@@ -671,7 +671,7 @@ namespace embark_assist {
             int8_t max_necro_neighbors; // N/A(-1), 0 - 9, where 9 = 9+
             int8_t min_civ_neighbors; // N/A(-1), 0 - 9, where 9 = 9+
             int8_t max_civ_neighbors; // N/A(-1), 0 - 9, where 9 = 9+
-            std::vector<neighbor> neighbors;
+            std::vector12<neighbor> neighbors;
         };
 
         struct match_iterators {

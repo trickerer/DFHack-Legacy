@@ -8,22 +8,22 @@
 #include <modules/Maps.h>
 #include <modules/Gui.h>
 #include <modules/MapCache.h>
-#include <vector>
+
 #include <cstdio>
 #include <stack>
-#include <string>
+
 #include <cmath>
-using std::vector;
-using std::string;
+
+
 using std::stack;
 using namespace DFHack;
 
-command_result readFlag (color_ostream &out, vector <string> & parameters);
-command_result writeFlag (color_ostream &out, vector <string> & parameters);
+command_result readFlag (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result writeFlag (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("buildprobe");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("bshow","Output building occupancy value",readFlag));
     commands.push_back(PluginCommand("bset","Set building occupancy value",writeFlag));
@@ -35,7 +35,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result readFlag (color_ostream &out, vector <string> & parameters)
+command_result readFlag (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
@@ -62,7 +62,7 @@ command_result readFlag (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result writeFlag (color_ostream &out, vector <string> & parameters)
+command_result writeFlag (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() == 0)
     {

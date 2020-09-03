@@ -4,10 +4,10 @@
 #include <iomanip>
 #include <sstream>
 #include <climits>
-#include <vector>
-#include <string>
+
+
 #include <algorithm>
-#include <set>
+
 using namespace std;
 
 #include "Core.h"
@@ -53,9 +53,9 @@ REQUIRE_GLOBAL(world);
 const int const_GloveRightHandedness = 1;
 const int const_GloveLeftHandedness = 2;
 
-command_result df_forceequip(color_ostream &out, vector <string> & parameters);
+command_result df_forceequip(color_ostream &out, std::vector12<std::string24> & parameters);
 
-const string forceequip_help =
+const std::string24 forceequip_help =
     "ForceEquip moves local items into a unit's inventory.  It is typically\n"
     "used to equip specific clothing/armor items onto a dwarf, but can also\n"
     "be used to put armor onto a war animal or to add unusual items (such\n"
@@ -213,7 +213,7 @@ const string forceequip_help =
     "\n"
     ;
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "forceequip", "Move items from the ground into a unit's inventory",
@@ -359,7 +359,7 @@ static bool moveToInventory(MapExtras::MapCache &mc, df::item *item, df::unit *u
             confirmedBodyPart = currPart;        // Assume that the bodypart is valid; we'll invalidate it if we detect too many collisions while looping
             int collisions = 0;
             //for (df::unit_inventory_item * currInvItem : unit->inventory)
-            for (std::vector<df::unit_inventory_item*>::const_iterator ci =
+            for (std::vector12<df::unit_inventory_item*>::const_iterator ci =
                 unit->inventory.begin(); ci != unit->inventory.end(); ++ci)
             {
                 df::unit_inventory_item* currInvItem = *ci;
@@ -412,7 +412,7 @@ static bool moveToInventory(MapExtras::MapCache &mc, df::item *item, df::unit *u
 }
 
 
-command_result df_forceequip(color_ostream &out, vector <string> & parameters)
+command_result df_forceequip(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // The "here" option is hardcoded to true, because the plugin currently doesn't support
     // equip-at-a-distance (e.g. grab items within 10 squares of the targeted unit)
@@ -433,12 +433,12 @@ command_result df_forceequip(color_ostream &out, vector <string> & parameters)
     bool verbose = false;
     // By default, the plugin will mate each item to an appropriate bodypart.  This
     // behaviour can be skipped if the user specifies a particular BP in the cmdline input.
-    std::string targetBodyPartCode;
+    std::string24 targetBodyPartCode;
 
     // Parse the input
     for (size_t i = 0; i < parameters.size(); i++)
     {
-        string & p = parameters[i];
+        std::string24 & p = parameters[i];
 
         if (p == "help" || p == "?" || p == "h" || p == "/?" || p == "info" || p == "man")
         {

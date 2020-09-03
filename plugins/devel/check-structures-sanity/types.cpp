@@ -1,11 +1,11 @@
 #include "check-structures-sanity.h"
 
-QueueItem::QueueItem(const std::string & path, const void *ptr) :
+QueueItem::QueueItem(const std::string24 & path, const void *ptr) :
     path(path),
     ptr(ptr)
 {
 }
-QueueItem::QueueItem(const QueueItem & parent, const std::string & member, const void *ptr) :
+QueueItem::QueueItem(const QueueItem & parent, const std::string24 & member, const void *ptr) :
     QueueItem(parent.path + "." + member, ptr)
 {
 }
@@ -176,7 +176,7 @@ type_identity *Checker::wrap_in_pointer(type_identity *base)
     return (wrappers[base] = dts::make_unique<df::pointer_identity>(base)).get();
 }
 
-std::map<size_t, std::vector<std::string>> known_types_by_size;
+std::map<size_t, std::vector12<std::string24>> known_types_by_size;
 void build_size_table()
 {
     for (auto & ident : compound_identity::getTopScope())

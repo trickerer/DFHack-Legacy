@@ -25,8 +25,8 @@
 #include "df/tool_uses.h"
 #include "df/general_ref.h"
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -42,11 +42,11 @@ REQUIRE_GLOBAL(job_next_id);
 
 static bool job_material_hotkey(df::viewscreen *top);
 
-static command_result job_material(color_ostream &out, vector <string> & parameters);
-static command_result job_duplicate(color_ostream &out, vector <string> & parameters);
-static command_result job_cmd(color_ostream &out, vector <string> & parameters);
+static command_result job_material(color_ostream &out, std::vector12<std::string24> & parameters);
+static command_result job_duplicate(color_ostream &out, std::vector12<std::string24> & parameters);
+static command_result job_cmd(color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (!world || !ui)
         return CR_FAILURE;
@@ -237,7 +237,7 @@ static command_result job_material_in_build(color_ostream &out, MaterialInfo &ne
     return CR_FAILURE;
 }
 
-static command_result job_material(color_ostream &out, vector <string> & parameters)
+static command_result job_material(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
 
@@ -262,7 +262,7 @@ static command_result job_material(color_ostream &out, vector <string> & paramet
 
 /* job-duplicate implementation */
 
-static command_result job_duplicate(color_ostream &out, vector <string> & parameters)
+static command_result job_duplicate(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (!parameters.empty())
         return CR_WRONG_USAGE;
@@ -298,7 +298,7 @@ static command_result job_duplicate(color_ostream &out, vector <string> & parame
 
 /* Main job command implementation */
 
-static df::job_item *getJobItem(color_ostream &out, df::job *job, std::string idx)
+static df::job_item *getJobItem(color_ostream &out, df::job *job, std::string24 idx)
 {
     if (!job)
         return NULL;
@@ -312,11 +312,11 @@ static df::job_item *getJobItem(color_ostream &out, df::job *job, std::string id
     return job->job_items[v-1];
 }
 
-static command_result job_cmd(color_ostream &out, vector <string> & parameters)
+static command_result job_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
-    std::string cmd = (parameters.empty() ? "query" : parameters[0]);
+    std::string24 cmd = (parameters.empty() ? "query" : parameters[0]);
     if (cmd == "query" || cmd == "list")
     {
         df::job *job = Gui::getSelectedJob(out);

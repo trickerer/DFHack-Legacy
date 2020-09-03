@@ -19,8 +19,8 @@
 #include "modules/Items.h"
 
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -28,7 +28,7 @@ using namespace df::enums;
 using df::global::world;
 using df::global::ui;
 
-static command_result nestboxes(color_ostream &out, vector <string> & parameters);
+static command_result nestboxes(color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("nestboxes");
 
@@ -39,8 +39,8 @@ static void eggscan(color_ostream &out)
     CoreSuspender suspend;
 
     //for (df::building *build : world->buildings.other[df::buildings_other_id::NEST_BOX])
-    std::vector<df::building*> const& nboxes = world->buildings.other[df::buildings_other_id::NEST_BOX];
-    for (std::vector<df::building*>::const_iterator cit = nboxes.begin(); cit != nboxes.end(); ++cit)
+    std::vector12<df::building*> const& nboxes = world->buildings.other[df::buildings_other_id::NEST_BOX];
+    for (std::vector12<df::building*>::const_iterator cit = nboxes.begin(); cit != nboxes.end(); ++cit)
     {
         df::building* build = *cit;
         df::building_type type = build->getType();
@@ -68,7 +68,7 @@ static void eggscan(color_ostream &out)
 }
 
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (world && ui) {
         commands.push_back(
@@ -108,7 +108,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-static command_result nestboxes(color_ostream &out, vector <string> & parameters)
+static command_result nestboxes(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 

@@ -9,7 +9,7 @@
 #include "Export.h"
 #include "PluginManager.h"
 
-#include <vector>
+
 #include <algorithm>
 #include <queue>
 #include <map>
@@ -76,7 +76,7 @@
 #include "joblabormapper.h"
 
 using namespace std;
-using std::string;
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -90,7 +90,7 @@ DFHACK_PLUGIN_IS_ENABLED(enable_labormanager);
 static bool print_debug = 0;
 static bool pause_on_error = 1;
 
-static std::vector<int> state_count(5);
+static std::vector12<int> state_count(5);
 
 static PersistentDataItem config;
 
@@ -108,10 +108,10 @@ const int MAX_DWARFS_UNMANAGED = -1;
 
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
-command_result labormanager(color_ostream &out, std::vector <std::string> & parameters);
+command_result labormanager(color_ostream &out, std::vector12<std::string24> & parameters);
 
 // A plugin must be able to return its name and version.
-// The name string provided must correspond to the filename - labormanager.plug.so or labormanager.plug.dll in this case
+// The name std::string24 provided must correspond to the filename - labormanager.plug.so or labormanager.plug.dll in this case
 DFHACK_PLUGIN("labormanager");
 
 static void generate_labor_to_skill_map();
@@ -429,7 +429,7 @@ struct labor_default
     tools_enum tool;
 };
 
-static std::vector<struct labor_info> labor_infos;
+static std::vector12<struct labor_info> labor_infos;
 
 static const struct labor_default default_labor_infos[] = {
     /* MINE */                  {100, 0, TOOL_PICK},
@@ -620,12 +620,12 @@ static void init_state()
     // Load labors from save
     labor_infos.resize(ARRAY_COUNT(default_labor_infos));
 
-    std::vector<PersistentDataItem> items;
+    std::vector12<PersistentDataItem> items;
     World::GetPersistentData(&items, "labormanager/2.0/labors/", true);
 
-    for (std::vector<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
+    for (std::vector12<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
     {
-        string key = p->key();
+        std::string24 key = p->key();
         df::unit_labor labor = (df::unit_labor) atoi(key.substr(strlen("labormanager/2.0/labors/")).c_str());
         if (labor >= 0 && size_t(labor) < labor_infos.size())
         {
@@ -837,7 +837,7 @@ static void enable_plugin(color_ostream &out)
     init_state();
 }
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     // initialize labor infos table from default table
     if (ARRAY_COUNT(default_labor_infos) != ENUM_LAST_ITEM(unit_labor) + 1)
@@ -847,7 +847,7 @@ DFhackCExport command_result plugin_init(color_ostream &out, std::vector <Plugin
     commands.push_back(PluginCommand(
         "labormanager", "Automatically manage dwarf labors.",
         labormanager, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         "  labormanager enable\n"
         "  labormanager disable\n"
         "    Enables or disables the plugin.\n"
@@ -907,7 +907,7 @@ public:
 
     ~AutoLaborManager()
     {
-        for (std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
+        for (std::vector12<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
         {
             delete (*d);
         }
@@ -954,7 +954,7 @@ private:
     std::map<df::unit_labor, int> labor_needed;
     std::map<df::unit_labor, int> labor_in_use;
     std::map<df::unit_labor, bool> labor_outside;
-    std::vector<dwarf_info_t*> dwarf_info;
+    std::vector12<dwarf_info_t*> dwarf_info;
     std::list<dwarf_info_t*> available_dwarfs;
     std::list<dwarf_info_t*> busy_dwarfs;
 
@@ -993,7 +993,7 @@ private:
         int bld = -1;
 
         //for (auto ref : j->general_refs)
-        for (std::vector<df::general_ref*>::const_iterator ci = j->general_refs.begin(); ci != j->general_refs.end(); ++ci)
+        for (std::vector12<df::general_ref*>::const_iterator ci = j->general_refs.begin(); ci != j->general_refs.end(); ++ci)
         {
             df::general_ref* ref = *ci;
             if (ref->getType() == df::general_ref_type::UNIT_WORKER)
@@ -1054,7 +1054,7 @@ private:
         trader_requested = false;
         labors_changed = false;
 
-        for (std::vector<df::building*>::const_iterator b = world->buildings.all.begin(); b != world->buildings.all.end(); b++)
+        for (std::vector12<df::building*>::const_iterator b = world->buildings.all.begin(); b != world->buildings.all.end(); b++)
         {
             df::building *build = *b;
             df::building_type type = build->getType();
@@ -1149,8 +1149,8 @@ private:
         F(in_building); F(construction);
 #undef F
 
-        std::vector<df::item*> const& v = world->items.all;
-        for (std::vector<df::item*>::const_iterator i = v.begin(); i != v.end(); i++)
+        std::vector12<df::item*> const& v = world->items.all;
+        for (std::vector12<df::item*>::const_iterator i = v.begin(); i != v.end(); i++)
         {
             df::item* item = *i;
 
@@ -1191,7 +1191,7 @@ private:
             process_job(j);
         }
 
-        for (std::vector<df::job_handler::T_postings*>::const_iterator jp =
+        for (std::vector12<df::job_handler::T_postings*>::const_iterator jp =
             world->jobs.postings.begin(); jp != world->jobs.postings.end(); jp++)
         {
             if ((*jp)->flags.bits.dead)
@@ -1207,7 +1207,7 @@ private:
         state_count.clear();
         state_count.resize(NUM_STATE);
 
-        for (std::vector<df::unit*>::const_iterator u = world->units.active.begin(); u != world->units.active.end(); ++u)
+        for (std::vector12<df::unit*>::const_iterator u = world->units.active.begin(); u != world->units.active.end(); ++u)
         {
             df::unit* cre = *u;
 
@@ -1283,7 +1283,7 @@ private:
 
                 // check to see if dwarf has minor children
 
-                for (std::vector<df::unit*>::const_iterator u2 = world->units.active.begin(); u2 != world->units.active.end(); ++u2)
+                for (std::vector12<df::unit*>::const_iterator u2 = world->units.active.begin(); u2 != world->units.active.end(); ++u2)
                 {
                     if ((*u2)->relationship_ids[df::unit_relationship_type::Mother] == dwarf->dwarf->id &&
                         Units::isActive(*u2) &&
@@ -1327,7 +1327,7 @@ private:
                 bool is_migrant = false;
                 dwarf_state state = OTHER;
 
-                for (std::vector<df::unit_misc_trait*>::const_iterator p =
+                for (std::vector12<df::unit_misc_trait*>::const_iterator p =
                     dwarf->dwarf->status.misc_traits.begin(); p < dwarf->dwarf->status.misc_traits.end(); p++)
                 {
                     if ((*p)->id == misc_trait_type::Migrant)
@@ -1501,7 +1501,7 @@ private:
     void release_dwarf_list()
     {
         while (!dwarf_info.empty()) {
-            std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin();
+            std::vector12<dwarf_info_t*>::const_iterator d = dwarf_info.begin();
             delete *d;
             dwarf_info.erase(d);
         }
@@ -1568,7 +1568,7 @@ private:
         if (labor == df::unit_labor::BUTCHER || labor == df::unit_labor::HAUL_ANIMALS || labor == df::unit_labor::CUTWOOD)
         {
             int nature = 0;
-            for (std::vector<df::unit_personality::T_values*>::const_iterator i =
+            for (std::vector12<df::unit_personality::T_values*>::const_iterator i =
                 d->dwarf->status.current_soul->personality.values.begin();
                 i != d->dwarf->status.current_soul->personality.values.end();
                 i++)
@@ -1701,7 +1701,7 @@ public:
 
         // add entries for vehicle hauling
 
-        for (std::vector<df::vehicle*>::const_iterator v = world->vehicles.all.begin(); v != world->vehicles.all.end(); v++)
+        for (std::vector12<df::vehicle*>::const_iterator v = world->vehicles.all.begin(); v != world->vehicles.all.end(); v++)
             if ((*v)->route_id != -1)
                 labor_needed[df::unit_labor::HANDLE_VEHICLES]++;
 
@@ -1714,7 +1714,7 @@ public:
             (isOptionEnabled(CF_ALLOW_HUNTING) && has_butchers) ? 1 : 0;
 
         /* add animal trainers */
-        for (std::vector<df::training_assignment*>::const_iterator a =
+        for (std::vector12<df::training_assignment*>::const_iterator a =
             df::global::ui->equipment.training_assignments.begin();
             a != df::global::ui->equipment.training_assignments.end();
             a++)
@@ -2091,7 +2091,7 @@ public:
         }
 
         /* check for dwarfs assigned no labors and assign them the bucket list if there are */
-        for (std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
+        for (std::vector12<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
         {
             if ((*d)->state == CHILD)
                 continue;
@@ -2128,7 +2128,7 @@ public:
 
         /* set reequip on any dwarfs who are carrying tools needed by others */
 
-        for (std::vector<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
+        for (std::vector12<dwarf_info_t*>::const_iterator d = dwarf_info.begin(); d != dwarf_info.end(); d++)
         {
             if ((*d)->dwarf->job.current_job && (*d)->dwarf->job.current_job->job_type == df::job_type::PickupEquipment)
                 continue;
@@ -2231,7 +2231,7 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
 
 void print_labor(df::unit_labor labor, color_ostream &out)
 {
-    string labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
+    std::string24 labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
     out << labor_name << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
@@ -2255,7 +2255,7 @@ void print_labor(df::unit_labor labor, color_ostream &out)
         << endl;
 }
 
-df::unit_labor lookup_labor_by_name(std::string name)
+df::unit_labor lookup_labor_by_name(std::string24 name)
 {
     // We should accept incorrect casing, there is no ambiguity.
     std::transform(name.begin(), name.end(), name.begin(), ::toupper);
@@ -2293,7 +2293,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-command_result labormanager(color_ostream &out, std::vector <std::string> & parameters)
+command_result labormanager(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 

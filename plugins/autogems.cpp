@@ -54,7 +54,7 @@ const char *usage = (
     "While this option is enabled, jobs will be created in Jeweler's Workshops\n"
     "to cut any accessible rough gems.\n"
 );
-std::set<mat_index> blacklist;
+std::set8<mat_index> blacklist;
 
 void add_task(mat_index gem_type, df::building_workshopst *workshop) {
     // Create a single task in the specified workshop.
@@ -133,13 +133,13 @@ bool valid_gem(df::item* item) {
 void create_jobs() {
     // Creates jobs in Jeweler's Workshops as necessary.
     // Todo: Consider path availability?
-    std::set<item_id> stockpiled;
-    std::set<df::building_workshopst*> unlinked;
+    std::set8<item_id> stockpiled;
+    std::set8<df::building_workshopst*> unlinked;
     gem_map available;
 
-    std::vector<df::building*> const& jew_vec = world->buildings.other[df::buildings_other_id::WORKSHOP_JEWELER];
+    std::vector12<df::building*> const& jew_vec = world->buildings.other[df::buildings_other_id::WORKSHOP_JEWELER];
     //for (df::building *building : world->buildings.other[df::buildings_other_id::WORKSHOP_JEWELER])
-    for (std::vector<df::building*>::const_iterator ci = jew_vec.begin(); ci != jew_vec.end(); ++ci)
+    for (std::vector12<df::building*>::const_iterator ci = jew_vec.begin(); ci != jew_vec.end(); ++ci)
     {
         df::building* building = *ci;
         df::building_workshopst* workshop = virtual_cast<df::building_workshopst>(building);
@@ -147,7 +147,7 @@ void create_jobs() {
             Core::printerr("autogems: invalid building %i (not a workshop)\n", building->id);
             continue;
         }
-        std::vector<df::building*> const& links = workshop->profile.links.take_from_pile;
+        std::vector12<df::building*> const& links = workshop->profile.links.take_from_pile;
 
         if (workshop->construction_stage < 3) {
             // Construction in progress.
@@ -160,7 +160,7 @@ void create_jobs() {
         }
 
         if (links.size() > 0) {
-            for (std::vector<df::building*>::const_iterator l = links.begin();
+            for (std::vector12<df::building*>::const_iterator l = links.begin();
                 l != links.end() && workshop->jobs.size() <= MAX_WORKSHOP_JOBS; ++l) {
                 df::building_stockpilest* stockpile = virtual_cast<df::building_stockpilest>(*l);
                 gem_map piled;
@@ -176,10 +176,10 @@ void create_jobs() {
                     }
                     else if (item->flags.bits.container)
                     {
-                        std::vector<df::item*> binneditems;
+                        std::vector12<df::item*> binneditems;
                         Items::getContainedItems(item, &binneditems);
                         //for (df::item *it : binneditems)
-                        for (std::vector<df::item*>::const_iterator cit = binneditems.begin();
+                        for (std::vector12<df::item*>::const_iterator cit = binneditems.begin();
                             cit != binneditems.end(); ++cit)
                         {
                             df::item* it = *cit;
@@ -193,8 +193,8 @@ void create_jobs() {
 
                 // Decrement current jobs from all linked workshops, not just this one.
                 //for (auto bld : stockpile->links.give_to_workshop)
-                std::vector<df::building*> const& tar_shops = stockpile->links.give_to_workshop;
-                for (std::vector<df::building*>::const_iterator cit = tar_shops.begin(); cit != tar_shops.end(); ++cit)
+                std::vector12<df::building*> const& tar_shops = stockpile->links.give_to_workshop;
+                for (std::vector12<df::building*>::const_iterator cit = tar_shops.begin(); cit != tar_shops.end(); ++cit)
                 {
                     df::building* bld = *cit;
                     df::building_workshopst* shop = virtual_cast<df::building_workshopst>(bld);
@@ -203,7 +203,7 @@ void create_jobs() {
                         continue;
                     }
                     //for (auto job : shop->jobs)
-                    for (std::vector<df::job*>::const_iterator citr = shop->jobs.begin(); citr != shop->jobs.end(); ++citr)
+                    for (std::vector12<df::job*>::const_iterator citr = shop->jobs.begin(); citr != shop->jobs.end(); ++citr)
                     {
                         df::job* job = *citr;
                         if (job->job_type == df::job_type::CutGems)
@@ -222,7 +222,7 @@ void create_jobs() {
         } else {
             // Note which gem types have already been ordered to be cut.
             //for (auto j = workshop->jobs.begin(); j != workshop->jobs.end(); ++j)
-            for (std::vector<df::job*>::const_iterator j = workshop->jobs.begin(); j != workshop->jobs.end(); ++j)
+            for (std::vector12<df::job*>::const_iterator j = workshop->jobs.begin(); j != workshop->jobs.end(); ++j)
             {
                 df::job* job = *j;
                 if (job->job_type == df::job_type::CutGems) {
@@ -239,8 +239,8 @@ void create_jobs() {
     if (unlinked.size() > 0) {
         // Count how many gems of each type are available to be cut.
         // Gems in stockpiles linked to specific workshops don't count.
-        std::vector<df::item*> const& gems = world->items.other[items_other_id::ROUGH];
-        for (std::vector<df::item*>::const_iterator g = gems.begin(); g != gems.end(); ++g)
+        std::vector12<df::item*> const& gems = world->items.other[items_other_id::ROUGH];
+        for (std::vector12<df::item*>::const_iterator g = gems.begin(); g != gems.end(); ++g)
         {
             df::item* item = *g;
             if (valid_gem(item) && !stockpiled.count(item->id)) {
@@ -248,7 +248,7 @@ void create_jobs() {
             }
         }
 
-        for (std::set<df::building_workshopst*>::const_iterator w = unlinked.begin(); w != unlinked.end(); ++w) {
+        for (std::set8<df::building_workshopst*>::const_iterator w = unlinked.begin(); w != unlinked.end(); ++w) {
             add_tasks(available, *w);
         }
     }
@@ -275,7 +275,7 @@ struct autogem_hook : public df::viewscreen_dwarfmodest {
         return ui->main.mode == ui_sidebar_mode::OrdersWorkshop;
     }
 
-    bool handleInput(std::set<df::interface_key> *input) {
+    bool handleInput(std::set8<df::interface_key> *input) {
         if (!in_menu()) {
             return false;
         }
@@ -296,7 +296,7 @@ struct autogem_hook : public df::viewscreen_dwarfmodest {
         return false;
     }
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set<df::interface_key> *input)) {
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input)) {
         if (!handleInput(input)) {
             INTERPOSE_NEXT(feed)(input);
         }
@@ -329,7 +329,7 @@ IMPLEMENT_VMETHOD_INTERPOSE(autogem_hook, feed);
 IMPLEMENT_VMETHOD_INTERPOSE(autogem_hook, render);
 
 bool read_config(color_ostream &out) {
-    std::string path = "data/save/" + World::ReadWorldFolder() + "/autogems.json";
+    std::string24 path = "data/save/" + World::ReadWorldFolder() + "/autogems.json";
     if (!Filesystem::isfile(path)) {
         // no need to require the config file to exist
         return true;
@@ -363,7 +363,7 @@ bool read_config(color_ostream &out) {
     return true;
 }
 
-command_result cmd_reload_config(color_ostream &out, std::vector<std::string>&) {
+command_result cmd_reload_config(color_ostream &out, std::vector12<std::string24>&) {
     return read_config(out) ? CR_OK : CR_FAILURE;
 }
 
@@ -399,7 +399,7 @@ DFhackCExport command_result plugin_enable(color_ostream& out, bool enable) {
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands) {
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands) {
     commands.push_back(PluginCommand(
         "autogems-reload",
         "Reload autogems config file",

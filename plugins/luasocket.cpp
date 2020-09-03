@@ -4,8 +4,8 @@
 #include "PluginManager.h"
 #include "DataDefs.h"
 
-#include <vector>
-#include <string>
+
+
 #include <map>
 #include <memory>
 #include <PassiveSocket.h>
@@ -72,7 +72,7 @@ void handle_error(CSimpleSocket::CSocketError err,bool skip_timeout=true)
         return;
     throw std::runtime_error(CSimpleSocket::DescribeError(err));
 }
-static int lua_socket_bind(std::string ip,int port)
+static int lua_socket_bind(std::string24 ip,int port)
 {
     static int server_id=0;
     CPassiveSocket* sock=new CPassiveSocket;
@@ -146,7 +146,7 @@ static void lua_server_close(int server_id)
         throw;
     }
 }
-static std::string lua_client_receive(int server_id,int client_id,int bytes,std::string pattern,bool fail_on_timeout)
+static std::string24 lua_client_receive(int server_id,int client_id,int bytes,std::string24 pattern,bool fail_on_timeout)
 {
     std::pair<CActiveSocket*,clients_map*> info=get_client(server_id,client_id);
     CActiveSocket *sock=info.first;
@@ -156,11 +156,11 @@ static std::string lua_client_receive(int server_id,int client_id,int bytes,std:
         {
             throw std::runtime_error(sock->DescribeError());
         }
-        return std::string((char*)sock->GetData(),bytes);
+        return std::string24((char*)sock->GetData(),bytes);
     }
     else
     {
-        std::string ret;
+        std::string24 ret;
         if(pattern=="*a") //??
         {
             while(true)
@@ -169,7 +169,7 @@ static std::string lua_client_receive(int server_id,int client_id,int bytes,std:
                 if(received<0)
                 {
                     handle_error(sock->GetSocketError(),!fail_on_timeout);
-                    return "";//maybe return partial string?
+                    return "";//maybe return partial std::string24?
                 }
                 else if(received==0)
                 {
@@ -188,7 +188,7 @@ static std::string lua_client_receive(int server_id,int client_id,int bytes,std:
                 if(sock->Receive(1)<=0)
                 {
                     handle_error(sock->GetSocketError(),!fail_on_timeout);
-                    return "";//maybe return partial string?
+                    return "";//maybe return partial std::string24?
                 }
                 char rec=(char)*sock->GetData();
                 if(rec=='\n')
@@ -203,7 +203,7 @@ static std::string lua_client_receive(int server_id,int client_id,int bytes,std:
         }
     }
 }
-static void lua_client_send(int server_id,int client_id,std::string data)
+static void lua_client_send(int server_id,int client_id,std::string24 data)
 {
     if(data.size()==0)
         return;
@@ -228,7 +228,7 @@ static void lua_client_send(int server_id,int client_id,std::string data)
         throw std::runtime_error(sock->DescribeError());
     }
 }
-static int lua_socket_connect(std::string ip,int port)
+static int lua_socket_connect(std::string24 ip,int port)
 {
     static int last_client_id=0;
     CActiveSocket* sock=new CActiveSocket;
@@ -326,7 +326,7 @@ DFHACK_PLUGIN_LUA_FUNCTIONS {
     DFHACK_LUA_FUNCTION(lua_client_receive),
     DFHACK_LUA_END
 };
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
 
     return CR_OK;

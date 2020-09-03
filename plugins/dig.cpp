@@ -1,8 +1,8 @@
-#include <vector>
+
 #include <cstdio>
 #include <cstdlib>
 #include <stack>
-#include <string>
+
 #include <cmath>
 
 #include "Core.h"
@@ -18,26 +18,26 @@
 
 #include "df/ui_sidebar_menus.h"
 
-using std::vector;
-using std::string;
+
+
 using std::stack;
 using namespace DFHack;
 using namespace df::enums;
 
-command_result digv (color_ostream &out, vector <string> & parameters);
-command_result digvx (color_ostream &out, vector <string> & parameters);
-command_result digl (color_ostream &out, vector <string> & parameters);
-command_result diglx (color_ostream &out, vector <string> & parameters);
-command_result digauto (color_ostream &out, vector <string> & parameters);
-command_result digexp (color_ostream &out, vector <string> & parameters);
-command_result digcircle (color_ostream &out, vector <string> & parameters);
-command_result digtype (color_ostream &out, vector <string> & parameters);
+command_result digv (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result digvx (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result digl (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result diglx (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result digauto (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result digexp (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result digcircle (color_ostream &out, std::vector12<std::string24> & parameters);
+command_result digtype (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("dig");
 REQUIRE_GLOBAL(ui_sidebar_menus);
 REQUIRE_GLOBAL(world);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "digv","Dig a whole vein.",digv,Gui::cursor_hotkey,
@@ -88,7 +88,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 
 template <class T>
 bool from_string(T& t,
-    const std::string& s,
+    const std::string24& s,
     std::ios_base& (*f)(std::ios_base&))
 {
     std::istringstream iss(s);
@@ -218,13 +218,13 @@ bool lineY (MapExtras::MapCache & MCache,
     return true;
 };
 
-int32_t parse_priority(color_ostream &out, vector<string> &parameters)
+int32_t parse_priority(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     int32_t default_priority = ui_sidebar_menus->designation.priority;
 
-    for (vector<string>::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+    for (std::vector12<std::string24>::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
     {
-        const string &s = *it;
+        const std::string24 &s = *it;
         if (s.substr(0, 2) == "p=" || s.substr(0, 2) == "-p")
         {
             if (s.size() >= 3)
@@ -250,12 +250,12 @@ int32_t parse_priority(color_ostream &out, vector<string> &parameters)
     return default_priority;
 }
 
-string forward_priority(color_ostream &out, vector<string> &parameters)
+std::string24 forward_priority(color_ostream &out, std::vector12<std::string24> &parameters)
 {
-    return string("-p") + int_to_string(parse_priority(out, parameters) / 1000);
+    return std::string24("-p") + int_to_string(parse_priority(out, parameters) / 1000);
 }
 
-command_result digcircle (color_ostream &out, vector <string> & parameters)
+command_result digcircle (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     static bool filled = false;
     static circle_what what = circle_set;
@@ -854,7 +854,7 @@ bool stamp_pattern (uint32_t bx, uint32_t by, int z_level,
     return true;
 };
 
-command_result digexp (color_ostream &out, vector <string> & parameters)
+command_result digexp (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool force_help = false;
     static explo_how how = EXPLO_NOTHING;
@@ -1032,16 +1032,16 @@ command_result digexp (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result digvx (color_ostream &out, vector <string> & parameters)
+command_result digvx (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
-    vector <string> lol;
+    std::vector12<std::string24> lol;
     lol.push_back("x");
     lol.push_back(forward_priority(out, parameters));
     return digv(out,lol);
 }
 
-command_result digv (color_ostream &out, vector <string> & parameters)
+command_result digv (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
     uint32_t x_max,y_max,z_max;
@@ -1204,10 +1204,10 @@ command_result digv (color_ostream &out, vector <string> & parameters)
     return CR_OK;
 }
 
-command_result diglx (color_ostream &out, vector <string> & parameters)
+command_result diglx (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
-    vector <string> lol;
+    std::vector12<std::string24> lol;
     lol.push_back("x");
     lol.push_back(forward_priority(out, parameters));
     return digl(out,lol);
@@ -1219,7 +1219,7 @@ command_result diglx (color_ostream &out, vector <string> & parameters)
 // to make the plugin a bit smaller and cleaner a main execute method would be nice
 // (doing the floodfill stuff and do the checks dependin on whether called in
 // "vein" or "layer" mode)
-command_result digl (color_ostream &out, vector <string> & parameters)
+command_result digl (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     // HOTKEY COMMAND: CORE ALREADY SUSPENDED
     uint32_t x_max,y_max,z_max;
@@ -1422,12 +1422,12 @@ command_result digl (color_ostream &out, vector <string> & parameters)
 }
 
 
-command_result digauto (color_ostream &out, vector <string> & parameters)
+command_result digauto (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     return CR_NOT_IMPLEMENTED;
 }
 
-command_result digtype (color_ostream &out, vector <string> & parameters)
+command_result digtype (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     //mostly copy-pasted from digv
     int32_t priority = parse_priority(out, parameters);
@@ -1441,7 +1441,7 @@ command_result digtype (color_ostream &out, vector <string> & parameters)
     int32_t targetDigType;
     if ( parameters.size() == 1 )
     {
-        string parameter = parameters[0];
+        std::string24 parameter = parameters[0];
         if ( parameter == "clear" )
             targetDigType = tile_dig_designation::No;
         else if ( parameter == "dig" )

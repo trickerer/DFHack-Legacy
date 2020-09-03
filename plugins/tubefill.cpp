@@ -4,7 +4,7 @@
 #include <iostream>
 #include <map>
 //#include <cinttypes>
-#include <vector>
+
 #include "Core.h"
 #include "Console.h"
 #include "Export.h"
@@ -36,9 +36,9 @@ bool isDesignatedHollow(df::coord pos)
     return false;
 }
 
-command_result tubefill(color_ostream &out, std::vector<std::string> & params);
+command_result tubefill(color_ostream &out, std::vector12<std::string24> & params);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("tubefill","Fill in all the adamantine tubes again.",tubefill, false,
         "Replenishes mined out adamantine but does not fill hollow adamantine tubes.\n"
@@ -51,7 +51,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result tubefill(color_ostream &out, std::vector<std::string> & params)
+command_result tubefill(color_ostream &out, std::vector12<std::string24> & params)
 {
     uint32_t count = 0;
     bool hollow = false;

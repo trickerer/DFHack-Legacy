@@ -3,7 +3,7 @@
 #include "Export.h"
 #include "PluginManager.h"
 
-#include <vector>
+
 #include <algorithm>
 
 #include "modules/Units.h"
@@ -40,9 +40,9 @@
 #include "modules/Items.h"
 #include "modules/Units.h"
 
-using std::string;
+
 using std::endl;
-using std::vector;
+
 using namespace DFHack;
 using namespace df::enums;
 
@@ -81,7 +81,7 @@ DFHACK_PLUGIN_IS_ENABLED(enable_autolabor);
 
 static bool print_debug = 0;
 
-static std::vector<int> state_count(5);
+static std::vector12<int> state_count(5);
 
 static PersistentDataItem config;
 
@@ -92,7 +92,7 @@ enum ConfigFlags {
 
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
-command_result autolabor (color_ostream &out, std::vector <std::string> & parameters);
+command_result autolabor (color_ostream &out, std::vector12<std::string24> & parameters);
 
 static void generate_labor_to_skill_map();
 
@@ -415,7 +415,7 @@ static int hauler_pct = 33;
 // specific skills.
 static int idler_pct = 10;
 
-static std::vector<struct labor_info> labor_infos;
+static std::vector12<struct labor_info> labor_infos;
 
 static const struct labor_default default_labor_infos[] = {
     /* MINE */                  {AUTOMATIC, true, 2, 200, 0},
@@ -599,12 +599,12 @@ static void init_state()
     // Load labors from save
     labor_infos.resize(ARRAY_COUNT(default_labor_infos));
 
-    std::vector<PersistentDataItem> items;
+    std::vector12<PersistentDataItem> items;
     World::GetPersistentData(&items, "autolabor/labors/", true);
 
-    for (std::vector<PersistentDataItem>::iterator p = items.begin(); p != items.end(); p++)
+    for (std::vector12<PersistentDataItem>::iterator p = items.begin(); p != items.end(); p++)
     {
-        string key = p->key();
+        std::string24 key = p->key();
         df::unit_labor labor = (df::unit_labor) atoi(key.substr(strlen("autolabor/labors/")).c_str());
         if (labor >= 0 && size_t(labor) < labor_infos.size())
         {
@@ -675,7 +675,7 @@ static void enable_plugin(color_ostream &out)
     init_state();
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     // initialize labor infos table from default table
     if(ARRAY_COUNT(default_labor_infos) != ENUM_LAST_ITEM(unit_labor) + 1)
@@ -688,7 +688,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
     commands.push_back(PluginCommand(
         "autolabor", "Automatically manage dwarf labors.",
         autolabor, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         "  autolabor enable\n"
         "  autolabor disable\n"
         "    Enables or disables the plugin.\n"
@@ -744,7 +744,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 // sorting objects
 struct dwarfinfo_sorter
 {
-    dwarfinfo_sorter(std::vector <dwarf_info_t> & info):dwarf_info(info){};
+    dwarfinfo_sorter(std::vector12<dwarf_info_t> & info):dwarf_info(info){};
     bool operator() (int i,int j)
     {
         if (dwarf_info[i].state == IDLE && dwarf_info[j].state != IDLE)
@@ -753,7 +753,7 @@ struct dwarfinfo_sorter
             return false;
         return dwarf_info[i].mastery_penalty > dwarf_info[j].mastery_penalty;
     };
-    std::vector <dwarf_info_t> & dwarf_info;
+    std::vector12<dwarf_info_t> & dwarf_info;
 };
 struct laborinfo_sorter
 {
@@ -793,20 +793,20 @@ struct values_sorter_desc
 
 struct values_sorter
 {
-    values_sorter(std::vector <int> & values):values(values){};
+    values_sorter(std::vector12<int> & values):values(values){};
     bool operator() (int i,int j)
     {
         return values[i] > values[j];
     };
-    std::vector<int> & values;
+    std::vector12<int> & values;
 };
 
 
 static void assign_labor(unit_labor::unit_labor labor,
     int n_dwarfs,
-    std::vector<dwarf_info_t>& dwarf_info,
+    std::vector12<dwarf_info_t>& dwarf_info,
     bool trader_requested,
-    std::vector<df::unit *>& dwarfs,
+    std::vector12<df::unit *>& dwarfs,
     bool has_butchers,
     bool has_fishery,
     color_ostream& out)
@@ -820,11 +820,11 @@ static void assign_labor(unit_labor::unit_labor labor,
         int best_value = -10000;
         int best_skill = 0;
 
-        std::vector<int> values(n_dwarfs);
-        std::vector<int> candidates;
+        std::vector12<int> values(n_dwarfs);
+        std::vector12<int> candidates;
         std::map<int, int> dwarf_skill;
         std::map<int, int> dwarf_skillxp;
-        std::vector<bool> previously_enabled(n_dwarfs);
+        std::vector12<bool> previously_enabled(n_dwarfs);
 
         labor_mode mode = labor_infos[labor].mode();
 
@@ -850,7 +850,7 @@ static void assign_labor(unit_labor::unit_labor labor,
                 int skill_level = 0;
                 int skill_experience = 0;
 
-                for (std::vector<df::unit_skill*>::iterator s = dwarfs[dwarf]->status.souls[0]->skills.begin();
+                for (std::vector12<df::unit_skill*>::iterator s = dwarfs[dwarf]->status.souls[0]->skills.begin();
                     s < dwarfs[dwarf]->status.souls[0]->skills.end(); s++)
                 {
                     if ((*s)->id == skill)
@@ -1066,7 +1066,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     uint32_t race = ui->race_id;
     uint32_t civ = ui->civ_id;
 
-    std::vector<df::unit *> dwarfs;
+    std::vector12<df::unit *> dwarfs;
 
     bool has_butchers = false;
     bool has_fishery = false;
@@ -1114,7 +1114,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     if (n_dwarfs == 0)
         return CR_OK;
 
-    std::vector<dwarf_info_t> dwarf_info(n_dwarfs);
+    std::vector12<dwarf_info_t> dwarf_info(n_dwarfs);
 
     // Find total skill and highest skill for each dwarf. More skilled dwarves shouldn't be used for minor tasks.
 
@@ -1180,7 +1180,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
             }
         }
 
-        for (std::vector<df::unit_skill*>::iterator s = dwarfs[dwarf]->status.souls[0]->skills.begin();
+        for (std::vector12<df::unit_skill*>::iterator s = dwarfs[dwarf]->status.souls[0]->skills.begin();
             s != dwarfs[dwarf]->status.souls[0]->skills.end(); s++)
         {
             df::job_skill skill = (*s)->id;
@@ -1262,7 +1262,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
             out.print("Dwarf %i \"%s\": penalty %i, state %s\n", dwarf, dwarfs[dwarf]->name.first_name.c_str(), dwarf_info[dwarf].mastery_penalty, state_names[dwarf_info[dwarf].state]);
     }
 
-    std::vector<df::unit_labor> labors;
+    std::vector12<df::unit_labor> labors;
 
     FOR_ENUM_ITEMS_SIMPLE(unit_labor, labor)
     {
@@ -1279,7 +1279,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     // Handle DISABLED skills (just bookkeeping).
     // Note that autolabor should *NEVER* enable or disable a skill that has been marked as DISABLED, for any reason.
     // The user has told us that they want manage this skill manually, and we must respect that.
-    for (std::vector<df::unit_labor>::const_iterator lp = labors.begin(); lp != labors.end(); ++lp)
+    for (std::vector12<df::unit_labor>::const_iterator lp = labors.begin(); lp != labors.end(); ++lp)
     {
         df::unit_labor labor = *lp;
 
@@ -1300,7 +1300,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
     // Handle all skills except those marked HAULERS
 
-    for (std::vector<df::unit_labor>::const_iterator lp = labors.begin(); lp != labors.end(); ++lp)
+    for (std::vector12<df::unit_labor>::const_iterator lp = labors.begin(); lp != labors.end(); ++lp)
     {
         df::unit_labor labor = *lp;
 
@@ -1315,7 +1315,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
     if (num_haulers < 1)
         num_haulers = 1;
 
-    std::vector<int> hauler_ids;
+    std::vector12<int> hauler_ids;
     for (int dwarf = 0; dwarf < n_dwarfs; dwarf++)
     {
         if ((dwarf_info[dwarf].trader && trader_requested) ||
@@ -1394,7 +1394,7 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 
 void print_labor (df::unit_labor labor, color_ostream &out)
 {
-    string labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
+    std::string24 labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
     out << labor_name << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
@@ -1433,7 +1433,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable )
     return CR_OK;
 }
 
-command_result autolabor (color_ostream &out, std::vector <std::string> & parameters)
+command_result autolabor (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 

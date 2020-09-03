@@ -41,8 +41,8 @@
 #include "df/inorganic_raw.h"
 #include "df/builtin_mats.h"
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using std::flush;
 using namespace DFHack;
@@ -57,15 +57,15 @@ REQUIRE_GLOBAL(job_next_id);
 
 /* Plugin registration */
 
-static command_result workflow_cmd(color_ostream &out, vector <string> & parameters);
-static command_result fix_job_postings_cmd(color_ostream &out, vector<string> &parameters);
+static command_result workflow_cmd(color_ostream &out, std::vector12<std::string24> & parameters);
+static command_result fix_job_postings_cmd(color_ostream &out, std::vector12<std::string24> &parameters);
 
 static void init_state(color_ostream &out);
 static void cleanup_state(color_ostream &out);
 
 static int fix_job_postings(color_ostream *out = NULL, bool dry_run = false);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (!world || !ui)
         return CR_FAILURE;
@@ -182,7 +182,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-command_result fix_job_postings_cmd(color_ostream &out, vector<string> &parameters)
+command_result fix_job_postings_cmd(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     bool dry = parameters.size();
     int fixed = fix_job_postings(&out, dry);
@@ -216,7 +216,7 @@ struct ProtectedJob {
     bool want_resumed;
     int resume_time, resume_delay;
 
-    std::vector<ItemConstraint*> constraints;
+    std::vector12<ItemConstraint*> constraints;
 
 public:
     ProtectedJob(df::job *job) : id(job->id)
@@ -341,7 +341,7 @@ struct ItemConstraint {
 
     // Tracking data
     int weight;
-    std::vector<ProtectedJob*> jobs;
+    std::vector12<ProtectedJob*> jobs;
 
     int item_amount, item_count, item_inuse_amount, item_inuse_count;
     bool request_suspend, request_resume;
@@ -379,7 +379,7 @@ public:
 
     int curItemStock() { return goalByCount() ? item_count : item_amount; }
 
-    void init(const std::string &str)
+    void init(const std::string24 &str)
     {
         config.val() = str;
         config.ival(0) = 10;
@@ -473,8 +473,8 @@ enum ConfigFlags {
 typedef std::map<int, ProtectedJob*> TKnownJobs;
 static TKnownJobs known_jobs;
 
-static std::vector<ProtectedJob*> pending_recover;
-static std::vector<ItemConstraint*> constraints;
+static std::vector12<ProtectedJob*> pending_recover;
+static std::vector12<ItemConstraint*> constraints;
 
 static int meltable_count = 0;
 static bool melt_active = false;
@@ -545,7 +545,7 @@ static void cleanup_state(color_ostream &out)
 }
 
 static void check_lost_jobs(color_ostream &out, int ticks);
-static ItemConstraint *get_constraint(color_ostream &out, const std::string &str, PersistentDataItem *cfg = NULL, bool create = true);
+static ItemConstraint *get_constraint(color_ostream &out, const std::string24 &str, PersistentDataItem *cfg = NULL, bool create = true);
 
 static void start_protect(color_ostream &out)
 {
@@ -569,7 +569,7 @@ static void init_state(color_ostream &out)
     enabled = isOptionEnabled(CF_ENABLED);
 
     // Parse constraints
-    std::vector<PersistentDataItem> items;
+    std::vector12<PersistentDataItem> items;
     World::GetPersistentData(&items, "workflow/constraints");
 
     for (int i = items.size()-1; i >= 0; i--) {
@@ -767,13 +767,13 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
  *   ITEM COUNT CONSTRAINT    *
  ******************************/
 
-static std::string history_key(PersistentDataItem &config) {
+static std::string24 history_key(PersistentDataItem &config) {
     return stl_sprintf("workflow/history/%d", config.entry_id());
 }
 
-static ItemConstraint *get_constraint(color_ostream &out, const std::string &str, PersistentDataItem *cfg, bool create)
+static ItemConstraint *get_constraint(color_ostream &out, const std::string24 &str, PersistentDataItem *cfg, bool create)
 {
-    std::vector<std::string> tokens;
+    std::vector12<std::string24> tokens;
     split_string(&tokens, str, "/");
 
     if (tokens.size() > 4)
@@ -795,7 +795,7 @@ static ItemConstraint *get_constraint(color_ostream &out, const std::string &str
         weight += 10000;
 
     df::dfhack_material_category mat_mask;
-    std::string maskstr = vector_get(tokens,1);
+    std::string24 maskstr = vector_get(tokens,1);
     if (!maskstr.empty() && !parseJobMaterialCategory(&mat_mask, maskstr)) {
         out.printerr("Cannot decode material mask: %s\n", maskstr.c_str());
         return NULL;
@@ -805,7 +805,7 @@ static ItemConstraint *get_constraint(color_ostream &out, const std::string &str
         weight += 100;
 
     MaterialInfo material;
-    std::string matstr = vector_get(tokens,2);
+    std::string24 matstr = vector_get(tokens,2);
     if (!matstr.empty() && (!material.find(matstr) || !material.isValid())) {
         out.printerr("Cannot find material: %s\n", matstr.c_str());
         return NULL;
@@ -821,16 +821,16 @@ static ItemConstraint *get_constraint(color_ostream &out, const std::string &str
 
     item_quality::item_quality minqual = item_quality::Ordinary;
     bool is_local = false;
-    std::string qualstr = vector_get(tokens, 3);
+    std::string24 qualstr = vector_get(tokens, 3);
 
     if(!qualstr.empty())
     {
-        std::vector<std::string> qtokens;
+        std::vector12<std::string24> qtokens;
         split_string(&qtokens, qualstr, ",");
 
         for (size_t i = 0; i < qtokens.size(); i++)
         {
-            std::string token = toLower(qtokens[i]);
+            std::string24 token = toLower(qtokens[i]);
 
             if (token == "local")
                 is_local = true;
@@ -905,7 +905,7 @@ static void delete_constraint(ItemConstraint *cv)
     delete cv;
 }
 
-static bool deleteConstraint(std::string name)
+static bool deleteConstraint(std::string24 name)
 {
     for (size_t i = 0; i < constraints.size(); i++)
     {
@@ -1182,7 +1182,7 @@ static void map_job_items(color_ostream &out)
 
     bool dry_buckets = isOptionEnabled(CF_DRYBUCKETS);
 
-    std::vector<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
+    std::vector12<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
 
     for (size_t i = 0; i < items.size(); i++)
     {
@@ -1297,7 +1297,7 @@ static void map_job_items(color_ostream &out)
  *   ITEM COUNT CONSTRAINT    *
  ******************************/
 
-static std::string shortJobDescription(df::job *job);
+static std::string24 shortJobDescription(df::job *job);
 
 static void setJobResumed(color_ostream &out, ProtectedJob *pj, bool goal)
 {
@@ -1362,7 +1362,7 @@ static void update_jobs_by_constraints(color_ostream &out)
             if (!!(is_running = ct->jobs[j]->isResumed()))
                 break;
 
-        std::string info = ct->item.toString();
+        std::string24 info = ct->item.toString();
 
         if (ct->is_craft)
             info = "crafts";
@@ -1563,7 +1563,7 @@ static int listConstraints(lua_State *L)
 
     lua_newtable(L);
 
-    std::vector<ItemConstraint*> &vec = (pj ? pj->constraints : constraints);
+    std::vector12<ItemConstraint*> &vec = (pj ? pj->constraints : constraints);
 
     for (size_t i = 0; i < vec.size(); i++)
     {
@@ -1665,9 +1665,9 @@ DFHACK_PLUGIN_LUA_COMMANDS {
  *  PRINTING AND THE COMMAND  *
  ******************************/
 
-static std::string shortJobDescription(df::job *job)
+static std::string24 shortJobDescription(df::job *job)
 {
-    std::string rv = stl_sprintf("job %d: ", job->id);
+    std::string24 rv = stl_sprintf("job %d: ", job->id);
 
     if (job->job_type != job_type::CustomReaction)
         rv += ENUM_KEY_STR_SIMPLE(job_type, job->job_type);
@@ -1686,7 +1686,7 @@ static std::string shortJobDescription(df::job *job)
     return rv;
 }
 
-static void print_constraint(color_ostream &out, ItemConstraint *cv, bool no_job = false, std::string prefix = "")
+static void print_constraint(color_ostream &out, ItemConstraint *cv, bool no_job = false, std::string24 prefix = "")
 {
     Console::color_value color;
     if (cv->request_resume)
@@ -1715,8 +1715,8 @@ static void print_constraint(color_ostream &out, ItemConstraint *cv, bool no_job
     if (cv->jobs.empty())
         out.printerr("  (no jobs)\n");
 
-    std::vector<ProtectedJob*> unique_jobs;
-    std::vector<int> unique_counts;
+    std::vector12<ProtectedJob*> unique_jobs;
+    std::vector12<int> unique_counts;
 
     for (size_t i = 0; i < cv->jobs.size(); i++)
     {
@@ -1741,7 +1741,7 @@ static void print_constraint(color_ostream &out, ItemConstraint *cv, bool no_job
         ProtectedJob *pj = unique_jobs[i];
         df::job *job = pj->actual_job;
 
-        std::string start = prefix + "  " + shortJobDescription(job);
+        std::string24 start = prefix + "  " + shortJobDescription(job);
 
         if (!pj->isActuallyResumed())
         {
@@ -1795,7 +1795,7 @@ static void print_job(color_ostream &out, ProtectedJob *pj)
         print_constraint(out, pj->constraints[i], true, "  ");
 }
 
-static command_result workflow_cmd(color_ostream &out, vector <string> & parameters)
+static command_result workflow_cmd(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
@@ -1817,7 +1817,7 @@ static command_result workflow_cmd(color_ostream &out, vector <string> & paramet
         //job = Gui::getSelectedWorkshopJob(out, true);
     }
 
-    std::string cmd = parameters.empty() ? "list" : parameters[0];
+    std::string24 cmd = parameters.empty() ? "list" : parameters[0];
 
     if (cmd == "enable" || cmd == "disable")
     {

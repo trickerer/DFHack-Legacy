@@ -26,11 +26,11 @@
 
 #include "modules/EventManager.h"
 
-#include <string.h>
+
 #include <stdexcept>
 
-using std::vector;
-using std::string;
+
+
 using std::stack;
 using namespace DFHack;
 using namespace df::enums;
@@ -51,7 +51,7 @@ struct ReagentSource {
 
 struct MaterialSource : ReagentSource {
     bool product;
-    std::string product_name;
+    std::string24 product_name;
 
     int mat_type, mat_index;
 
@@ -72,10 +72,10 @@ struct ProductInfo {
 struct ReactionInfo {
     df::reaction *react;
 
-    std::vector<ProductInfo> products;
+    std::vector12<ProductInfo> products;
 };
 
-static std::map<std::string, ReactionInfo> reactions;
+static std::map<std::string24, ReactionInfo> reactions;
 static std::map<df::reaction_product*, ProductInfo*> products;
 
 /*
@@ -85,8 +85,8 @@ static std::map<df::reaction_product*, ProductInfo*> products;
 DEFINE_LUA_EVENT_NH_2(onWorkshopFillSidebarMenu, df::building_actual*, bool*);
 DEFINE_LUA_EVENT_NH_1(postWorkshopFillSidebarMenu, df::building_actual*);
 
-DEFINE_LUA_EVENT_NH_7(onReactionCompleting, df::reaction*, df::reaction_product_itemst*, df::unit *, std::vector<df::item*> *, std::vector<df::reaction_reagent*> *, std::vector<df::item*> *, bool *);
-DEFINE_LUA_EVENT_NH_6(onReactionComplete, df::reaction*, df::reaction_product_itemst*, df::unit *, std::vector<df::item*> *, std::vector<df::reaction_reagent*> *, std::vector<df::item*> *);
+DEFINE_LUA_EVENT_NH_7(onReactionCompleting, df::reaction*, df::reaction_product_itemst*, df::unit *, std::vector12<df::item*> *, std::vector12<df::reaction_reagent*> *, std::vector12<df::item*> *, bool *);
+DEFINE_LUA_EVENT_NH_6(onReactionComplete, df::reaction*, df::reaction_product_itemst*, df::unit *, std::vector12<df::item*> *, std::vector12<df::reaction_reagent*> *, std::vector12<df::item*> *);
 DEFINE_LUA_EVENT_NH_5(onItemContaminateWound, df::item_actual*, df::unit*, df::unit_wound*, uint8_t, int16_t);
 //projectiles
 DEFINE_LUA_EVENT_NH_2(onProjItemCheckImpact, df::proj_itemst*, bool);
@@ -106,7 +106,7 @@ DEFINE_LUA_EVENT_NH_4(onInventoryChange, int32_t, int32_t, df::unit_inventory_it
 DEFINE_LUA_EVENT_NH_1(onReport, int32_t);
 DEFINE_LUA_EVENT_NH_3(onUnitAttack, int32_t, int32_t, int32_t);
 DEFINE_LUA_EVENT_NH_0(onUnload);
-DEFINE_LUA_EVENT_NH_6(onInteraction, std::string, std::string, int32_t, int32_t, int32_t, int32_t);
+DEFINE_LUA_EVENT_NH_6(onInteraction, std::string24, std::string24, int32_t, int32_t, int32_t, int32_t);
 
 DFHACK_PLUGIN_LUA_EVENTS {
     DFHACK_LUA_EVENT(onWorkshopFillSidebarMenu),
@@ -206,7 +206,7 @@ static void ev_mng_interaction(color_ostream& out, void* ptr) {
     EventManager::InteractionData* data = (EventManager::InteractionData*)ptr;
     onInteraction(out, data->attackVerb, data->defendVerb, data->attacker, data->defender, data->attackReport, data->defendReport);
 }
-std::vector<int> enabledEventManagerEvents(EventManager::EventType::MAX_EVENTS,-1);
+std::vector12<int> enabledEventManagerEvents(EventManager::EventType::MAX_EVENTS,-1);
 typedef void (*handler_t) (color_ostream&,void*);
 static const handler_t eventHandlers[] = {
  NULL,
@@ -282,12 +282,12 @@ struct product_hook : item_product {
     DEFINE_VMETHOD_INTERPOSE(
         void, produce,
         (df::unit *unit,
-         std::vector<df::reaction_product*> *out_products,
-         std::vector<df::item*> *out_items,
-         std::vector<df::reaction_reagent*> *in_reag,
-         std::vector<df::item*> *in_items,
+         std::vector12<df::reaction_product*> *out_products,
+         std::vector12<df::item*> *out_items,
+         std::vector12<df::reaction_reagent*> *in_reag,
+         std::vector12<df::item*> *in_items,
          int32_t quantity, df::job_skill skill,
-         int32_t quality, df::historical_entity *entity,  df::world_site *site, std::vector<void *> *unk2)
+         int32_t quality, df::historical_entity *entity,  df::world_site *site, std::vector12<void *> *unk2)
     ) {
         color_ostream_proxy out(Core::getInstance().getConsole());
         ProductInfo* product = products[this];
@@ -386,17 +386,17 @@ static bool find_reactions(color_ostream &out)
 {
     reactions.clear();
 
-    std::vector<df::reaction*> &rlist = df::reaction::get_vector();
+    std::vector12<df::reaction*> &rlist = df::reaction::get_vector();
 
     for (size_t i = 0; i < rlist.size(); i++)
     {
         reactions[rlist[i]->code].react = rlist[i];
     }
 
-    for (std::map<std::string, ReactionInfo>::iterator it = reactions.begin(); it != reactions.end(); ++it)
+    for (std::map<std::string24, ReactionInfo>::iterator it = reactions.begin(); it != reactions.end(); ++it)
     {
-        std::vector<df::reaction_product*> &prod = it->second.react->products;
-        std::vector<ProductInfo> &out_prod = it->second.products;
+        std::vector12<df::reaction_product*> &prod = it->second.react->products;
+        std::vector12<ProductInfo> &out_prod = it->second.products;
 
         for (size_t i = 0; i < prod.size(); i++)
         {
@@ -462,7 +462,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (Core::getInstance().isWorldLoaded())
         plugin_onstatechange(out, SC_WORLD_LOADED);

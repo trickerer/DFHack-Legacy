@@ -47,8 +47,8 @@
 
 #include <stdlib.h>
 
-using std::vector;
-using std::string;
+
+
 using std::endl;
 using namespace DFHack;
 using namespace df::enums;
@@ -61,13 +61,13 @@ using df::global::ui_build_selector;
 using namespace DFHack::Gui;
 using Screen::Pen;
 
-static command_result fix_armory(color_ostream &out, vector <string> & parameters);
+static command_result fix_armory(color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("fix-armory");
 
 DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_change_event event);
 
-DFhackCExport command_result plugin_init (color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init (color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "fix-armory", "Enables or disables the fix-armory plugin.", fix_armory, false,
@@ -171,7 +171,7 @@ static bool is_squad_ammo(df::item *item, df::squad *squad, bool combat, bool tr
 // Recursively check room parents to find out if this ammo item is allowed here
 static bool can_store_ammo_rec(df::item *item, df::building *holder, int squad_id)
 {
-    std::vector<df::building_squad_use*> *squads = holder->getSquads();
+    std::vector12<df::building_squad_use*> *squads = holder->getSquads();
 
     if (squads)
     {
@@ -199,7 +199,7 @@ static bool can_store_ammo_rec(df::item *item, df::building *holder, int squad_i
     // Ugh, archery targets don't actually have a squad use vector
     else if (holder->getType() == building_type::ArcheryTarget)
     {
-        std::vector<df::squad*> &squads = world->squads.all;
+        std::vector12<df::squad*> &squads = world->squads.all;
 
         for (size_t si = 0; si < squads.size(); si++)
         {
@@ -381,7 +381,7 @@ template<class Item> struct armory_hook : Item {
         if (is_assigned_item(this))
         {
             // The original vmethod adds the item to this vector to force instant check
-            std::vector<df::item*> &ovec = world->items.other[items_other_id::ANY_RECENTLY_DROPPED];
+            std::vector12<df::item*> &ovec = world->items.other[items_other_id::ANY_RECENTLY_DROPPED];
 
             // If it is indeed there, remove it
             if (erase_from_vector(ovec, &df::item::id, this->id))
@@ -548,7 +548,7 @@ static bool try_store_item(df::building *target, df::item *item)
 }
 
 // Store the item into the first building in the list that would accept it.
-static void try_store_item(std::vector<int32_t> &vec, df::item *item)
+static void try_store_item(std::vector12<int32_t> &vec, df::item *item)
 {
     for (size_t i = 0; i < vec.size(); i++)
     {
@@ -562,7 +562,7 @@ static void try_store_item(std::vector<int32_t> &vec, df::item *item)
 }
 
 // Store the items into appropriate armory buildings
-static void try_store_item_set(std::vector<int32_t> &items, df::squad *squad, df::squad_position *pos)
+static void try_store_item_set(std::vector12<int32_t> &items, df::squad *squad, df::squad_position *pos)
 {
     for (size_t j = 0; j < items.size(); j++)
     {
@@ -585,7 +585,7 @@ static void try_store_item_set(std::vector<int32_t> &items, df::squad *squad, df
 }
 
 // For storing ammo, use a data structure sorted by free space, to even out the load
-typedef std::map<int, std::set<df::building*> > ammo_box_set;
+typedef std::map<int, std::set8<df::building*> > ammo_box_set;
 
 // Enumerate boxes in the room, adding them to the set
 static void index_boxes(df::building *root, ammo_box_set &group, int squad_id)
@@ -617,7 +617,7 @@ static bool try_store_ammo(df::item *item, ammo_box_set &group)
         if (it->first < volume)
             break;
 
-        for (std::set<df::building*>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+        for (std::set8<df::building*>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
         {
             df::building* bld = *it2;
 
@@ -708,7 +708,7 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out, state_change_ev
         return CR_OK;
 
     // Loop over squads
-    std::vector<df::squad*> &squads = world->squads.all;
+    std::vector12<df::squad*> &squads = world->squads.all;
 
     for (size_t si = 0; si < squads.size(); si++)
     {
@@ -823,14 +823,14 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-static command_result fix_armory(color_ostream &out, vector <string> &parameters)
+static command_result fix_armory(color_ostream &out, std::vector12<std::string24> &parameters)
 {
     CoreSuspender suspend;
 
     if (parameters.empty())
         return CR_WRONG_USAGE;
 
-    string cmd = parameters[0];
+    std::string24 cmd = parameters[0];
 
     if (cmd == "enable")
         return plugin_enable(out, true);

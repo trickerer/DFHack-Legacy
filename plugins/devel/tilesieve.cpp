@@ -5,7 +5,7 @@
 #include <Console.h>
 #include <Export.h>
 #include <PluginManager.h>
-#include <set>
+
 // DF data structure definition headers
 #include "DataDefs.h"
 #include "modules/Maps.h"
@@ -19,19 +19,19 @@ using df::global::world;
 
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
-command_result tilesieve (color_ostream &out, std::vector <std::string> & parameters);
+command_result tilesieve (color_ostream &out, std::vector12<std::string24> & parameters);
 
 // A plugin must be able to return its name. This must correspond to the filename - skeleton.plug.so or skeleton.plug.dll
 DFHACK_PLUGIN("tilesieve");
 
 // Mandatory init function. If you have some global state, create it here.
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     // Fill the command list with your commands.
     commands.push_back(PluginCommand(
         "tilesieve", "Scan map for unknown tiles.",
         tilesieve, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help string. Used by CR_WRONG_USAGE and the help command:
+        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
         "  This command scans the whole map for tiles that aren't recognized yet.\n"
     ));
     return CR_OK;
@@ -49,7 +49,7 @@ struct xyz
     int z;
 };
 
-command_result tilesieve(color_ostream &out, std::vector<std::string> & params)
+command_result tilesieve(color_ostream &out, std::vector12<std::string24> & params)
 {
     CoreSuspender suspend;
 
@@ -59,7 +59,7 @@ command_result tilesieve(color_ostream &out, std::vector<std::string> & params)
         return CR_FAILURE;
     }
     out.print("Scanning.\n");
-    std::set <df::tiletype> seen;
+    std::set8<df::tiletype> seen;
     for (auto iter = world->map.map_blocks.begin(); iter != world->map.map_blocks.end(); iter++)
     {
         df::map_block *block = *iter;

@@ -11,9 +11,9 @@
 #include "modules/Filesystem.h"
 #include "modules/Job.h"
 
-#include <vector>
-#include <string>
-#include <set>
+
+
+
 #include <algorithm>
 //#include <tuple>
 #include "VTableInterpose.h"
@@ -40,9 +40,9 @@
 #include "listcolumn.h"
 
 using std::stringstream;
-using std::set;
-using std::vector;
-using std::string;
+
+
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -287,17 +287,17 @@ struct UnitInfo
 {
     df::unit *unit;
     bool allowEdit;
-    string name;
-    string transname;
-    string profession;
-    string goal;
+    std::string24 name;
+    std::string24 transname;
+    std::string24 profession;
+    std::string24 goal;
     df::pronoun_type goal_gender;
     bool achieved_goal;
     int8_t color;
     int active_index;
-    string squad_effective_name;
-    string squad_info;
-    string job_desc;
+    std::string24 squad_effective_name;
+    std::string24 squad_info;
+    std::string24 job_desc;
     enum { IDLE, SOCIAL, JOB } job_mode;
     bool selected;
     struct {
@@ -328,7 +328,7 @@ enum altsort_mode {
     ALTSORT_MAX
 };
 
-string itos (int n)
+std::string24 itos (int n)
 {
     stringstream ss;
     ss << n;
@@ -470,33 +470,33 @@ bool sortBySelected (const UnitInfo *d1, const UnitInfo *d2)
 template<typename T>
 struct StringFmtCaller
 {
-    typedef string(*T_callback)(T);
+    typedef std::string24(*T_callback)(T);
 public:
-    explicit StringFmtCaller(string const& _s1, string const& _s2, T_callback _cb) : s1(_s1), s2(_s2), cb(_cb) {}
+    explicit StringFmtCaller(std::string24 const& _s1, std::string24 const& _s2, T_callback _cb) : s1(_s1), s2(_s2), cb(_cb) {}
 
-    string operator()(T obj) const
+    std::string24 operator()(T obj) const
     {
         return cb(obj);
     }
 
-    string s1; //code
-    string s2; //help
+    std::string24 s1; //code
+    std::string24 s2; //help
     T_callback cb;
 };
 
 template<typename T>
 class StringFormatter {
 public:
-    typedef string(*T_callback)(T);
-    //typedef std::tuple<string, string, T_callback> T_opt;
+    typedef std::string24(*T_callback)(T);
+    //typedef std::tuple<std::string24, std::string24, T_callback> T_opt;
     typedef StringFmtCaller<T> T_opt;
-    typedef vector<T_opt> T_optlist;
-    static bool compare_opts(const string &first, const string &second)
+    typedef std::vector12<T_opt> T_optlist;
+    static bool compare_opts(const std::string24 &first, const std::string24 &second)
     {
         return first.size() > second.size();
     }
     StringFormatter() {}
-    void add_option(string spec, string help, string (*callback)(T))
+    void add_option(std::string24 spec, std::string24 help, std::string24 (*callback)(T))
     {
         //opt_list.push_back(std::make_tuple(spec, help, callback));
         opt_list.push_back(StringFmtCaller<T>(spec, help, callback));
@@ -506,14 +506,14 @@ public:
     {
         opt_list.clear();
     }
-    string grab_opt (string s, size_t start)
+    std::string24 grab_opt (std::string24 s, size_t start)
     {
-        vector<string> candidates;
+        std::vector12<std::string24> candidates;
         for (T_optlist::const_iterator it = opt_list.begin(); it != opt_list.end(); ++it)
         {
-            //string opt = std::get<0>(*it);
-            string opt = (*it).s1;
-            string slice = s.substr(start, opt.size());
+            //std::string24 opt = std::get<0>(*it);
+            std::string24 opt = (*it).s1;
+            std::string24 slice = s.substr(start, opt.size());
             if (slice == opt)
                 candidates.push_back(slice);
         }
@@ -523,7 +523,7 @@ public:
         std::sort(candidates.begin(), candidates.end(), StringFormatter<T>::compare_opts);
         return candidates[0];
     }
-    T_callback get_callback (string s)
+    T_callback get_callback (std::string24 s)
     {
         for (T_optlist::const_iterator it = opt_list.begin(); it != opt_list.end(); ++it)
         {
@@ -534,9 +534,9 @@ public:
         }
         return NULL;
     }
-    string format (T obj, string fmt)
+    std::string24 format (T obj, std::string24 fmt)
     {
-        string dest = "";
+        std::string24 dest = "";
         bool in_opt = false;
         size_t i = 0;
         while (i < fmt.size())
@@ -552,7 +552,7 @@ public:
                 }
                 else
                 {
-                    string opt = grab_opt(fmt, i);
+                    std::string24 opt = grab_opt(fmt, i);
                     if (opt.size())
                     {
                         T_callback func = get_callback(opt);
@@ -588,25 +588,25 @@ protected:
 };
 
 namespace unit_ops {
-    string get_real_name(UnitInfo *u)
+    std::string24 get_real_name(UnitInfo *u)
         { return Translation::TranslateName(&u->unit->name, false); }
-    string get_nickname(UnitInfo *u)
+    std::string24 get_nickname(UnitInfo *u)
         { return Translation::TranslateName(Units::getVisibleName(u->unit), false); }
-    string get_real_name_eng(UnitInfo *u)
+    std::string24 get_real_name_eng(UnitInfo *u)
         { return Translation::TranslateName(&u->unit->name, true); }
-    string get_nickname_eng(UnitInfo *u)
+    std::string24 get_nickname_eng(UnitInfo *u)
         { return Translation::TranslateName(Units::getVisibleName(u->unit), true); }
-    string get_first_nickname(UnitInfo *u)
+    std::string24 get_first_nickname(UnitInfo *u)
     {
         return Translation::capitalize(u->unit->name.nickname.size() ?
             u->unit->name.nickname : u->unit->name.first_name);
     }
-    string get_first_name(UnitInfo *u)
+    std::string24 get_first_name(UnitInfo *u)
         { return Translation::capitalize(u->unit->name.first_name); }
-    string get_last_name(UnitInfo *u)
+    std::string24 get_last_name(UnitInfo *u)
     {
         df::language_name name = u->unit->name;
-        string ret = "";
+        std::string24 ret = "";
         for (int i = 0; i < 2; i++)
         {
             if (name.words[i] >= 0)
@@ -614,10 +614,10 @@ namespace unit_ops {
         }
         return Translation::capitalize(ret);
     }
-    string get_last_name_eng(UnitInfo *u)
+    std::string24 get_last_name_eng(UnitInfo *u)
     {
         df::language_name name = u->unit->name;
-        string ret = "";
+        std::string24 ret = "";
         for (int i = 0; i < 2; i++)
         {
             if (name.words[i] >= 0)
@@ -625,49 +625,49 @@ namespace unit_ops {
         }
         return Translation::capitalize(ret);
     }
-    string get_profname(UnitInfo *u)
+    std::string24 get_profname(UnitInfo *u)
         { return Units::getProfessionName(u->unit); }
-    string get_goalname(UnitInfo *u)
+    std::string24 get_goalname(UnitInfo *u)
         { return Units::getGoalName(u->unit); }
-    string get_real_profname(UnitInfo *u)
+    std::string24 get_real_profname(UnitInfo *u)
     {
-        string tmp = u->unit->custom_profession;
+        std::string24 tmp = u->unit->custom_profession;
         u->unit->custom_profession = "";
-        string ret = get_profname(u);
+        std::string24 ret = get_profname(u);
         u->unit->custom_profession = tmp;
         return ret;
     }
-    string get_base_profname(UnitInfo *u)
+    std::string24 get_base_profname(UnitInfo *u)
     {
         return ENUM_ATTR_STR(profession, caption, u->unit->profession);
     }
-    string get_short_profname(UnitInfo *u)
+    std::string24 get_short_profname(UnitInfo *u)
     {
         for (size_t i = 0; i < NUM_COLUMNS; i++)
         {
             if (columns[i].profession == u->unit->profession)
-                return string(columns[i].label);
+                return std::string24(columns[i].label);
         }
         return "??";
     }
     #define id_getter(id) \
-    string get_##id(UnitInfo *u) \
+    std::string24 get_##id(UnitInfo *u) \
         { return itos(u->ids.id); }
     id_getter(list_id);
     id_getter(list_id_prof);
     id_getter(list_id_group);
     #undef id_getter
-    string get_unit_id(UnitInfo *u)
+    std::string24 get_unit_id(UnitInfo *u)
         { return itos(u->unit->id); }
-    string get_age(UnitInfo *u)
+    std::string24 get_age(UnitInfo *u)
         { return itos((int)Units::getAge(u->unit)); }
-    void set_nickname(UnitInfo *u, std::string nick)
+    void set_nickname(UnitInfo *u, std::string24 nick)
     {
         Units::setNickname(u->unit, nick);
         u->name = get_nickname(u);
         u->transname = get_nickname_eng(u);
     }
-    void set_profname(UnitInfo *u, std::string prof)
+    void set_profname(UnitInfo *u, std::string24 prof)
     {
         u->unit->custom_profession = prof;
         u->profession = get_profname(u);
@@ -676,27 +676,27 @@ namespace unit_ops {
 
 struct ProfessionTemplate
 {
-    std::string name;
+    std::string24 name;
     bool mask;
-    std::vector<df::unit_labor> labors;
+    std::vector12<df::unit_labor> labors;
 
-    bool load(string directory, string file)
+    bool load(std::string24 directory, std::string24 file)
     {
         cerr << "Attempt to load " << file << endl;
-        string fullPath = directory;
+        std::string24 fullPath = directory;
         fullPath += "/" + file;
         std::ifstream infile(fullPath.c_str());
         if (infile.bad()) {
             return false;
         }
 
-        std::string line;
+        std::string24 line;
         name = file; // If no name is given we default to the filename
         mask = false;
         while (std::getline(infile, line)) {
             if (strcmp(line.substr(0,5).c_str(),"NAME ")==0)
             {
-                string::size_type nextInd = line.find(' ');
+                std::string24::size_type nextInd = line.find(' ');
                 name = line.substr(nextInd + 1);
                 continue;
             }
@@ -717,9 +717,9 @@ struct ProfessionTemplate
 
         return true;
     }
-    bool save(string directory)
+    bool save(std::string24 directory)
     {
-        string fullPath = directory;
+        std::string24 fullPath = directory;
         fullPath += "/" + name;
         std::ofstream outfile(fullPath.c_str());
         if (outfile.bad())
@@ -774,11 +774,11 @@ struct ProfessionTemplate
     }
 };
 
-static std::string professions_folder = Filesystem::getcwd() + "/professions";
+static std::string24 professions_folder = Filesystem::getcwd() + "/professions";
 class ProfessionTemplateManager
 {
 public:
-    std::vector<ProfessionTemplate> templates;
+    std::vector12<ProfessionTemplate> templates;
 
     void reload() {
         unload();
@@ -789,7 +789,7 @@ public:
     }
     void load()
     {
-        vector <string> files;
+        std::vector12<std::string24> files;
 
         cerr << "Attempting to load professions: " << professions_folder.c_str() << endl;
         if (!Filesystem::isdir(professions_folder) && !Filesystem::mkdir(professions_folder))
@@ -827,7 +827,7 @@ static ProfessionTemplateManager manager;
 class viewscreen_unitbatchopst : public dfhack_viewscreen {
 public:
     enum page { MENU, NICKNAME, PROFNAME };
-    viewscreen_unitbatchopst(vector<UnitInfo*> &base_units,
+    viewscreen_unitbatchopst(std::vector12<UnitInfo*> &base_units,
                              bool filter_selected = true,
                              bool *dirty_flag = NULL
                              )
@@ -860,7 +860,7 @@ public:
         formatter.add_option("gi", "Position in list, among dwarves in same profession group", unit_ops::get_list_id_group);
         formatter.add_option("ri", "Raw unit ID", unit_ops::get_unit_id);
         selection_empty = true;
-        for (std::vector<UnitInfo*>::const_iterator it = base_units.begin(); it != base_units.end(); ++it)
+        for (std::vector12<UnitInfo*>::const_iterator it = base_units.begin(); it != base_units.end(); ++it)
         {
             UnitInfo* uinfo = *it;
             if (uinfo->selected || !filter_selected)
@@ -870,26 +870,26 @@ public:
             }
         }
     }
-    std::string getFocusString() { return "unitlabors/batch"; }
+    std::string24 getFocusString() { return "unitlabors/batch"; }
     void select_page (page p)
     {
         if (p == NICKNAME || p == PROFNAME)
             entry = "";
         cur_page = p;
     }
-    void apply(void (*func)(UnitInfo*, string), string arg, StringFormatter<UnitInfo*> *arg_formatter)
+    void apply(void (*func)(UnitInfo*, std::string24), std::string24 arg, StringFormatter<UnitInfo*> *arg_formatter)
     {
         if (dirty)
             *dirty = true;
-        for (std::vector<UnitInfo*>::const_iterator it = units.begin(); it != units.end(); ++it)
+        for (std::vector12<UnitInfo*>::const_iterator it = units.begin(); it != units.end(); ++it)
         {
             UnitInfo* u = (*it);
             if (!u || !u->unit || !u->allowEdit) continue;
-            string cur_arg = arg_formatter->format(u, arg);
+            std::string24 cur_arg = arg_formatter->format(u, arg);
             func(u, cur_arg);
         }
     }
-    void feed(set<df::interface_key> *events)
+    void feed(std::set8<df::interface_key> *events)
     {
         if (cur_page == MENU)
         {
@@ -922,7 +922,7 @@ public:
             }
             else
             {
-                for (set<df::interface_key>::const_iterator it = events->begin(); it != events->end(); ++it)
+                for (std::set8<df::interface_key>::const_iterator it = events->begin(); it != events->end(); ++it)
                 {
                     int ch = Screen::keyToChar(*it);
                     if (ch == 0 && entry.size())
@@ -949,12 +949,12 @@ public:
             menu_options.display(true);
         }
         OutputString(COLOR_LIGHTGREEN, x, y, itos(units.size()));
-        OutputString(COLOR_GREY, x, y, string(" ") + (units.size() > 1 ? "dwarves" : "dwarf") + " selected: ");
+        OutputString(COLOR_GREY, x, y, std::string24(" ") + (units.size() > 1 ? "dwarves" : "dwarf") + " selected: ");
         size_t max_x = gps->dimx - 2;
         size_t i = 0;
         for ( ; i < units.size(); i++)
         {
-            string name = unit_ops::get_nickname(units[i]);
+            std::string24 name = unit_ops::get_nickname(units[i]);
             if (name.size() + x + 12 >= max_x)   // 12 = "and xxx more"
                 break;
             OutputString(COLOR_WHITE, x, y, name + ", ");
@@ -971,7 +971,7 @@ public:
         x = 2; y += 2;
         if (cur_page == NICKNAME || cur_page == PROFNAME)
         {
-            std::string name_type = (cur_page == page::NICKNAME) ? "Nickname" : "Profession name";
+            std::string24 name_type = (cur_page == page::NICKNAME) ? "Nickname" : "Profession name";
             OutputString(COLOR_GREY, x, y, "Custom " + name_type + ":");
             x = 2; y += 1;
             OutputString(COLOR_WHITE, x, y, entry);
@@ -986,8 +986,8 @@ public:
             {
                 x = 2; y++;
                 StringFormatter<UnitInfo*>::T_opt opt = *it;
-                //OutputString(COLOR_LIGHTCYAN, x, y, "%" + string(std::get<0>(opt)));
-                //OutputString(COLOR_WHITE, x, y, ": " + string(std::get<1>(opt)));
+                //OutputString(COLOR_LIGHTCYAN, x, y, "%" + std::string24(std::get<0>(opt)));
+                //OutputString(COLOR_WHITE, x, y, ": " + std::string24(std::get<1>(opt)));
                 OutputString(COLOR_LIGHTCYAN, x, y, "%" + opt.s1);
                 OutputString(COLOR_WHITE, x, y, ": " + opt.s2);
             }
@@ -996,8 +996,8 @@ public:
 protected:
     ListColumn<page> menu_options;
     page cur_page;
-    string entry;
-    vector<UnitInfo*> units;
+    std::string24 entry;
+    std::vector12<UnitInfo*> units;
     StringFormatter<UnitInfo*> formatter;
     bool selection_empty;
     bool *dirty;
@@ -1010,7 +1010,7 @@ private:
 };
 class viewscreen_unitprofessionset : public dfhack_viewscreen {
 public:
-    viewscreen_unitprofessionset(vector<UnitInfo*> &base_units,
+    viewscreen_unitprofessionset(std::vector12<UnitInfo*> &base_units,
                              bool filter_selected = true
                              )
         :menu_options(-1) // default
@@ -1024,7 +1024,7 @@ public:
 
         manager.reload();
         for (size_t i = 0; i < manager.templates.size(); i++) {
-            std::string name = manager.templates[i].name;
+            std::string24 name = manager.templates[i].name;
             if (manager.templates[i].mask)
                 name += " (mask)";
             ListEntry<size_t> elem(name, i);
@@ -1033,7 +1033,7 @@ public:
         menu_options.filterDisplay();
 
         selection_empty = true;
-        for (vector<UnitInfo*>::const_iterator it = base_units.begin(); it != base_units.end(); ++it)
+        for (std::vector12<UnitInfo*>::const_iterator it = base_units.begin(); it != base_units.end(); ++it)
         {
             UnitInfo* uinfo = *it;
             if (uinfo->selected || !filter_selected)
@@ -1043,8 +1043,8 @@ public:
             }
         }
     }
-    std::string getFocusString() { return "unitlabors/profession"; }
-    void feed(set<df::interface_key> *events)
+    std::string24 getFocusString() { return "unitlabors/profession"; }
+    void feed(std::set8<df::interface_key> *events)
     {
         if (events->count(interface_key::LEAVESCREEN))
         {
@@ -1076,7 +1076,7 @@ public:
         ProfessionTemplate prof = manager.templates[selected];
 
         //for (UnitInfo *u : units)
-        for (std::vector<UnitInfo*>::const_iterator ci = units.begin(); ci != units.end(); ++ci)
+        for (std::vector12<UnitInfo*>::const_iterator ci = units.begin(); ci != units.end(); ++ci)
         {
             UnitInfo* u = *ci;
             if (!u || !u->unit || !u->allowEdit) continue;
@@ -1101,12 +1101,12 @@ public:
         }
         menu_options.display(true);
         OutputString(COLOR_LIGHTGREEN, x, y, itos(units.size()));
-        OutputString(COLOR_GREY, x, y, string(" ") + (units.size() > 1 ? "dwarves" : "dwarf") + " selected: ");
+        OutputString(COLOR_GREY, x, y, std::string24(" ") + (units.size() > 1 ? "dwarves" : "dwarf") + " selected: ");
         size_t max_x = gps->dimx - 2;
         size_t i = 0;
         for ( ; i < units.size(); i++)
         {
-            string name = unit_ops::get_nickname(units[i]);
+            std::string24 name = unit_ops::get_nickname(units[i]);
             if (name.size() + x + 12 >= max_x)   // 12 = "and xxx more"
                 break;
             OutputString(COLOR_WHITE, x, y, name + ", ");
@@ -1124,7 +1124,7 @@ public:
 protected:
     bool selection_empty;
     ListColumn<size_t> menu_options;
-    vector<UnitInfo*> units;
+    std::vector12<UnitInfo*> units;
 private:
     void resize(int32_t x, int32_t y)
     {
@@ -1144,7 +1144,7 @@ enum display_columns {
 
 class viewscreen_unitlaborsst : public dfhack_viewscreen {
 public:
-    void feed(set<df::interface_key> *events);
+    void feed(std::set8<df::interface_key> *events);
 
     void logic() {
         dfhack_viewscreen::logic();
@@ -1157,15 +1157,15 @@ public:
 
     void help() { }
 
-    std::string getFocusString() { return "unitlabors"; }
+    std::string24 getFocusString() { return "unitlabors"; }
 
     df::unit *getSelectedUnit();
 
-    viewscreen_unitlaborsst(vector<df::unit*> &src, int cursor_pos);
+    viewscreen_unitlaborsst(std::vector12<df::unit*> &src, int cursor_pos);
     ~viewscreen_unitlaborsst() { };
 
 protected:
-    vector<UnitInfo *> units;
+    std::vector12<UnitInfo *> units;
     altsort_mode altsort;
 
     bool do_refresh_names;
@@ -1182,10 +1182,10 @@ protected:
     void calcSize ();
 };
 
-viewscreen_unitlaborsst::viewscreen_unitlaborsst(vector<df::unit*> &src, int cursor_pos)
+viewscreen_unitlaborsst::viewscreen_unitlaborsst(std::vector12<df::unit*> &src, int cursor_pos)
 {
     std::map<df::unit*,int> active_idx;
-    std::vector<df::unit*> &active = world->units.active;
+    std::vector12<df::unit*> &active = world->units.active;
     for (size_t i = 0; i < active.size(); i++)
         active_idx[active[i]] = i;
 
@@ -1465,7 +1465,7 @@ void viewscreen_unitlaborsst::calcSize()
         first_column = sel_column - col_widths[DISP_COLUMN_LABORS] + 1;
 }
 
-void viewscreen_unitlaborsst::feed(set<df::interface_key> *events)
+void viewscreen_unitlaborsst::feed(std::set8<df::interface_key> *events)
 {
     int8_t modstate = Core::getInstance().getModstate();
     bool leave_all = events->count(interface_key::LEAVESCREEN_ALL);
@@ -1891,7 +1891,7 @@ void viewscreen_unitlaborsst::feed(set<df::interface_key> *events)
 
     if (events->count(interface_key::CUSTOM_E))
     {
-        vector<UnitInfo*> tmp;
+        std::vector12<UnitInfo*> tmp;
         tmp.push_back(cur);
         //Screen::show(dts::make_unique<viewscreen_unitbatchopst>(tmp, false, &do_refresh_names), plugin_self);
         Screen::show(new viewscreen_unitbatchopst(tmp, false, &do_refresh_names), NULL, plugin_self);
@@ -1908,7 +1908,7 @@ void viewscreen_unitlaborsst::feed(set<df::interface_key> *events)
             //Screen::show(dts::make_unique<viewscreen_unitprofessionset>(units, true), plugin_self);
             Screen::show(new viewscreen_unitprofessionset(units, true), NULL, plugin_self);
         } else {
-            vector<UnitInfo*> tmp;
+            std::vector12<UnitInfo*> tmp;
             tmp.push_back(cur);
             //Screen::show(dts::make_unique<viewscreen_unitprofessionset>(tmp, false), plugin_self);
             Screen::show(new viewscreen_unitprofessionset(tmp, false), NULL, plugin_self);
@@ -1957,7 +1957,7 @@ void viewscreen_unitlaborsst::render()
     Screen::paintTile(Screen::Pen('\373', 7, 0), col_offsets[DISP_COLUMN_SELECTED], 2);
     Screen::paintString(Screen::Pen(' ', 7, 0), col_offsets[DISP_COLUMN_NAME], 2, "Name");
 
-    string detail_str;
+    std::string24 detail_str;
     if (detail_mode == DETAIL_MODE_SQUAD) {
         detail_str = "Squad";
     } else if (detail_mode == DETAIL_MODE_JOB) {
@@ -2009,7 +2009,7 @@ void viewscreen_unitlaborsst::render()
         int8_t fg = 15, bg = 0;
 
         int stress_lvl = unit->status.current_soul ? unit->status.current_soul->personality.stress_level : 0;
-        //const vector<UIColor> stress_colors {
+        //const std::vector12<UIColor> stress_colors {
         //    13, // 5:1
         //    12, // 4:1
         //    14, // 6:1
@@ -2023,13 +2023,13 @@ void viewscreen_unitlaborsst::render()
             2,  // 2:0
             10  // 2:1 (default)
         };
-        static const vector<UIColor> stress_colors(stress_c_arr, stress_c_arr + sizeof(stress_c_arr)/sizeof(stress_c_arr[0]));
+        static const std::vector12<UIColor> stress_colors(stress_c_arr, stress_c_arr + sizeof(stress_c_arr)/sizeof(stress_c_arr[0]));
         fg = vector_get(stress_colors, Units::getStressCategoryRaw(stress_lvl), stress_colors.back());
 
         // cap at 6 digits
         if (stress_lvl < -99999) stress_lvl = -99999;
         if (stress_lvl > 999999) stress_lvl = 999999;
-        string stress = stl_sprintf("%6i", stress_lvl);
+        std::string24 stress = stl_sprintf("%6i", stress_lvl);
 
         Screen::paintString(Screen::Pen(' ', fg, bg), col_offsets[DISP_COLUMN_STRESS], 4 + row, stress);
 
@@ -2045,7 +2045,7 @@ void viewscreen_unitlaborsst::render()
             bg = 7;
         }
 
-        string name = cur->name;
+        std::string24 name = cur->name;
         name.resize(col_widths[DISP_COLUMN_NAME]);
         Screen::paintString(Screen::Pen(' ', fg, bg), col_offsets[DISP_COLUMN_NAME], 4 + row, name);
 
@@ -2156,7 +2156,7 @@ void viewscreen_unitlaborsst::render()
         Screen::paintString(white_pen, x, y, ": ");
         x += 2;
 
-        string str;
+        std::string24 str;
         if (columns[sel_column].skill == job_skill::NONE)
         {
             str = ENUM_ATTR_STR(unit_labor, caption, columns[sel_column].labor);
@@ -2189,15 +2189,15 @@ void viewscreen_unitlaborsst::render()
             x = 1;
             y++;
 
-            string squadLabel = "Squad: ";
+            std::string24 squadLabel = "Squad: ";
             Screen::paintString(white_pen, x, y, squadLabel);
             x += squadLabel.size();
 
-            string squad = cur->squad_effective_name;
+            std::string24 squad = cur->squad_effective_name;
             Screen::paintString(Screen::Pen(' ', 11, 0), x, y, squad);
             x += squad.size();
 
-            string pos = stl_sprintf(" Pos %i", cur->unit->military.squad_position + 1);
+            std::string24 pos = stl_sprintf(" Pos %i", cur->unit->military.squad_position + 1);
             Screen::paintString(Screen::Pen(' ', 9, 0), x, y, pos);
 
         }
@@ -2293,7 +2293,7 @@ struct unitlist_hook : df::viewscreen_unitlistst
 {
     typedef df::viewscreen_unitlistst interpose_base;
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (input->count(interface_key::UNITVIEW_PRF_PROF))
         {
@@ -2341,7 +2341,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     if (!Filesystem::isdir(CONFIG_PATH) && !Filesystem::mkdir(CONFIG_PATH))
     {

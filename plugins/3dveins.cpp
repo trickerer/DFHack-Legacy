@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <map>
 #include <algorithm>
-#include <vector>
+
 #include <math.h>
 
 #include "Core.h"
@@ -47,9 +47,9 @@ DFHACK_PLUGIN("3dveins");
 REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(gametype);
 
-command_result cmd_3dveins(color_ostream &out, std::vector <std::string> & parameters);
+command_result cmd_3dveins(color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "3dveins", "Rewrites the veins to make them extend in 3D space.",
@@ -213,7 +213,7 @@ template<class T>
 class BlockGrid
 {
     df::coord dim;
-    std::vector<T> buf;
+    std::vector12<T> buf;
 public:
     BlockGrid(df::coord size) : dim(size) {
         buf.resize(dim.x * dim.y * dim.z);
@@ -294,7 +294,7 @@ struct GeoBlock
 struct VeinExtent
 {
     //typedef shared_ptr<VeinExtent> Ptr;
-    typedef std::vector<VeinExtent*> PVec;
+    typedef std::vector12<VeinExtent*> PVec;
 
     t_veinkey vein;
     int probability, num_tiles;
@@ -306,7 +306,7 @@ struct VeinExtent
     NoiseFunction* distribution;
 
     int num_unmined, num_layer, min_z, max_z;
-    std::vector<GeoLayer*> layers;
+    std::vector12<GeoLayer*> layers;
 
     VeinExtent(t_veinkey vein) : vein(vein) {
         probability = num_tiles = placed_tiles = 0;
@@ -389,7 +389,7 @@ struct GeoLayer
 
     df::coord2d size;
     BlockGrid<GeoBlock*> blocks;
-    std::vector<GeoBlock*> block_list;
+    std::vector12<GeoBlock*> block_list;
 
     int tiles, unmined_tiles, mineral_tiles;
     std::map<t_veinkey,int> mineral_count;
@@ -456,7 +456,7 @@ struct GeoBiome
     df::coord2d size;
     BlockGrid<GeoColumn> columns;
 
-    std::vector<GeoLayer*> layers;
+    std::vector12<GeoLayer*> layers;
 
     GeoBiome(const BiomeInfo &biome, df::coord2d base, df::coord2d mapsize)
         : info(biome), world_pos(base), size(mapsize), columns(mapsize)
@@ -509,7 +509,7 @@ struct VeinGenerator
     df::coord2d base;
 
     std::map<int, GeoBiome*> biomes;
-    std::vector<GeoBiome*> biome_by_idx;
+    std::vector12<GeoBiome*> biome_by_idx;
 
     struct VMats {
         bool can_support_aquifer;
@@ -525,7 +525,7 @@ struct VeinGenerator
             memset(valid_type, -1, sizeof(valid_type));
         }
     };
-    std::vector<VMats> materials;
+    std::vector12<VMats> materials;
 
     std::map<t_veinkey, VeinExtent::PVec> veins;
 
@@ -535,7 +535,7 @@ struct VeinGenerator
         for (std::map<int, GeoBiome*>::const_iterator it = biomes.begin(); it != biomes.end(); ++it)
             delete it->second;
 
-        for (std::vector<VMats>::const_iterator ci = materials.begin(); ci != materials.end(); ++ci)
+        for (std::vector12<VMats>::const_iterator ci = materials.begin(); ci != materials.end(); ++ci)
             for (unsigned int i = 0; i < NUM_INCLUSIONS; ++i)
                 delete (*ci).funcs[i];
     }
@@ -573,7 +573,7 @@ struct VeinGenerator
 
 bool VeinGenerator::init_biomes()
 {
-    std::vector<df::inorganic_raw*> &mats = df::inorganic_raw::get_vector();
+    std::vector12<df::inorganic_raw*> &mats = df::inorganic_raw::get_vector();
     materials.resize(world->raws.inorganics.size());
 
     for (size_t i = 0; i < mats.size(); i++)
@@ -609,7 +609,7 @@ bool VeinGenerator::init_biomes()
                 return false;
 
             // Mark valid vein types
-            std::vector<df::world_geo_layer*> &layers = info.geobiome->layers;
+            std::vector12<df::world_geo_layer*> &layers = info.geobiome->layers;
 
             for (size_t i = 0; i < layers.size(); i++)
             {
@@ -638,7 +638,7 @@ bool VeinGenerator::init_biomes()
 
 bool GeoBiome::init_layers()
 {
-    std::vector<df::world_geo_layer*> &info_layers = info.geobiome->layers;
+    std::vector12<df::world_geo_layer*> &info_layers = info.geobiome->layers;
 
     layers.resize(info_layers.size());
 
@@ -1192,7 +1192,7 @@ void GeoBlock::place_tiles(float threshold, int16_t new_material, df::inclusion_
     }
 }
 
-static int measure(const std::vector<GeoBlock*> &arena, float threshold)
+static int measure(const std::vector12<GeoBlock*> &arena, float threshold)
 {
     int count = 0;
     for (size_t i = 0; i < arena.size(); i++)
@@ -1238,7 +1238,7 @@ void VeinExtent::merge_into(VeinExtent* target)
 
 void VeinExtent::place_tiles()
 {
-    std::vector<GeoBlock*> arena;
+    std::vector12<GeoBlock*> arena;
 
     int env_material = parent_mat();
 
@@ -1246,7 +1246,7 @@ void VeinExtent::place_tiles()
     {
         GeoLayer* layer = layers[i];
 
-        for (std::vector<GeoBlock*>::const_iterator bit = layer->block_list.begin(); bit != layer->block_list.end(); ++bit)
+        for (std::vector12<GeoBlock*>::const_iterator bit = layer->block_list.begin(); bit != layer->block_list.end(); ++bit)
         {
             if ((*bit)->prepare_arena(env_material, distribution))
                 arena.push_back(*bit);
@@ -1279,7 +1279,7 @@ void VeinExtent::place_tiles()
 
 bool GeoLayer::form_veins(color_ostream &out)
 {
-    std::vector<VeinExtent*> refs;
+    std::vector12<VeinExtent*> refs;
 
     // Defunct layers cannot have veins
     if (tiles <= 0)
@@ -1307,7 +1307,7 @@ bool GeoLayer::form_veins(color_ostream &out)
 
             if (cur_pmat != tgt_pmat)
             {
-                std::string ctx = "be anywhere";
+                std::string24 ctx = "be anywhere";
                 if (vptr->parent)
                     ctx = "only be in "+MaterialInfo(0,vptr->parent_mat()).getToken();
 
@@ -1345,7 +1345,7 @@ bool VeinGenerator::place_orphan(t_veinkey key, int size, GeoLayer *from)
 
     for (std::map<int,GeoBiome*>::const_iterator it = biomes.begin(); it != biomes.end(); ++it)
     {
-        std::vector<GeoLayer*> &layers = it->second->layers;
+        std::vector12<GeoLayer*> &layers = it->second->layers;
 
         for (size_t i = 0; i < layers.size(); i++)
         {
@@ -1417,7 +1417,7 @@ bool VeinGenerator::form_veins()
     // Form veins in layers
     for (std::map<int,GeoBiome*>::const_iterator it = biomes.begin(); it != biomes.end(); ++it)
     {
-        std::vector<GeoLayer*> &layers = it->second->layers;
+        std::vector12<GeoLayer*> &layers = it->second->layers;
 
         for (size_t i = 0; i < layers.size(); i++)
             if (layers[i] && !layers[i]->form_veins(out))
@@ -1427,7 +1427,7 @@ bool VeinGenerator::form_veins()
     // Place orphaned minerals
     for (std::map<int,GeoBiome*>::const_iterator it = biomes.begin(); it != biomes.end(); ++it)
     {
-        std::vector<GeoLayer*> &layers = it->second->layers;
+        std::vector12<GeoLayer*> &layers = it->second->layers;
 
         for (size_t i = 0; i < layers.size(); i++)
         {
@@ -1446,7 +1446,7 @@ bool VeinGenerator::form_veins()
     // Join adjacent extents with the same density
     for (std::map<int,GeoBiome*>::const_iterator it = biomes.begin(); it != biomes.end(); ++it)
     {
-        std::vector<GeoLayer*> &layers = it->second->layers;
+        std::vector12<GeoLayer*> &layers = it->second->layers;
 
         for (size_t i = 0; i < layers.size(); i++)
         {
@@ -1498,7 +1498,7 @@ void VeinGenerator::init_seeds()
 {
     MersenneRNG rng;
 
-    std::string seed = world->worldgen.worldgen_parms.seed;
+    std::string24 seed = world->worldgen.worldgen_parms.seed;
     seed.resize((seed.size()+3)&~3);
     rng.init((uint32_t*)seed.data(), seed.size()/4, 10);
 
@@ -1615,7 +1615,7 @@ bool VeinGenerator::place_veins(bool verbose)
     return true;
 }
 
-command_result cmd_3dveins(color_ostream &con, std::vector<std::string> & parameters)
+command_result cmd_3dveins(color_ostream &con, std::vector12<std::string24> & parameters)
 {
     bool verbose = false;
 

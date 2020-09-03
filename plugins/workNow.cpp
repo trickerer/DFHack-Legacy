@@ -9,7 +9,7 @@
 
 #include "df/global_objects.h"
 
-#include <vector>
+
 
 using namespace std;
 using namespace DFHack;
@@ -20,12 +20,12 @@ REQUIRE_GLOBAL(process_dig);
 
 static int mode = 0;
 
-DFhackCExport command_result workNow(color_ostream& out, vector<string>& parameters);
+DFhackCExport command_result workNow(color_ostream& out, std::vector12<std::string24>& parameters);
 
 void jobCompletedHandler(color_ostream& out, void* ptr);
 EventManager::EventHandler handler(jobCompletedHandler,1);
 
-DFhackCExport command_result plugin_init(color_ostream& out, std::vector<PluginCommand> &commands) {
+DFhackCExport command_result plugin_init(color_ostream& out, std::vector12<PluginCommand> &commands) {
     if (!process_jobs || !process_dig)
         return CR_FAILURE;
 
@@ -64,7 +64,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-DFhackCExport command_result workNow(color_ostream& out, vector<string>& parameters) {
+DFhackCExport command_result workNow(color_ostream& out, std::vector12<std::string24>& parameters) {
     if ( parameters.size() == 0 ) {
         out.print("workNow status = %d\n", mode);
         return CR_OK;

@@ -1,8 +1,8 @@
 // Auto Material Select
 
 #include <map>
-#include <string>
-#include <vector>
+
+
 
 #include "Core.h"
 #include "Console.h"
@@ -40,8 +40,8 @@
 
 using namespace std;
 using std::map;
-using std::string;
-using std::vector;
+
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -91,14 +91,14 @@ static coord32_t box_first, box_second;
 static bool box_select_enabled = false;
 static bool show_box_selection = true;
 static bool hollow_selection = false;
-static deque<df::item*> box_select_materials;
+static std::deque20<df::item*> box_select_materials;
 
 #define SELECTION_IGNORE_TICKS 10
 static int ignore_selection = SELECTION_IGNORE_TICKS;
 
 static map<int16_t, MaterialDescriptor> last_used_material;
 static map<int16_t, MaterialDescriptor> last_moved_material;
-static map< int16_t, vector<MaterialDescriptor> > preferred_materials;
+static map< int16_t, std::vector12<MaterialDescriptor> > preferred_materials;
 static map< int16_t, df::interface_key > hotkeys;
 static bool last_used_moved = false;
 static bool auto_choose_materials = true;
@@ -131,10 +131,10 @@ static inline bool in_type_choice_stage()
         ui_build_selector->building_type < 0;
 }
 
-static inline vector<MaterialDescriptor> &get_curr_constr_prefs()
+static inline std::vector12<MaterialDescriptor> &get_curr_constr_prefs()
 {
     if (preferred_materials.find(ui_build_selector->building_subtype) == preferred_materials.end())
-        preferred_materials[ui_build_selector->building_subtype] = vector<MaterialDescriptor>();
+        preferred_materials[ui_build_selector->building_subtype] = std::vector12<MaterialDescriptor>();
 
     return preferred_materials[ui_build_selector->building_subtype];
 }
@@ -278,13 +278,13 @@ struct building_site
     building_site() {}
 };
 
-static deque<building_site> valid_building_sites;
-static deque<building_site> open_air_sites;
+static std::deque20<building_site> valid_building_sites;
+static std::deque20<building_site> open_air_sites;
 static building_site anchor;
 
 static bool is_orthogonal_to_pending_construction(building_site &site)
 {
-    for (deque<building_site>::iterator it = valid_building_sites.begin(); it != valid_building_sites.end(); it++)
+    for (std::deque20<building_site>::iterator it = valid_building_sites.begin(); it != valid_building_sites.end(); it++)
     {
         if ((it->pos.x == site.pos.x && abs(it->pos.y - site.pos.y) == 1) || (it->pos.y == site.pos.y && abs(it->pos.x - site.pos.x) == 1))
         {
@@ -535,9 +535,9 @@ static bool find_valid_building_sites(bool in_future_placement_mode)
     while (valid_building_sites.size() > 0 && open_air_sites.size() != last_open_air_count)
     {
         last_open_air_count = open_air_sites.size();
-        deque<building_site> current_open_air_list = open_air_sites;
+        std::deque20<building_site> current_open_air_list = open_air_sites;
         open_air_sites.clear();
-        for (deque<building_site>::iterator it = current_open_air_list.begin(); it != current_open_air_list.end(); it++)
+        for (std::deque20<building_site>::iterator it = current_open_air_list.begin(); it != current_open_air_list.end(); it++)
         {
             if (is_orthogonal_to_pending_construction(*it))
                 valid_building_sites.push_back(*it);
@@ -556,7 +556,7 @@ static bool designate_new_construction(df::coord &pos, df::construction_type &ty
     if (!newinst)
         return false;
 
-    vector<df::item*> items;
+    std::vector12<df::item*> items;
     items.push_back(item);
     Maps::ensureTileBlock(pos);
 
@@ -579,7 +579,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
 
     void send_key(const df::interface_key &key)
     {
-        set< df::interface_key > keys;
+        std::set8< df::interface_key > keys;
         keys.insert(key);
         this->feed(&keys);
     }
@@ -587,7 +587,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
     bool select_material_at_index(size_t i)
     {
         ui_build_selector->sel_index = i;
-        std::set< df::interface_key > keys;
+        std::set8< df::interface_key > keys;
         keys.insert(df::interface_key::SELECT_ALL);
         this->feed(&keys);
         return !in_material_choice_stage();
@@ -660,7 +660,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
         }
         else if (show_box_selection && box_select_mode == SELECT_MATERIALS)
         {
-            for (deque<building_site>::iterator it = valid_building_sites.begin(); it != valid_building_sites.end(); it++)
+            for (std::deque20<building_site>::iterator it = valid_building_sites.begin(); it != valid_building_sites.end(); it++)
             {
                 int32_t x = it->pos.x - vport.x + 1;
                 int32_t y = it->pos.y - vport.y + 1;
@@ -678,7 +678,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
         }
     }
 
-    void handle_input(set<df::interface_key> *input)
+    void handle_input(std::set8<df::interface_key> *input)
     {
         if (ui_build_selector->building_subtype >= 7)
             return;
@@ -703,7 +703,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
                     if (box_select_enabled)
                     {
                         int32_t curr_index = ui_build_selector->sel_index;
-                        vector<MaterialDescriptor> gen_material;
+                        std::vector12<MaterialDescriptor> gen_material;
                         gen_material.push_back(get_material_in_list(curr_index));
                         box_select_materials.clear();
                         // Populate material list with selected material
@@ -821,7 +821,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
     //END UI Methods
 
     //START Building Application
-    bool populate_box_materials(vector<MaterialDescriptor> &gen_materials, int32_t count = -1)
+    bool populate_box_materials(std::vector12<MaterialDescriptor> &gen_materials, int32_t count = -1)
     {
         bool result = false;
 
@@ -832,7 +832,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
             send_key(interface_key::BUILDING_EXPAND_CONTRACT);
 
         size_t size = ui_build_selector->choices.size();
-        vector<MaterialDescriptor>::iterator gen_material;
+        std::vector12<MaterialDescriptor>::iterator gen_material;
         for (size_t i = 0; i < size; i++)
         {
             if (VIRTUAL_CAST_VAR(spec, df::build_req_choice_specst, ui_build_selector->choices[i]))
@@ -998,7 +998,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
     }
     //END Building Application
 
-    DEFINE_VMETHOD_INTERPOSE(void, feed, (set<df::interface_key> *input))
+    DEFINE_VMETHOD_INTERPOSE(void, feed, (std::set8<df::interface_key> *input))
     {
         if (ignore_selection < SELECTION_IGNORE_TICKS)
         {
@@ -1171,7 +1171,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable)
     return CR_OK;
 }
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     hotkeys[construction_type::Wall] = df::interface_key::HOTKEY_BUILDING_CONSTRUCTION_WALL;
     hotkeys[construction_type::Floor] = df::interface_key::HOTKEY_BUILDING_CONSTRUCTION_FLOOR;

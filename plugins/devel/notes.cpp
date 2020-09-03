@@ -2,19 +2,19 @@
 #include <Console.h>
 #include <Export.h>
 #include <PluginManager.h>
-#include <vector>
-#include <string>
+
+
 #include <modules/Notes.h>
 
-using std::vector;
-using std::string;
+
+
 using namespace DFHack;
 
-command_result df_notes (color_ostream &out, vector <string> & parameters);
+command_result df_notes (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFHACK_PLUGIN("notes");
 
-DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("dumpnotes",
                "Dumps in-game notes",
@@ -27,12 +27,12 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result df_notes (color_ostream &con, vector <string> & parameters)
+command_result df_notes (color_ostream &con, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
 
     DFHack::Notes * note_mod = Core::getInstance().getNotes();
-    std::vector<t_note*>* note_list = note_mod->notes;
+    std::vector12<t_note*>* note_list = note_mod->notes;
 
     if (note_list == NULL)
     {

@@ -1,8 +1,8 @@
 #include "Core.h"
 #include "Console.h"
 
-#include <string>
-#include <set>
+
+
 #include "modules/Gui.h"
 
 #include "Types.h"
@@ -10,7 +10,7 @@
 #include "help_ui.h"
 #include "screen.h"
 
-using std::vector;
+
 
 namespace embark_assist{
     namespace help_ui {
@@ -35,11 +35,11 @@ namespace embark_assist{
         public:
             ViewscreenHelpUi();
 
-            void feed(std::set<df::interface_key> *input);
+            void feed(std::set8<df::interface_key> *input);
 
             void render();
 
-            std::string getFocusString() { return "Help UI"; }
+            std::string24 getFocusString() { return "Help UI"; }
 
         private:
             pages current_page;
@@ -47,7 +47,7 @@ namespace embark_assist{
 
         //===============================================================================
 
-        void ViewscreenHelpUi::feed(std::set<df::interface_key> *input) {
+        void ViewscreenHelpUi::feed(std::set8<df::interface_key> *input) {
             if (input->count(df::interface_key::LEAVESCREEN))
             {
                 input->clear();
@@ -110,7 +110,7 @@ namespace embark_assist{
             Screen::Pen site_pen = Screen::Pen(' ', COLOR_YELLOW, COLOR_BLACK, false);
             Screen::Pen pen_lr(' ', COLOR_LIGHTRED);
 
-            std::vector<std::string> help_text;
+            std::vector12<std::string24> help_text;
 
             Screen::clear();
 

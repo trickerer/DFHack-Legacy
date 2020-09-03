@@ -21,10 +21,10 @@ REQUIRE_GLOBAL(world);
 
 #define RENAMER_VERSION 3
 
-command_result list_creatures(color_ostream &out, std::vector <std::string> & parameters);
-command_result save_generated_raw(color_ostream &out, std::vector <std::string> & parameters);
+command_result list_creatures(color_ostream &out, std::vector12<std::string24> & parameters);
+command_result save_generated_raw(color_ostream &out, std::vector12<std::string24> & parameters);
 
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init(color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand(
         "list-generated",
@@ -55,7 +55,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
     return CR_OK;
 }
 
-//std::vector<std::string> descriptors = {
+//std::vector12<std::string24> descriptors = {
 //    "blob",        "quadruped",       "humanoid",     "silverfish",    "mayfly",        "dragonfly",   "damselfly",    "stonefly",
 //    "earwig",      "grasshopper",     "cricket",      "stick insect",  "cockroach",     "termite",     "mantis",       "louse",
 //    "thrips",      "aphid",           "cicada",       "assassin bug",  "wasp",          "hornet",      "tiger beetle", "ladybug",
@@ -88,7 +88,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
 //    "cat",         "ass",             "elk"
 //};
 
-//std::vector<std::string> prefixes = {
+//std::vector12<std::string24> prefixes = {
 //    "FORGOTTEN_BEAST_",
 //    "TITAN_",
 //    "DEMON_",
@@ -96,7 +96,7 @@ DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
 //    "HF"
 //};
 //
-std::string desc_arr[] = {
+std::string24 desc_arr[] = {
     "blob",        "quadruped",       "humanoid",     "silverfish",    "mayfly",        "dragonfly",   "damselfly",    "stonefly",
     "earwig",      "grasshopper",     "cricket",      "stick insect",  "cockroach",     "termite",     "mantis",       "louse",
     "thrips",      "aphid",           "cicada",       "assassin bug",  "wasp",          "hornet",      "tiger beetle", "ladybug",
@@ -128,16 +128,16 @@ std::string desc_arr[] = {
     "owl",         "pig",             "bee",          "fly",           "hawk",          "jay",         "rat",          "fox",
     "cat",         "ass",             "elk"
 };
-std::vector<std::string> descriptors(desc_arr, desc_arr + sizeof(desc_arr)/sizeof(desc_arr[0]));
+std::vector12<std::string24> descriptors(desc_arr, desc_arr + sizeof(desc_arr)/sizeof(desc_arr[0]));
 
-std::string pref_arr[] = {
+std::string24 pref_arr[] = {
     "FORGOTTEN_BEAST_",
     "TITAN_",
     "DEMON_",
     "NIGHT_CREATURE_",
     "HF"
 };
-std::vector<std::string> prefixes(pref_arr, pref_arr + sizeof(pref_arr)/sizeof(pref_arr[0]));
+std::vector12<std::string24> prefixes(pref_arr, pref_arr + sizeof(pref_arr)/sizeof(pref_arr[0]));
 
 DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_change_event event)
 {
@@ -149,7 +149,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
     CoreSuspender suspend;
 
-    std::vector<int> descriptorCount = std::vector<int>(descriptors.size());
+    std::vector12<int> descriptorCount = std::vector12<int>(descriptors.size());
 
     PersistentDataItem version = World::GetPersistentData("AlreadyRenamedCreatures");
     if (version.isValid() && version.ival(1) >= RENAMER_VERSION)
@@ -164,7 +164,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
         df::creature_raw* creatureRaw = world->raws.creatures.all[i];
         if (!creatureRaw->flags.is_set(df::enums::creature_raw_flags::GENERATED))
             continue;
-        size_t minPos = std::string::npos;
+        size_t minPos = std::string24::npos;
         size_t foundIndex = -1;
         size_t prefixIndex = -1;
 
@@ -192,7 +192,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
         if (foundIndex < 0)
             continue; //can't find a match.
 
-        std::string descriptor = descriptors[foundIndex];
+        std::string24 descriptor = descriptors[foundIndex];
 
         for (size_t j = 0; j < descriptor.size(); j++)
         {
@@ -202,7 +202,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
                 descriptor[j] = toupper(descriptor[j]);
         }
 
-        std::string prefix = prefixes[prefixIndex];
+        std::string24 prefix = prefixes[prefixIndex];
         if (prefix[prefix.length() - 1] != '_')
             prefix.append("_");
 
@@ -226,7 +226,7 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
     return CR_OK;
 }
 
-command_result list_creatures(color_ostream &out, std::vector <std::string> & parameters)
+command_result list_creatures(color_ostream &out, std::vector12<std::string24> & parameters)
 {
     bool detailed = false;
     if (!parameters.empty())
@@ -254,22 +254,22 @@ command_result list_creatures(color_ostream &out, std::vector <std::string> & pa
     return CR_OK;
 }
 
-command_result save_generated_raw(color_ostream &out, std::vector <std::string> & parameters)
+command_result save_generated_raw(color_ostream &out, std::vector12<std::string24> & parameters)
 {
 #ifdef LINUX_BUILD
-    std::string pathSep =  "/";
+    std::string24 pathSep =  "/";
 #else
-    std::string pathSep = "\\";
+    std::string24 pathSep = "\\";
 #endif
     int pageWidth = 16;
     int pageHeight = (descriptors.size() / pageWidth) + ((descriptors.size() % pageWidth > 0) ? 1 : 0);
     int tileWidth = 24;
     int tileHeight = 24;
-    std::string fileName = "graphics_procedural_creatures";
-    std::string pageName = "PROCEDURAL_FRIENDLY";
+    std::string24 fileName = "graphics_procedural_creatures";
+    std::string24 pageName = "PROCEDURAL_FRIENDLY";
     size_t repeats = 128;
 
-    std::string full_name = fileName + ".txt";
+    std::string24 full_name = fileName + ".txt";
     std::ofstream outputFile(full_name.c_str(), std::ios::out | std::ios::trunc);
 
     outputFile << fileName << endl << endl;
@@ -287,7 +287,7 @@ command_result save_generated_raw(color_ostream &out, std::vector <std::string> 
         {
             for (size_t rep = 0; rep < repeats; rep++)
             {
-                std::string descriptor = descriptors[descIndex];
+                std::string24 descriptor = descriptors[descIndex];
 
                 for (size_t j = 0; j < descriptor.size(); j++)
                 {
@@ -297,11 +297,11 @@ command_result save_generated_raw(color_ostream &out, std::vector <std::string> 
                         descriptor[j] = toupper(descriptor[j]);
                 }
 
-                std::string prefix = prefixes[prefIndex];
+                std::string24 prefix = prefixes[prefIndex];
                 if (prefix[prefix.length() - 1] != '_')
                     prefix.append("_");
 
-                std::string token = prefix + descriptor;
+                std::string24 token = prefix + descriptor;
                 if (rep > 0)
                     token.append("_" + uint_to_string(rep));
 

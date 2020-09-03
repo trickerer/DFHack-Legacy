@@ -1,7 +1,7 @@
 #include "common.h"
 #include <iostream>
 #include <map>
-#include <vector>
+
 #include "Core.h"
 #include "Console.h"
 #include "Export.h"
@@ -17,8 +17,8 @@
 
 using MapExtras::MapCache;
 
-using std::string;
-using std::vector;
+
+
 
 using namespace DFHack;
 using namespace df::enums;
@@ -58,7 +58,7 @@ struct hideblock
 
 // the saved data. we keep map size to check if things still match
 uint32_t x_max, y_max, z_max;
-vector <hideblock> hidesaved;
+std::vector12<hideblock> hidesaved;
 bool nopause_state = false;
 
 enum revealstate
@@ -71,14 +71,14 @@ enum revealstate
 
 revealstate revealed = NOT_REVEALED;
 
-command_result reveal(color_ostream &out, vector<string> & params);
-command_result unreveal(color_ostream &out, vector<string> & params);
-command_result revtoggle(color_ostream &out, vector<string> & params);
-command_result revflood(color_ostream &out, vector<string> & params);
-command_result revforget(color_ostream &out, vector<string> & params);
-command_result nopause(color_ostream &out, vector<string> & params);
+command_result reveal(color_ostream &out, std::vector12<std::string24> & params);
+command_result unreveal(color_ostream &out, std::vector12<std::string24> & params);
+command_result revtoggle(color_ostream &out, std::vector12<std::string24> & params);
+command_result revflood(color_ostream &out, std::vector12<std::string24> & params);
+command_result revforget(color_ostream &out, std::vector12<std::string24> & params);
+command_result nopause(color_ostream &out, std::vector12<std::string24> & params);
 
-DFhackCExport command_result plugin_init ( color_ostream &out, vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
     commands.push_back(PluginCommand("reveal","Reveal the map.",reveal,false,
         "Reveals the map, by default ignoring hell.\n"
@@ -124,7 +124,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result nopause (color_ostream &out, vector <string> & parameters)
+command_result nopause (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     if (parameters.size() == 1 && (parameters[0] == "0" || parameters[0] == "1"))
     {
@@ -164,7 +164,7 @@ void revealAdventure(color_ostream &out)
     out.print("Local map revealed.\n");
 }
 
-command_result reveal(color_ostream &out, vector<string> & params)
+command_result reveal(color_ostream &out, std::vector12<std::string24> & params)
 {
     bool no_hell = true;
     bool pause = true;
@@ -254,7 +254,7 @@ command_result reveal(color_ostream &out, vector<string> & params)
     return CR_OK;
 }
 
-command_result unreveal(color_ostream &out, vector<string> & params)
+command_result unreveal(color_ostream &out, std::vector12<std::string24> & params)
 {
     color_ostream& con = out;
     for(size_t i = 0; i < params.size();i++)
@@ -308,7 +308,7 @@ command_result unreveal(color_ostream &out, vector<string> & params)
     return CR_OK;
 }
 
-command_result revtoggle (color_ostream &out, vector<string> & params)
+command_result revtoggle (color_ostream &out, std::vector12<std::string24> & params)
 {
     for(size_t i = 0; i < params.size();i++)
     {
@@ -328,7 +328,7 @@ command_result revtoggle (color_ostream &out, vector<string> & params)
     }
 }
 
-command_result revflood(color_ostream &out, vector<string> & params)
+command_result revflood(color_ostream &out, std::vector12<std::string24> & params)
 {
     for(size_t i = 0; i < params.size();i++)
     {
@@ -504,7 +504,7 @@ command_result revflood(color_ostream &out, vector<string> & params)
     return CR_OK;
 }
 
-command_result revforget(color_ostream &out, vector<string> & params)
+command_result revforget(color_ostream &out, std::vector12<std::string24> & params)
 {
     color_ostream& con = out;
     for(size_t i = 0; i < params.size();i++)
