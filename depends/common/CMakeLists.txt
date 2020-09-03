@@ -1,5 +1,5 @@
 project(dfhack-common)
-add_library(dfhack-common STATIC EXCLUDE_FROM_ALL common.h common.cpp vector12.h bvector12.h string24.h deque20.h set8.h custom_hash.h)
+add_library(dfhack-common STATIC EXCLUDE_FROM_ALL common.h common.cpp vector12.h bvector12.h string24.h deque20.h deque20_utility.h set8.h custom_hash.h)
 ide_folder(dfhack-common "Depends")
 if(UNIX)
     set_target_properties(dfhack-common PROPERTIES COMPILE_FLAGS "-Wno-strict-aliasing")

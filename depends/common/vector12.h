@@ -65,13 +65,13 @@ public:
 		_Myptr = 0;
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
-	_Vector12_const_iterator(_Tptr _Ptr, const _Container_base *_Pvector)
-		{	// construct with pointer _Ptr
-		//_SCL_SECURE_VALIDATE(_Pvector == NULL || (((_Myvec *)_Pvector)->_Myfirst <= _Ptr && _Ptr <= ((_Myvec *)_Pvector)->_Mylast));
-		this->_Adopt(_Pvector);
-		_Myptr = _Ptr;
-		}
+ //#if _HAS_ITERATOR_DEBUGGING
+	//_Vector12_const_iterator(_Tptr _Ptr, const _Container_base *_Pvector)
+	//	{	// construct with pointer _Ptr
+	//	//_SCL_SECURE_VALIDATE(_Pvector == NULL || (((_Myvec *)_Pvector)->_Myfirst <= _Ptr && _Ptr <= ((_Myvec *)_Pvector)->_Mylast));
+	//	this->_Adopt(_Pvector);
+	//	_Myptr = _Ptr;
+	//	}
 
  //#elif _SECURE_SCL
 	//_Vector12_const_iterator(_Tptr _Ptr, const _Container_base *_Pvector)
@@ -81,28 +81,28 @@ public:
 	//	_Myptr = _Ptr;
 	//	}
 
- #else
+ //#else
 	explicit _Vector12_const_iterator(_Tptr _Ptr)
 		{	// construct with pointer _Ptr
 		_Myptr = _Ptr;
 		}
-#endif /* _HAS_ITERATOR_DEBUGGING */
+//#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	reference operator*() const
 		{	// return designated object
 
- #if _HAS_ITERATOR_DEBUGGING
-		if (this->_Mycont == 0
-			|| _Myptr < ((_Myvec *)this->_Mycont)->_Myfirst
-			|| ((_Myvec *)this->_Mycont)->_Mylast <= _Myptr)
-			{
-			_DEBUG_ERROR("vector12 iterator not dereferencable");
-			_SCL_SECURE_OUT_OF_RANGE;
-			}
- #else
- 		//_SCL_SECURE_VALIDATE(this->_Has_container());
-		//_SCL_SECURE_VALIDATE_RANGE(_Myptr < ((_Myvec *)(this->_Getmycont()))->_Mylast);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	if (this->_Mycont == 0
+	//		|| _Myptr < ((_Myvec *)this->_Mycont)->_Myfirst
+	//		|| ((_Myvec *)this->_Mycont)->_Mylast <= _Myptr)
+	//		{
+	//		_DEBUG_ERROR("vector12 iterator not dereferencable");
+	//		_SCL_SECURE_OUT_OF_RANGE;
+	//		}
+ //#else
+ //		//_SCL_SECURE_VALIDATE(this->_Has_container());
+	//	//_SCL_SECURE_VALIDATE_RANGE(_Myptr < ((_Myvec *)(this->_Getmycont()))->_Mylast);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (*_Myptr);
 		}
@@ -117,11 +117,11 @@ public:
 		//_SCL_SECURE_VALIDATE(this->_Has_container());
 		//_SCL_SECURE_VALIDATE_RANGE(_Myptr < ((_Myvec *)(this->_Getmycont()))->_Mylast);
 
- #if _HAS_ITERATOR_DEBUGGING
-		if (this->_Mycont == 0
-			|| ((_Myvec *)this->_Mycont)->_Mylast <= _Myptr)
-			_DEBUG_ERROR("vector12 iterator not incrementable");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	if (this->_Mycont == 0
+	//		|| ((_Myvec *)this->_Mycont)->_Mylast <= _Myptr)
+	//		_DEBUG_ERROR("vector12 iterator not incrementable");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		++_Myptr;
 		return (*this);
@@ -139,11 +139,11 @@ public:
 		//_SCL_SECURE_VALIDATE(this->_Has_container());
 		//_SCL_SECURE_VALIDATE_RANGE(_Myptr > ((_Myvec *)(this->_Getmycont()))->_Myfirst);
 
- #if _HAS_ITERATOR_DEBUGGING
-		if (this->_Mycont == 0
-			|| _Myptr == ((_Myvec *)this->_Mycont)->_Myfirst)
-			_DEBUG_ERROR("vector12 iterator not decrementable");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	if (this->_Mycont == 0
+	//		|| _Myptr == ((_Myvec *)this->_Mycont)->_Myfirst)
+	//		_DEBUG_ERROR("vector12 iterator not decrementable");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		--_Myptr;
 		return (*this);
@@ -186,11 +186,11 @@ public:
 	difference_type operator-(const _MyType& _Right) const
 		{	// return difference of iterators
 
- #if _HAS_ITERATOR_DEBUGGING
-		_Compat(_Right);
- #else
-		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	_Compat(_Right);
+ //#else
+	//	//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (_Myptr - _Right._Myptr);
 		}
@@ -203,11 +203,11 @@ public:
 	bool operator==(const _MyType& _Right) const
 		{	// test for iterator equality
 
- #if _HAS_ITERATOR_DEBUGGING
-		_Compat(_Right);
- #else
-		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	_Compat(_Right);
+ //#else
+	//	//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (_Myptr == _Right._Myptr);
 		}
@@ -220,11 +220,11 @@ public:
 	bool operator<(const _MyType& _Right) const
 		{	// test if this < _Right
 
- #if _HAS_ITERATOR_DEBUGGING
-		_Compat(_Right);
- #else
-		//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	_Compat(_Right);
+ //#else
+	//	//_SCL_SECURE_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (_Myptr < _Right._Myptr);
 		}
@@ -244,16 +244,16 @@ public:
 		return (!(*this < _Right));
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
-	void _Compat(const _MyType& _Right) const
-		{	// test for compatible iterator pair
-		if (this->_Mycont == 0 || this->_Mycont != _Right._Mycont)
-			{
-			_DEBUG_ERROR("vector12 iterators incompatible");
-			_SCL_SECURE_INVALID_ARGUMENT;
-			}
-		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//void _Compat(const _MyType& _Right) const
+	//	{	// test for compatible iterator pair
+	//	if (this->_Mycont == 0 || this->_Mycont != _Right._Mycont)
+	//		{
+	//		_DEBUG_ERROR("vector12 iterators incompatible");
+	//		_SCL_SECURE_INVALID_ARGUMENT;
+	//		}
+	//	}
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	static void _Xlen()
 		{	// report a length_error
@@ -316,11 +316,11 @@ public:
 		{	// construct with null vector12 pointer
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
-	_Vector12_iterator(pointer _Ptr, const _Container_base *_Pvector)
-		: _Mybase(_Ptr, _Pvector)
-		{	// construct with pointer _Ptr
-		}
+ //#if _HAS_ITERATOR_DEBUGGING
+	//_Vector12_iterator(pointer _Ptr, const _Container_base *_Pvector)
+	//	: _Mybase(_Ptr, _Pvector)
+	//	{	// construct with pointer _Ptr
+	//	}
 
  //#elif _SECURE_SCL
 	//_Vector12_iterator(pointer _Ptr, const _Container_base *_Pvector)
@@ -328,12 +328,12 @@ public:
 	//	{	// construct with pointer _Ptr
 	//	}
 
- #else
+ //#else
 	explicit _Vector12_iterator(pointer _Ptr)
 		: _Mybase(_Ptr)
 		{	// construct with pointer _Ptr
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	reference operator*() const
 		{	// return designated object
@@ -596,9 +596,9 @@ public:
 		if (this != &_Right)
 			{	// worth doing
 
- #if _HAS_ITERATOR_DEBUGGING
-			this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		this->_Orphan_all();
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			if (_Right.size() == 0)
 				clear();	// new sequence empty, erase existing sequence
@@ -652,9 +652,9 @@ public:
 				this->_Alval().deallocate(_Myfirst, _Myend - _Myfirst);
 				}
 
- #if _HAS_ITERATOR_DEBUGGING
-			this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		this->_Orphan_all();
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			_Myend = _Ptr + _Count;
 			_Mylast = _Ptr + _Size;
@@ -841,34 +841,34 @@ public:
 		{	// insert element at end
 		if (size() < capacity())
 
- #if _HAS_ITERATOR_DEBUGGING
-			{ // room at end, construct it there
-			_Orphan_range(_Mylast, _Mylast);
-			_Mylast = _Ufill(_Mylast, 1, _Val);
-			}
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		{ // room at end, construct it there
+	//		_Orphan_range(_Mylast, _Mylast);
+	//		_Mylast = _Ufill(_Mylast, 1, _Val);
+	//		}
 
- #else /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
 			_Mylast = _Ufill(_Mylast, 1, _Val);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		else
 			insert(end(), _Val);
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
-	void pop_back()
-		{	// erase element at end
-		if (empty())
-			_DEBUG_ERROR("vector12 empty before pop");
-		else
-			{	// erase last element
-			_Orphan_range(_Mylast - 1, _Mylast);
-			_Destroy(_Mylast - 1, _Mylast);
-			--_Mylast;
-			}
-		}
+ //#if _HAS_ITERATOR_DEBUGGING
+	//void pop_back()
+	//	{	// erase element at end
+	//	if (empty())
+	//		_DEBUG_ERROR("vector12 empty before pop");
+	//	else
+	//		{	// erase last element
+	//		_Orphan_range(_Mylast - 1, _Mylast);
+	//		_Destroy(_Mylast - 1, _Mylast);
+	//		--_Mylast;
+	//		}
+	//	}
 
- #else /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
 	void pop_back()
 		{	// erase element at end
 		if (!empty())
@@ -877,7 +877,7 @@ public:
 			--_Mylast;
 			}
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	template<class _Iter>
 		void assign(_Iter _First, _Iter _Last)
@@ -933,11 +933,11 @@ public:
 			input_iterator_tag)
 		{	// insert [_First, _Last) at _Where, input iterators
 
- #if _HAS_ITERATOR_DEBUGGING
-		if (_Where._Mycont != this
-			|| _Where._Myptr < _Myfirst || _Mylast < _Where._Myptr)
-			_DEBUG_ERROR("vector12 insert iterator outside range");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	if (_Where._Mycont != this
+	//		|| _Where._Myptr < _Myfirst || _Mylast < _Where._Myptr)
+	//		_DEBUG_ERROR("vector12 insert iterator outside range");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		if (_First != _Last)
 			{	// worth doing, gather at end and rotate into place
@@ -958,12 +958,12 @@ public:
 			_Iter _First, _Iter _Last, forward_iterator_tag)
 		{	// insert [_First, _Last) at _Where, forward iterators
 
- #if _HAS_ITERATOR_DEBUGGING
-		if (_Where._Mycont != this
-			|| _Where._Myptr < _Myfirst || _Mylast < _Where._Myptr)
-			_DEBUG_ERROR("vector12 insert iterator outside range");
-		_DEBUG_RANGE(_First, _Last);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	if (_Where._Mycont != this
+	//		|| _Where._Myptr < _Myfirst || _Mylast < _Where._Myptr)
+	//		_DEBUG_ERROR("vector12 insert iterator outside range");
+	//	_DEBUG_RANGE(_First, _Last);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		size_type _Count = 0;
 		_Distance(_First, _Last, _Count);
@@ -1000,9 +1000,9 @@ public:
 				this->_Alval().deallocate(_Myfirst, _Myend - _Myfirst);
 				}
 
- #if _HAS_ITERATOR_DEBUGGING
-			this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		this->_Orphan_all();
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			_Myend = _Newvec + _Capacity;
 			_Mylast = _Newvec + _Count;
@@ -1018,9 +1018,9 @@ public:
 
 			_Mylast += _Count;
 
- #if _HAS_ITERATOR_DEBUGGING
-			_Orphan_range(_Where._Myptr, _Mylast);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		_Orphan_range(_Where._Myptr, _Mylast);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			}
 		}
@@ -1036,20 +1036,20 @@ public:
 			}
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
-	iterator erase(const_iterator _Where)
-		{	// erase element at where
-		if (_Where._Mycont != this
-			|| _Where._Myptr < _Myfirst || _Mylast <= _Where._Myptr)
-			_DEBUG_ERROR("vector12 erase iterator outside range");
-		_STDEXT unchecked_copy(_Where._Myptr + 1, _Mylast, _Where._Myptr);
-		_Destroy(_Mylast - 1, _Mylast);
-		_Orphan_range(_Where._Myptr, _Mylast);
-		--_Mylast;
-		return (iterator(_Where._Myptr, this));
-		}
+ //#if _HAS_ITERATOR_DEBUGGING
+	//iterator erase(const_iterator _Where)
+	//	{	// erase element at where
+	//	if (_Where._Mycont != this
+	//		|| _Where._Myptr < _Myfirst || _Mylast <= _Where._Myptr)
+	//		_DEBUG_ERROR("vector12 erase iterator outside range");
+	//	_STDEXT unchecked_copy(_Where._Myptr + 1, _Mylast, _Where._Myptr);
+	//	_Destroy(_Mylast - 1, _Mylast);
+	//	_Orphan_range(_Where._Myptr, _Mylast);
+	//	--_Mylast;
+	//	return (iterator(_Where._Myptr, this));
+	//	}
 
- #else /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
 	iterator erase(const_iterator _Where)
 		{	// erase element at where
 		_STDEXT unchecked_copy(_VEC_ITER_BASE(_Where) + 1, _Mylast,
@@ -1058,7 +1058,7 @@ public:
 		--_Mylast;
 		return (_Make_iter(_Where));
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	iterator erase(const_iterator _First_arg,
 		const_iterator _Last_arg)
@@ -1069,27 +1069,27 @@ public:
 		if (_First != _Last)
 			{	// worth doing, copy down over hole
 
- #if _HAS_ITERATOR_DEBUGGING
-			if (_Last < _First || _First._Mycont != this
-				|| _First._Myptr < _Myfirst || _Mylast < _Last._Myptr)
-				_DEBUG_ERROR("vector12 erase iterator outside range");
-			pointer _Ptr = _STDEXT unchecked_copy(_VEC_ITER_BASE(_Last), _Mylast,
-				_VEC_ITER_BASE(_First));
-			_Orphan_range(_First._Myptr, _Mylast);
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		if (_Last < _First || _First._Mycont != this
+	//			|| _First._Myptr < _Myfirst || _Mylast < _Last._Myptr)
+	//			_DEBUG_ERROR("vector12 erase iterator outside range");
+	//		pointer _Ptr = _STDEXT unchecked_copy(_VEC_ITER_BASE(_Last), _Mylast,
+	//			_VEC_ITER_BASE(_First));
+	//		_Orphan_range(_First._Myptr, _Mylast);
 
- #else /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
 			pointer _Ptr = _STDEXT unchecked_copy(_VEC_ITER_BASE(_Last), _Mylast,
 				_VEC_ITER_BASE(_First));
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			_Destroy(_Ptr, _Mylast);
 			_Mylast = _Ptr;
 			}
-#if _HAS_ITERATOR_DEBUGGING
-        return (iterator(_First._Myptr, this));
-#else
+//#if _HAS_ITERATOR_DEBUGGING
+//        return (iterator(_First._Myptr, this));
+//#else
 		return (_First);
-#endif
+//#endif
 		}
 
 	void clear()
@@ -1104,9 +1104,9 @@ public:
 		else if (this->_Alval() == _Right._Alval())
 			{	// same allocator, swap control information
 
- #if _HAS_ITERATOR_DEBUGGING
-			this->_Swap_all(_Right);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		this->_Swap_all(_Right);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			this->_Swap_aux(_Right);
 
@@ -1161,9 +1161,9 @@ protected:
 		if (_Myfirst != 0)
 			{	// something to free, destroy and deallocate it
 
- #if _HAS_ITERATOR_DEBUGGING
-			this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		this->_Orphan_all();
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			_Destroy(_Myfirst, _Mylast);
 			this->_Alval().deallocate(_Myfirst, _Myend - _Myfirst);
@@ -1189,11 +1189,11 @@ protected:
 		size_type _Count, const _Type& _Val)
 		{	// insert _Count * _Val at _Where
 
- #if _HAS_ITERATOR_DEBUGGING
-		if (_Where._Mycont != this
-			|| _Where._Myptr < _Myfirst || _Mylast < _Where._Myptr)
-			_DEBUG_ERROR("vector12 insert iterator outside range");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//	if (_Where._Mycont != this
+	//		|| _Where._Myptr < _Myfirst || _Mylast < _Where._Myptr)
+	//		_DEBUG_ERROR("vector12 insert iterator outside range");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		size_type _Capacity = capacity();
 
@@ -1228,9 +1228,9 @@ protected:
 				this->_Alval().deallocate(_Myfirst, _Myend - _Myfirst);
 				}
 
- #if _HAS_ITERATOR_DEBUGGING
-			this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		this->_Orphan_all();
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			_Myend = _Newvec + _Capacity;
 			_Mylast = _Newvec + _Count;
@@ -1253,9 +1253,9 @@ protected:
 
 			_Mylast += _Count;
 
- #if _HAS_ITERATOR_DEBUGGING
-			_Orphan_range(_Where._Myptr, _Mylast);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		_Orphan_range(_Where._Myptr, _Mylast);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			std::fill(_VEC_ITER_BASE(_Where), _Mylast - _Count,
 				_Tmp);	// insert up to old end
@@ -1268,9 +1268,9 @@ protected:
 			_Mylast = _Umove(_Oldend - _Count, _Oldend,
 				_Mylast);	// copy suffix
 
- #if _HAS_ITERATOR_DEBUGGING
-			_Orphan_range(_Where._Myptr, _Mylast);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//		_Orphan_range(_Where._Myptr, _Mylast);
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			_STDEXT _Unchecked_move_backward(_VEC_ITER_BASE(_Where), _Oldend - _Count,
 				_Oldend);	// copy hole
@@ -1300,21 +1300,21 @@ protected:
 		_THROW(invalid_argument, "invalid vector12<T> argument");
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
-	void _Orphan_range(pointer _First, pointer _Last) const
-		{	// orphan iterators within specified (inclusive) range
-		_Lockit _Lock(_LOCK_DEBUG);
-		const_iterator **_Pnext = (const_iterator **)&this->_Myfirstiter;
-		while (*_Pnext != 0)
-			if ((*_Pnext)->_Myptr < _First || _Last < (*_Pnext)->_Myptr)
-				_Pnext = (const_iterator **)&(*_Pnext)->_Mynextiter;
-			else
-				{	// orphan the iterator
-				(*_Pnext)->_Mycont = 0;
-				*_Pnext = (const_iterator *)(*_Pnext)->_Mynextiter;
-				}
-		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#if _HAS_ITERATOR_DEBUGGING
+	//void _Orphan_range(pointer _First, pointer _Last) const
+	//	{	// orphan iterators within specified (inclusive) range
+	//	_Lockit _Lock(_LOCK_DEBUG);
+	//	const_iterator **_Pnext = (const_iterator **)&this->_Myfirstiter;
+	//	while (*_Pnext != 0)
+	//		if ((*_Pnext)->_Myptr < _First || _Last < (*_Pnext)->_Myptr)
+	//			_Pnext = (const_iterator **)&(*_Pnext)->_Mynextiter;
+	//		else
+	//			{	// orphan the iterator
+	//			(*_Pnext)->_Mycont = 0;
+	//			*_Pnext = (const_iterator *)(*_Pnext)->_Mynextiter;
+	//			}
+	//	}
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	pointer _Myfirst;	// pointer to beginning of array
 	pointer _Mylast;	// pointer to current end of sequence

@@ -12,6 +12,8 @@
 #include <memory>
 #include <stdexcept>
 
+#include "deque20_utility.h"
+
 #ifdef _MSC_VER
  #pragma pack(push,_CRT_PACKING)
  #pragma warning(push,3)
@@ -32,13 +34,13 @@ template<class _Type,
 		// TEMPLATE CLASS _Deque20_const_iterator
 template<class _Type, class _Alloc, bool _SECURE_VALIDATION>
 	class _Deque20_const_iterator
-// #if !defined(_DEBUG) && !_SECURE_SCL
-//		: public _Ranit_base<_Type, typename _Alloc::difference_type,
-//			typename _Alloc::const_pointer, typename _Alloc::const_reference, _Iterator_base_aux>
-//#else
-		: public _Ranit<_Type, typename _Alloc::difference_type,
+ #if !defined(_DEBUG) && !_SECURE_SCL
+		: public _Ranit_base<_Type, typename _Alloc::difference_type,
+			typename _Alloc::const_pointer, typename _Alloc::const_reference, _Iterator_base_aux>
+#else
+		: public _Ranit_deque20<_Type, typename _Alloc::difference_type,
 			typename _Alloc::const_pointer, typename _Alloc::const_reference>
-//#endif
+#endif
 	{	// iterator for nonmutable vector
 public:
 	// helper data used by the expression evaluator
@@ -47,11 +49,11 @@ public:
 	typedef _Deque20_const_iterator<_Type, _Alloc, _SECURE_VALIDATION> _Myt;
 	typedef deque20<_Type, _Alloc> _Mydeque;
 
-//#if !defined(_DEBUG) && !_SECURE_SCL
-//	typedef _Container_base_aux _Mydequebase;
-//#else
-	typedef _Container_base _Mydequebase;
-//#endif
+#if !defined(_DEBUG) && !_SECURE_SCL
+	typedef _Container_base_aux _Mydequebase;
+#else
+	typedef _Container_deque20_base _Mydequebase;
+#endif
 
 	typedef random_access_iterator_tag iterator_category;
 	typedef _Type value_type;
@@ -61,29 +63,29 @@ public:
 
 	typedef typename _Alloc::size_type size_type;
 
- //#if _SECURE_SCL
-	//typedef typename _Secure_validation_helper<_SECURE_VALIDATION>::_Checked_iterator_category _Checked_iterator_category;
-	//typedef typename _If<_SECURE_VALIDATION,
-	//	_Deque20_const_iterator<_Type, _Alloc, false>,
-	//	_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
+ #if _SECURE_SCL
+	typedef typename _Secure_validation_helper<_SECURE_VALIDATION>::_Checked_iterator_category _Checked_iterator_category;
+	typedef typename _If<_SECURE_VALIDATION,
+		_Deque20_const_iterator<_Type, _Alloc, false>,
+		_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
 
-	//friend _Deque20_const_iterator<_Type, _Alloc, false>;
-	//friend _Deque20_const_iterator<_Type, _Alloc, true>;
+	friend _Deque20_const_iterator<_Type, _Alloc, false>;
+	friend _Deque20_const_iterator<_Type, _Alloc, true>;
 
-	//_Deque20_const_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
-	//{
-	//	_Deque20_const_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
-	//	return _Base;
-	//}
+	_Deque20_const_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
+	{
+		_Deque20_const_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
+		return _Base;
+	}
 
-	//void _Checked_iterator_assign_from_base(_Deque20_const_iterator<_Type, _Alloc, false> _Base)
-	//{
-	//	_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
-	//	this->_Myoff = _Base._Myoff;
-	//}
- //#endif
+	void _Checked_iterator_assign_from_base(_Deque20_const_iterator<_Type, _Alloc, false> _Base)
+	{
+		_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
+		this->_Myoff = _Base._Myoff;
+	}
+ #endif
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		_Deque20_const_iterator()
 			{	// construct with null deque20 pointer
 			_Myoff = 0;
@@ -114,7 +116,7 @@ public:
 				|| ((_Mydeque *)this->_Mycont)->_Myoff
 					+ ((_Mydeque *)this->_Mycont)->_Mysize <= _Myoff)
 			{
-				_DEBUG_ERROR("deque20 iterator not dereferencable");
+				_DEBUG_DEQ20_ERROR("deque20 iterator not dereferencable");
 				_SCL_SECURE_TRAITS_OUT_OF_RANGE;
 			}
 			if (((_Mydeque *)this->_Mycont)->_Mapsize <= _Block)
@@ -122,33 +124,33 @@ public:
 			return ((((_Mydeque *)this->_Mycont)->_Map)[_Block][_Off]);
 			}
 
- #else /* _HAS_ITERATOR_DEBUGGING */
-		_Deque20_const_iterator()
-			{	// construct with null deque20 pointer
-			_Myoff = 0;
-			}
+ //#else /* _HAS_ITERATOR_DEBUGGING */
+	//	_Deque20_const_iterator()
+	//		{	// construct with null deque20 pointer
+	//		_Myoff = 0;
+	//		}
 
-		_Deque20_const_iterator(size_type _Off, const _Mydequebase *_Pdeque)
-			{	// construct with offset _Off in *_Pdeque
-			_SCL_SECURE_TRAITS_VALIDATE(
-				_Pdeque != NULL &&
-				((_Mydeque *)_Pdeque)->_Myoff <= _Off && _Off <= (((_Mydeque *)_Pdeque)->_Myoff + ((_Mydeque *)_Pdeque)->_Mysize));
-				
-			this->_Set_container(_Pdeque);
-			_Myoff = _Off;
-			}
+	//	_Deque20_const_iterator(size_type _Off, const _Mydequebase *_Pdeque)
+	//		{	// construct with offset _Off in *_Pdeque
+	//		_SCL_SECURE_TRAITS_VALIDATE(
+	//			_Pdeque != NULL &&
+	//			((_Mydeque *)_Pdeque)->_Myoff <= _Off && _Off <= (((_Mydeque *)_Pdeque)->_Myoff + ((_Mydeque *)_Pdeque)->_Mysize));
+	//			
+	//		this->_Set_container(_Pdeque);
+	//		_Myoff = _Off;
+	//		}
 
-		reference operator*() const
-			{	// return designated object
-			size_type _Block = _Myoff / _DEQUE20SIZ;
-			size_type _Off = _Myoff & (_DEQUE20SIZ - 1);	// assume power of 2
-			//_SCL_SECURE_VALIDATE(this->_Has_container());
-			//_SCL_SECURE_VALIDATE_RANGE(_Myoff < ((_Mydeque *)(this->_Getmycont()))->_Myoff + ((_Mydeque *)(this->_Getmycont()))->_Mysize);
-			if (static_cast<const _Mydeque *>(this->_Getmycont())->_Mapsize <= _Block)
-				_Block -= static_cast<const _Mydeque *>(this->_Getmycont())->_Mapsize;
-			return ((static_cast<const _Mydeque *>(this->_Getmycont())->_Map)[_Block][_Off]);
-			}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+	//	reference operator*() const
+	//		{	// return designated object
+	//		size_type _Block = _Myoff / _DEQUE20SIZ;
+	//		size_type _Off = _Myoff & (_DEQUE20SIZ - 1);	// assume power of 2
+	//		_SCL_SECURE_VALIDATE(this->_Has_container());
+	//		_SCL_SECURE_VALIDATE_RANGE(_Myoff < ((_Mydeque *)(this->_Getmycont()))->_Myoff + ((_Mydeque *)(this->_Getmycont()))->_Mysize);
+	//		if (static_cast<const _Mydeque *>(this->_Getmycont())->_Mapsize <= _Block)
+	//			_Block -= static_cast<const _Mydeque *>(this->_Getmycont())->_Mapsize;
+	//		return ((static_cast<const _Mydeque *>(this->_Getmycont())->_Map)[_Block][_Off]);
+	//		}
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	pointer operator->() const
 		{	// return pointer to class object
@@ -160,12 +162,12 @@ public:
 		_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container());
 		_SCL_SECURE_TRAITS_VALIDATE_RANGE(_Myoff < ((_Mydeque *)(this->_Getmycont()))->_Myoff + ((_Mydeque *)(this->_Getmycont()))->_Mysize);
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (this->_Mycont == 0
 			|| ((_Mydeque *)this->_Mycont)->_Myoff
 				+ ((_Mydeque *)this->_Mycont)->_Mysize == _Myoff)
-			_DEBUG_ERROR("deque20 iterator not incrementable");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+			_DEBUG_DEQ20_ERROR("deque20 iterator not incrementable");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		++_Myoff;
 		return (*this);
@@ -183,11 +185,11 @@ public:
 		_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container());
 		_SCL_SECURE_TRAITS_VALIDATE_RANGE(_Myoff > ((_Mydeque *)(this->_Getmycont()))->_Myoff);
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (this->_Mycont == 0
 			|| _Myoff == ((_Mydeque *)this->_Mycont)->_Myoff)
-			_DEBUG_ERROR("deque20 iterator not decrementable");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+			_DEBUG_DEQ20_ERROR("deque20 iterator not decrementable");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		--_Myoff;
 		return (*this);
@@ -230,11 +232,11 @@ public:
 	difference_type operator-(const _Myt& _Right) const
 		{	// return difference of iterators
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		_Compat(_Right);
- #else
-		_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#else
+	//	_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (_Right._Myoff <= _Myoff ? _Myoff - _Right._Myoff
 			: -(difference_type)(_Right._Myoff - _Myoff));
@@ -248,7 +250,7 @@ public:
 	bool operator==(const _Myt& _Right) const
 		{	// test for iterator equality
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		_Compat(_Right);
 		return (_Myoff == _Right._Myoff);
 		}
@@ -257,11 +259,11 @@ public:
 	//	_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
 	//	return (_Myoff == _Right._Myoff);
 	//	}
-
- #else
-		return (this->_Same_container(_Right) && _Myoff == _Right._Myoff);
-		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+	//		
+ //#else
+	//	return (this->_Same_container(_Right) && _Myoff == _Right._Myoff);
+	//	}
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	bool operator!=(const _Myt& _Right) const
 		{	// test for iterator inequality
@@ -271,7 +273,7 @@ public:
 	bool operator<(const _Myt& _Right) const
 		{	// test if this < _Right
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		_Compat(_Right);
 		return (_Myoff < _Right._Myoff);
 		}
@@ -280,11 +282,11 @@ public:
 	//	_SCL_SECURE_TRAITS_VALIDATE(this->_Has_container() && this->_Same_container(_Right));
 	//	return (_Myoff < _Right._Myoff);
 	//	}
-			
- #else
-		return (this->_Same_container(_Right) && _Myoff < _Right._Myoff);
-		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+	//		
+ //#else
+	//	return (this->_Same_container(_Right) && _Myoff < _Right._Myoff);
+	//	}
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	bool operator>(const _Myt& _Right) const
 		{	// test if this > _Right
@@ -316,16 +318,16 @@ public:
 		_THROW(out_of_range, "invalid deque20 <T> subscript");
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 	void _Compat(const _Myt& _Right) const
 		{	// test for compatible iterator pair
 		if (this->_Mycont == 0 || this->_Mycont != _Right._Mycont)
 			{
-			_DEBUG_ERROR("deque20 iterators incompatible");
+			_DEBUG_DEQ20_ERROR("deque20 iterators incompatible");
 			_SCL_SECURE_TRAITS_INVALID_ARGUMENT;
 			}
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	size_type _Myoff;	// offset of element in deque20
 	};
@@ -357,26 +359,26 @@ public:
 
 	typedef typename _Alloc::size_type size_type;
 
- //#if _SECURE_SCL
-	//typedef typename _If<_SECURE_VALIDATION,
-	//	_Deque20_iterator<_Type, _Alloc, false>,
-	//	_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
+ #if _SECURE_SCL
+	typedef typename _If<_SECURE_VALIDATION,
+		_Deque20_iterator<_Type, _Alloc, false>,
+		_Unchanged_checked_iterator_base_type_tag>::_Result _Checked_iterator_base_type;
 
-	//friend _Deque20_iterator<_Type, _Alloc, false>;
-	//friend _Deque20_iterator<_Type, _Alloc, true>;
+	friend _Deque20_iterator<_Type, _Alloc, false>;
+	friend _Deque20_iterator<_Type, _Alloc, true>;
 
-	//_Deque20_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
-	//{
-	//	_Deque20_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
-	//	return _Base;
-	//}
+	_Deque20_iterator<_Type, _Alloc, false> _Checked_iterator_base() const
+	{
+		_Deque20_iterator<_Type, _Alloc, false> _Base(this->_Myoff, this->_Getmycont());
+		return _Base;
+	}
 
-	//void _Checked_iterator_assign_from_base(_Deque20_iterator<_Type, _Alloc, false> _Base)
-	//{
-	//	_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
-	//	this->_Myoff = _Base._Myoff;
-	//}
- //#endif
+	void _Checked_iterator_assign_from_base(_Deque20_iterator<_Type, _Alloc, false> _Base)
+	{
+		_SCL_SECURE_VALIDATE(this->_Same_container(_Base));
+		this->_Myoff = _Base._Myoff;
+	}
+ #endif
 
 	_Deque20_iterator()
 		{	// construct with null vector pointer
@@ -497,20 +499,20 @@ template<class _Alloc>
 		}
 
 	//typename _Alloc::template rebind<_Aux_cont>::other _Alaux; // allocator object for aux objects
-//#if !defined(_DEBUG) && !_SECURE_SCL
+#if !defined(_DEBUG) && !_SECURE_SCL
         typedef typename _Alloc::template rebind<_Aux_cont>::other _Aux_alloc;
     static _Aux_alloc _Alaux()
         {
             return _Aux_alloc();
         }
-//#endif
+#endif
 	};
 
-//#if !defined(_DEBUG) && !_SECURE_SCL
+#if !defined(_DEBUG) && !_SECURE_SCL
 	#define _DEQUE20_BASE _Container_base_aux_alloc_real_no_alloc<_Alloc>
-//#else
-//	#define _DEQUE20_BASE _CONTAINER_BASE_AUX_ALLOC<_Alloc>
-//#endif
+#else
+	#define _DEQUE20_BASE _Container_deque20_base_aux_alloc_empty<_Alloc>
+#endif
 
 		// TEMPLATE CLASS _Deque20_map
 template<class _Type,
@@ -594,10 +596,9 @@ public:
 
 //	friend class _Deque20_iterator<_Type, _Alloc>;
 	friend class _Deque20_const_iterator<_Type, _Alloc, false>;
-    friend class _Deque20_const_iterator<_Type, _Alloc, true>;
-//#if _SECURE_SCL
-//	friend class _Deque20_const_iterator<_Type, _Alloc, true>;
-//#endif
+#if _SECURE_SCL
+	friend class _Deque20_const_iterator<_Type, _Alloc, true>;
+#endif
 
 	typedef std::reverse_iterator<iterator> reverse_iterator;
 	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
@@ -810,10 +811,10 @@ public:
 	const_reference operator[](size_type _Pos) const
 		{	// subscript nonmutable sequence
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (_Mysize <= _Pos)
-			_DEBUG_ERROR("deque20 subscript out of range");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+			_DEBUG_DEQ20_ERROR("deque20 subscript out of range");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (*(begin() + _Pos));
 		}
@@ -821,10 +822,10 @@ public:
 	reference operator[](size_type _Pos)
 		{	// subscript mutable sequence
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (_Mysize <= _Pos)
-			_DEBUG_ERROR("deque20 subscript out of range");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+			_DEBUG_DEQ20_ERROR("deque20 subscript out of range");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (*(begin() + _Pos));
 		}
@@ -852,9 +853,9 @@ public:
 	void push_front(const _Type& _Val)
 		{	// insert element at beginning
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		if (_Myoff % _DEQUE20SIZ == 0
 			&& _Mapsize <= (_Mysize + _DEQUE20SIZ) / _DEQUE20SIZ)
@@ -872,17 +873,17 @@ public:
 	void pop_front()
 		{	// erase element at beginning
 
- #if _HAS_ITERATOR_DEBUGGING
+// #if _HAS_ITERATOR_DEBUGGING
 		if (empty())
-			_DEBUG_ERROR("deque20 empty before pop");
+			_DEBUG_DEQ20_ERROR("deque20 empty before pop");
 		else
 			{	// something to erase, do it
 			_Orphan_off(_Myoff);
 
- #else /* _HAS_ITERATOR_DEBUGGING */
-		if (!empty())
-			{	// something to erase, do it
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
+	//	if (!empty())
+	//		{	// something to erase, do it
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			size_type _Block = _Myoff / _DEQUE20SIZ;
 			this->_Alval().destroy(_Map[_Block] + _Myoff % _DEQUE20SIZ);
@@ -896,9 +897,9 @@ public:
 	void push_back(const _Type& _Val)
 		{	// insert element at end
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		if ((_Myoff + _Mysize) % _DEQUE20SIZ == 0
 			&& _Mapsize <= (_Mysize + _DEQUE20SIZ) / _DEQUE20SIZ)
@@ -916,17 +917,17 @@ public:
 	void pop_back()
 		{	// erase element at end
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (empty())
-			_DEBUG_ERROR("deque20 empty before pop");
+			_DEBUG_DEQ20_ERROR("deque20 empty before pop");
 		else
 			{	// something to erase, do it
 			_Orphan_off(_Myoff + _Mysize - 1);
 
- #else /* _HAS_ITERATOR_DEBUGGING */
-		if (!empty())
-			{	// something to erase, do it
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
+	//	if (!empty())
+	//		{	// something to erase, do it
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			size_type _Newoff = _Mysize + _Myoff - 1;
 			size_type _Block = _Newoff / _DEQUE20SIZ;
@@ -980,10 +981,10 @@ public:
 			size_type _Off = _Where - begin();
 			_Type _Tmp = _Val;	// in case _Val is in sequence
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (_Mysize < _Off)
-			_DEBUG_ERROR("deque20 insert iterator outside range");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+			_DEBUG_DEQ20_ERROR("deque20 insert iterator outside range");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			if (_Off < _Mysize / 2)
 				{	// closer to front, push to front then copy
@@ -1027,11 +1028,11 @@ public:
 		{	// insert [_First, _Last) at _Where, input iterators
 		size_type _Off = _Where - begin();
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (_Mysize < _Off)
-			_DEBUG_ERROR("deque20 insert iterator outside range");
+			_DEBUG_DEQ20_ERROR("deque20 insert iterator outside range");
 		_DEBUG_RANGE(_First, _Last);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		size_type _Rem = _Mysize - _Off;
 		size_type _Oldsize = _Mysize;
@@ -1104,20 +1105,20 @@ public:
 		iterator _First = _Make_iter(_First_arg);
 		iterator _Last = _Make_iter(_Last_arg);
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (_Last < _First
 			|| _First < begin() || end() < _Last)
-			_DEBUG_ERROR("deque20 erase iterator outside range");
+			_DEBUG_DEQ20_ERROR("deque20 erase iterator outside range");
 		_DEBUG_RANGE(_First, _Last);
 
 		size_type _Off = _First - begin();
 		size_type _Count = _Last - _First;
 		bool _Moved = 0 < _Off && _Off + _Count < _Mysize;
 
- #else /* _HAS_ITERATOR_DEBUGGING */
-		size_type _Off = _First - begin();
-		size_type _Count = _Last - _First;
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#else /* _HAS_ITERATOR_DEBUGGING */
+	//	size_type _Off = _First - begin();
+	//	size_type _Count = _Last - _First;
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		if (_Off < (size_type)(end() - _Last))
 			{	// closer to front
@@ -1132,10 +1133,10 @@ public:
 				pop_back();	// pop copied elements
 			}
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (_Moved)
 			this->_Orphan_all();
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		return (begin() + _Off);
 		}
@@ -1152,9 +1153,9 @@ public:
 		else if (this->_Alval() == _Right._Alval())
 			{	// same allocator, swap control information
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 			this->_Swap_all(_Right);
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 			this->_Swap_aux(_Right);
 
@@ -1193,10 +1194,10 @@ protected:
 		size_type _Rem = _Mysize - _Off;
 		size_type _Oldsize = _Mysize;
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 		if (_Mysize < _Off)
-			_DEBUG_ERROR("deque20 insert iterator outside range");
- #endif /* _HAS_ITERATOR_DEBUGGING */
+			_DEBUG_DEQ20_ERROR("deque20 insert iterator outside range");
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 		if (_Off < _Rem)
 			{	// closer to front
@@ -1340,11 +1341,11 @@ protected:
 		_Map = 0;
 		}
 
- #if _HAS_ITERATOR_DEBUGGING
+ //#if _HAS_ITERATOR_DEBUGGING
 	void _Orphan_off(size_type _Offlo) const
 		{	// orphan iterators with specified offset(s)
 		if (_Mysize == 0)
-			_DEBUG_ERROR("deque20 empty before pop");
+			_DEBUG_DEQ20_ERROR("deque20 empty before pop");
 		size_type _Offhigh = _Myoff + _Mysize <= _Offlo + 1
 			? (size_type)(-1) : _Offlo;
 		if (_Offlo == _Myoff)
@@ -1361,7 +1362,7 @@ protected:
 				*_Pnext = (const_iterator *)(*_Pnext)->_Mynextiter;
 				}
 		}
- #endif /* _HAS_ITERATOR_DEBUGGING */
+ //#endif /* _HAS_ITERATOR_DEBUGGING */
 
 	_Mapptr _Map;	// pointer to array of pointers to blocks
 	size_type _Mapsize;	// size of map array

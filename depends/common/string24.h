@@ -1548,49 +1548,49 @@ public:
         return (_Myptr()[_Off]);
         }
 
- //#if !defined(_DLL_CPPLIB) || _SECURE_SCL
+ #if !defined(_DLL_CPPLIB) || _SECURE_SCL
 
- //   reference __CLR_OR_THIS_CALL operator[](size_type _Off)
- //       {    // subscript mutable sequence
+    reference __CLR_OR_THIS_CALL operator[](size_type _Off)
+        {    // subscript mutable sequence
 
- //#if _HAS_ITERATOR_DEBUGGING
- //       // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
- //       if (this->_Myfirstiter != _IGNORE_MYITERLIST)
- //           {
- //           if (_Mysize < _Off)
- //               {
- //               _DEBUG_ERROR("string subscript out of range");
- //               _SCL_SECURE_OUT_OF_RANGE;
- //               }
- //           }
- //#else
- //       _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
- //#endif /* _HAS_ITERATOR_DEBUGGING */
+ #if _HAS_ITERATOR_DEBUGGING
+        // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
+        if (this->_Myfirstiter != _IGNORE_MYITERLIST)
+            {
+            if (_Mysize < _Off)
+                {
+                _DEBUG_ERROR("string subscript out of range");
+                _SCL_SECURE_OUT_OF_RANGE;
+                }
+            }
+ #else
+        _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
+ #endif /* _HAS_ITERATOR_DEBUGGING */
 
- //       return (_Myptr()[_Off]);
- //       }
+        return (_Myptr()[_Off]);
+        }
 
- //   const_reference __CLR_OR_THIS_CALL operator[](size_type _Off) const
- //       {    // subscript nonmutable sequence
+    const_reference __CLR_OR_THIS_CALL operator[](size_type _Off) const
+        {    // subscript nonmutable sequence
 
- //#if _HAS_ITERATOR_DEBUGGING
- //       // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
- //       if (this->_Myfirstiter != _IGNORE_MYITERLIST)
- //           {
- //           if (_Mysize < _Off)    // sic
- //               {
- //               _DEBUG_ERROR("string subscript out of range");
- //               _SCL_SECURE_OUT_OF_RANGE;
- //               }
- //           }
- //#else
- //       _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
- //#endif /* _HAS_ITERATOR_DEBUGGING */
+ #if _HAS_ITERATOR_DEBUGGING
+        // skip debug checks if the container is initizialed with _IGNORE_MYITERLIST
+        if (this->_Myfirstiter != _IGNORE_MYITERLIST)
+            {
+            if (_Mysize < _Off)    // sic
+                {
+                _DEBUG_ERROR("string subscript out of range");
+                _SCL_SECURE_OUT_OF_RANGE;
+                }
+            }
+ #else
+        _SCL_SECURE_VALIDATE_RANGE(_Off <= _Mysize);
+ #endif /* _HAS_ITERATOR_DEBUGGING */
 
- //       return (_Myptr()[_Off]);
- //       }
+        return (_Myptr()[_Off]);
+        }
 
- //#endif /* !defined(_DLL_CPPLIB) || _SECURE_SCL */
+ #endif /* !defined(_DLL_CPPLIB) || _SECURE_SCL */
 
  #if defined(_DLL_CPPLIB)
 
