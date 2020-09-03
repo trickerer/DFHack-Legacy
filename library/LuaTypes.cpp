@@ -331,7 +331,7 @@ bool container_identity::lua_insert2(lua_State *state, int fname_idx, void *ptr,
         if (id->isConstructed())
             luaL_error(state, "Temporaries of type %s not supported", id->getFullName().c_str());
 
-        assert(id->byte_size() <= sizeof(tmp));
+        ASSERT(id->byte_size() <= sizeof(tmp));
         id->lua_write(state, fname_idx, pitem, val_index);
     }
     else

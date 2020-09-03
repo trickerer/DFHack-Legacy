@@ -804,7 +804,7 @@ int dfhack_lua_viewscreen::do_input(lua_State *L)
 
 dfhack_lua_viewscreen::dfhack_lua_viewscreen(lua_State *L, int table_idx)
 {
-    assert(Lua::IsCoreContext(L));
+    ASSERT(Lua::IsCoreContext(L));
 
     Lua::PushDFObject(L, (df::viewscreen*)this);
     lua_setfield(L, table_idx, "_native");

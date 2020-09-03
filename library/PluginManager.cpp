@@ -628,7 +628,7 @@ RPCService *Plugin::rpc_connect(color_ostream &out)
     if (rv)
     {
         // Retain the access reference
-        assert(!rv->holder);
+        ASSERT(!rv->holder);
         services.push_back(rv);
         rv->holder = this;
         return rv;
@@ -644,7 +644,7 @@ void Plugin::detach_connection(RPCService *svc)
 {
     int idx = linear_index(services, svc);
 
-    assert(svc->holder == this && idx >= 0);
+    ASSERT(svc->holder == this && idx >= 0);
 
     vector_erase_at(services, idx);
     access->lock_sub();

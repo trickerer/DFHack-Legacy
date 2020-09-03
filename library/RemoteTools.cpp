@@ -186,7 +186,7 @@ void DFHack::describeMaterial(BasicMaterialInfo *info, df::material *mat, const 
 
 void DFHack::describeMaterial(BasicMaterialInfo *info, const MaterialInfo &mat, const BasicMaterialInfoMask *mask)
 {
-    assert(mat.isValid());
+    ASSERT(mat.isValid());
 
     info->set_type(mat.type);
     info->set_index(mat.index);

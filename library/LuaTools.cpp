@@ -78,7 +78,7 @@ inline bool is_null_userdata(lua_State *L, int idx)
 
 inline void AssertCoreSuspend(lua_State *state)
 {
-    assert(!Lua::IsCoreContext(state) || DFHack::Core::getInstance().isSuspended());
+    ASSERT(!Lua::IsCoreContext(state) || DFHack::Core::getInstance().isSuspended());
 }
 
 /*
@@ -975,7 +975,7 @@ bool DFHack::Lua::SafeCallString(color_ostream &out, lua_State *state, const std
     {
         lua_pushvalue(state, env_idx);
         lua_setupvalue(state, -2, 1);
-        assert(lua_gettop(state) == base+1);
+        ASSERT(lua_gettop(state) == base+1);
     }
 
     if (nargs > 0)
@@ -1573,7 +1573,7 @@ void DFHack::Lua::Event::Make(lua_State *state, void *key, Owner *owner)
 
 void DFHack::Lua::Notification::invoke(color_ostream &out, int nargs)
 {
-    assert(state);
+    ASSERT(state);
     Event::Invoke(out, state, key, nargs);
 }
 
@@ -1694,9 +1694,9 @@ lua_State *DFHack::Lua::Open(color_ostream &out, lua_State *state)
 
     // stash the loaded module table into our own registry key
     lua_getglobal(state, "package");
-    assert(lua_istable(state, -1));
+    ASSERT(lua_istable(state, -1));
     lua_getfield(state, -1, "loaded");
-    assert(lua_istable(state, -1));
+    ASSERT(lua_istable(state, -1));
     lua_rawsetp(state, LUA_REGISTRYINDEX, &DFHACK_LOADED_TOKEN);
     lua_pop(state, 1);
 

@@ -34,4 +34,18 @@ typedef uint64              uint64_t;
 #define INT64FMT "%I64d"
 #define UINT64FMT "%I64u"
 
+// assertions
+#ifndef ASSERT
+
+#ifdef  __cplusplus
+extern "C" {
+_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
+}
+#else
+_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
+#endif
+
+#define ASSERT(_Expression) (void)( (!!(_Expression)) || (_wassert(_CRT_WIDE(#_Expression), _CRT_WIDE(__FILE__), __LINE__), 0) )
+#endif
+
 #endif // _COMMON_H_

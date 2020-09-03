@@ -176,7 +176,7 @@ namespace  DFHack
             command_result (*fptr)(color_ostream &out, const In *input, Out *output),
             int flags = 0
         ) {
-            assert(!owner);
+            ASSERT(!owner);
             functions.push_back(new ServerFunction<In,Out>(this, name, flags, fptr));
         }
 
@@ -186,7 +186,7 @@ namespace  DFHack
             command_result (*fptr)(color_ostream &out, const In *input),
             int flags = 0
         ) {
-            assert(!owner);
+            ASSERT(!owner);
             functions.push_back(new VoidServerFunction<In>(this, name, flags, fptr));
         }
 
@@ -199,7 +199,7 @@ namespace  DFHack
             command_result (Svc::*fptr)(color_ostream &out, const In *input, Out *output),
             int flags = 0
         ) {
-            assert(!owner);
+            ASSERT(!owner);
             functions.push_back(new ServerMethod<Svc,In,Out>(this, name, flags, fptr));
         }
 
@@ -209,7 +209,7 @@ namespace  DFHack
             command_result (Svc::*fptr)(color_ostream &out, const In *input),
             int flags = 0
         ) {
-            assert(!owner);
+            ASSERT(!owner);
             functions.push_back(new VoidServerMethod<Svc,In>(this, name, flags, fptr));
         }
 

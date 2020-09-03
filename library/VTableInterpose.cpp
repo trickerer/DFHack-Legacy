@@ -207,7 +207,7 @@ void DFHack::addr_to_method_pointer_(void *pptr, void *addr)
 
 void *virtual_identity::get_vmethod_ptr(int idx)
 {
-    assert(idx >= 0);
+    ASSERT(idx >= 0);
     void **vtable = (void**)vtable_ptr;
     if (!vtable) return NULL;
     return vtable[idx];
@@ -215,7 +215,7 @@ void *virtual_identity::get_vmethod_ptr(int idx)
 
 bool virtual_identity::set_vmethod_ptr(MemoryPatcher &patcher, int idx, void *ptr)
 {
-    assert(idx >= 0);
+    ASSERT(idx >= 0);
     void **vtable = (void**)vtable_ptr;
     if (!vtable) return NULL;
     return patcher.write(&vtable[idx], &ptr, sizeof(void*));
@@ -348,7 +348,7 @@ bool VMethodInterposeLinkBase::find_child_hosts(virtual_identity *cur, void *vmp
 
         if (base)
         {
-            assert(base->prev == NULL);
+            ASSERT(base->prev == NULL);
 
             if (base->saved_chain != vmptr)
                 continue;
@@ -392,7 +392,7 @@ void VMethodInterposeLinkBase::on_host_delete(virtual_identity *from)
     else
     {
         // Otherwise, drop the link to that child:
-        assert(child_hosts.count(from) != 0 &&
+        ASSERT(child_hosts.count(from) != 0 &&
                from->interpose_list[vmethod_idx] == this);
 
         // Find and restore the original vmethod ptr
@@ -437,7 +437,7 @@ bool VMethodInterposeLinkBase::apply(bool enable)
     }
 
     void *old_ptr = next_link ? next_link->saved_chain : host->get_vmethod_ptr(vmethod_idx);
-    assert(old_ptr != NULL && (!old_link || old_link->interpose_method == old_ptr));
+    ASSERT(old_ptr != NULL && (!old_link || old_link->interpose_method == old_ptr));
 
     // Apply the new method ptr
     MemoryPatcher patcher;
@@ -471,7 +471,7 @@ bool VMethodInterposeLinkBase::apply(bool enable)
     if (old_link && old_link->host == host)
     {
         // If the old link is home, just push into the plain chain
-        assert(old_link->next == next_link);
+        ASSERT(old_link->next == next_link);
         old_link->next = this;
 
         // Child links belong to the topmost local entry
@@ -482,7 +482,7 @@ bool VMethodInterposeLinkBase::apply(bool enable)
     {
         if (old_link)
         {
-            assert(old_link->child_next.count(next_link));
+            ASSERT(old_link->child_next.count(next_link));
             old_link->child_next.erase(next_link);
             old_link->child_next.insert(this);
         }
@@ -495,7 +495,7 @@ bool VMethodInterposeLinkBase::apply(bool enable)
         if (old_link)
         {
             // Enter the child chain set
-            assert(old_link->child_hosts.count(host));
+            ASSERT(old_link->child_hosts.count(host));
             old_link->child_hosts.erase(host);
             old_link->child_next.insert(this);
 
@@ -507,13 +507,13 @@ bool VMethodInterposeLinkBase::apply(bool enable)
         }
     }
 
-    assert (!next_link || (child_next.empty() && child_hosts.empty()));
+    ASSERT (!next_link || (child_next.empty() && child_hosts.empty()));
 
     // Chain subclass hooks
     for (std::set8<VMethodInterposeLinkBase*>::const_iterator it = child_next.begin(); it != child_next.end(); ++it)
     {
         VMethodInterposeLinkBase* nlink = *it;
-        assert(nlink->saved_chain == old_ptr && nlink->prev == old_link);
+        ASSERT(nlink->saved_chain == old_ptr && nlink->prev == old_link);
         nlink->set_chain(interpose_method);
         nlink->prev = this;
     }
@@ -522,7 +522,7 @@ bool VMethodInterposeLinkBase::apply(bool enable)
     for (std::set8<virtual_identity*>::const_iterator it = child_hosts.begin(); it != child_hosts.end(); ++it)
     {
         virtual_identity* nhost = *it;
-        assert(nhost->interpose_list[vmethod_idx] == old_link);
+        ASSERT(nhost->interpose_list[vmethod_idx] == old_link);
         nhost->set_vmethod_ptr(patcher, vmethod_idx, interpose_method);
         nhost->interpose_list[vmethod_idx] = this;
     }
@@ -556,7 +556,7 @@ void VMethodInterposeLinkBase::remove()
         next->set_chain(saved_chain);
         next->prev = prev;
 
-        assert(child_next.empty() && child_hosts.empty());
+        ASSERT(child_next.empty() && child_hosts.empty());
     }
     else
     {
@@ -569,7 +569,7 @@ void VMethodInterposeLinkBase::remove()
         for (std::set8<VMethodInterposeLinkBase*>::const_iterator it = child_next.begin(); it != child_next.end(); ++it)
         {
             VMethodInterposeLinkBase* nlink = *it;
-            assert(nlink->saved_chain == interpose_method && nlink->prev == this);
+            ASSERT(nlink->saved_chain == interpose_method && nlink->prev == this);
             nlink->set_chain(saved_chain);
             nlink->prev = prev;
             if (prev)
@@ -579,7 +579,7 @@ void VMethodInterposeLinkBase::remove()
         for (std::set8<virtual_identity*>::const_iterator it = child_hosts.begin(); it != child_hosts.end(); ++it)
         {
             virtual_identity* nhost = *it;
-            assert(nhost->interpose_list[vmethod_idx] == this);
+            ASSERT(nhost->interpose_list[vmethod_idx] == this);
             nhost->interpose_list[vmethod_idx] = prev;
             nhost->set_vmethod_ptr(patcher, vmethod_idx, saved_chain);
             if (prev)

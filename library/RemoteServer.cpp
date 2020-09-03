@@ -114,7 +114,7 @@ RPCService::~RPCService()
 
 ServerFunctionBase *RPCService::getFunction(const std::string24 &name)
 {
-    assert(owner);
+    ASSERT(owner);
     return lookup[name];
 }
 

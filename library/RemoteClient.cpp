@@ -170,7 +170,7 @@ int RemoteClient::GetDefaultPort()
 
 bool RemoteClient::connect(int port)
 {
-    assert(!active);
+    ASSERT(!active);
 
     if (port <= 0)
         port = GetDefaultPort();
@@ -363,7 +363,7 @@ bool sendRemoteMessage(CSimpleSocket *socket, int16_t id, const MessageLite *msg
 
     uint8_t *pstart = data + sizeof(RPCMessageHeader);
     uint8_t *pend = msg->SerializeWithCachedSizesToArray(pstart);
-    assert((pend - pstart) == size);
+    ASSERT((pend - pstart) == size);
 
     int got = socket->Send(data, fullsz);
     delete[] data;

@@ -191,7 +191,7 @@ static void init_tables()
 
         if (isCoreMaterial(attrs.material))
         {
-            assert(attrs.material < NUM_CVTABLES);
+            ASSERT(attrs.material < NUM_CVTABLES);
             tile_to_mat[attrs.material][tt] = tt;
         }
     }
@@ -287,8 +287,8 @@ namespace DFHack
         if (tshape == cur_shape)
             return sourceTileType;
 
-        #ifdef assert
-        assert(is_valid_enum_item(sourceTileType));
+        #ifdef ASSERT
+        ASSERT(is_valid_enum_item(sourceTileType));
         #endif
 
         // Special case for smooth pillars.

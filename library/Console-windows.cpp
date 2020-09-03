@@ -124,7 +124,7 @@ namespace DFHack
 
         void begin_batch()
         {
-            assert(!in_batch);
+            ASSERT(!in_batch);
 
             in_batch = true;
 
@@ -136,7 +136,7 @@ namespace DFHack
 
         void end_batch()
         {
-            assert(in_batch);
+            ASSERT(in_batch);
 
             flush();
 
