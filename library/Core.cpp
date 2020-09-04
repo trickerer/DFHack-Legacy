@@ -2467,12 +2467,12 @@ int Core::Shutdown ( void )
     // invalidate all modules
     allModules.clear();
     memset(&(s_mods), 0, sizeof(s_mods));
-    delete d;
-    d = NULL;
     delete d->hotkeythread;
     delete d->iothread;
     d->hotkeythread = NULL;
     d->iothread = NULL;
+    delete d;
+    d = NULL;
     return -1;
 }
 
