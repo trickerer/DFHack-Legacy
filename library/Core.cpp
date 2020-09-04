@@ -2432,10 +2432,10 @@ int Core::Shutdown ( void )
     errorstate = 1;
 
     // Make sure we release main thread if this is called from main thread
-    cerr << "\nCore::Shutdown checklock";
+    cerr << "Core::Shutdown checklock\n";
     while (MainThread::suspend().owns_lock())
     {
-        cerr << "\nCore::Shutdown unlock";
+        cerr << "Core::Shutdown unlock\n";
         MainThread::suspend().unlock();
     }
 
