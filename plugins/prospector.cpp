@@ -160,7 +160,7 @@ void printMats(color_ostream &con, MatMap &mat, std::vector12<T*> &materials, bo
         }
         T* mat = materials[it->first];
         // Somewhat of a hack, but it works because df::inorganic_raw and df::plant_raw both have a field named "id"
-        con << std::setw(25) << mat->id << " : ";
+        con << std::setw(25) << mat->id.c_str() << " : ";
         if (show_value)
             con << std::setw(3) << getValue(*mat) << " : ";
         printMatdata(con, it->second);
@@ -785,7 +785,7 @@ command_result prospector (color_ostream &con, std::vector12<std::string24> & pa
     con << "Base materials:" << std::endl;
     for (it = baseMats.begin(); it != baseMats.end(); ++it)
     {
-        con << std::setw(25) << ENUM_KEY_STR_SIMPLE(tiletype_material,(df::tiletype_material)it->first) << " : " << it->second.count << std::endl;
+        con << std::setw(25) << ENUM_KEY_STR_SIMPLE(tiletype_material,(df::tiletype_material)it->first).c_str() << " : " << it->second.count << std::endl;
     }
 
     if (liquidWater.count || liquidMagma.count)

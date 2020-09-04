@@ -6,20 +6,36 @@ QueueItem::QueueItem(const std::string24 & path, const void *ptr) :
 {
 }
 QueueItem::QueueItem(const QueueItem & parent, const std::string24 & member, const void *ptr) :
-    QueueItem(parent.path + "." + member, ptr)
+    //QueueItem(parent.path + "." + member, ptr)
+    path(parent.path + "." + member),
+    ptr(ptr)
 {
 }
 QueueItem::QueueItem(const QueueItem & parent, size_t index, const void *ptr) :
-    QueueItem(parent.path + stl_sprintf("[%zu]", index), ptr)
+    //QueueItem(parent.path + stl_sprintf("[%zu]", index), ptr)
+    path(parent.path + stl_sprintf("[%zu]", index)),
+    ptr(ptr)
 {
 }
 
 CheckedStructure::CheckedStructure() :
-    CheckedStructure(nullptr, 0)
+    //CheckedStructure(NULL, 0)
+    identity(NULL),
+    count(0),
+    allocated_count(0),
+    eid(NULL),
+    ptr_is_array(false),
+    inside_structure(false)
 {
 }
 CheckedStructure::CheckedStructure(type_identity *identity, size_t count) :
-    CheckedStructure(identity, count, nullptr, false)
+    //CheckedStructure(identity, count, NULL, false)
+    identity(identity),
+    count(count),
+    allocated_count(0),
+    eid(NULL),
+    ptr_is_array(false),
+    inside_structure(false)
 {
 }
 CheckedStructure::CheckedStructure(type_identity *identity, size_t count, enum_identity *eid, bool inside_structure) :
@@ -32,7 +48,13 @@ CheckedStructure::CheckedStructure(type_identity *identity, size_t count, enum_i
 {
 }
 CheckedStructure::CheckedStructure(const struct_field_info *field) :
-    CheckedStructure()
+    //CheckedStructure()
+    identity(NULL),
+    count(0),
+    allocated_count(0),
+    eid(NULL),
+    ptr_is_array(false),
+    inside_structure(false)
 {
     if (!field || field->mode == struct_field_info::END)
     {
@@ -40,7 +62,7 @@ CheckedStructure::CheckedStructure(const struct_field_info *field) :
     }
 
     identity = field->type;
-    eid = field->extra ? field->extra->index_enum : nullptr;
+    eid = field->extra ? field->extra->index_enum : NULL;
     inside_structure = true;
     switch (field->mode)
     {
@@ -122,23 +144,23 @@ bool CheckedStructure::has_type_at_offset(const CheckedStructure & type, size_t 
 
     if (identity->type() == IDTYPE_BUFFER)
     {
-        auto target = static_cast<container_identity *>(identity)->getItemType();
+        type_identity * target = static_cast<container_identity *>(identity)->getItemType();
         return CheckedStructure(target, 0).has_type_at_offset(type, offset % target->byte_size());
     }
 
-    auto st = dynamic_cast<struct_identity *>(identity);
+    struct_identity * st = dynamic_cast<struct_identity *>(identity);
     if (!st)
     {
         return false;
     }
 
-    for (auto p = st; p; p = p->getParent())
+    for (struct_identity * p = st; p; p = p->getParent())
     {
-        auto fields = p->getFields();
+        struct_field_info const* fields = p->getFields();
         if (!fields)
             continue;
 
-        for (auto field = fields; field->mode != struct_field_info::END; field++)
+        for (struct_field_info const* field = fields; field->mode != struct_field_info::END; field++)
         {
             if (field->mode == struct_field_info::OBJ_METHOD || field->mode == struct_field_info::CLASS_METHOD)
                 continue;
@@ -154,33 +176,52 @@ bool CheckedStructure::has_type_at_offset(const CheckedStructure & type, size_t 
     return false;
 }
 
+static std::map<type_identity*, df::stl_ptr_vector_identity*> twrappers;
 type_identity *Checker::wrap_in_stl_ptr_vector(type_identity *base)
 {
-    static std::map<type_identity *, std::unique_ptr<df::stl_ptr_vector_identity>> wrappers;
-    auto it = wrappers.find(base);
-    if (it != wrappers.end())
+    std::map<type_identity*, df::stl_ptr_vector_identity*>::iterator it = twrappers.find(base);
+    if (it != twrappers.end())
     {
-        return it->second.get();
+        return it->second;
     }
-    return (wrappers[base] = dts::make_unique<df::stl_ptr_vector_identity>(base, nullptr)).get();
+    return (twrappers[base] = new df::stl_ptr_vector_identity(base, NULL));
 }
 
+static std::map<type_identity*, df::pointer_identity*> pwrappers;
 type_identity *Checker::wrap_in_pointer(type_identity *base)
 {
-    static std::map<type_identity *, std::unique_ptr<df::pointer_identity>> wrappers;
-    auto it = wrappers.find(base);
-    if (it != wrappers.end())
+    std::map<type_identity*, df::pointer_identity*>::iterator it = pwrappers.find(base);
+    if (it != pwrappers.end())
     {
-        return it->second.get();
+        return it->second;
     }
-    return (wrappers[base] = dts::make_unique<df::pointer_identity>(base)).get();
+    return (pwrappers[base] = new df::pointer_identity(base));
+}
+
+Checker::~Checker()
+{
+    for (std::map<type_identity*, df::stl_ptr_vector_identity*>::iterator
+        i = twrappers.begin(); i != twrappers.end(); ++i)
+    {
+        delete i->second;
+    }
+    for (std::map<type_identity*, df::pointer_identity*>::iterator
+        i = pwrappers.begin(); i != pwrappers.end(); ++i)
+    {
+        delete i->second;
+    }
+    twrappers.clear();
+    pwrappers.clear();
 }
 
 std::map<size_t, std::vector12<std::string24>> known_types_by_size;
 void build_size_table()
 {
-    for (auto & ident : compound_identity::getTopScope())
+    //for (auto & ident : compound_identity::getTopScope())
+    std::vector12<compound_identity*> const& cidts = compound_identity::getTopScope();
+    for (std::vector12<compound_identity*>::const_iterator ci = cidts.begin(); ci != cidts.end(); ++ci)
     {
+        compound_identity* ident = *ci;
         if (ident->byte_size() >= MIN_SIZE_FOR_SUGGEST)
         {
             known_types_by_size[ident->byte_size()].push_back(ident->getFullName());

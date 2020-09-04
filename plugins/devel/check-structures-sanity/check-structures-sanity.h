@@ -6,9 +6,9 @@
 #include "DataDefs.h"
 #include "DataIdentity.h"
 
-#include <deque>
+//#include <deque>
 #include <map>
-#include <string>
+//#include <string>
 
 using namespace DFHack;
 
@@ -22,11 +22,11 @@ using namespace DFHack;
 
 struct QueueItem
 {
-    QueueItem(const std::string &, const void *);
-    QueueItem(const QueueItem &, const std::string &, const void *);
+    QueueItem(const std::string24 &, const void *);
+    QueueItem(const QueueItem &, const std::string24 &, const void *);
     QueueItem(const QueueItem &, size_t, const void *);
 
-    std::string path;
+    std::string24 path;
     const void *ptr;
 };
 struct CheckedStructure
@@ -48,12 +48,46 @@ struct CheckedStructure
 };
 
 #define MIN_SIZE_FOR_SUGGEST 64
-extern std::map<size_t, std::vector<std::string>> known_types_by_size;
+extern std::map<size_t, std::vector12<std::string24>> known_types_by_size;
 void build_size_table();
+
+//todo: extract this
+namespace stdd
+{
+template <typename T>
+struct no_const
+{ typedef T type; };
+template <typename T>
+struct no_const<const T>
+{ typedef T type; };
+template <typename T>
+struct no_volatile
+{ typedef T type; };
+template <typename T>
+struct no_volatile<volatile T>
+{ typedef T type; };
+template <typename T>
+struct no_cv : no_const<typename no_volatile<T>::type>
+{};
+template <typename T>
+struct is_uqpointer
+{ enum { value = false }; };
+template <typename T>
+struct is_uqpointer<T*>
+{ enum { value = true }; };
+template <typename T>
+struct is_pointer : is_uqpointer<typename no_cv<T>::type>
+{};
+//template <typename T>
+//bool is_pointer(const T&)
+//{
+//    return is_pointer<T>::value;
+//}
+}
 
 namespace
 {
-    template<typename T, bool is_pointer = std::is_pointer<T>::value>
+    template<typename T, bool is_pointer = stdd::is_pointer<T>::value>
     struct safe_t
     {
         typedef T type;
@@ -68,9 +102,10 @@ namespace
 class Checker
 {
     color_ostream & out;
-    std::vector<t_memrange> mapped;
-    std::map<const void *, std::pair<std::string, CheckedStructure>> data;
-    std::deque<QueueItem> queue;
+    std::vector12<t_memrange> mapped;
+    typedef std::map<const void *, std::pair<std::string24, CheckedStructure>> CheckerData;
+    CheckerData data;
+    std::deque20<QueueItem> queue;
 public:
     size_t checked_count;
     size_t error_count;
@@ -84,6 +119,7 @@ public:
     bool maybepointer;
 
     Checker(color_ostream & out);
+    ~Checker();
     bool queue_item(const QueueItem & item, CheckedStructure cs);
     void queue_globals();
     bool process_queue();
@@ -113,8 +149,8 @@ public:
     std::pair<const void *, CheckedStructure> validate_vector_size(const QueueItem & item, const CheckedStructure & cs, bool quiet = false);
     size_t get_allocated_size(const QueueItem & item);
 #ifndef WIN32
-    // this function doesn't make sense on windows, where std::string is not pointer-sized.
-    const std::string *validate_stl_string_pointer(const void *const*);
+    // this function doesn't make sense on windows, where std::string24 is not pointer-sized.
+    const std::string24 *validate_stl_string_pointer(const void *const*);
 #endif
     static const char *const *get_enum_item_key(enum_identity *identity, int64_t value);
     static const char *const *get_enum_item_attr_or_key(enum_identity *identity, int64_t value, const char *attr_name);
@@ -151,7 +187,7 @@ private:
 #define FAIL(message) \
     do \
     { \
-        auto & failstream = fail(__LINE__, item, cs); \
+        color_ostream & failstream = fail(__LINE__, item, cs); \
         failstream << message; \
         failstream << COLOR_RESET << std::endl; \
         if (failfast) \

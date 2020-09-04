@@ -87,10 +87,10 @@ static int32_t lastInvasionDigger = -1;
 static int32_t edgesPerTick = 100;
 //static EventManager::EventHandler jobCompleteHandler(watchForJobComplete, 5);
 static bool activeDigging=false;
-static hash_set<std::string24> diggingRaces;
+static hash_set<std::string24, String24Hash> diggingRaces;
 static hash_set<int32_t> invaderJobs;
 static df::coord lastDebugEdgeCostPoint;
-hash_map<std::string24, DigAbilities> digAbilities;
+hash_map<std::string24, DigAbilities, String24Hash> digAbilities;
 
 typedef hash_map<df::coord, cost_t, PointHash> PointCostMap;
 
@@ -282,7 +282,7 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector12<std::str
             }
 
             cost_t value;
-            stringstream asdf(parameters[a+3]);
+            stringstream asdf(parameters[a+3].c_str());
             asdf >> value;
             //if ( parameters[a] == "setCost" && value <= 0 )
             //    return CR_WRONG_USAGE;
@@ -317,7 +317,7 @@ command_result diggingInvadersCommand(color_ostream& out, std::vector12<std::str
         } else if ( parameters[a] == "edgesPerTick" ) {
             if ( a+1 >= parameters.size() )
                 return CR_WRONG_USAGE;
-            stringstream asdf(parameters[a+1]);
+            stringstream asdf(parameters[a+1].c_str());
             int32_t edgeCount = 100;
             asdf >> edgeCount;
             edgesPerTick = edgeCount;
@@ -342,7 +342,7 @@ hash_map<df::coord,df::coord,PointHash> parentMap;
 hash_map<df::coord,cost_t,PointHash> costMap;
 
 PointComp comp(&costMap);
-std::set8<df::coord, PointComp> fringe(comp);
+std::set<df::coord, PointComp> fringe(comp);
 EventManager::EventHandler findJobTickHandler(findAndAssignInvasionJob, 1);
 
 int32_t localPtsFound = 0;
@@ -358,7 +358,7 @@ void clearDijkstra() {
     parentMap.clear();
     costMap.clear();
     comp = PointComp(&costMap);
-    fringe = std::set8<df::coord,PointComp>(comp);
+    fringe = std::set<df::coord,PointComp>(comp);
     localPtsFound = edgeCount = 0;
     foundTarget = false;
     closedSet.clear();

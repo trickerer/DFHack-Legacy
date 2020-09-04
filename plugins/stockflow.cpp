@@ -140,7 +140,7 @@ public:
     bool stockpile_method(const char *method, building_stockpilest *sp) {
         // Combines the select_order and toggle_trigger method calls,
         // because they share the same signature.
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
 
         lua_State* L = Lua::Core::State;
         color_ostream_proxy out(Core::getInstance().getConsole());
@@ -170,7 +170,7 @@ public:
         lua_State* L = Lua::Core::State;
         color_ostream_proxy out(Core::getInstance().getConsole());
 
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
         Lua::StackUnwinder top(L);
 
         if (!lua_checkstack(L, 2))

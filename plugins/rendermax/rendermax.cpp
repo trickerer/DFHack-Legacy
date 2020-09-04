@@ -43,7 +43,7 @@ enum RENDERER_MODE
 {
     MODE_DEFAULT,MODE_TRIPPY,MODE_TRUECOLOR,MODE_LUA,MODE_LIGHT
 };
-RENDERER_MODE current_mode=MODE_DEFAULT;
+RENDERER_MODE current_mode = MODE_DEFAULT;
 lightingEngine *engine=NULL;
 
 static command_result rendermax(color_ostream &out, std::vector12<std::string24> & parameters);
@@ -68,7 +68,7 @@ struct dwarmode_render_hook : viewscreen_dwarfmodest{
     typedef df::viewscreen_dwarfmodest interpose_base;
     DEFINE_VMETHOD_INTERPOSE(void,render,())
     {
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
         engine->preRender();
         INTERPOSE_NEXT(render)();
         engine->calculate();
@@ -81,7 +81,7 @@ struct dungeon_render_hook : viewscreen_dungeonmodest{
     typedef df::viewscreen_dungeonmodest interpose_base;
     DEFINE_VMETHOD_INTERPOSE(void,render,())
     {
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
         engine->preRender();
         INTERPOSE_NEXT(render)();
         engine->calculate();
@@ -98,66 +98,66 @@ void removeOld()
         INTERPOSE_HOOK(dwarmode_render_hook,render).apply(false);
         INTERPOSE_HOOK(dungeon_render_hook,render).apply(false);
         delete engine;
-        engine=0;
+        engine = 0;
     }
-    if(current_mode!=MODE_DEFAULT)
+    if(current_mode != MODE_DEFAULT)
         delete enabler->renderer;
 
-    current_mode=MODE_DEFAULT;
+    current_mode = MODE_DEFAULT;
 }
 void installNew(df::renderer* r,RENDERER_MODE newMode)
 {
-    enabler->renderer=r;
-    current_mode=newMode;
+    enabler->renderer = r;
+    current_mode = newMode;
 }
 static void lockGrids()
 {
-    if(current_mode!=MODE_LUA)
-        return ;
-    renderer_lua* r=reinterpret_cast<renderer_lua*>(enabler->renderer);
+    if(current_mode != MODE_LUA)
+        return;
+    renderer_lua* r = reinterpret_cast<renderer_lua*>(enabler->renderer);
     r->dataMutex.lock();
 }
 static void unlockGrids()
 {
-    if(current_mode!=MODE_LUA)
-        return ;
-    renderer_lua* r=reinterpret_cast<renderer_lua*>(enabler->renderer);
+    if(current_mode != MODE_LUA)
+        return;
+    renderer_lua* r = reinterpret_cast<renderer_lua*>(enabler->renderer);
     r->dataMutex.unlock();
 }
 static void resetGrids()
 {
-    if(current_mode!=MODE_LUA)
-        return ;
-    renderer_lua* r=reinterpret_cast<renderer_lua*>(enabler->renderer);
-    for(size_t i=0;i<r->foreMult.size();i++)
+    if(current_mode != MODE_LUA)
+        return;
+    renderer_lua* r = reinterpret_cast<renderer_lua*>(enabler->renderer);
+    for(size_t i = 0; i < r->foreMult.size(); i++)
     {
-        r->foreMult[i]=rgbf(1,1,1);
-        r->foreOffset[i]=rgbf(0,0,0);
-        r->backMult[i]=rgbf(1,1,1);
-        r->backOffset[i]=rgbf(0,0,0);
+        r->foreMult[i] = rgbf(1,1,1);
+        r->foreOffset[i] = rgbf(0,0,0);
+        r->backMult[i] = rgbf(1,1,1);
+        r->backOffset[i] = rgbf(0,0,0);
     }
 }
 static int getGridsSize(lua_State* L)
 {
-    if(current_mode!=MODE_LUA)
+    if(current_mode != MODE_LUA)
         return -1;
-    renderer_lua* r=reinterpret_cast<renderer_lua*>(enabler->renderer);
+    renderer_lua* r = reinterpret_cast<renderer_lua*>(enabler->renderer);
     lua_pushnumber(L,gps->dimx);
     lua_pushnumber(L,gps->dimy);
     return 2;
 }
 static int getCell(lua_State* L)
 {
-    if(current_mode!=MODE_LUA)
+    if(current_mode != MODE_LUA)
         return 0;
-    renderer_lua* r=reinterpret_cast<renderer_lua*>(enabler->renderer);
-    int x=luaL_checknumber(L,1);
-    int y=luaL_checknumber(L,2);
-    int id=r->xyToTile(x,y);
-    rgbf fo=r->foreOffset[id];
-    rgbf fm=r->foreMult[id];
-    rgbf bo=r->backOffset[id];
-    rgbf bm=r->backMult[id];
+    renderer_lua* r = reinterpret_cast<renderer_lua*>(enabler->renderer);
+    int x = luaL_checknumber(L,1);
+    int y = luaL_checknumber(L,2);
+    int id = r->xyToTile(x,y);
+    rgbf fo = r->foreOffset[id];
+    rgbf fm = r->foreMult[id];
+    rgbf bo = r->backOffset[id];
+    rgbf bm = r->backMult[id];
     lua_newtable(L);
 
     lua_newtable(L);
@@ -199,47 +199,47 @@ static int getCell(lua_State* L)
 }
 static int setCell(lua_State* L)
 {
-    if(current_mode!=MODE_LUA)
+    if(current_mode != MODE_LUA)
         return 0;
-    renderer_lua* r=reinterpret_cast<renderer_lua*>(enabler->renderer);
-    int x=luaL_checknumber(L,1);
-    int y=luaL_checknumber(L,2);
+    renderer_lua* r = reinterpret_cast<renderer_lua*>(enabler->renderer);
+    int x = luaL_checknumber(L,1);
+    int y = luaL_checknumber(L,2);
 
     rgbf fo;
     lua_getfield(L,3,"fo");
     lua_getfield(L,-1,"r");
-    fo.r=lua_tonumber(L,-1);lua_pop(L,1);
+    fo.r = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"g");
-    fo.g=lua_tonumber(L,-1);lua_pop(L,1);
+    fo.g = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"b");
-    fo.b=lua_tonumber(L,-1);lua_pop(L,1);
+    fo.b = lua_tonumber(L,-1); lua_pop(L,1);
     rgbf fm;
     lua_getfield(L,3,"fm");
     lua_getfield(L,-1,"r");
-    fm.r=lua_tonumber(L,-1);lua_pop(L,1);
+    fm.r = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"g");
-    fm.g=lua_tonumber(L,-1);lua_pop(L,1);
+    fm.g = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"b");
-    fm.b=lua_tonumber(L,-1);lua_pop(L,1);
+    fm.b = lua_tonumber(L,-1); lua_pop(L,1);
 
     rgbf bo;
     lua_getfield(L,3,"bo");
     lua_getfield(L,-1,"r");
-    bo.r=lua_tonumber(L,-1);lua_pop(L,1);
+    bo.r = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"g");
-    bo.g=lua_tonumber(L,-1);lua_pop(L,1);
+    bo.g = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"b");
-    bo.b=lua_tonumber(L,-1);lua_pop(L,1);
+    bo.b = lua_tonumber(L,-1); lua_pop(L,1);
 
     rgbf bm;
     lua_getfield(L,3,"bm");
     lua_getfield(L,-1,"r");
-    bm.r=lua_tonumber(L,-1);lua_pop(L,1);
+    bm.r = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"g");
-    bm.g=lua_tonumber(L,-1);lua_pop(L,1);
+    bm.g = lua_tonumber(L,-1); lua_pop(L,1);
     lua_getfield(L,-1,"b");
-    bm.b=lua_tonumber(L,-1);lua_pop(L,1);
-    int id=r->xyToTile(x,y);
+    bm.b = lua_tonumber(L,-1); lua_pop(L,1);
+    int id = r->xyToTile(x,y);
     r->foreMult[id]=fm;
     r->foreOffset[id]=fo;
     r->backMult[id]=bm;
@@ -248,10 +248,10 @@ static int setCell(lua_State* L)
 }
 static int invalidate(lua_State* L)
 {
-    if(current_mode!=MODE_LUA)
+    if(current_mode != MODE_LUA)
         return 0;
-    renderer_lua* r=reinterpret_cast<renderer_lua*>(enabler->renderer);
-    if(lua_gettop(L)==0)
+    renderer_lua* r = reinterpret_cast<renderer_lua*>(enabler->renderer);
+    if(lua_gettop(L) == 0)
     {
         r->invalidate();
     }
@@ -259,20 +259,20 @@ static int invalidate(lua_State* L)
     {
         int x,y,w,h;
         lua_getfield(L,1,"x");
-        x=lua_tonumber(L,-1);lua_pop(L,1);
+        x = lua_tonumber(L,-1); lua_pop(L,1);
         lua_getfield(L,1,"y");
-        y=lua_tonumber(L,-1);lua_pop(L,1);
+        y = lua_tonumber(L,-1); lua_pop(L,1);
         lua_getfield(L,1,"w");
-        w=lua_tonumber(L,-1);lua_pop(L,1);
+        w = lua_tonumber(L,-1); lua_pop(L,1);
         lua_getfield(L,1,"h");
-        h=lua_tonumber(L,-1);lua_pop(L,1);
+        h = lua_tonumber(L,-1); lua_pop(L,1);
         r->invalidateRect(x,y,w,h);
     }
     return 0;
 }
 bool isEnabled()
 {
-    return current_mode==MODE_LUA;
+    return current_mode == MODE_LUA;
 }
 DFHACK_PLUGIN_LUA_FUNCTIONS {
     DFHACK_LUA_FUNCTION(isEnabled),
@@ -302,14 +302,14 @@ static void enable_hooks(bool enable)
 
 DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_change_event event)
 {
-    if(current_mode!=MODE_LIGHT)
+    if(current_mode != MODE_LIGHT)
         return CR_OK;
     switch(event)
     {
     case SC_VIEWSCREEN_CHANGED:
         {
-            CoreSuspendClaimer suspender;
-            if(current_mode==MODE_LIGHT)
+            CoreSuspender suspender;
+            if(current_mode == MODE_LIGHT)
             {
                 engine->clear();
             }
@@ -330,67 +330,67 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
 
 static command_result rendermax(color_ostream &out, std::vector12<std::string24> & parameters)
 {
-    if(parameters.size()==0)
+    if(parameters.size() == 0)
         return CR_WRONG_USAGE;
     if(!enabler->renderer->uses_opengl())
     {
         out.printerr("Sorry, this plugin needs open gl enabled printmode. Try STANDARD or other non-2D\n");
         return CR_FAILURE;
     }
-    std::string24 cmd=parameters[0];
-    if(cmd=="trippy")
+    std::string24 cmd = parameters[0];
+    if(cmd == "trippy")
     {
         removeOld();
         installNew(new renderer_trippy(enabler->renderer),MODE_TRIPPY);
         return CR_OK;
     }
-    else if(cmd=="truecolor")
+    else if(cmd == "truecolor")
     {
-        if(current_mode!=MODE_TRUECOLOR)
+        if(current_mode != MODE_TRUECOLOR)
         {
             removeOld();
             installNew(new renderer_test(enabler->renderer),MODE_TRUECOLOR);
         }
-        if(current_mode==MODE_TRUECOLOR && parameters.size()==2)
+        if(current_mode == MODE_TRUECOLOR && parameters.size() == 2)
         {
             rgbf red(1,0,0),green(0,1,0),blue(0,0,1),white(1,1,1);
-            rgbf cur=white;
+            rgbf cur = white;
             rgbf dim(0.2f,0.2f,0.2f);
-            std::string24 col=parameters[1];
-            if(col=="red")
-                cur=red;
-            else if(col=="green")
-                cur=green;
-            else if(col=="blue")
-                cur=blue;
+            std::string24 col = parameters[1];
+            if(col == "red")
+                cur = red;
+            else if(col == "green")
+                cur = green;
+            else if(col == "blue")
+                cur = blue;
 
-            renderer_test* r=reinterpret_cast<renderer_test*>(enabler->renderer);
+            renderer_test* r = reinterpret_cast<renderer_test*>(enabler->renderer);
             tthread::lock_guard<tthread::mutex> guard(r->dataMutex);
-            int h=gps->dimy;
-            int w=gps->dimx;
-            int cx=w/2;
-            int cy=h/2;
-            int rad=cx;
-            if(rad>cy)rad=cy;
-            rad/=2;
-            int radsq=rad*rad;
-            for(size_t i=0;i<r->lightGrid.size();i++)
+            int h = gps->dimy;
+            int w = gps->dimx;
+            int cx = w/2;
+            int cy = h/2;
+            int rad = cx;
+            if(rad > cy)rad = cy;
+            rad /= 2;
+            int radsq = rad*rad;
+            for(size_t i = 0; i < r->lightGrid.size(); i++)
             {
                 r->lightGrid[i]=dim;
             }
-            for(int i=-rad;i<rad;i++)
-            for(int j=-rad;j<rad;j++)
+            for(int i = -rad; i < rad; i++)
+            for(int j = -rad; j < rad; j++)
             {
-                if((i*i+j*j)<radsq)
+                if((i*i+j*j) < radsq)
                 {
-                    float val=(radsq-i*i-j*j)/(float)radsq;
-                    r->lightGrid[(cx+i)*h+(cy+j)]=dim+cur*val;
+                    float val = (radsq-i*i-j*j) / (float)radsq;
+                    r->lightGrid[(cx+i)*h+(cy+j)] = dim+cur*val;
                 }
             }
             return CR_OK;
         }
     }
-    else if(cmd=="lua")
+    else if(cmd == "lua")
     {
         removeOld();
         installNew(new renderer_lua(enabler->renderer),MODE_LUA);
@@ -399,43 +399,43 @@ static command_result rendermax(color_ostream &out, std::vector12<std::string24>
         unlockGrids();
         return CR_OK;
     }
-    else if(cmd=="light")
+    else if(cmd == "light")
     {
-        if(current_mode!=MODE_LIGHT)
+        if(current_mode != MODE_LIGHT)
         {
             removeOld();
-            renderer_light *myRender=new renderer_light(enabler->renderer);
+            renderer_light *myRender = new renderer_light(enabler->renderer);
             installNew(myRender,MODE_LIGHT);
-            engine=new lightingEngineViewscreen(myRender);
+            engine = new lightingEngineViewscreen(myRender);
 
             if (Core::getInstance().isWorldLoaded())
                 plugin_onstatechange(out, SC_WORLD_LOADED);
         }
-        else if(current_mode==MODE_LIGHT && parameters.size()>1)
+        else if(current_mode == MODE_LIGHT && parameters.size()>1)
         {
-            if(parameters[1]=="reload")
+            if(parameters[1] == "reload")
             {
                 enable_hooks(true);
             }
-            else if(parameters[1]=="sun" && parameters.size()==3)
+            else if(parameters[1] == "sun" && parameters.size() == 3)
             {
-                if(parameters[2]=="cycle")
+                if(parameters[2] == "cycle")
                 {
                     engine->setHour(-1);
                 }
                 else
                 {
                     std::stringstream ss;
-                    ss<<parameters[2];
+                    ss << parameters[2].c_str();
                     float h;
-                    ss>>h;
+                    ss >> h;
                     engine->setHour(h);
                 }
             }
-            else if(parameters[1]=="occlusionON")
+            else if(parameters[1] == "occlusionON")
             {
                 engine->debug(true);
-            }else if(parameters[1]=="occlusionOFF")
+            }else if(parameters[1] == "occlusionOFF")
             {
                 engine->debug(false);
             }
@@ -445,9 +445,9 @@ static command_result rendermax(color_ostream &out, std::vector12<std::string24>
 
         return CR_OK;
     }
-    else if(cmd=="disable")
+    else if(cmd == "disable")
     {
-        if(current_mode==MODE_DEFAULT)
+        if(current_mode == MODE_DEFAULT)
             out.print("%s\n","Not installed, doing nothing.");
         else
             removeOld();

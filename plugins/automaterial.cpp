@@ -1127,7 +1127,7 @@ struct jobutils_hook : public df::viewscreen_dwarfmodest
                     int dY = abs(box_first.y - curr_y) + 1;
                     stringstream label;
                     label << "Selection: " << dX << "x" << dY;
-                    OutputString(COLOR_WHITE, x, ++y, label.str(), true, left_margin);
+                    OutputString(COLOR_WHITE, x, ++y, label.str().c_str(), true, left_margin);
 
                     int cx = box_first.x;
                     int cy = box_first.y;

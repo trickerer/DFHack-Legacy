@@ -56,9 +56,9 @@ command_result df_notes (color_ostream &con, std::vector12<std::string24> & para
         con.print("Note symbol: '%c'\n", note->symbol);
 
         if (note->name.length() > 0)
-            con << "Note name: " << (note->name) << std::endl;
+            con << "Note name: " << (note->name.c_str()) << std::endl;
         if (note->text.length() > 0)
-            con << "Note text: " << (note->text) << std::endl;
+            con << "Note text: " << (note->text.c_str()) << std::endl;
 
         if (note->unk1 != 0)
             con.print("unk1: %x\n", note->unk1);

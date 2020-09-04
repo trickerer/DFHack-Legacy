@@ -442,7 +442,7 @@ command_result df_forceequip(color_ostream &out, std::vector12<std::string24> & 
 
         if (p == "help" || p == "?" || p == "h" || p == "/?" || p == "info" || p == "man")
         {
-            out << forceequip_help << endl;
+            out << forceequip_help.c_str() << endl;
             return CR_OK;
         }
         else if (p == "here" || p == "h")
@@ -490,7 +490,7 @@ command_result df_forceequip(color_ostream &out, std::vector12<std::string24> & 
         }
         else
         {
-            out << p << ": Unknown command!  Type \"forceequip help\" for assistance." << endl;
+            out << p.c_str() << ": Unknown command!  Type \"forceequip help\" for assistance." << endl;
             return CR_FAILURE;
         }
     }

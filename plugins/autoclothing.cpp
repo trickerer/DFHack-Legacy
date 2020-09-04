@@ -83,32 +83,32 @@ struct ClothingRequirement
     std::string24 Serialize()
     {
         stringstream stream;
-        stream << ENUM_KEY_STR_SIMPLE(job_type, jobType) << " ";
-        stream << ENUM_KEY_STR_SIMPLE(item_type,itemType) << " ";
+        stream << ENUM_KEY_STR_SIMPLE(job_type, jobType).c_str() << " ";
+        stream << ENUM_KEY_STR_SIMPLE(item_type,itemType).c_str() << " ";
         stream << item_subtype << " ";
         stream << material_category.whole << " ";
         stream << needed_per_citizen;
-        return stream.str();
+        return stream.str().c_str();
     }
 
     void Deserialize(std::string24 s)
     {
-        stringstream stream(s);
-        std::string24 loadedJob;
+        stringstream stream(s.c_str());
+        std::string loadedJob;
         stream >> loadedJob;
         FOR_ENUM_ITEMS_SIMPLE(job_type, job)
         {
-            if (ENUM_KEY_STR_SIMPLE(job_type, job) == loadedJob)
+            if (ENUM_KEY_STR_SIMPLE(job_type, job) == loadedJob.c_str())
             {
                 jobType = job;
                 break;
             }
         }
-        std::string24 loadedItem;
+        std::string loadedItem;
         stream >> loadedItem;
         FOR_ENUM_ITEMS_SIMPLE(item_type, item)
         {
-            if (ENUM_KEY_STR_SIMPLE(item_type, item) == loadedItem)
+            if (ENUM_KEY_STR_SIMPLE(item_type, item) == loadedItem.c_str())
             {
                 itemType = item;
                 break;
@@ -123,16 +123,16 @@ struct ClothingRequirement
     {
         if (!set_bitfield_field(&material_category, parameters[0], 1))
         {
-            out << "Unrecognized material type: " << parameters[0] << endl;
+            out << "Unrecognized material type: " << parameters[0].c_str() << endl;
         }
         if (!setItem(parameters[1], this))
         {
-            out << "Unrecognized item name or token: " << parameters[1] << endl;
+            out << "Unrecognized item name or token: " << parameters[1].c_str() << endl;
             return false;
         }
         if (!validateMaterialCategory(this))
         {
-            out << parameters[0] << " is not a valid material category for " << parameters[1] << endl;
+            out << parameters[0].c_str() << " is not a valid material category for " << parameters[1].c_str() << endl;
             return false;
         }
         return true;
@@ -141,7 +141,7 @@ struct ClothingRequirement
     std::string24 ToReadableLabel()
     {
         stringstream stream;
-        stream << bitfield_to_string(material_category) << " ";
+        stream << bitfield_to_string(material_category).c_str() << " ";
         std::string24 adjective = "";
         std::string24 name = "";
         switch (itemType)
@@ -170,11 +170,11 @@ struct ClothingRequirement
             break;
         }
         if (!adjective.empty())
-            stream << adjective << " ";
-        stream << name << " ";
+            stream << adjective.c_str() << " ";
+        stream << name.c_str() << " ";
         stream << needed_per_citizen;
 
-        return stream.str();
+        return stream.str().c_str();
     }
 };
 
@@ -372,7 +372,7 @@ command_result autoclothing(color_ostream &out, std::vector12<std::string24> & p
         out << "Currently set " << clothingOrders.size() << " automatic clothing orders" << endl;
         for (size_t i = 0; i < clothingOrders.size(); i++)
         {
-            out << clothingOrders[i].ToReadableLabel() << endl;
+            out << clothingOrders[i].ToReadableLabel().c_str() << endl;
         }
         return CR_OK;
     }
@@ -403,7 +403,7 @@ command_result autoclothing(color_ostream &out, std::vector12<std::string24> & p
         }
         catch (const std::exception&)
         {
-            out << parameters[2] << " is not a valid number." << endl;
+            out << parameters[2].c_str() << " is not a valid number." << endl;
             return CR_WRONG_USAGE;
         }
         settingSize = true;
@@ -419,17 +419,17 @@ command_result autoclothing(color_ostream &out, std::vector12<std::string24> & p
             if (newRequirement.needed_per_citizen == 0)
             {
                 clothingOrders.erase(clothingOrders.begin() + i);
-                out << "Unset " << parameters[0] << " " << parameters[1] << endl;
+                out << "Unset " << parameters[0].c_str() << " " << parameters[1].c_str() << endl;
             }
             else
             {
                 clothingOrders[i] = newRequirement;
-                out << "Set " << parameters[0] << " " << parameters[1] << " to " << parameters[2] << endl;
+                out << "Set " << parameters[0].c_str() << " " << parameters[1].c_str() << " to " << parameters[2].c_str() << endl;
             }
         }
         else
         {
-            out << parameters[0] << " " << parameters[1] << " is set to " << clothingOrders[i].needed_per_citizen << endl;
+            out << parameters[0].c_str() << " " << parameters[1].c_str() << " is set to " << clothingOrders[i].needed_per_citizen << endl;
         }
         break;
     }
@@ -439,17 +439,17 @@ command_result autoclothing(color_ostream &out, std::vector12<std::string24> & p
         {
             if (newRequirement.needed_per_citizen == 0)
             {
-                out << parameters[0] << " " << parameters[1] << " already unset." << endl;
+                out << parameters[0].c_str() << " " << parameters[1].c_str() << " already unset." << endl;
             }
             else
             {
                 clothingOrders.push_back(newRequirement);
-                out << "Added order for " << parameters[0] << " " << parameters[1] << " to " << parameters[2] << endl;
+                out << "Added order for " << parameters[0].c_str() << " " << parameters[1].c_str() << " to " << parameters[2].c_str() << endl;
             }
         }
         else
         {
-            out << parameters[0] << " " << parameters[1] << " is not set." << endl;
+            out << parameters[0].c_str() << " " << parameters[1].c_str() << " is not set." << endl;
         }
     }
     if (settingSize)
@@ -660,7 +660,7 @@ static void init_state(color_ostream &out)
         ClothingRequirement req;
         req.Deserialize(item.val());
         clothingOrders.push_back(req);
-        out << "autoclothing added " << req.ToReadableLabel() << endl;
+        out << "autoclothing added " << req.ToReadableLabel().c_str() << endl;
     }
 }
 

@@ -20,10 +20,16 @@ using df::global::world;
 int changeLiquid (df::tile_liquid type)
 {
     int tiles = 0;
-    for (df::map_block *block : world->map.map_blocks)
+    //for (df::map_block *block : world->map.map_blocks)
+    for (std::vector12<df::map_block*>::iterator it = world->map.map_blocks.begin();
+        it != world->map.map_blocks.end(); ++it)
     {
-        for (df::block_square_event *evt : block->block_events)
+        df::map_block* block = *it;
+        //for (df::block_square_event *evt : block->block_events)
+        for (std::vector12<df::block_square_event*>::iterator itr = block->block_events.begin();
+            itr != block->block_events.end(); ++itr)
         {
+            df::block_square_event* evt = *itr;
             if (evt->getType() != block_square_event_type::frozen_liquid)
                 continue;
             df::block_square_event_frozen_liquidst *frozen = (df::block_square_event_frozen_liquidst *)evt;

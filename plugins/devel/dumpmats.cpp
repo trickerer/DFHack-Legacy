@@ -30,7 +30,7 @@ command_result df_dumpmats (color_ostream &out, std::vector12<std::string24> &pa
     out.print("hardcoded_materials\n\n");
     out.print("[OBJECT:MATERIAL]\n");
 
-    FOR_ENUM_ITEMS(builtin_mats, mat_num)
+    FOR_ENUM_ITEMS_SIMPLE(builtin_mats, mat_num)
     {
         df::material *mat = world->raws.mat_table.builtin[mat_num];
         if (!mat)
@@ -138,7 +138,7 @@ command_result df_dumpmats (color_ostream &out, std::vector12<std::string24> &pa
         }
         const char *state_names[6] = {"SOLID", "LIQUID", "GAS", "SOLID_POWDER", "SOLID_PASTE", "SOLID_PRESSED"};
 
-        FOR_ENUM_ITEMS(matter_state, state)
+        FOR_ENUM_ITEMS_SIMPLE(matter_state, state)
         {
             if (mat->state_color[state] != -1 && mat->state_color[state] != def_color[state])
                 out.print("\t[STATE_COLOR:%s:%s]\n", state_names[state], world->raws.descriptors.colors[mat->state_color[state]]->id.c_str());
@@ -197,9 +197,9 @@ command_result df_dumpmats (color_ostream &out, std::vector12<std::string24> &pa
         if (uint32_t(mat->molar_mass) != 0xFBBC7818)
             out.print("\t[MOLAR_MASS:%i]\n", mat->molar_mass);
 
-        FOR_ENUM_ITEMS(strain_type, strain)
+        FOR_ENUM_ITEMS_SIMPLE(strain_type, strain)
         {
-            auto name = ENUM_KEY_STR(strain_type,strain);
+            std::string24 name = ENUM_KEY_STR_SIMPLE(strain_type,strain);
 
             if (mat->strength.yield[strain] != 10000)
                 out.print("\t[%s_YIELD:%i]\n", name.c_str(), mat->strength.yield[strain]);
@@ -214,23 +214,24 @@ command_result df_dumpmats (color_ostream &out, std::vector12<std::string24> &pa
         if (mat->strength.absorption != 0)
             out.print("\t[ABSORPTION:%i]\n", mat->strength.absorption);
 
-        FOR_ENUM_ITEMS(material_flags, i)
+        FOR_ENUM_ITEMS_SIMPLE(material_flags, i)
         {
             if (mat->flags.is_set(i))
-                out.print("\t[%s]\n", ENUM_KEY_STR(material_flags, i).c_str());
+                out.print("\t[%s]\n", ENUM_KEY_STR_SIMPLE(material_flags, i).c_str());
         }
 
         if (mat->extract_storage != item_type::BARREL)
-            out.print("\t[EXTRACT_STORAGE:%s]\n", ENUM_KEY_STR(item_type, mat->extract_storage).c_str());
+            out.print("\t[EXTRACT_STORAGE:%s]\n", ENUM_KEY_STR_SIMPLE(item_type, mat->extract_storage).c_str());
         if (mat->butcher_special_type != item_type::NONE || mat->butcher_special_subtype != -1)
-            out.print("\t[BUTCHER_SPECIAL:%s:%s]\n", ENUM_KEY_STR(item_type, mat->butcher_special_type).c_str(), (mat->butcher_special_subtype == -1) ? "NONE" : "?");
+            out.print("\t[BUTCHER_SPECIAL:%s:%s]\n", ENUM_KEY_STR_SIMPLE(item_type, mat->butcher_special_type).c_str(), (mat->butcher_special_subtype == -1) ? "NONE" : "?");
         if (mat->meat_name[0].size() || mat->meat_name[1].size() || mat->meat_name[2].size())
             out.print("\t[MEAT_NAME:%s:%s:%s]\n", mat->meat_name[0].c_str(), mat->meat_name[1].c_str(), mat->meat_name[2].c_str());
         if (mat->block_name[0].size() || mat->block_name[1].size())
             out.print("\t[BLOCK_NAME:%s:%s]\n", mat->block_name[0].c_str(), mat->block_name[1].c_str());
 
-        for (std::string24 *s : mat->reaction_class)
-            out.print("\t[REACTION_CLASS:%s]\n", s->c_str());
+        //for (std::string24 *s : mat->reaction_class)
+        for(std::vector12<std::string24*>::iterator it = mat->reaction_class.begin(); it != mat->reaction_class.end(); ++it)
+            out.print("\t[REACTION_CLASS:%s]\n", (*it)->c_str());
         for (size_t i = 0; i < mat->reaction_product.id.size(); i++)
         {
             if ((*mat->reaction_product.str[0][i] == "NONE") && (*mat->reaction_product.str[1][i] == "NONE"))

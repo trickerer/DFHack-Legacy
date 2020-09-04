@@ -1286,10 +1286,10 @@ private:
             {
                 item_grouped_entry* item_group = groups_iter->second;
                 stringstream label;
-                label << item_group->getLabel(is_grouped);
+                label << item_group->getLabel(is_grouped).c_str();
                 if (!item_group->isSingleItem())
                     label << " (" << item_group->entries.size() << ")";
-                ListEntry<item_grouped_entry *> entry(label.str(), item_group, item_group->getKeywords());
+                ListEntry<item_grouped_entry *> entry(label.str().c_str(), item_group, item_group->getKeywords());
                 items_column.add(entry);
             }
         }

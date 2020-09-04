@@ -153,8 +153,8 @@ command_result follow (color_ostream &out, std::vector12<std::string24> & parame
     {
         is_enabled = true;
         std::ostringstream ss;
-        ss << "Unpause to begin following " << world->raws.creatures.all[followedUnit->race]->name[0];
-        if (followedUnit->name.has_name) ss << " " << followedUnit->name.first_name;
+        ss << "Unpause to begin following " << world->raws.creatures.all[followedUnit->race]->name[0].c_str();
+        if (followedUnit->name.has_name) ss << " " << followedUnit->name.first_name.c_str();
         ss << ". Simply manually move the view to break the following.\n";
         out.print("%s", ss.str().c_str());
     }

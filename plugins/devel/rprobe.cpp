@@ -113,7 +113,7 @@ command_result rprobe (color_ostream &out, std::vector12<std::string24> & parame
     {
         coord2d rg = screen->location.biome_rgn[i];
 
-        auto rd = &data->region_map[rg.x][rg.y];
+        df::region_map_entry* rd = &data->region_map[rg.x][rg.y];
 
         if (set && int(i) == to_set) {
             if (set_field == 0)

@@ -120,19 +120,19 @@ std::vector12<std::vector12<std::string24>> tokenizeFile(std::string24 filename)
     if (!infile.good()) {
         throw -1;
     }
-    std::string24 line;
+    std::string line;
     y = 0;
     while (std::getline(infile, line)) {
         x = 0;
         if (strcmp(line.substr(0,1).c_str(),"#")==0) {
-            fileTokens[y++][0] = line;
+            fileTokens[y++][0] = line.c_str();
             continue;
         }
         int start = 0;
         size_t nextInd = line.find(',');
-        std::string24 curCell = line.substr(start,nextInd-start);
+        std::string curCell = line.substr(start,nextInd-start);
         do {
-            fileTokens[y][x] = curCell;
+            fileTokens[y][x] = curCell.c_str();
             start = nextInd+1;
             nextInd = line.find(',',start);
             curCell = line.substr(start,nextInd-start);

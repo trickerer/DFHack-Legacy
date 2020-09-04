@@ -265,7 +265,7 @@ void CopyBuildMenu(DwarfControl::SidebarState * out)
         for (size_t i = 0; i < build_selector->errors.size(); i++)
         {
             if (build_selector->errors[i])
-                send_selector->add_errors(*build_selector->errors[i]);
+                send_selector->add_errors((*build_selector->errors[i]).c_str());
         }
         for (size_t i = 0; i < build_selector->choices.size(); i++)
         {
@@ -274,7 +274,7 @@ void CopyBuildMenu(DwarfControl::SidebarState * out)
             send_choice->set_distance(choice->distance);
             std::string24 name;
             choice->getName(&name);
-            send_choice->set_name(name);
+            send_choice->set_name(name.c_str());
             send_choice->set_num_candidates(choice->getNumCandidates());
             send_choice->set_used_count(choice->getUsedCount());
         }

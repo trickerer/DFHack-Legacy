@@ -276,8 +276,8 @@ command_result cursecheck (color_ostream &out, std::vector12<std::string24> & pa
                 if (verbose)
                 {
                     out << "Curse flags: "
-                        << bitfield_to_string(unit->curse.add_tags1) << endl
-                        << bitfield_to_string(unit->curse.add_tags2) << endl;
+                        << bitfield_to_string(unit->curse.add_tags1).c_str() << endl
+                        << bitfield_to_string(unit->curse.add_tags2).c_str() << endl;
                 }
             }
         }

@@ -89,7 +89,7 @@ bool StockpileSerializer::serialize_to_file ( const std::string24 & file )
     std::fstream output ( file.c_str(), std::ios::out | std::ios::binary |  std::ios::trunc );
     if ( output.fail()  )
     {
-        debug() <<  "ERROR: failed to open file for writing: " <<  file <<  endl;
+        debug() << "ERROR: failed to open file for writing: " << file.c_str() << endl;
         return false;
     }
     return serialize_to_ostream ( &output );
@@ -111,7 +111,7 @@ bool StockpileSerializer::unserialize_from_file ( const std::string24 & file )
     std::fstream input ( file.c_str(), std::ios::in | std::ios::binary );
     if ( input.fail()  )
     {
-        debug() <<  "ERROR: failed to open file for reading: " <<  file <<  endl;
+        debug() << "ERROR: failed to open file for reading: " << file.c_str() << endl;
         return false;
     }
     return parse_from_istream ( &input );
@@ -196,8 +196,8 @@ void StockpileSerializer::serialize_list_organic_mat ( FuncWriteExport add_value
             std::string24 token = OrganicMatLookup::food_token_by_idx ( debug(), cat, i );
             if ( !token.empty() )
             {
-                add_value ( token );
-                debug() <<  " organic_material " << i << " is " <<  token <<  endl;
+                add_value ( token.c_str() );
+                debug() << " organic_material " << i << " is " << token.c_str() << endl;
             }
             else
             {
@@ -213,12 +213,12 @@ void StockpileSerializer::unserialize_list_organic_mat ( FuncReadImport get_valu
     pile_list->resize ( OrganicMatLookup::food_max_size ( cat ),  '\0' );
     for ( size_t i = 0; i < list_size; ++i )
     {
-        std::string24 token = get_value ( i );
-        int16_t idx = OrganicMatLookup::food_idx_by_token ( debug(), cat, token );
-        debug() << "   organic_material " << idx << " is " << token << endl;
+        std::string token = get_value ( i );
+        int16_t idx = OrganicMatLookup::food_idx_by_token ( debug(), cat, token.c_str() );
+        debug() << "   organic_material " << idx << " is " << token.c_str() << endl;
         if ( size_t(idx) >=  pile_list->size() )
         {
-            debug() <<  "error organic mat index too large!   idx[" << idx <<  "] max_size[" << pile_list->size() <<  "]" <<   endl;
+            debug() << "error organic mat index too large!   idx[" << idx << "] max_size[" << pile_list->size() << "]" << endl;
             continue;
         }
         pile_list->at ( idx ) = 1;
@@ -231,16 +231,16 @@ void StockpileSerializer::serialize_list_item_type ( FuncItemAllowed is_allowed,
     using df::enums::item_type::item_type;
     //using type_traits = df::enum_traits<item_type>;
     typedef df::enum_traits<item_type> type_traits;
-    debug() <<  "item_type size = " <<  list.size() <<  " size limit = " <<  type_traits::last_item_value <<  " typecasted:  " << ( size_t ) type_traits::last_item_value <<  endl;
+    debug() << "item_type size = " << list.size() << " size limit = " << type_traits::last_item_value << " typecasted:  " << ( size_t ) type_traits::last_item_value << endl;
     for ( size_t i = 0; i <= ( size_t ) type_traits::last_item_value; ++i )
     {
         if ( list.at ( i ) )
         {
             const item_type type = ( item_type ) ( ( df::enum_traits<item_type>::base_type ) i );
-            std::string24 r_type ( type_traits::key_table[i+1] );
+            std::string r_type ( type_traits::key_table[i+1] );
             if ( !is_allowed ( type ) ) continue;
             add_value ( r_type );
-            debug() << "item_type key_table[" << i+1 << "] type[" << ( int16_t ) type <<  "] is " << r_type <<endl;
+            debug() << "item_type key_table[" << i+1 << "] type[" << ( int16_t ) type << "] is " << r_type.c_str() << endl;
         }
     }
 }
@@ -258,15 +258,15 @@ void StockpileSerializer::unserialize_list_item_type ( FuncItemAllowed is_allowe
     df::enum_traits<item_type> type_traits;
     for ( int32_t i = 0; i < list_size; ++i )
     {
-        const std::string24 token = read_value ( i );
+        const std::string token = read_value ( i );
         // subtract one because item_type starts at -1
-        const df::enum_traits<item_type>::base_type idx = linear_index ( debug(), type_traits, token ) - 1;
+        const df::enum_traits<item_type>::base_type idx = linear_index ( debug(), type_traits, token.c_str() ) - 1;
         const item_type type = ( item_type ) idx;
         if ( !is_allowed ( type ) ) continue;
-        debug() << "   item_type " << idx << " is " << token << endl;
+        debug() << "   item_type " << idx << " is " << token.c_str() << endl;
         if ( size_t(idx) >=  pile_list->size() )
         {
-            debug() <<  "error item_type index too large!   idx[" << idx <<  "] max_size[" << pile_list->size() <<  "]" <<   endl;
+            debug() << "error item_type index too large!   idx[" << idx << "] max_size[" << pile_list->size() << "]" << endl;
             continue;
         }
         pile_list->at ( idx ) =  1;
@@ -283,8 +283,8 @@ void StockpileSerializer::serialize_list_material ( FuncMaterialAllowed is_allow
         {
             mi.decode ( 0, i );
             if ( !is_allowed ( mi ) ) continue;
-            debug() << "   material " << i << " is " << mi.getToken() << endl;
-            add_value ( mi.getToken() );
+            debug() << "   material " << i << " is " << mi.getToken().c_str() << endl;
+            add_value ( mi.getToken().c_str() );
         }
     }
 }
@@ -306,14 +306,14 @@ void StockpileSerializer::unserialize_list_material ( FuncMaterialAllowed is_all
     }
     for ( int i = 0; i < list_size; ++i )
     {
-        const std::string24 token = read_value ( i );
+        const std::string token = read_value ( i );
         MaterialInfo mi;
-        mi.find ( token );
+        mi.find ( token.c_str() );
         if ( !is_allowed ( mi ) ) continue;
-        debug() << "   material " << mi.index << " is " << token << endl;
+        debug() << "   material " << mi.index << " is " << token.c_str() << endl;
         if ( size_t(mi.index) >=  pile_list->size() )
         {
-            debug() <<  "error material index too large!   idx[" << mi.index <<  "] max_size[" << pile_list->size() <<  "]" <<   endl;
+            debug() << "error material index too large!   idx[" << mi.index << "] max_size[" << pile_list->size() << "]" << endl;
             continue;
         }
         pile_list->at ( mi.index ) = 1;
@@ -330,9 +330,9 @@ void StockpileSerializer::serialize_list_quality ( FuncWriteExport add_value, co
     {
         if ( quality_list[i] )
         {
-            const std::string24 f_type ( quality_traits::key_table[i] );
+            const std::string f_type ( quality_traits::key_table[i] );
             add_value ( f_type );
-            debug() << "  quality: " << i << " is " << f_type <<endl;
+            debug() << "  quality: " << i << " is " << f_type.c_str() << endl;
         }
     }
 }
@@ -353,14 +353,14 @@ void StockpileSerializer::unserialize_list_quality ( FuncReadImport read_value, 
         df::enum_traits<item_quality> quality_traits;
         for ( int i = 0; i < list_size; ++i )
         {
-            const std::string24 quality = read_value ( i );
-            df::enum_traits<item_quality>::base_type idx = linear_index ( debug(), quality_traits, quality );
+            const std::string quality = read_value ( i );
+            df::enum_traits<item_quality>::base_type idx = linear_index ( debug(), quality_traits, quality.c_str() );
             if ( idx < 0 )
             {
-                debug() << " invalid quality token " << quality << endl;
+                debug() << " invalid quality token " << quality.c_str() << endl;
                 continue;
             }
-            debug() << "   quality: " << idx << " is " << quality << endl;
+            debug() << "   quality: " << idx << " is " << quality.c_str() << endl;
             pile_list[idx] = true;
         }
     }
@@ -379,8 +379,8 @@ void StockpileSerializer::serialize_list_other_mats ( const std::map<int, std::s
                 debug() << " invalid other material with index " << i << endl;
                 continue;
             }
-            add_value ( token );
-            debug() << "  other mats " << i << " is " << token << endl;
+            add_value ( token.c_str() );
+            debug() << "  other mats " << i << " is " << token.c_str() << endl;
         }
     }
 }
@@ -392,17 +392,17 @@ void StockpileSerializer::unserialize_list_other_mats ( const std::map<int, std:
     pile_list->resize ( other_mats.size(),  '\0' );
     for ( int i = 0; i < list_size; ++i )
     {
-        const std::string24 token = read_value ( i );
-        size_t idx = other_mats_token ( other_mats, token );
+        const std::string token = read_value ( i );
+        size_t idx = other_mats_token ( other_mats, token.c_str() );
         if ( idx < 0 )
         {
-            debug() << "invalid other mat with token " << token;
+            debug() << "invalid other mat with token " << token.c_str();
             continue;
         }
-        debug() << "  other_mats " << idx << " is " << token << endl;
+        debug() << "  other_mats " << idx << " is " << token.c_str() << endl;
         if ( idx >=  pile_list->size() )
         {
-            debug() <<  "error other_mats index too large!   idx[" << idx <<  "] max_size[" << pile_list->size() <<  "]" <<   endl;
+            debug() << "error other_mats index too large!   idx[" << idx << "] max_size[" << pile_list->size() << "]" << endl;
             continue;
         }
         pile_list->at ( idx ) = 1;
@@ -422,8 +422,8 @@ void StockpileSerializer::serialize_list_itemdef ( FuncWriteExport add_value,  s
             if ( a->base_flags.is_set ( df::itemdef_flags::GENERATED ) ) continue;
             ItemTypeInfo ii;
             if ( !ii.decode ( type,  i ) ) continue;
-            add_value ( ii.getToken() );
-            debug() <<  "  itemdef type" <<  i <<  " is " <<  ii.getToken() << endl;
+            add_value ( ii.getToken().c_str() );
+            debug() << "  itemdef type" << i << " is " << ii.getToken().c_str() << endl;
         }
     }
 }
@@ -435,13 +435,13 @@ void StockpileSerializer::unserialize_list_itemdef ( FuncReadImport read_value, 
     pile_list->resize ( Items::getSubtypeCount ( type ),  '\0' );
     for ( int i = 0; i < list_size; ++i )
     {
-        std::string24 token = read_value ( i );
+        std::string token = read_value ( i );
         ItemTypeInfo ii;
-        if ( !ii.find ( token ) ) continue;
-        debug() <<  "  itemdef " <<  ii.subtype <<  " is " <<  token << endl;
+        if ( !ii.find ( token.c_str() ) ) continue;
+        debug() << "  itemdef " << ii.subtype << " is " << token.c_str() << endl;
         if ( size_t(ii.subtype) >=  pile_list->size() )
         {
-            debug() <<  "error itemdef index too large!   idx[" << ii.subtype <<  "] max_size[" << pile_list->size() <<  "]" <<   endl;
+            debug() << "error itemdef index too large!   idx[" << ii.subtype << "] max_size[" << pile_list->size() << "]" << endl;
             continue;
         }
         pile_list->at ( ii.subtype ) = 1;
@@ -509,8 +509,8 @@ void StockpileSerializer::write_animals()
         if ( mPile->settings.animals.enabled.at ( i ) == 1 )
         {
             df::creature_raw* r = find_creature ( i );
-            debug() << "creature "<< r->creature_id << " " << i << endl;
-            animals->add_enabled ( r->creature_id );
+            debug() << "creature "<< r->creature_id.c_str() << " " << i << endl;
+            animals->add_enabled ( r->creature_id.c_str() );
         }
     }
 }
@@ -526,15 +526,15 @@ void StockpileSerializer::read_animals()
 
         mPile->settings.animals.enabled.clear();
         mPile->settings.animals.enabled.resize ( world->raws.creatures.all.size(), '\0' );
-        debug() <<  " pile has " <<  mPile->settings.animals.enabled.size() <<  endl;
+        debug() << " pile has " << mPile->settings.animals.enabled.size() << endl;
         for (int i = 0; i < mBuffer.animals().enabled_size(); ++i )
         {
-            std::string24 id = mBuffer.animals().enabled ( i );
-            int idx = find_creature ( id );
+            std::string id = mBuffer.animals().enabled ( i );
+            int idx = find_creature ( id.c_str() );
             debug() << id << " " << idx << endl;
-            if ( idx < 0 ||  size_t(idx) >= mPile->settings.animals.enabled.size() )
+            if ( idx < 0 || size_t(idx) >= mPile->settings.animals.enabled.size() )
             {
-                debug() <<  "WARNING: animal index invalid: " <<  idx << endl;
+                debug() << "WARNING: animal index invalid: " << idx << endl;
                 continue;
             }
             mPile->settings.animals.enabled.at ( idx ) = ( char ) 1;
@@ -549,7 +549,7 @@ void StockpileSerializer::read_animals()
     }
 }
 
-std::string24 StockpileSerializer::FuncReadImport::operator()(const size_t& idx) const
+std::string StockpileSerializer::FuncReadImport::operator()(const size_t& idx) const
 {
     switch (cat)
     {
@@ -630,7 +630,7 @@ std::string24 StockpileSerializer::FuncReadImport::operator()(const size_t& idx)
         default:                        return "";
     }
 }
-void StockpileSerializer::FuncWriteExport::operator()(const std::string24 &id)
+void StockpileSerializer::FuncWriteExport::operator()(const std::string &id)
 {
     switch (cat)
     {
@@ -960,7 +960,7 @@ StockpileSerializer::food_pair StockpileSerializer::food_map ( organic_mat_categ
 void StockpileSerializer::write_food()
 {
     StockpileSettings::FoodSet *food = mBuffer.mutable_food();
-    debug() <<  " food: " <<  endl;
+    debug() << " food: " << endl;
     food->set_prepared_meals ( mPile->settings.food.prepared_meals );
 
     using df::enums::organic_mat_category::organic_mat_category;
@@ -970,7 +970,7 @@ void StockpileSerializer::write_food()
     {
         food_pair p = food_map ( ( organic_mat_category ) mat_category );
         if ( !p.valid ) continue;
-        debug() <<  " food: " <<  traits::key_table[mat_category] <<  endl;
+        debug() << " food: " << traits::key_table[mat_category] << endl;
         serialize_list_organic_mat ( p.set_value, p.stockpile_values, ( organic_mat_category ) mat_category );
     }
 }
@@ -985,14 +985,14 @@ void StockpileSerializer::read_food()
     {
         mPile->settings.flags.bits.food = 1;
         const StockpileSettings::FoodSet food = mBuffer.food();
-        debug() << "food:" <<endl;
+        debug() << "food:" << endl;
 
         if ( food.has_prepared_meals() )
             mPile->settings.food.prepared_meals = food.prepared_meals();
         else
             mPile->settings.food.prepared_meals = true;
 
-        debug() <<  "  prepared_meals: " <<  mPile->settings.food.prepared_meals << endl;
+        debug() << "  prepared_meals: " << mPile->settings.food.prepared_meals << endl;
 
         for ( int32_t mat_category = traits::first_item_value; mat_category <traits::last_item_value; ++mat_category )
         {
@@ -1046,9 +1046,9 @@ void StockpileSerializer::write_furniture()
     {
         if ( mPile->settings.furniture.type.at ( i ) )
         {
-            std::string24 f_type ( type_traits::key_table[i] );
+            std::string f_type ( type_traits::key_table[i] );
             furniture->add_type ( f_type );
-            debug() << "furniture_type " << i << " is " << f_type <<endl;
+            debug() << "furniture_type " << i << " is " << f_type << endl;
         }
     }
     // metal, stone/clay materials
@@ -1092,7 +1092,7 @@ void StockpileSerializer::read_furniture()
     {
         mPile->settings.flags.bits.furniture = 1;
         const StockpileSettings::FurnitureSet furniture = mBuffer.furniture();
-        debug() << "furniture:" <<endl;
+        debug() << "furniture:" << endl;
 
         if ( mBuffer.furniture().has_sand_bags() )
             mPile->settings.furniture.sand_bags = mBuffer.furniture().sand_bags();
@@ -1108,12 +1108,12 @@ void StockpileSerializer::read_furniture()
         {
             for ( int i = 0; i < furniture.type_size(); ++i )
             {
-                const std::string24 type = furniture.type ( i );
-                df::enum_traits<furniture_type>::base_type idx = linear_index ( debug(), type_traits, type );
+                const std::string type = furniture.type ( i );
+                df::enum_traits<furniture_type>::base_type idx = linear_index ( debug(), type_traits, type.c_str() );
                 debug() << "   type " << idx << " is " << type << endl;
                 if ( idx < 0 ||  size_t(idx) >=  mPile->settings.furniture.type.size() )
                 {
-                    debug() <<  "WARNING: furniture type index invalid " << type <<  ", idx=" << idx <<  endl;
+                    debug() << "WARNING: furniture type index invalid " << type << ", idx=" << idx << endl;
                     continue;
                 }
                 mPile->settings.furniture.type.at ( idx ) = 1;
@@ -1184,8 +1184,8 @@ void StockpileSerializer::refuse_write_helper ( FuncWriteExport add_value, const
             df::creature_raw* r = find_creature ( i );
             // skip forgotten beasts, titans, demons, and night creatures
             if ( !refuse_creature_is_allowed ( r ) ) continue;
-            debug() << "creature "<< r->creature_id << " " << i << endl;
-            add_value ( r->creature_id );
+            debug() << "creature "<< r->creature_id.c_str() << " " << i << endl;
+            add_value ( r->creature_id.c_str() );
         }
     }
 }
@@ -1280,12 +1280,12 @@ void StockpileSerializer::refuse_read_helper ( FuncReadImport get_value, size_t 
     {
         for ( size_t i = 0; i < list_size; ++i )
         {
-            const std::string24 creature_id = get_value ( i );
-            const int idx = find_creature ( creature_id );
+            const std::string creature_id = get_value ( i );
+            const int idx = find_creature ( creature_id.c_str() );
             const df::creature_raw* creature = find_creature ( idx );
             if ( idx < 0 ||  !refuse_creature_is_allowed ( creature ) ||  size_t(idx) >=  pile_list->size() )
             {
-                debug() << "WARNING invalid refuse creature " << creature_id << ",  idx=" <<  idx <<  endl;
+                debug() << "WARNING invalid refuse creature " << creature_id << ",  idx=" << idx << endl;
                 continue;
             }
             debug() << "      creature " << idx << " is " << creature_id << endl;
@@ -1302,9 +1302,9 @@ void StockpileSerializer::read_refuse()
     {
         mPile->settings.flags.bits.refuse = 1;
         const StockpileSettings::RefuseSet refuse = mBuffer.refuse();
-        debug() << "refuse: " <<endl;
-        debug() <<  "  fresh hide " <<  refuse.fresh_raw_hide() << endl;
-        debug() <<  "  rotten hide " << refuse.rotten_raw_hide() << endl;
+        debug() << "refuse: " << endl;
+        debug() << "  fresh hide " << refuse.fresh_raw_hide() << endl;
+        debug() << "  rotten hide " << refuse.rotten_raw_hide() << endl;
         mPile->settings.refuse.fresh_raw_hide =  refuse.fresh_raw_hide();
         mPile->settings.refuse.rotten_raw_hide =  refuse.rotten_raw_hide();
 
@@ -1427,7 +1427,7 @@ void StockpileSerializer::read_stone()
     {
         mPile->settings.flags.bits.stone = 1;
         const StockpileSettings::StoneSet stone = mBuffer.stone();
-        debug() << "stone: " <<endl;
+        debug() << "stone: " << endl;
 
         //FuncMaterialAllowed filter = std::bind ( &StockpileSerializer::stone_is_allowed, this,  _1 );
         //unserialize_list_material ( filter, [=] ( const size_t & idx ) -> const std::string24&
@@ -1477,14 +1477,14 @@ void StockpileSerializer::write_ammo()
     // other mats - only wood and bone
     if ( mPile->settings.ammo.other_mats.size() > 2 )
     {
-        debug() << "WARNING: ammo other materials > 2! " <<  mPile->settings.ammo.other_mats.size() <<  endl;
+        debug() << "WARNING: ammo other materials > 2! " << mPile->settings.ammo.other_mats.size() << endl;
     }
 
     for ( size_t i = 0; i < std::min ( size_t ( 2 ), mPile->settings.ammo.other_mats.size() ); ++i )
     {
         if ( !mPile->settings.ammo.other_mats.at ( i ) )
             continue;
-        const std::string24 token = i ==  0  ?  "WOOD"  :  "BONE";
+        const std::string token = i ==  0  ?  "WOOD"  :  "BONE";
         ammo->add_other_mats ( token );
         debug() << "  other mats " << i << " is " << token << endl;
     }
@@ -1510,7 +1510,7 @@ void StockpileSerializer::read_ammo()
     {
         mPile->settings.flags.bits.ammo = 1;
         const StockpileSettings::AmmoSet ammo = mBuffer.ammo();
-        debug() << "ammo: " <<endl;
+        debug() << "ammo: " << endl;
 
         //  ammo type
         //unserialize_list_itemdef ( [=] ( const size_t & idx ) -> const std::string24&
@@ -1538,7 +1538,7 @@ void StockpileSerializer::read_ammo()
             // TODO remove hardcoded value
             for ( int i = 0; i < ammo.other_mats_size(); ++i )
             {
-                const std::string24 token = ammo.other_mats ( i );
+                const std::string token = ammo.other_mats ( i );
                 const int32_t idx = token ==  "WOOD"  ?  0 :  token ==  "BONE"  ? 1 : -1;
                 debug() << "   other mats " << idx << " is " << token << endl;
                 if ( idx !=  -1 )
@@ -1596,7 +1596,7 @@ void StockpileSerializer::read_coins()
     {
         mPile->settings.flags.bits.coins = 1;
         const StockpileSettings::CoinSet coins = mBuffer.coin();
-        debug() << "coins: " <<endl;
+        debug() << "coins: " << endl;
 
         //FuncMaterialAllowed filter = std::bind ( &StockpileSerializer::coins_mat_is_allowed, this,  _1 );
         //unserialize_list_material ( filter, [=] ( const size_t & idx ) -> const std::string24&
@@ -1683,7 +1683,7 @@ void StockpileSerializer::read_bars_blocks()
     {
         mPile->settings.flags.bits.bars_blocks = 1;
         const StockpileSettings::BarsBlocksSet bars_blocks = mBuffer.barsblocks();
-        debug() << "bars_blocks: " <<endl;
+        debug() << "bars_blocks: " << endl;
         // bars
         //FuncMaterialAllowed filter = std::bind ( &StockpileSerializer::bars_mat_is_allowed, this,  _1 );
         //unserialize_list_material ( filter, [=] ( const size_t & idx ) -> const std::string24&
@@ -1771,8 +1771,8 @@ void StockpileSerializer::write_gems()
         {
             mi.decode ( i, -1 );
             if ( !gem_other_mat_is_allowed ( mi ) ) continue;
-            debug() << "   gem rough_other mat" << i << " is " << mi.getToken() << endl;
-            gems->add_rough_other_mats ( mi.getToken() );
+            debug() << "   gem rough_other mat" << i << " is " << mi.getToken().c_str() << endl;
+            gems->add_rough_other_mats ( mi.getToken().c_str() );
         }
     }
     //  cut other
@@ -1783,8 +1783,8 @@ void StockpileSerializer::write_gems()
             mi.decode ( i, -1 );
             if ( !mi.isValid() ) mi.decode ( 0, i );
             if ( !gem_other_mat_is_allowed ( mi ) ) continue;
-            debug() << "   gem cut_other mat" << i << " is " << mi.getToken() << endl;
-            gems->add_cut_other_mats ( mi.getToken() );
+            debug() << "   gem cut_other mat" << i << " is " << mi.getToken().c_str() << endl;
+            gems->add_cut_other_mats ( mi.getToken().c_str() );
         }
     }
 }
@@ -1795,7 +1795,7 @@ void StockpileSerializer::read_gems()
     {
         mPile->settings.flags.bits.gems = 1;
         const StockpileSettings::GemsSet gems = mBuffer.gems();
-        debug() << "gems: " <<endl;
+        debug() << "gems: " << endl;
         // rough
         //FuncMaterialAllowed filter_rough = std::bind ( &StockpileSerializer::gem_mat_is_allowed, this,  _1 );
         //unserialize_list_material ( filter_rough, [=] ( const size_t & idx ) -> const std::string24&
@@ -1823,12 +1823,12 @@ void StockpileSerializer::read_gems()
         mPile->settings.gems.rough_other_mats.resize ( builtin_size, '\0' );
         for ( int i = 0; i < gems.rough_other_mats_size(); ++i )
         {
-            const std::string24 token = gems.rough_other_mats ( i );
+            const std::string token = gems.rough_other_mats ( i );
             MaterialInfo mi;
-            mi.find ( token );
+            mi.find ( token.c_str() );
             if ( !mi.isValid() ||  size_t(mi.type) >=  builtin_size )
             {
-                debug() <<  "WARNING: invalid gem mat " <<  token <<  ". idx=" <<  mi.type << endl;
+                debug() << "WARNING: invalid gem mat " << token << ". idx=" << mi.type << endl;
                 continue;
             }
             debug() << "   rough_other mats " << mi.type << " is " << token << endl;
@@ -1840,12 +1840,12 @@ void StockpileSerializer::read_gems()
         mPile->settings.gems.cut_other_mats.resize ( builtin_size, '\0' );
         for ( int i = 0; i < gems.cut_other_mats_size(); ++i )
         {
-            const std::string24 token = gems.cut_other_mats ( i );
+            const std::string token = gems.cut_other_mats ( i );
             MaterialInfo mi;
-            mi.find ( token );
+            mi.find ( token.c_str() );
             if ( !mi.isValid() ||  size_t(mi.type) >=  builtin_size )
             {
-                debug() <<  "WARNING: invalid gem mat " <<  token <<  ". idx=" <<  mi.type << endl;
+                debug() << "WARNING: invalid gem mat " << token << ". idx=" << mi.type << endl;
                 continue;
             }
             debug() << "   cut_other mats " << mi.type << " is " << token << endl;
@@ -1982,7 +1982,7 @@ void StockpileSerializer::read_finished_goods()
     {
         mPile->settings.flags.bits.finished_goods = 1;
         const StockpileSettings::FinishedGoodsSet finished_goods = mBuffer.finished_goods();
-        debug() << "finished_goods: " <<endl;
+        debug() << "finished_goods: " << endl;
 
         // type
         //FuncItemAllowed filter = std::bind ( &StockpileSerializer::finished_goods_type_is_allowed, this,  _1 );
@@ -2058,7 +2058,7 @@ void StockpileSerializer::read_leather()
     {
         mPile->settings.flags.bits.leather = 1;
         const StockpileSettings::LeatherSet leather = mBuffer.leather();
-        debug() << "leather: " <<endl;
+        debug() << "leather: " << endl;
 
         //unserialize_list_organic_mat ( [=] ( size_t idx ) -> std::string24
         //{
@@ -2148,7 +2148,7 @@ void StockpileSerializer::read_cloth()
     {
         mPile->settings.flags.bits.cloth = 1;
         const StockpileSettings::ClothSet cloth = mBuffer.cloth();
-        debug() << "cloth: " <<endl;
+        debug() << "cloth: " << endl;
 
         //unserialize_list_organic_mat ( [=] ( size_t idx ) -> std::string24
         //{
@@ -2241,8 +2241,8 @@ void StockpileSerializer::write_wood()
         {
             const df::plant_raw * plant = find_plant ( i );
             if ( !wood_mat_is_allowed ( plant ) ) continue;
-            wood->add_mats ( plant->id );
-            debug() <<  "  plant " <<  i <<  " is " <<  plant->id <<  endl;
+            wood->add_mats ( plant->id.c_str() );
+            debug() << "  plant " << i << " is " << plant->id.c_str() << endl;
         }
     }
 }
@@ -2252,20 +2252,20 @@ void StockpileSerializer::read_wood()
     {
         mPile->settings.flags.bits.wood = 1;
         const StockpileSettings::WoodSet wood = mBuffer.wood();
-        debug() << "wood: " <<endl;
+        debug() << "wood: " << endl;
 
         mPile->settings.wood.mats.clear();
         mPile->settings.wood.mats.resize ( world->raws.plants.all.size(), '\0' );
         for ( int i = 0; i <  wood.mats_size(); ++i )
         {
-            const std::string24 token = wood.mats ( i );
-            const size_t idx = find_plant ( token );
+            const std::string token = wood.mats ( i );
+            const size_t idx = find_plant ( token.c_str() );
             if ( idx < 0 ||  idx >= mPile->settings.wood.mats.size() )
             {
-                debug() <<  "WARNING wood mat index invalid " <<  token <<  ",  idx=" << idx <<  endl;
+                debug() << "WARNING wood mat index invalid " << token << ",  idx=" << idx << endl;
                 continue;
             }
-            debug() <<  "   plant " <<  idx <<  " is " <<  token <<  endl;
+            debug() << "   plant " << idx << " is " << token << endl;
             mPile->settings.wood.mats.at ( idx ) = 1;
         }
     }
@@ -2351,12 +2351,12 @@ void StockpileSerializer::read_weapons()
     {
         mPile->settings.flags.bits.weapons = 1;
         const StockpileSettings::WeaponsSet weapons = mBuffer.weapons();
-        debug() << "weapons: " <<endl;
+        debug() << "weapons: " << endl;
 
         bool unusable = weapons.unusable();
         bool usable = weapons.usable();
-        debug() <<  "unusable " <<  unusable <<  endl;
-        debug() <<  "usable " <<  usable <<  endl;
+        debug() << "unusable " << unusable << endl;
+        debug() << "usable " << usable << endl;
         mPile->settings.weapons.unusable = unusable;
         mPile->settings.weapons.usable = usable;
 
@@ -2564,12 +2564,12 @@ void StockpileSerializer::read_armor()
     {
         mPile->settings.flags.bits.armor = 1;
         const StockpileSettings::ArmorSet armor = mBuffer.armor();
-        debug() << "armor: " <<endl;
+        debug() << "armor: " << endl;
 
         bool unusable = armor.unusable();
         bool usable = armor.usable();
-        debug() <<  "unusable " <<  unusable <<  endl;
-        debug() <<  "usable " <<  usable <<  endl;
+        debug() << "unusable " << unusable << endl;
+        debug() << "usable " << usable << endl;
         mPile->settings.armor.unusable = unusable;
         mPile->settings.armor.usable = usable;
 

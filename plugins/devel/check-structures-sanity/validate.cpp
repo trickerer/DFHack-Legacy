@@ -2,19 +2,19 @@
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
-#define _WIN32_WINNT 0x0501
-#define WINVER 0x0501
+//#define _WIN32_WINNT 0x0501
+//#define WINVER 0x0501
 #include <windows.h>
 #endif
 
 bool Checker::is_in_global(const QueueItem & item)
 {
-    auto fields = df::global::_identity.getFields();
-    for (auto field = fields; field->mode != struct_field_info::END; field++)
+    struct_field_info const* fields = df::global::_identity.getFields();
+    for (struct_field_info const* field = fields; field->mode != struct_field_info::END; field++)
     {
         size_t size = CheckedStructure(field).full_size();
-        auto start = *reinterpret_cast<const void * const*>(field->offset);
-        auto offset = uintptr_t(item.ptr) - uintptr_t(start);
+        const void * const start = *reinterpret_cast<const void * const*>(field->offset);
+        uintptr_t offset = uintptr_t(item.ptr) - uintptr_t(start);
         if (offset < size)
         {
             return true;
@@ -25,7 +25,7 @@ bool Checker::is_in_global(const QueueItem & item)
 }
 bool Checker::is_valid_dereference(const QueueItem & item, const CheckedStructure & cs, size_t size, bool quiet)
 {
-    auto base = const_cast<void *>(item.ptr);
+    void* base = const_cast<void *>(item.ptr);
     if (!base)
     {
         // cannot dereference null pointer, but not an error
@@ -35,12 +35,16 @@ bool Checker::is_valid_dereference(const QueueItem & item, const CheckedStructur
     // assumes MALLOC_PERTURB_=45
 #ifdef DFHACK64
 #define UNINIT_PTR 0xd2d2d2d2d2d2d2d2
-#define FAIL_PTR(message) FAIL(stl_sprintf("0x%016zx: ", reinterpret_cast<uintptr_t>(base)) << message)
+#define FAIL_PTR(message) FAIL((stl_sprintf("0x%016zx: ", reinterpret_cast<uintptr_t>(base)) + message).c_str())
 #else
 #define UNINIT_PTR 0xd2d2d2d2
-#define FAIL_PTR(message) FAIL(stl_sprintf("0x%08zx: ", reinterpret_cast<uintptr_t>(base)) << message)
+#define UNINIT_PTR2 0xbaadf00d
+#define UNINIT_PTR3 0xfeeefeee
+#define FAIL_PTR(message) FAIL((stl_sprintf("0x%08zx: ", reinterpret_cast<uintptr_t>(base)) + message).c_str())
 #endif
-    if (uintptr_t(base) == UNINIT_PTR)
+    if (uintptr_t(base) == UNINIT_PTR ||
+        uintptr_t(base) == UNINIT_PTR2 ||
+        uintptr_t(base) == UNINIT_PTR3)
     {
         if (!quiet)
         {
@@ -50,14 +54,16 @@ bool Checker::is_valid_dereference(const QueueItem & item, const CheckedStructur
     }
 
     bool found = true;
-    auto expected_start = base;
+    void* expected_start = base;
     size_t remaining_size = size;
     while (found)
     {
         found = false;
 
-        for (auto & range : mapped)
+        //for (auto & range : mapped)
+        for (std::vector12<t_memrange>::iterator it = mapped.begin(); it != mapped.end(); ++it)
         {
+            t_memrange range = *it;
             if (!range.isInRange(expected_start))
             {
                 continue;
@@ -74,10 +80,10 @@ bool Checker::is_valid_dereference(const QueueItem & item, const CheckedStructur
                 return false;
             }
 
-            auto expected_end = const_cast<void *>(PTR_ADD(expected_start, remaining_size - 1));
+            void* expected_end = const_cast<void *>(PTR_ADD(expected_start, remaining_size - 1));
             if (size && !range.isInRange(expected_end))
             {
-                auto next_start = PTR_ADD(range.end, 1);
+                const void* next_start = PTR_ADD(range.end, 1);
                 remaining_size -= ptrdiff_t(next_start) - ptrdiff_t(expected_start);
                 expected_start = const_cast<void *>(next_start);
                 break;
@@ -98,7 +104,9 @@ bool Checker::is_valid_dereference(const QueueItem & item, const CheckedStructur
     }
     else
     {
-        FAIL_PTR("pointer exceeds mapped memory bounds (size " << size << ")");
+        std::ostringstream failmsg;
+        failmsg << "pointer exceeds mapped memory bounds (size " << size << ")";
+        FAIL_PTR(failmsg.str().c_str());
     }
 
     return false;
@@ -148,19 +156,19 @@ int64_t Checker::get_int_value(const QueueItem & item, type_identity *type, bool
 
 const char *Checker::get_vtable_name(const QueueItem & item, const CheckedStructure & cs, bool quiet)
 {
-    auto vtable = validate_and_dereference<const void *const*>(QueueItem(item, "?vtable?", item.ptr), quiet);
+    const void *const* vtable = validate_and_dereference<const void *const*>(QueueItem(item, "?vtable?", item.ptr), quiet);
     if (!vtable)
-        return nullptr;
+        return NULL;
 
-    auto info = validate_and_dereference<const char *const*>(QueueItem(item, "?vtable?.info", vtable - 1), quiet);
+    const char *const* info = validate_and_dereference<const char *const*>(QueueItem(item, "?vtable?.info", vtable - 1), quiet);
     if (!info)
-        return nullptr;
+        return NULL;
 
 #ifdef WIN32
 #ifdef DFHACK64
     void *base;
     if (!RtlPcToFileHeader(const_cast<void *>(reinterpret_cast<const void *>(info)), &base))
-        return nullptr;
+        return NULL;
 
     const char *typeinfo = reinterpret_cast<const char *>(base) + reinterpret_cast<const int32_t *>(info)[3];
     const char *name = typeinfo + 16;
@@ -171,8 +179,10 @@ const char *Checker::get_vtable_name(const QueueItem & item, const CheckedStruct
     auto name = validate_and_dereference<const char *>(QueueItem(item, "?vtable?.info.name", info + 1), quiet);
 #endif
 
-    for (auto & range : mapped)
+    //for (auto & range : mapped)
+    for (std::vector12<t_memrange>::iterator it = mapped.begin(); it != mapped.end(); ++it)
     {
+        t_memrange range = *it;
         if (!range.isInRange(const_cast<char *>(name)))
         {
             continue;
@@ -184,16 +194,16 @@ const char *Checker::get_vtable_name(const QueueItem & item, const CheckedStruct
             {
                 FAIL("pointer to invalid memory range");
             }
-            return nullptr;
+            return NULL;
         }
 
-        const char *first_letter = nullptr;
+        const char *first_letter = NULL;
         bool letter = false;
         for (const char *p = name; ; p++)
         {
             if (!range.isInRange(const_cast<char *>(p)))
             {
-                return nullptr;
+                return NULL;
             }
 
             if ((*p >= 'a' && *p <= 'z') || *p == '_')
@@ -211,12 +221,12 @@ const char *Checker::get_vtable_name(const QueueItem & item, const CheckedStruct
         }
     }
 
-    return nullptr;
+    return NULL;
 }
 
 std::pair<const void *, CheckedStructure> Checker::validate_vector_size(const QueueItem & item, const CheckedStructure & cs, bool quiet)
 {
-    using ret_type = std::pair<const void *, CheckedStructure>;
+    typedef std::pair<const void*,CheckedStructure> ret_type;
     struct vector_data
     {
         uintptr_t start;
@@ -230,7 +240,7 @@ std::pair<const void *, CheckedStructure> Checker::validate_vector_size(const Qu
     ptrdiff_t capacity = vector.end_of_storage - vector.start;
 
     bool local_ok = true;
-    auto item_size = cs.identity ? cs.identity->byte_size() : 0;
+    size_t item_size = cs.identity ? cs.identity->byte_size() : 0;
     if (!item_size)
     {
         item_size = 1;
@@ -290,7 +300,7 @@ std::pair<const void *, CheckedStructure> Checker::validate_vector_size(const Qu
         return ret_type();
     }
 
-    auto start_ptr = reinterpret_cast<const void *>(vector.start);
+    const void* start_ptr = reinterpret_cast<const void *>(vector.start);
 
     if (capacity && !is_valid_dereference(QueueItem(item, "?items?", start_ptr), CheckedStructure(cs.identity, capacity / item_size), quiet))
     {
@@ -346,7 +356,7 @@ const std::string24 *Checker::validate_stl_string_pointer(const void *const* bas
 
     if (!is_valid_dereference(QueueItem("str", PTR_ADD(str_data, -16)), 16, true))
     {
-        return nullptr;
+        return NULL;
     }
 
     uint32_t tag = *reinterpret_cast<const uint32_t *>(PTR_ADD(str_data, -8));
@@ -357,17 +367,17 @@ const std::string24 *Checker::validate_stl_string_pointer(const void *const* bas
 
         if (allocated_size != expected_size)
         {
-            return nullptr;
+            return NULL;
         }
     }
     else
     {
-        return nullptr;
+        return NULL;
     }
 
     if (str_data->capacity < str_data->length)
     {
-        return nullptr;
+        return NULL;
     }
 
     const char *ptr = reinterpret_cast<const char *>(*base);
@@ -375,13 +385,13 @@ const std::string24 *Checker::validate_stl_string_pointer(const void *const* bas
     {
         if (!*ptr++)
         {
-            return nullptr;
+            return NULL;
         }
     }
 
     if (*ptr++)
     {
-        return nullptr;
+        return NULL;
     }
 
     return reinterpret_cast<const std::string24 *>(base);
@@ -390,18 +400,18 @@ const std::string24 *Checker::validate_stl_string_pointer(const void *const* bas
 
 const char *const *Checker::get_enum_item_key(enum_identity *identity, int64_t value)
 {
-    return get_enum_item_attr_or_key(identity, value, nullptr);
+    return get_enum_item_attr_or_key(identity, value, NULL);
 }
 
 const char *const *Checker::get_enum_item_attr_or_key(enum_identity *identity, int64_t value, const char *attr_name)
 {
     size_t index;
-    if (auto cplx = identity->getComplex())
+    if (enum_identity::ComplexData* cplx = const_cast<enum_identity::ComplexData*>(identity->getComplex()))
     {
-        auto it = cplx->value_index_map.find(value);
-        if (it == cplx->value_index_map.cend())
+        std::map<int64_t, size_t>::iterator it = cplx->value_index_map.find(value);
+        if (it == cplx->value_index_map.end())
         {
-            return nullptr;
+            return NULL;
         }
         index = it->second;
     }
@@ -409,22 +419,22 @@ const char *const *Checker::get_enum_item_attr_or_key(enum_identity *identity, i
     {
         if (value < identity->getFirstItem() || value > identity->getLastItem())
         {
-            return nullptr;
+            return NULL;
         }
         index = value - identity->getFirstItem();
     }
 
     if (attr_name)
     {
-        auto attrs = identity->getAttrs();
-        auto attr_type = identity->getAttrType();
+        const void* attrs = identity->getAttrs();
+        struct_identity* attr_type = identity->getAttrType();
         if (!attrs || !attr_type)
         {
-            return nullptr;
+            return NULL;
         }
 
         attrs = PTR_ADD(attrs, attr_type->byte_size() * index);
-        for (auto field = attr_type->getFields(); field->mode != struct_field_info::END; field++)
+        for (const struct_field_info* field = attr_type->getFields(); field->mode != struct_field_info::END; field++)
         {
             if (!strcmp(field->name, attr_name))
             {
@@ -432,7 +442,7 @@ const char *const *Checker::get_enum_item_attr_or_key(enum_identity *identity, i
             }
         }
 
-        return nullptr;
+        return NULL;
     }
 
     return &identity->getKeys()[index];

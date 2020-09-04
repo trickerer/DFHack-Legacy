@@ -140,7 +140,7 @@ protected:
     std::string24 indicator;
     void update_indicator()
     {
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
         buffered_color_ostream out;
         Core::getInstance().runCommand(out, "prospect");
         std::list<buffered_color_ostream::fragment_type> const& fragments = out.fragments();
@@ -857,7 +857,7 @@ command_result embark_tools_cmd (color_ostream &out, std::vector12<std::string24
             FOR_ITER_TOOLS(iter)
             {
                 EmbarkTool* t = iter->second;
-                out << "  " << t->getName() << " (" << t->getId() << "): "
+                out << "  " << t->getName().c_str() << " (" << t->getId().c_str() << "): "
                     << (t->getEnabled() ? "Enabled" : "Disabled") << std::endl;
             }
         }

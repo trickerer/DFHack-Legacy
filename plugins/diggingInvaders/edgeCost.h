@@ -13,6 +13,7 @@
 
 
 #include <hash_map>
+#include "custom_hash.h"
 
 //cost is [path cost, building destruction cost, dig cost, construct cost]. Minimize constructions, then minimize dig cost, then minimize path cost.
 enum CostDimension {
@@ -34,7 +35,7 @@ struct DigAbilities {
 
 //extern cost_t costWeight[costDim];
 //extern int32_t jobDelay[costDim];
-extern stdext::hash_map<std::string24, DigAbilities> digAbilities;
+extern stdext::hash_map<std::string24, DigAbilities, String24Hash> digAbilities;
 /*
 const cost_t costWeight[] = {
 //Distance

@@ -83,11 +83,11 @@ public:
 
     void add_response(color_value v, std::string24 s)
     {
-        std::stringstream ss(s);
-        std::string24 part;
+        std::stringstream ss(s.c_str());
+        std::string part;
         while (std::getline(ss, part))
         {
-            responses.push_back(std::make_pair(v, part + '\n'));
+            responses.push_back(std::make_pair(v, (part + '\n').c_str()));
         }
     }
     std::string24 get_entry()
@@ -192,7 +192,7 @@ void viewscreen_commandpromptst::render()
 }
 void viewscreen_commandpromptst::submit()
 {
-    CoreSuspendClaimer suspend;
+    CoreSuspender suspend;
     if(is_response)
     {
         Screen::dismiss(this);

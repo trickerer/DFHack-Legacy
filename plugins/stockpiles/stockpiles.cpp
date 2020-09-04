@@ -329,7 +329,7 @@ bool manage_settings ( building_stockpilest *sp )
     lua_State* L = Lua::Core::State;
     color_ostream_proxy out ( Core::getInstance().getConsole() );
 
-    CoreSuspendClaimer suspend;
+    CoreSuspender suspend;
     Lua::StackUnwinder top ( L );
 
     if ( !lua_checkstack ( L, 2 ) )
@@ -351,7 +351,7 @@ bool show_message_box ( const std::string24 & title,  const std::string24 & msg,
     lua_State* L = Lua::Core::State;
     color_ostream_proxy out ( Core::getInstance().getConsole() );
 
-    CoreSuspendClaimer suspend;
+    CoreSuspender suspend;
     Lua::StackUnwinder top ( L );
 
     if ( !lua_checkstack ( L, 4 ) )
@@ -455,10 +455,10 @@ static std::vector12<std::string24> list_dir ( const std::string24 &path, bool r
     std::vector12<std::string24> files;
     std::stack<std::string24> dirs;
     dirs.push(path);
-//     out <<  "list_dir start" <<  endl;
+//     out << "list_dir start" << endl;
     while (!dirs.empty() ) {
         const std::string24 current = dirs.top();
-//         out <<  "\t walking " <<  current << endl;
+//         out << "\t walking " << current << endl;
         dirs.pop();
         std::vector12<std::string24> entries;
         const int res = DFHack::getdir(current,  entries);
@@ -469,22 +469,22 @@ static std::vector12<std::string24> list_dir ( const std::string24 &path, bool r
             if ( (*it).empty() ||  (*it)[0] ==  '.' ) continue;
             //  shitty cross platform c++ we've got to construct the actual path manually
             std::ostringstream child_path_s;
-            child_path_s <<  current <<  "/" <<  *it;
-            const std::string24 child = child_path_s.str();
+            child_path_s << current.c_str() << "/" << (*it).c_str();
+            const std::string24 child = child_path_s.str().c_str();
             if ( recursive && Filesystem::isdir ( child ) )
             {
-//                 out <<  "\t\tgot child dir: " <<  child <<  endl;
+//                 out << "\t\tgot child dir: " << child << endl;
                 dirs.push ( child );
             }
             else if ( Filesystem::isfile ( child ) )
             {
                 const std::string24  rel_path ( child.substr ( std::string24 ( "./"+path).length()-1 ) );
-//                 out <<  "\t\t adding file: " <<  child << "  as   " <<  rel_path  <<  endl;
+//                 out << "\t\t adding file: " << child << "  as   " << rel_path  << endl;
                 files.push_back ( rel_path );
             }
         }
     }
-//     out <<  "listdir_stop" <<  endl;
+//     out << "listdir_stop" << endl;
     return files;
 }
 

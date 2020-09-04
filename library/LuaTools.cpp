@@ -76,9 +76,22 @@ inline bool is_null_userdata(lua_State *L, int idx)
     return lua_islightuserdata(L, idx) && !lua_touserdata(L, idx);
 }
 
+#ifdef WIN32
+#define TEMPBREAK __debugbreak()
+#else
+#define TEMPBREAK __asm__ volatile ("int $0x03; nop")
+#endif
+
 inline void AssertCoreSuspend(lua_State *state)
 {
-    ASSERT(!Lua::IsCoreContext(state) || DFHack::Core::getInstance().isSuspended());
+    bool isCore = Lua::IsCoreContext(state);
+    bool isSusp = DFHack::Core::getInstance().isSuspended();
+    if (isCore && !isSusp)
+    {
+        //dfhack_printerr(state, "AssertCoreSuspend: core context and not suspended\n");
+        TEMPBREAK;
+    }
+    //ASSERT(!Lua::IsCoreContext(state) || DFHack::Core::getInstance().isSuspended());
 }
 
 /*
@@ -1837,7 +1850,8 @@ static void cancel_timers(std::multimap<int,int> &timers)
     timers.clear();
 }
 
-void DFHack::Lua::Core::onStateChange(color_ostream &out, int code) {
+void DFHack::Lua::Core::onStateChange(color_ostream &out, int code)
+{
     if (!State) return;
 
     switch (code)
@@ -1935,6 +1949,7 @@ void DFHack::Lua::Core::Reset(color_ostream &out, const char *where)
     if (top != 0)
     {
         out.printerr("Common lua context stack top left at %d after %s.\n", top, where);
+        TEMPBREAK;
         lua_settop(State, 0);
     }
 }

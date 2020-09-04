@@ -304,8 +304,8 @@ command_result changelayer (color_ostream &out, std::vector12<std::string24> & p
                 {
                     if(verbose)
                         out << "changing geolayer " << j
-                            << " from " << mat_old.getToken()
-                            << " to " << mat_new.getToken()
+                            << " from " << mat_old.getToken().c_str()
+                            << " to " << mat_new.getToken().c_str()
                             << endl;
                     geolayers[j]->mat_index = mat_new.index;
                 }
@@ -319,8 +319,8 @@ command_result changelayer (color_ostream &out, std::vector12<std::string24> & p
             {
                 if(verbose)
                     out << "changing geolayer " << layer
-                        << " from " << mat_old.getToken()
-                        << " to " << mat_new.getToken()
+                        << " from " << mat_old.getToken().c_str()
+                        << " to " << mat_new.getToken().c_str()
                         << endl;
                 geolayers[layer]->mat_index = mat_new.index;
             }

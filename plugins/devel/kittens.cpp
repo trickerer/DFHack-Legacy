@@ -1,9 +1,11 @@
-#include <array>
-#include <atomic>
+//#include <array>
+//#include <atomic>
 
-#include <random>
+//#include <random>
 
-#include <thread>
+//#include <thread>
+
+#include "tinythread.h"
 
 #include "Console.h"
 #include "Core.h"
@@ -11,7 +13,7 @@
 #include "Export.h"
 #include "MiscUtils.h"
 #include "PluginManager.h"
-#include "Signal.hpp"
+//#include "Signal.hpp"
 
 #include "modules/Gui.h"
 #include "modules/Items.h"
@@ -22,9 +24,9 @@
 #include "df/world.h"
 
 // for MSVC alignas(64) issues
-#ifdef WIN32
-#define _DISABLE_EXTENDED_ALIGNED_STORAGE
-#endif
+//#ifdef WIN32
+//#define _DISABLE_EXTENDED_ALIGNED_STORAGE
+//#endif
 
 
 
@@ -39,12 +41,18 @@ namespace DFHack {
 DBG_DECLARE(kittens,command);
 }
 
-std::atomic<bool> shutdown_flag{false};
-std::atomic<bool> final_flag{true};
-std::atomic<bool> timering{false};
-std::atomic<bool> trackmenu_flg{false};
-std::atomic<uint8_t> trackpos_flg{0};
-std::atomic<uint8_t> statetrack{0};
+//std::atomic<bool> shutdown_flag{false};
+//std::atomic<bool> final_flag{true};
+//std::atomic<bool> timering{false};
+//std::atomic<bool> trackmenu_flg{false};
+//std::atomic<uint8_t> trackpos_flg{0};
+//std::atomic<uint8_t> statetrack{0};
+tthread::atomic<bool> shutdown_flag(false);
+tthread::atomic<bool> final_flag(true);
+tthread::atomic<bool> timering(false);
+tthread::atomic<bool> trackmenu_flg(false);
+tthread::atomic<uint8_t> trackpos_flg(0);
+tthread::atomic<uint8_t> statetrack(0);
 int32_t last_designation[3] = {-30000, -30000, -30000};
 int32_t last_mouse[2] = {-1, -1};
 df::ui_sidebar_mode last_menu = df::ui_sidebar_mode::Default;
@@ -56,7 +64,7 @@ command_result trackmenu (color_ostream &out, std::vector12<std::string24> & par
 command_result trackpos (color_ostream &out, std::vector12<std::string24> & parameters);
 command_result trackstate (color_ostream &out, std::vector12<std::string24> & parameters);
 command_result colormods (color_ostream &out, std::vector12<std::string24> & parameters);
-command_result sharedsignal (color_ostream &out, std::vector12<std::string24> & parameters);
+//command_result sharedsignal (color_ostream &out, std::vector12<std::string24> & parameters);
 
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<PluginCommand> &commands)
 {
@@ -66,7 +74,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<Plu
     commands.push_back(PluginCommand("trackpos","Track mouse and designation coords (toggle).",trackpos));
     commands.push_back(PluginCommand("trackstate","Track world and map state (toggle).",trackstate));
     commands.push_back(PluginCommand("colormods","Dump colormod vectors.",colormods));
-    commands.push_back(PluginCommand("sharedsignal","Test Signal with signal_shared_tag",sharedsignal));
+    //commands.push_back(PluginCommand("sharedsignal","Test Signal with signal_shared_tag",sharedsignal));
     return CR_OK;
 }
 
@@ -179,12 +187,14 @@ command_result trackstate ( color_ostream& out, std::vector12<std::string24 >& p
 command_result colormods (color_ostream &out, std::vector12<std::string24> & parameters)
 {
     CoreSuspender suspend;
-    auto & vec = world->raws.creatures.alphabetic;
-    for(df::creature_raw* rawlion : vec)
+    std::vector12<df::creature_raw*> & vec = world->raws.creatures.alphabetic;
+    //for(df::creature_raw* rawlion : vec)
+    for (std::vector12<df::creature_raw*>::const_iterator ci = vec.begin(); ci != vec.end(); ++ci)
     {
+        df::creature_raw* rawlion = *ci;
         df::caste_raw * caste = rawlion->caste[0];
         out.print("%s\nCaste addr %p\n",rawlion->creature_id.c_str(), &caste->color_modifiers);
-        for(size_t j = 0; j < caste->color_modifiers.size();j++)
+        for (size_t j = 0; j < caste->color_modifiers.size(); j++)
         {
             out.print("mod %zd: %p\n", j, caste->color_modifiers[j]);
         }
@@ -212,172 +222,172 @@ command_result ktimer (color_ostream &out, std::vector12<std::string24> & parame
 }
 
 struct Connected;
-using shared = std::shared_ptr<Connected>;
-using weak = std::weak_ptr<Connected>;
+//using shared = std::shared_ptr<Connected>;
+//using weak = std::weak_ptr<Connected>;
 
-static constexpr std::chrono::microseconds delay{1};
+static const tthread::chrono::microseconds delay(1);
 
-template<typename Derived>
-struct ClearMem : public ConnectedBase {
-    ~ClearMem()
-    {
-        memset(reinterpret_cast<void*>(this), 0xDE, sizeof(Derived));
-    }
-};
-
-struct Connected : public ClearMem<Connected> {
-    using Sig = Signal<void(uint32_t), signal_shared_tag>;
-    std::array<Sig::Connection,4> con;
-    Sig signal;
-    weak other;
-    Sig::weak_ptr other_sig;
-    color_ostream *out;
-    int id;
-    uint32_t count;
-    uint32_t caller;
-    alignas(64) std::atomic<uint32_t> callee;
-    Connected() = default;
-    Connected(int id) :
-        Connected{}
-    {
-        this->id = id;
-    }
-    void connect(color_ostream& o, shared& b, size_t pos, uint32_t c)
-    {
-        out = &o;
-        count = c*2;
-        other = b;
-        other_sig = b->signal.weak_from_this();
-        // Externally synchronized object destruction is only safe to this
-        // connect.
-        con[pos] = b->signal.connect(
-                [this](uint32_t) {
-                    uint32_t old = callee.fetch_add(1);
-                    assert(old != 0xDEDEDEDE);
-                    std::this_thread::sleep_for(delay);
-                    assert(callee != 0xDEDEDEDE);
-                });
-        // Shared object managed object with possibility of destruction while
-        // other threads calling emit must pass the shared_ptr to connect.
-        Connected *bptr = b.get();
-        b->con[pos] = signal.connect(b,
-                [bptr](int) {
-                    uint32_t old = bptr->callee.fetch_add(1);
-                    assert(old != 0xDEDEDEDE);
-                    std::this_thread::sleep_for(delay);
-                    assert(bptr->callee != 0xDEDEDEDE);
-                });
-    }
-    void reconnect(size_t pos) {
-        auto b = other.lock();
-        if (!b)
-            return;
-        // Not required to use Sig::lock because other holds strong reference to
-        // Signal. But this just shows how weak_ref could be used.
-        auto sig = Sig::lock(other_sig);
-        if (!sig)
-            return;
-        con[pos] = sig->connect(b,
-                [this](uint32_t) {
-                    uint32_t old = callee.fetch_add(1);
-                    assert(old != 0xDEDEDEDE);
-                    std::this_thread::sleep_for(delay);
-                    assert(callee != 0xDEDEDEDE);
-                });
-    }
-    void connect(color_ostream& o, shared& a, shared& b,size_t pos, uint32_t c)
-    {
-        out = &o;
-        count = c;
-        con[pos] = b->signal.connect(a,
-                [this](uint32_t) {
-                    uint32_t old = callee.fetch_add(1);
-                    assert(old != 0xDEDEDEDE);
-                    std::this_thread::sleep_for(delay);
-                    assert(callee != 0xDEDEDEDE);
-                });
-    }
-    Connected* operator->() noexcept
-    {
-        return this;
-    }
-    ~Connected() {
-        INFO(command,*out).print("Connected %d had %d count. "
-                "It was caller %d times. "
-                "It was callee %d times.\n",
-                id, count, caller, callee.load());
-    }
-};
-
-command_result sharedsignal (color_ostream &out, std::vector12<std::string24> & parameters)
-{
-    using rng_t = std::linear_congruential_engine<uint32_t, 747796405U, 2891336453U, 0>;
-    rng_t rng(std::random_device{}());
-    size_t count = 10;
-    if (0 < parameters.size()) {
-        std::stringstream ss(parameters[0]);
-        ss >> count;
-        DEBUG(command, out) << "Parsed " << count
-            << " from paramters[0] '" << parameters[0] << '\'' << std::endl;
-    }
-
-
-    std::uniform_int_distribution<uint32_t>  dis(4096,8192);
-    out << "Running signal_shared_tag destruction test "
-        << count << " times" << std::endl;
-    for (size_t nr = 0; nr < count; ++nr) {
-        std::array<std::thread,4> t{};
-        // Make an object which destruction is protected by std::thread::join()
-        Connected external{static_cast<int>(t.size())};
-        TRACE(command, out) << "begin " << std::endl;
-        {
-            int id = 0;
-            // Make objects that are automatically protected using weak_ptr
-            // references that are promoted to shared_ptr when Signal is
-            // accessed.
-            std::array<shared,4> c = {
-                std::make_shared<Connected>(id++),
-                std::make_shared<Connected>(id++),
-                std::make_shared<Connected>(id++),
-                std::make_shared<Connected>(id++),
-            };
-            assert(t.size() == c.size());
-            for (unsigned i = 1; i < c.size(); ++i) {
-                c[0]->connect(out, c[0], c[i], i - 1, dis(rng));
-                c[i]->connect(out, c[i], c[0], 0, dis(rng));
-            }
-            external.connect(out, c[1], 1, dis(rng));
-            auto thr = [&out](shared c) {
-                TRACE(command, out) << "Thread " << c->id << " started." << std::endl;
-                weak ref = c;
-                for (;c->caller < c->count; ++c->caller) {
-                    c->signal(std::move(c->caller));
-                }
-                TRACE(command, out) << "Thread " << c->id << " resets shared." << std::endl;
-                c.reset();
-                while((c = ref.lock())) {
-                    ++c->caller;
-                    c->signal(std::move(c->caller));
-                    c.reset();
-                    std::this_thread::sleep_for(delay*25);
-                }
-            };
-            for (unsigned i = 0; i < c.size(); ++i) {
-                TRACE(command, out) << "start thread " << i << std::endl;
-                t[i] = std::thread{thr, c[i]};
-            }
-        }
-        TRACE(command, out) << "running " << std::endl;
-        for (;external->caller < external->count; ++external->caller) {
-            external->signal(std::move(external->caller));
-            external->reconnect(1);
-        }
-        TRACE(command, out) << "join " << std::endl;
-        for (unsigned i = 0; i < t.size(); ++i)
-            t[i].join();
-    }
-    return CR_OK;
-}
+//template<typename Derived>
+//struct ClearMem : public ConnectedBase {
+//    ~ClearMem()
+//    {
+//        memset(reinterpret_cast<void*>(this), 0xDE, sizeof(Derived));
+//    }
+//};
+//
+//struct Connected : public ClearMem<Connected> {
+//    using Sig = Signal<void(uint32_t), signal_shared_tag>;
+//    std::array<Sig::Connection,4> con;
+//    Sig signal;
+//    weak other;
+//    Sig::weak_ptr other_sig;
+//    color_ostream *out;
+//    int id;
+//    uint32_t count;
+//    uint32_t caller;
+//    alignas(64) std::atomic<uint32_t> callee;
+//    Connected() = default;
+//    Connected(int id) :
+//        Connected{}
+//    {
+//        this->id = id;
+//    }
+//    void connect(color_ostream& o, shared& b, size_t pos, uint32_t c)
+//    {
+//        out = &o;
+//        count = c*2;
+//        other = b;
+//        other_sig = b->signal.weak_from_this();
+//        // Externally synchronized object destruction is only safe to this
+//        // connect.
+//        con[pos] = b->signal.connect(
+//                [this](uint32_t) {
+//                    uint32_t old = callee.fetch_add(1);
+//                    assert(old != 0xDEDEDEDE);
+//                    std::this_thread::sleep_for(delay);
+//                    assert(callee != 0xDEDEDEDE);
+//                });
+//        // Shared object managed object with possibility of destruction while
+//        // other threads calling emit must pass the shared_ptr to connect.
+//        Connected *bptr = b.get();
+//        b->con[pos] = signal.connect(b,
+//                [bptr](int) {
+//                    uint32_t old = bptr->callee.fetch_add(1);
+//                    assert(old != 0xDEDEDEDE);
+//                    std::this_thread::sleep_for(delay);
+//                    assert(bptr->callee != 0xDEDEDEDE);
+//                });
+//    }
+//    void reconnect(size_t pos) {
+//        auto b = other.lock();
+//        if (!b)
+//            return;
+//        // Not required to use Sig::lock because other holds strong reference to
+//        // Signal. But this just shows how weak_ref could be used.
+//        auto sig = Sig::lock(other_sig);
+//        if (!sig)
+//            return;
+//        con[pos] = sig->connect(b,
+//                [this](uint32_t) {
+//                    uint32_t old = callee.fetch_add(1);
+//                    assert(old != 0xDEDEDEDE);
+//                    std::this_thread::sleep_for(delay);
+//                    assert(callee != 0xDEDEDEDE);
+//                });
+//    }
+//    void connect(color_ostream& o, shared& a, shared& b,size_t pos, uint32_t c)
+//    {
+//        out = &o;
+//        count = c;
+//        con[pos] = b->signal.connect(a,
+//                [this](uint32_t) {
+//                    uint32_t old = callee.fetch_add(1);
+//                    assert(old != 0xDEDEDEDE);
+//                    std::this_thread::sleep_for(delay);
+//                    assert(callee != 0xDEDEDEDE);
+//                });
+//    }
+//    Connected* operator->() noexcept
+//    {
+//        return this;
+//    }
+//    ~Connected() {
+//        INFO(command,*out).print("Connected %d had %d count. "
+//                "It was caller %d times. "
+//                "It was callee %d times.\n",
+//                id, count, caller, callee.load());
+//    }
+//};
+//
+//command_result sharedsignal (color_ostream &out, std::vector12<std::string24> & parameters)
+//{
+//    using rng_t = std::linear_congruential_engine<uint32_t, 747796405U, 2891336453U, 0>;
+//    rng_t rng(std::random_device{}());
+//    size_t count = 10;
+//    if (0 < parameters.size()) {
+//        std::stringstream ss(parameters[0]);
+//        ss >> count;
+//        DEBUG(command, out) << "Parsed " << count
+//            << " from paramters[0] '" << parameters[0] << '\'' << std::endl;
+//    }
+//
+//
+//    std::uniform_int_distribution<uint32_t>  dis(4096,8192);
+//    out << "Running signal_shared_tag destruction test "
+//        << count << " times" << std::endl;
+//    for (size_t nr = 0; nr < count; ++nr) {
+//        std::array<std::thread,4> t{};
+//        // Make an object which destruction is protected by std::thread::join()
+//        Connected external{static_cast<int>(t.size())};
+//        TRACE(command, out) << "begin " << std::endl;
+//        {
+//            int id = 0;
+//            // Make objects that are automatically protected using weak_ptr
+//            // references that are promoted to shared_ptr when Signal is
+//            // accessed.
+//            std::array<shared,4> c = {
+//                std::make_shared<Connected>(id++),
+//                std::make_shared<Connected>(id++),
+//                std::make_shared<Connected>(id++),
+//                std::make_shared<Connected>(id++),
+//            };
+//            assert(t.size() == c.size());
+//            for (unsigned i = 1; i < c.size(); ++i) {
+//                c[0]->connect(out, c[0], c[i], i - 1, dis(rng));
+//                c[i]->connect(out, c[i], c[0], 0, dis(rng));
+//            }
+//            external.connect(out, c[1], 1, dis(rng));
+//            auto thr = [&out](shared c) {
+//                TRACE(command, out) << "Thread " << c->id << " started." << std::endl;
+//                weak ref = c;
+//                for (;c->caller < c->count; ++c->caller) {
+//                    c->signal(std::move(c->caller));
+//                }
+//                TRACE(command, out) << "Thread " << c->id << " resets shared." << std::endl;
+//                c.reset();
+//                while((c = ref.lock())) {
+//                    ++c->caller;
+//                    c->signal(std::move(c->caller));
+//                    c.reset();
+//                    std::this_thread::sleep_for(delay*25);
+//                }
+//            };
+//            for (unsigned i = 0; i < c.size(); ++i) {
+//                TRACE(command, out) << "start thread " << i << std::endl;
+//                t[i] = std::thread{thr, c[i]};
+//            }
+//        }
+//        TRACE(command, out) << "running " << std::endl;
+//        for (;external->caller < external->count; ++external->caller) {
+//            external->signal(std::move(external->caller));
+//            external->reconnect(1);
+//        }
+//        TRACE(command, out) << "join " << std::endl;
+//        for (unsigned i = 0; i < t.size(); ++i)
+//            t[i].join();
+//    }
+//    return CR_OK;
+//}
 
 command_result kittens (color_ostream &out, std::vector12<std::string24> & parameters)
 {
@@ -386,9 +396,9 @@ command_result kittens (color_ostream &out, std::vector12<std::string24> & param
         if (parameters[0] == "stop")
         {
             shutdown_flag = true;
-            while(!final_flag)
+            while (!final_flag)
             {
-                Core::getInstance().getConsole().msleep(60);
+                Core::getInstance().getConsole().msleep(50);
             }
             shutdown_flag = false;
             return CR_OK;

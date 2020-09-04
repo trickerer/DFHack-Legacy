@@ -801,6 +801,18 @@ struct atomic {
 #endif
     }
 
+    inline T fetch_xor(T arg, memory_order order = memory_order_seq_cst)
+    {
+#ifdef _TTHREAD_HAS_ATOMIC_BUILTINS_
+      return __sync_xor(&mValue, arg);
+#else
+      lock_guard<mutex> guard(mLock);
+      T result = mValue;
+      mValue = mValue^arg;
+      return result;
+#endif
+    }
+
     inline T exchange(T arg, memory_order order = memory_order_seq_cst)
     {
 #ifdef _TTHREAD_HAS_ATOMIC_BUILTINS_

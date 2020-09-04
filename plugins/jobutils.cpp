@@ -180,8 +180,8 @@ static command_result job_material_in_job(color_ostream &out, MaterialInfo &new_
         item->mat_index = new_mat.index;
     }
 
-    out << "Applied material '" << new_mat.toString()
-        << "' to job " << ENUM_KEY_STR_SIMPLE(job_type,job->job_type) << endl;
+    out << "Applied material '" << new_mat.toString().c_str()
+        << "' to job " << ENUM_KEY_STR_SIMPLE(job_type,job->job_type).c_str() << endl;
     return CR_OK;
 }
 

@@ -38,8 +38,8 @@ bool check_malloc_perturb()
     struct T_test {
         uint32_t data[1024];
     };
-    auto test = new T_test;
-    bool ret = (test->data[0] == 0xd2d2d2d2);
+    T_test* test = new T_test;
+    bool ret = (test->data[0] == 0xd2d2d2d2 || test->data[0] == 0xbaadf00d || test->data[0] == 0xfeeefeee);
     delete test;
     return ret;
 }
@@ -58,7 +58,8 @@ static command_result command(color_ostream & out, std::vector12<std::string24> 
 
     // check parameters with values first
 #define VAL_PARAM(name, expr_using_value) \
-    auto name ## _idx = std::find(parameters.begin(), parameters.end(), "-" #name); \
+    std::vector12<std::string24>::const_iterator name ## _idx = \
+        std::find(parameters.begin(), parameters.end(), "-" #name); \
     if (name ## _idx != parameters.end()) \
     { \
         if (name ## _idx + 1 == parameters.end()) \
@@ -67,7 +68,7 @@ static command_result command(color_ostream & out, std::vector12<std::string24> 
         } \
         try \
         { \
-            auto value = std::move(*(name ## _idx + 1)); \
+            std::string24 value(*(name ## _idx + 1)); \
             parameters.erase((name ## _idx + 1)); \
             parameters.erase(name ## _idx); \
             checker.name = (expr_using_value); \
@@ -78,11 +79,12 @@ static command_result command(color_ostream & out, std::vector12<std::string24> 
             return CR_WRONG_USAGE; \
         } \
     }
-    VAL_PARAM(maxerrors, std::stoul(value));
+    VAL_PARAM(maxerrors, unsigned long(atol(value.c_str())));
 #undef VAL_PARAM
 
 #define BOOL_PARAM(name) \
-    auto name ## _idx = std::find(parameters.begin(), parameters.end(), "-" #name); \
+    std::vector12<std::string24>::const_iterator name ## _idx = \
+        std::find(parameters.begin(), parameters.end(), "-" #name); \
     if (name ## _idx != parameters.end()) \
     { \
         checker.name = true; \
@@ -126,7 +128,7 @@ static command_result command(color_ostream & out, std::vector12<std::string24> 
         QueueItem item(parameters.at(0), get_object_ref(State, -1));
         lua_getfield(State, -1, "_type");
         lua_getfield(State, -1, "_identity");
-        auto identity = reinterpret_cast<type_identity *>(lua_touserdata(State, -1));
+        type_identity* identity = reinterpret_cast<type_identity *>(lua_touserdata(State, -1));
         if (!identity)
         {
             out.printerr("could not determine type identity\n");

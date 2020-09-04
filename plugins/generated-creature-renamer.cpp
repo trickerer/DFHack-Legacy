@@ -272,11 +272,11 @@ command_result save_generated_raw(color_ostream &out, std::vector12<std::string2
     std::string24 full_name = fileName + ".txt";
     std::ofstream outputFile(full_name.c_str(), std::ios::out | std::ios::trunc);
 
-    outputFile << fileName << endl << endl;
+    outputFile << fileName.c_str() << endl << endl;
 
     outputFile << "[OBJECT:GRAPHICS]" << endl << endl;
 
-    outputFile << "[TILE_PAGE:" << pageName << "]" << endl;
+    outputFile << "[TILE_PAGE:" << pageName.c_str() << "]" << endl;
     outputFile << "    [FILE:procedural_friendly.png]" << endl;
     outputFile << "    [TILE_DIM:" << tileWidth << ":" << tileHeight << "]" << endl;
     outputFile << "    [PAGE_DIM:" << pageWidth << ":" << pageHeight << "]" << endl << endl;
@@ -305,8 +305,8 @@ command_result save_generated_raw(color_ostream &out, std::vector12<std::string2
                 if (rep > 0)
                     token.append("_" + uint_to_string(rep));
 
-                outputFile << "[CREATURE_GRAPHICS:" << token << "]" << endl;
-                outputFile << "    [DEFAULT:" << pageName << ":" << descIndex % pageWidth << ":" << descIndex / pageWidth << ":ADD_COLOR]" << endl;
+                outputFile << "[CREATURE_GRAPHICS:" << token.c_str() << "]" << endl;
+                outputFile << "    [DEFAULT:" << pageName.c_str() << ":" << descIndex % pageWidth << ":" << descIndex / pageWidth << ":ADD_COLOR]" << endl;
             }
             outputFile << endl;
         }

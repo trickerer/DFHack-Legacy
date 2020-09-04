@@ -5,4 +5,4 @@ set(PLUGIN_SRCS
     validate.cpp
 )
 
-dfhack_plugin(check-structures-sanity ${PLUGIN_SRCS} LINK_LIBRARIES lua)
+dfhack_plugin(check-structures-sanity ${PLUGIN_SRCS} LINK_LIBRARIES lua dfhack-tinythread)

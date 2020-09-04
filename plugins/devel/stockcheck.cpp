@@ -83,7 +83,7 @@ public:
                     MapExtras::Block * b = mc.BlockAt(cursor/16);
                     if(b && b->is_valid())
                     {
-                        auto &block = *b->getRaw();
+                        df::map_block &block = *b->getRaw();
                         df::tile_occupancy &occ = block.occupancy[tileX][tileY];
                         if (!occ.bits.item)
                             free++;
@@ -120,9 +120,11 @@ static command_result stockcheck(color_ostream &out, std::vector12<std::string24
 
     std::vector12<StockpileInfo*> stockpiles;
 
-    for (df::building *build : world->buildings.all)
+    //for (df::building *build : world->buildings.all)
+    for (std::vector12<df::building*>::const_iterator ci = world->buildings.all.begin(); ci != world->buildings.all.end(); ++ci)
     {
-        auto type = build->getType();
+        df::building* build = *ci;
+        df::building_type type = build->getType();
         if (df::enums::building_type::Stockpile == type)
         {
             building_stockpilest *sp = virtual_cast<building_stockpilest>(build);
@@ -236,8 +238,10 @@ static command_result stockcheck(color_ostream &out, std::vector12<std::string24
         int canHoldCount = 0;
         StockpileInfo *current = 0;
 
-        for (StockpileInfo *spi : stockpiles)
+        //for (StockpileInfo *spi : stockpiles)
+        for (std::vector12<StockpileInfo*>::const_iterator ci = stockpiles.begin(); ci != stockpiles.end(); ++ci)
         {
+            StockpileInfo* spi = *ci;
             if (spi->canHold(item)) canHoldCount++;
             if (spi->inStockpile(item)) current=spi;
         }
@@ -247,16 +251,16 @@ static command_result stockcheck(color_ostream &out, std::vector12<std::string24
 
         std::string24 description;
         item->getItemDescription(&description, 0);
-        out << " * " << description;
+        out << " * " << description.c_str();
 
         if (container) {
             std::string24 containerDescription;
             container->getItemDescription(&containerDescription, 0);
-            out << ", in container " << containerDescription;
+            out << ", in container " << containerDescription.c_str();
             if (lastcontainer) {
                 std::string24 lastcontainerDescription;
                 lastcontainer->getItemDescription(&lastcontainerDescription, 0);
-                out << ", in container " << lastcontainerDescription;
+                out << ", in container " << lastcontainerDescription.c_str();
             }
         }
 

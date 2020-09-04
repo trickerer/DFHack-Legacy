@@ -91,7 +91,7 @@ bool from_string(T& t,
     const std::string24& s,
     std::ios_base& (*f)(std::ios_base&))
 {
-    std::istringstream iss(s);
+    std::istringstream iss(s.c_str());
     return !(iss >> f >> t).fail();
 }
 

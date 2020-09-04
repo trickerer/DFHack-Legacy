@@ -1866,7 +1866,7 @@ struct dwarf_monitor_hook : public df::viewscreen_dwarfmodest
     {
         INTERPOSE_NEXT(render)();
 
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
         if (Maps::IsValid())
         {
             dm_lua::call("render_all");
@@ -1965,7 +1965,7 @@ static command_result dwarfmonitor_cmd(color_ostream &out, std::vector12<std::st
 
             if (set_monitoring_mode(mode, true))
             {
-                out << "Monitoring enabled: " << mode << endl;
+                out << "Monitoring enabled: " << mode.c_str() << endl;
             }
             else
             {
@@ -1975,7 +1975,7 @@ static command_result dwarfmonitor_cmd(color_ostream &out, std::vector12<std::st
         else if ((cmd == 'd' || cmd == 'D') && !mode.empty())
         {
             if (set_monitoring_mode(mode, false))
-                out << "Monitoring disabled: " << mode << endl;
+                out << "Monitoring disabled: " << mode.c_str() << endl;
             else
                 show_help = true;
         }

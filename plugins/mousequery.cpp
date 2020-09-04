@@ -660,7 +660,7 @@ struct mousequery_hook : public df::viewscreen_dwarfmodest
             int disp_y = gps->dimy - 3;
             stringstream label;
             label << "Selection: " << dX << "x" << dY << "x" << dZ;
-            OutputString(COLOR_WHITE, disp_x, disp_y, label.str());
+            OutputString(COLOR_WHITE, disp_x, disp_y, label.str().c_str());
         }
         else
         {

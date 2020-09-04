@@ -130,7 +130,7 @@ command_result df_changeitem(color_ostream &out, std::vector12<std::string24> & 
 
         if (p == "help" || p == "?")
         {
-            out << changeitem_help << endl;
+            out << changeitem_help.c_str() << endl;
             return CR_OK;
         }
         else if (p == "here")
@@ -185,7 +185,7 @@ command_result df_changeitem(color_ostream &out, std::vector12<std::string24> & 
                 out << "Invalid quality specified!" << endl;
                 return CR_WRONG_USAGE;
             }
-            out << "change to quality: " << describeQuality(new_quality) << endl;
+            out << "change to quality: " << describeQuality(new_quality).c_str() << endl;
             change_quality = true;
             i++;
         }
@@ -204,7 +204,7 @@ command_result df_changeitem(color_ostream &out, std::vector12<std::string24> & 
         }
         else
         {
-            out << p << ": Unknown command!" << endl;
+            out << p.c_str() << ": Unknown command!" << endl;
             return CR_WRONG_USAGE;
         }
     }
@@ -323,12 +323,12 @@ command_result changeitem_execute(
     if(info)
     {
         out << "Item info: " << endl;
-        out << "  type:    " << ENUM_KEY_STR_SIMPLE(item_type, item->getType()) << endl;
-        out << "  subtype: " << (sub_old.custom ? sub_old.custom->id : "NONE") << endl;
-        out << "  quality: " << describeQuality(item->getQuality()) << endl;
+        out << "  type:    " << ENUM_KEY_STR_SIMPLE(item_type, item->getType()).c_str() << endl;
+        out << "  subtype: " << (sub_old.custom ? sub_old.custom->id.c_str() : "NONE") << endl;
+        out << "  quality: " << describeQuality(item->getQuality()).c_str() << endl;
         //if(item->isImproved())
         //    out << "  imp.quality: " << describeQuality(item->getImprovementQuality()) << endl;
-        out << "  material: " << mat_old.getToken() << endl;
+        out << "  material: " << mat_old.getToken().c_str() << endl;
         return CR_OK;
     }
 

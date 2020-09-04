@@ -19,7 +19,7 @@ namespace DFHack {
             }
             void remove(T_func *func)
             {
-                auto it = std::find(funcs.begin(), funcs.end(), func);
+                std::vector12<T_func*>::iterator it = std::find(funcs.begin(), funcs.end(), func);
                 if (it != funcs.end())
                     funcs.erase(it);
             }
@@ -34,7 +34,7 @@ namespace DFHack {
             {
                 if (funcs.size())
                 {
-                    auto it = std::find(funcs.begin(), funcs.end(), cur);
+                    std::vector12<T_func*>::iterator it = std::find(funcs.begin(), funcs.end(), cur);
                     if (it != funcs.end() && it != funcs.begin())
                         return *(it - 1);
                 }

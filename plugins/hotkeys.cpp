@@ -345,7 +345,7 @@ static command_result hotkeys_cmd(color_ostream &out, std::vector12<std::string2
         else if (cmd == 'i')
         {
             int index;
-            stringstream index_raw(parameters[1]);
+            stringstream index_raw(parameters[1].c_str());
             index_raw >> index;
             invoke_command(index);
         }

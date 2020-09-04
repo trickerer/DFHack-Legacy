@@ -189,7 +189,7 @@ command_result df_liquids (color_ostream &out_, std::vector12<std::string24> & p
         print_prompt(str, cur_mode);
         str << "# ";
         int rv;
-        while ((rv = out.lineedit(str.str(),input,liquids_hist))
+        while ((rv = out.lineedit(str.str().c_str(),input,liquids_hist))
                 == Console::RETRY);
         if (rv <= Console::FAILURE)
             return rv == Console::FAILURE ? CR_FAILURE : CR_OK;
@@ -345,7 +345,7 @@ command_result df_liquids (color_ostream &out_, std::vector12<std::string24> & p
                 break;
             }
             if (tail)
-                out << command << " : invalid permaflow mode" << endl;
+                out << command.c_str() << " : invalid permaflow mode" << endl;
         }
         // blah blah, bad code, bite me.
         else if(command == "0")
@@ -370,7 +370,7 @@ command_result df_liquids (color_ostream &out_, std::vector12<std::string24> & p
         }
         else
         {
-            out << command << " : unknown command." << endl;
+            out << command.c_str() << " : unknown command." << endl;
         }
     }
     return CR_OK;

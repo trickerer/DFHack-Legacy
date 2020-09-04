@@ -249,8 +249,8 @@ public:
                 int o = farm->plant_id[season];
                 farm->plant_id[season] = n;
                 out << "autofarm: changing farm #" << farm->id <<
-                    " from " << ((o == -1) ? "NONE" : world->raws.plants.all[o]->name) <<
-                    " to " << ((n == -1) ? "NONE" : world->raws.plants.all[n]->name) << endl;
+                    " from " << ((o == -1) ? "NONE" : world->raws.plants.all[o]->name.c_str()) <<
+                    " to " << ((n == -1) ? "NONE" : world->raws.plants.all[n]->name.c_str()) << endl;
                 toChange.pop();
                 if (c++ == min)
                     extra--;
@@ -344,7 +344,7 @@ public:
         for (map<int, int>::const_iterator ci = lastCounts.begin(); ci != lastCounts.end(); ++ci)
         {
             df::plant_raw const* plant = world->raws.plants.all[ci->first];
-            out << plant->id << " limit " << getThreshold(ci->first) << " current " << ci->second << endl;
+            out << plant->id.c_str() << " limit " << getThreshold(ci->first) << " current " << ci->second << endl;
         }
 
         //for (auto th : thresholds)
@@ -353,7 +353,7 @@ public:
             if (lastCounts[ci->first] > 0)
                 continue;
             df::plant_raw const* plant = world->raws.plants.all[ci->first];
-            out << plant->id << " limit " << getThreshold(ci->first) << " current 0" << endl;
+            out << plant->id.c_str() << " limit " << getThreshold(ci->first) << " current 0" << endl;
         }
         out << "Default: " << defaultThreshold << endl;
     }
@@ -433,7 +433,7 @@ static command_result setThresholds(color_ostream& out, std::vector12<std::strin
         }
         if (!ok)
         {
-            out << "Cannot find plant with id " << id << endl;
+            out << "Cannot find plant with id " << id.c_str() << endl;
             return CR_WRONG_USAGE;
         }
     }

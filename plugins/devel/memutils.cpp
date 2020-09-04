@@ -65,7 +65,7 @@ namespace memutils {
             return NULL;
         }
 
-        auto addr = uintptr_t(lua_tointeger(state, -1));
+        uintptr_t addr = uintptr_t(lua_tointeger(state, -1));
         return (void*)addr;
     }
 }

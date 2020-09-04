@@ -15,15 +15,15 @@ Checker::Checker(color_ostream & out) :
     noprogress(!out.is_console()),
     maybepointer(false)
 {
-    Core::getInstance().p->getMemRanges(mapped);
+    Core::getInstance().proc->getMemRanges(mapped);
 }
 
 color_ostream & Checker::fail(int line, const QueueItem & item, const CheckedStructure & cs)
 {
     error_count++;
     out << COLOR_LIGHTRED << "sanity check failed (line " << line << "): ";
-    out << COLOR_RESET << (cs.identity ? cs.identity->getFullName() : "?");
-    out << " (accessed as " << item.path << "): ";
+    out << COLOR_RESET << (cs.identity ? cs.identity->getFullName().c_str() : "?");
+    out << " (accessed as " << item.path.c_str() << "): ";
     out << COLOR_YELLOW;
     if (maxerrors && maxerrors != ~size_t(0))
         maxerrors--;
@@ -47,7 +47,7 @@ bool Checker::queue_item(const QueueItem & item, CheckedStructure cs)
 
         if (get_vtable_name(item, cs, true))
         {
-            auto actual_identity = virtual_identity::get(reinterpret_cast<virtual_ptr>(const_cast<void *>(item.ptr)));
+            virtual_identity* actual_identity = virtual_identity::get(reinterpret_cast<virtual_ptr>(const_cast<void *>(item.ptr)));
             if (static_cast<virtual_identity *>(cs.identity)->is_subclass(actual_identity))
             {
                 cs.identity = actual_identity;
@@ -55,25 +55,25 @@ bool Checker::queue_item(const QueueItem & item, CheckedStructure cs)
         }
     }
 
-    auto ptr_end = PTR_ADD(item.ptr, cs.full_size());
+    const void* ptr_end = PTR_ADD(item.ptr, cs.full_size());
 
-    auto prev = data.lower_bound(item.ptr);
-    if (prev != data.cbegin() && uintptr_t(prev->first) > uintptr_t(item.ptr))
+    CheckerData::iterator prev = data.lower_bound(item.ptr);
+    if (prev != data.begin() && uintptr_t(prev->first) > uintptr_t(item.ptr))
     {
         prev--;
     }
-    if (prev != data.cend() && uintptr_t(prev->first) <= uintptr_t(item.ptr) && uintptr_t(prev->first) + prev->second.second.full_size() > uintptr_t(item.ptr))
+    if (prev != data.end() && uintptr_t(prev->first) <= uintptr_t(item.ptr) && uintptr_t(prev->first) + prev->second.second.full_size() > uintptr_t(item.ptr))
     {
-        auto offset = uintptr_t(item.ptr) - uintptr_t(prev->first);
+        uintptr_t offset = uintptr_t(item.ptr) - uintptr_t(prev->first);
         if (!prev->second.second.has_type_at_offset(cs, offset))
         {
             if (offset == 0 && cs.identity == df::identity_traits<void *>::get())
             {
-                FAIL("unknown pointer is " << prev->second.second.identity->getFullName() << ", previously seen at " << prev->second.first);
+                FAIL("unknown pointer is " << prev->second.second.identity->getFullName().c_str() << ", previously seen at " << prev->second.first.c_str());
                 return false;
             }
             // TODO
-            FAIL("TODO: handle merging structures: " << item.path << " overlaps " << prev->second.first << " (backward)");
+            FAIL("TODO: handle merging structures: " << item.path.c_str() << " overlaps " << prev->second.first.c_str() << " (backward)");
             return false;
         }
 
@@ -81,15 +81,15 @@ bool Checker::queue_item(const QueueItem & item, CheckedStructure cs)
         return false;
     }
 
-    auto overlap_start = data.lower_bound(item.ptr);
-    auto overlap_end = data.lower_bound(ptr_end);
-    for (auto overlap = overlap_start; overlap != overlap_end; overlap++)
+    CheckerData::iterator overlap_start = data.lower_bound(item.ptr);
+    CheckerData::iterator overlap_end = data.lower_bound(ptr_end);
+    for (CheckerData::iterator overlap = overlap_start; overlap != overlap_end; overlap++)
     {
-        auto offset = uintptr_t(overlap->first) - uintptr_t(item.ptr);
+        uintptr_t offset = uintptr_t(overlap->first) - uintptr_t(item.ptr);
         if (!cs.has_type_at_offset(overlap->second.second, offset))
         {
             // TODO
-            FAIL("TODO: handle merging structures: " << overlap->second.first << " overlaps " << item.path << " (forward)");
+            FAIL("TODO: handle merging structures: " << overlap->second.first.c_str() << " overlaps " << item.path.c_str() << " (forward)");
             return false;
         }
     }
@@ -97,14 +97,14 @@ bool Checker::queue_item(const QueueItem & item, CheckedStructure cs)
     data.erase(overlap_start, overlap_end);
 
     data[item.ptr] = std::make_pair(item.path, cs);
-    queue.push_back(item);
+    queue.push_back(QueueItem(item));
     return true;
 }
 
 void Checker::queue_globals()
 {
-    auto fields = df::global::_identity.getFields();
-    for (auto field = fields; field->mode != struct_field_info::END; field++)
+    const struct_field_info* fields = df::global::_identity.getFields();
+    for (const struct_field_info* field = fields; field->mode != struct_field_info::END; field++)
     {
         if (!field->offset)
         {
@@ -113,7 +113,7 @@ void Checker::queue_globals()
         }
 
         // offset is the position of the DFHack pointer to this global.
-        auto ptr = *reinterpret_cast<const void **>(field->offset);
+        const void* ptr = *reinterpret_cast<const void **>(field->offset);
 
         QueueItem item(stl_sprintf("df.global.%s", field->name), ptr);
         CheckedStructure cs(field);
@@ -141,10 +141,10 @@ bool Checker::process_queue()
         return false;
     }
 
-    auto item = std::move(queue.front());
+    QueueItem item(queue.front());
     queue.pop_front();
 
-    auto cs = data.find(item.ptr);
+    CheckerData::iterator cs = data.find(item.ptr);
     if (cs == data.end())
     {
         // happens if pointer is determined to be part of a larger structure
@@ -172,9 +172,9 @@ void Checker::dispatch_item(const QueueItem & base, const CheckedStructure & cs)
 
     if (sizes && !cs.inside_structure)
     {
-        if (auto allocated_size = get_allocated_size(base))
+        if (size_t allocated_size = get_allocated_size(base))
         {
-            auto expected_size = cs.identity->byte_size();
+            size_t expected_size = cs.identity->byte_size();
             if (cs.allocated_count)
                 expected_size *= cs.allocated_count;
             else if (cs.count)
@@ -187,11 +187,11 @@ void Checker::dispatch_item(const QueueItem & base, const CheckedStructure & cs)
                     UNEXPECTED;
                 }
 
-                auto virtual_type = virtual_identity::get(static_cast<virtual_ptr>(const_cast<void *>(base.ptr)));
+                virtual_identity* virtual_type = virtual_identity::get(static_cast<virtual_ptr>(const_cast<void *>(base.ptr)));
                 expected_size = virtual_type->byte_size();
             }
 
-            auto & item = base;
+            const QueueItem & item = base;
 
             if (allocated_size > expected_size)
             {
@@ -208,8 +208,8 @@ void Checker::dispatch_item(const QueueItem & base, const CheckedStructure & cs)
         }
     }
 
-    auto ptr = base.ptr;
-    auto size = cs.identity->byte_size();
+    const void* ptr = base.ptr;
+    size_t size = cs.identity->byte_size();
     for (size_t i = 0; i < cs.count; i++)
     {
         QueueItem item(base, i, ptr);
@@ -293,19 +293,22 @@ void Checker::dispatch_primitive(const QueueItem & item, const CheckedStructure 
     }
     else if (cs.identity == df::identity_traits<bool>::get())
     {
-        auto val = *reinterpret_cast<const uint8_t *>(item.ptr);
-        if (val > 1 && val != 0xd2)
+        const uint8_t val = *reinterpret_cast<const uint8_t *>(item.ptr);
+        if (val > 1 && val != 0xd2 &&
+            val != 0xba && val != 0xad && val != 0xf0 && val != 0x0d && val != 0xfe && val != 0xee)
         {
-            FAIL("invalid value for bool: " << int(val));
+            std::ostringstream failmsg;
+            failmsg << "invalid value for bool: " << int(val);
+            FAIL(failmsg.str().c_str());
         }
     }
-    else if (auto int_id = dynamic_cast<df::integer_identity_base *>(cs.identity))
+    else if (df::integer_identity_base* int_id = dynamic_cast<df::integer_identity_base *>(cs.identity))
     {
         check_possible_pointer(item, cs);
 
         // TODO check ints?
     }
-    else if (auto float_id = dynamic_cast<df::float_identity_base *>(cs.identity))
+    else if (df::float_identity_base* float_id = dynamic_cast<df::float_identity_base *>(cs.identity))
     {
         // TODO check floats?
     }
@@ -316,7 +319,7 @@ void Checker::dispatch_primitive(const QueueItem & item, const CheckedStructure 
 }
 void Checker::dispatch_pointer(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto target_ptr = validate_and_dereference<const void *>(item);
+    const void* target_ptr = validate_and_dereference<const void *>(item);
     if (!target_ptr)
     {
         return;
@@ -325,14 +328,14 @@ void Checker::dispatch_pointer(const QueueItem & item, const CheckedStructure & 
 #ifdef DFHACK64
     if (uintptr_t(target_ptr) == 0xd2d2d2d2d2d2d2d2)
 #else
-    if (uintptr_t(target_ptr) == 0xd2d2d2d2)
+    if (uintptr_t(target_ptr) == 0xd2d2d2d2 || uintptr_t(target_ptr) == 0xbaadf00d || uintptr_t(target_ptr) == 0xfeeefeee)
 #endif
     {
         return;
     }
 
     QueueItem target_item(item.path, target_ptr);
-    auto target = static_cast<pointer_identity *>(cs.identity)->getTarget();
+    type_identity* target = static_cast<pointer_identity *>(cs.identity)->getTarget();
     if (!target)
     {
         check_unknown_pointer(target_item);
@@ -361,13 +364,13 @@ void Checker::dispatch_pointer(const QueueItem & item, const CheckedStructure & 
 }
 void Checker::dispatch_container(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto identity = static_cast<container_identity *>(cs.identity);
-    auto base_container = identity->getFullName(nullptr);
-    if (base_container == "std::vector12<void>")
+    container_identity* identity = static_cast<container_identity *>(cs.identity);
+    std::string24 base_container = identity->getFullName(NULL);
+    if (base_container == "vector")
     {
         check_stl_vector(item, identity->getItemType(), identity->getIndexEnumType());
     }
-    else if (base_container == "std::deque20<void>")
+    else if (base_container == "deque<void>")
     {
         // TODO: check std::deque20?
     }
@@ -382,21 +385,21 @@ void Checker::dispatch_container(const QueueItem & item, const CheckedStructure 
 }
 void Checker::dispatch_ptr_container(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto identity = static_cast<container_identity *>(cs.identity);
-    auto base_container = identity->getFullName(nullptr);
+    container_identity* identity = static_cast<container_identity *>(cs.identity);
+    std::string24 base_container = identity->getFullName(NULL);
     {
         UNEXPECTED;
     }
 }
 void Checker::dispatch_bit_container(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto identity = static_cast<container_identity *>(cs.identity);
-    auto base_container = identity->getFullName(nullptr);
+    container_identity* identity = static_cast<container_identity *>(cs.identity);
+    std::string24 base_container = identity->getFullName(NULL);
     if (base_container == "BitArray<>")
     {
         // TODO: check DF bit array
     }
-    else if (base_container == "std::vector12<bool>")
+    else if (base_container == "vector<bool>")
     {
         // TODO: check stl bit vector
     }
@@ -414,7 +417,7 @@ void Checker::dispatch_bitfield(const QueueItem & item, const CheckedStructure &
         return;
     }
 
-    auto bitfield_type = static_cast<bitfield_identity *>(cs.identity);
+    bitfield_identity* bitfield_type = static_cast<bitfield_identity *>(cs.identity);
     uint64_t bitfield_value;
     switch (bitfield_type->byte_size())
     {
@@ -449,8 +452,8 @@ void Checker::dispatch_bitfield(const QueueItem & item, const CheckedStructure &
             break;
     }
 
-    auto num_bits = bitfield_type->getNumBits();
-    auto bits = bitfield_type->getBits();
+    int num_bits = bitfield_type->getNumBits();
+    const bitfield_item_info* bits = bitfield_type->getBits();
     for (int i = 0; i < 64; i++)
     {
         if (!(num_bits & 1))
@@ -484,8 +487,8 @@ void Checker::dispatch_enum(const QueueItem & item, const CheckedStructure & cs)
         return;
     }
 
-    auto enum_type = static_cast<enum_identity *>(cs.identity);
-    auto enum_value = get_int_value(item, enum_type->getBaseType());
+    enum_identity* enum_type = static_cast<enum_identity *>(cs.identity);
+    int64_t enum_value = get_int_value(item, enum_type->getBaseType());
     if (enum_type->byte_size() == 2 && uint16_t(enum_value) == 0xd2d2)
     {
         return;
@@ -504,7 +507,7 @@ void Checker::dispatch_enum(const QueueItem & item, const CheckedStructure & cs)
         return;
     }
 
-    auto enum_name = get_enum_item_key(enum_type, enum_value);
+    const char* const* enum_name = get_enum_item_key(enum_type, enum_value);
     if (!enum_name)
     {
         FAIL("enum value (" << enum_value << ") is out of range");
@@ -517,16 +520,16 @@ void Checker::dispatch_enum(const QueueItem & item, const CheckedStructure & cs)
 }
 void Checker::dispatch_struct(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto identity = static_cast<struct_identity *>(cs.identity);
-    for (auto p = identity; p; p = p->getParent())
+    struct_identity* identity = static_cast<struct_identity *>(cs.identity);
+    for (struct_identity* p = identity; p; p = p->getParent())
     {
-        auto fields = p->getFields();
+        const struct_field_info* fields = p->getFields();
         if (!fields)
         {
             continue;
         }
 
-        for (auto field = fields; field->mode != struct_field_info::END; field++)
+        for (const struct_field_info* field = fields; field->mode != struct_field_info::END; field++)
         {
             dispatch_field(item, cs, fields, field);
         }
@@ -540,17 +543,17 @@ void Checker::dispatch_field(const QueueItem & item, const CheckedStructure & cs
         return;
     }
 
-    auto field_ptr = PTR_ADD(item.ptr, field->offset);
+    const void* field_ptr = PTR_ADD(item.ptr, field->offset);
     QueueItem field_item(item, field->name, field_ptr);
     CheckedStructure field_cs(field);
 
-    auto tag_field = find_union_tag(fields, field);
+    const struct_field_info* tag_field = find_union_tag(fields, field);
     if (tag_field)
     {
-        auto tag_ptr = PTR_ADD(item.ptr, tag_field->offset);
+        const void* tag_ptr = PTR_ADD(item.ptr, tag_field->offset);
         QueueItem tag_item(item, tag_field->name, tag_ptr);
         CheckedStructure tag_cs(tag_field);
-        auto attr_name = field->extra ? field->extra->union_tag_attr : nullptr;
+        const char* attr_name = field->extra ? field->extra->union_tag_attr : NULL;
         if (tag_cs.identity->isContainer())
         {
             dispatch_tagged_union_vector(field_item, tag_item, field_cs, tag_cs, attr_name);
@@ -566,46 +569,50 @@ void Checker::dispatch_field(const QueueItem & item, const CheckedStructure & cs
 }
 void Checker::dispatch_class(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto vtable_name = get_vtable_name(item, cs);
+    const char* vtable_name = get_vtable_name(item, cs);
     if (!vtable_name)
     {
         // bail out now because virtual_identity::get will crash
         return;
     }
 
-    auto base_identity = static_cast<virtual_identity *>(cs.identity);
-    auto vptr = static_cast<virtual_ptr>(const_cast<void *>(item.ptr));
-    auto identity = virtual_identity::get(vptr);
+    virtual_identity* base_identity = static_cast<virtual_identity *>(cs.identity);
+    virtual_ptr vptr = static_cast<virtual_ptr>(const_cast<void *>(item.ptr));
+    virtual_identity* identity = virtual_identity::get(vptr);
     if (!identity)
     {
-        FAIL("unidentified subclass of " << base_identity->getFullName() << ": " << vtable_name);
+        std::ostringstream failmsg;
+        failmsg << "unidentified subclass of " << base_identity->getFullName().c_str() << ": " << vtable_name;
+        FAIL(failmsg.str().c_str());
         return;
     }
     if (base_identity != identity && !base_identity->is_subclass(identity))
     {
-        FAIL("expected subclass of " << base_identity->getFullName() << ", but got " << identity->getFullName());
+        std::ostringstream failmsg;
+        failmsg << "expected subclass of " << base_identity->getFullName().c_str() << ", but got " << identity->getFullName().c_str();
+        FAIL(failmsg.str().c_str());
         return;
     }
 
-    if (data.count(item.ptr) && data.at(item.ptr).first == item.path)
+    if (data.count(item.ptr) && data[item.ptr].first == item.path)
     {
         // TODO: handle cases where this may overlap later data
-        data.at(item.ptr).second.identity = identity;
+        data[item.ptr].second.identity = identity;
     }
 
     dispatch_struct(QueueItem(item.path + "<" + identity->getFullName() + ">", item.ptr), CheckedStructure(identity));
 }
 void Checker::dispatch_buffer(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto identity = static_cast<container_identity *>(cs.identity);
+    container_identity* identity = static_cast<container_identity *>(cs.identity);
 
-    auto item_identity = identity->getItemType();
+    type_identity* item_identity = identity->getItemType();
     dispatch_item(item, CheckedStructure(item_identity, identity->byte_size() / item_identity->byte_size(), static_cast<enum_identity *>(identity->getIndexEnumType()), true));
 }
 void Checker::dispatch_stl_ptr_vector(const QueueItem & item, const CheckedStructure & cs)
 {
-    auto identity = static_cast<container_identity *>(cs.identity);
-    auto ptr_type = wrap_in_pointer(identity->getItemType());
+    container_identity* identity = static_cast<container_identity *>(cs.identity);
+    type_identity* ptr_type = wrap_in_pointer(identity->getItemType());
     check_stl_vector(item, ptr_type, identity->getIndexEnumType());
 }
 void Checker::dispatch_tagged_union(const QueueItem & item, const QueueItem & tag_item, const CheckedStructure & cs, const CheckedStructure & tag_cs, const char *attr_name)
@@ -616,8 +623,8 @@ void Checker::dispatch_tagged_union(const QueueItem & item, const QueueItem & ta
         return;
     }
 
-    auto union_type = static_cast<union_identity *>(cs.identity);
-    auto union_data_ptr = reinterpret_cast<const uint8_t *>(item.ptr);
+    union_identity* union_type = static_cast<union_identity *>(cs.identity);
+    const uint8_t* union_data_ptr = reinterpret_cast<const uint8_t *>(item.ptr);
     uint8_t padding_byte = *union_data_ptr;
     bool all_padding = false;
     if (padding_byte == 0x00 || padding_byte == 0xd2 || padding_byte == 0xff)
@@ -633,8 +640,8 @@ void Checker::dispatch_tagged_union(const QueueItem & item, const QueueItem & ta
         }
     }
 
-    auto tag_identity = static_cast<enum_identity *>(tag_cs.identity);
-    auto tag_value = get_int_value(tag_item, tag_identity->getBaseType());
+    enum_identity* tag_identity = static_cast<enum_identity *>(tag_cs.identity);
+    int64_t tag_value = get_int_value(tag_item, tag_identity->getBaseType());
     if (all_padding && padding_byte == 0xd2)
     {
         // special case: completely uninitialized
@@ -670,20 +677,24 @@ void Checker::dispatch_tagged_union(const QueueItem & item, const QueueItem & ta
         }
     }
 
-    auto tag_name = get_enum_item_attr_or_key(tag_identity, tag_value, attr_name);
+    const char* const* tag_name = get_enum_item_attr_or_key(tag_identity, tag_value, attr_name);
     if (!tag_name)
     {
-        FAIL("tagged union tag (accessed as " << tag_item.path << ") value (" << tag_value << ") not defined in enum " << tag_cs.identity->getFullName());
+        std::ostringstream failmsg;
+        failmsg << "tagged union tag (accessed as " << tag_item.path.c_str() << ") value (" << tag_value << ") not defined in enum " << tag_cs.identity->getFullName().c_str();
+        FAIL(failmsg.str().c_str());
         return;
     }
 
     if (!*tag_name)
     {
-        FAIL("tagged union tag (accessed as " << tag_item.path << ") value (" << tag_value << ") is unnamed");
+        std::ostringstream failmsg;
+        failmsg << "tagged union tag (accessed as " << tag_item.path.c_str() << ") value (" << tag_value << ") is unnamed";
+        FAIL(failmsg.str().c_str());
         return;
     }
 
-    for (auto field = union_type->getFields(); field->mode != struct_field_info::END; field++)
+    for (const struct_field_info* field = union_type->getFields(); field->mode != struct_field_info::END; field++)
     {
         if (strcmp(field->name, *tag_name))
         {
@@ -705,11 +716,13 @@ void Checker::dispatch_tagged_union(const QueueItem & item, const QueueItem & ta
         return;
     }
 
-    FAIL("tagged union missing " << *tag_name << " field to match tag (accessed as " << tag_item.path << ") value (" << tag_value << ")");
+    std::ostringstream failmsg;
+    failmsg << "tagged union missing " << *tag_name << " field to match tag (accessed as " << tag_item.path.c_str() << ") value (" << tag_value << ")";
+    FAIL(failmsg.str().c_str());
 }
 void Checker::dispatch_tagged_union_vector(const QueueItem & item, const QueueItem & tag_item, const CheckedStructure & cs, const CheckedStructure & tag_cs, const char *attr_name)
 {
-    auto union_container_identity = static_cast<container_identity *>(cs.identity);
+    container_identity* union_container_identity = static_cast<container_identity *>(cs.identity);
     CheckedStructure union_item_cs(union_container_identity->getItemType());
     if (union_container_identity->type() != IDTYPE_CONTAINER)
     {
@@ -717,13 +730,13 @@ void Checker::dispatch_tagged_union_vector(const QueueItem & item, const QueueIt
         union_item_cs.identity = wrap_in_pointer(union_item_cs.identity);
     }
 
-    auto tag_container_identity = static_cast<container_identity *>(tag_cs.identity);
-    auto tag_container_base = tag_container_identity->getFullName(nullptr);
-    if (tag_container_base == "std::vector12<void>")
+    container_identity* tag_container_identity = static_cast<container_identity *>(tag_cs.identity);
+    std::string24 tag_container_base = tag_container_identity->getFullName(NULL);
+    if (tag_container_base == "vector<void>")
     {
-        auto vec_union = validate_vector_size(item, union_item_cs);
+        std::pair<const void*, CheckedStructure> vec_union = validate_vector_size(item, union_item_cs);
         CheckedStructure tag_item_cs(tag_container_identity->getItemType());
-        auto vec_tag = validate_vector_size(tag_item, tag_item_cs);
+        std::pair<const void *, CheckedStructure> vec_tag = validate_vector_size(tag_item, tag_item_cs);
         if (!vec_union.first || !vec_tag.first)
         {
             // invalid vectors (already warned)
@@ -736,7 +749,9 @@ void Checker::dispatch_tagged_union_vector(const QueueItem & item, const QueueIt
         }
         if (vec_union.second.count != vec_tag.second.count)
         {
-            FAIL("tagged union vector is " << vec_union.second.count << " elements, but tag vector (accessed as " << tag_item.path << ") is " << vec_tag.second.count << " elements");
+            std::ostringstream failmsg;
+            failmsg << "tagged union vector is " << vec_union.second.count << " elements, but tag vector (accessed as " << tag_item.path.c_str() << ") is " << vec_tag.second.count << " elements";
+            FAIL(failmsg.str().c_str());
         }
 
         for (size_t i = 0; i < vec_union.second.count && i < vec_tag.second.count; i++)
@@ -746,7 +761,7 @@ void Checker::dispatch_tagged_union_vector(const QueueItem & item, const QueueIt
             vec_tag.first = PTR_ADD(vec_tag.first, tag_item_cs.identity->byte_size());
         }
     }
-    else if (tag_container_base == "std::vector12<bool>")
+    else if (tag_container_base == "vector<bool>")
     {
         // TODO
         UNEXPECTED;
@@ -763,7 +778,7 @@ void Checker::dispatch_untagged_union(const QueueItem & item, const CheckedStruc
     {
         // it's 16 bytes on 64-bit linux due to a messy header in libgraphics
         // but only the first 8 bytes are ever used
-        dispatch_primitive(item, CheckedStructure(df::identity_traits<int64_t>::get(), 0, nullptr, cs.inside_structure));
+        dispatch_primitive(item, CheckedStructure(df::identity_traits<int64_t>::get(), 0, NULL, cs.inside_structure));
         return;
     }
 
@@ -772,13 +787,17 @@ void Checker::dispatch_untagged_union(const QueueItem & item, const CheckedStruc
 
 void Checker::check_unknown_pointer(const QueueItem & item)
 {
-    const static CheckedStructure cs(nullptr, 0, nullptr, true);
-    if (auto allocated_size = get_allocated_size(item))
+    const static CheckedStructure cs(NULL, 0, NULL, true);
+    if (size_t allocated_size = get_allocated_size(item))
     {
-        FAIL("pointer to a block of " << allocated_size << " bytes of allocated memory");
+        std::ostringstream failmsg;
+        failmsg << "pointer to a block of " << allocated_size << " bytes of allocated memory";
+        FAIL(failmsg.str().c_str());
         if (allocated_size >= MIN_SIZE_FOR_SUGGEST && known_types_by_size.count(allocated_size))
         {
-            FAIL("known types of this size: " << join_strings(", ", known_types_by_size.at(allocated_size)));
+            std::ostringstream failmsg1;
+            failmsg1 << "known types of this size: " << join_strings(", ", known_types_by_size[allocated_size]).c_str();
+            FAIL(failmsg1.str().c_str());
         }
 
         // check recursively if it's the right size for a pointer
@@ -800,9 +819,11 @@ void Checker::check_unknown_pointer(const QueueItem & item)
         FAIL("untyped pointer is actually stl-std::string24 with value \"" << *str << "\" (length " << str->length() << ")");
     }
 #endif
-    else if (auto vtable_name = get_vtable_name(QueueItem(item.path, &item.ptr), cs, true))
+    else if (const char* vtable_name = get_vtable_name(QueueItem(item.path, &item.ptr), cs, true))
     {
-        FAIL("pointer to a vtable: " << vtable_name);
+        std::ostringstream failmsg;
+        failmsg << "pointer to a vtable: " << vtable_name;
+        FAIL(failmsg.str().c_str());
     }
     else if (sizes)
     {
@@ -812,7 +833,7 @@ void Checker::check_unknown_pointer(const QueueItem & item)
 
 void Checker::check_stl_vector(const QueueItem & item, type_identity *item_identity, type_identity *eid)
 {
-    auto vec_items = validate_vector_size(item, CheckedStructure(item_identity));
+    std::pair<const void *, CheckedStructure> vec_items = validate_vector_size(item, CheckedStructure(item_identity));
 
     // skip bad pointer vectors
     if (item.path.length() > 4 && item.path.substr(item.path.length() - 4) == ".bad" && item_identity->type() == IDTYPE_POINTER)
@@ -829,7 +850,7 @@ void Checker::check_stl_vector(const QueueItem & item, type_identity *item_ident
 
 void Checker::check_stl_string(const QueueItem & item)
 {
-    const static CheckedStructure cs(df::identity_traits<std::string24>::get(), 0, nullptr, true);
+    const static CheckedStructure cs(df::identity_traits<std::string24>::get(), 0, NULL, true);
 
 #ifdef WIN32
     struct string_data
@@ -854,39 +875,39 @@ void Checker::check_stl_string(const QueueItem & item)
     };
 #endif
 
-    auto std::string24 = reinterpret_cast<const string_data *>(item.ptr);
+    const string_data* dstring = reinterpret_cast<const string_data *>(item.ptr);
 #ifdef WIN32
-    bool is_local = std::string24->capacity < 16;
-    const char *start = is_local ? &std::string24->local_data[0] : reinterpret_cast<const char *>(std::string24->start);
-    ptrdiff_t length = std::string24->length;
-    ptrdiff_t capacity = std::string24->capacity;
+    bool is_local = dstring->capacity < 16;
+    const char *start = is_local ? &dstring->local_data[0] : reinterpret_cast<const char *>(dstring->start);
+    ptrdiff_t length = dstring->length;
+    ptrdiff_t capacity = dstring->capacity;
 #else
-    if (!is_valid_dereference(QueueItem(item, "?ptr?", std::string24->ptr), 1))
+    if (!is_valid_dereference(QueueItem(item, "?ptr?", dstring->ptr), 1))
     {
-        // nullptr is NOT okay here
-        FAIL("invalid std::string24 pointer " << stl_sprintf("%p", std::string24->ptr));
+        // NULL is NOT okay here
+        FAIL("invalid string pointer " << stl_sprintf("%p", dstring->ptr));
         return;
     }
-    if (!is_valid_dereference(QueueItem(item, "?hdr?", std::string24->ptr - 1), sizeof(*std::string24->ptr)))
+    if (!is_valid_dereference(QueueItem(item, "?hdr?", dstring->ptr - 1), sizeof(*dstring->ptr)))
     {
         return;
     }
-    const char *start = reinterpret_cast<const char *>(std::string24->ptr);
-    ptrdiff_t length = (std::string24->ptr - 1)->length;
-    ptrdiff_t capacity = (std::string24->ptr - 1)->capacity;
+    const char *start = reinterpret_cast<const char *>(dstring->ptr);
+    ptrdiff_t length = (dstring->ptr - 1)->length;
+    ptrdiff_t capacity = (dstring->ptr - 1)->capacity;
 #endif
 
     if (length < 0)
     {
-        FAIL("std::string24 length is negative (" << length << ")");
+        FAIL("string length is negative (" << length << ")");
     }
     else if (capacity < 0)
     {
-        FAIL("std::string24 capacity is negative (" << capacity << ")");
+        FAIL("string capacity is negative (" << capacity << ")");
     }
     else if (capacity < length)
     {
-        FAIL("std::string24 capacity (" << capacity << ") is less than length (" << length << ")");
+        FAIL("string capacity (" << capacity << ") is less than length (" << length << ")");
     }
 
 #ifndef WIN32
@@ -912,7 +933,7 @@ void Checker::check_possible_pointer(const QueueItem & item, const CheckedStruct
 {
     if (sizes && maybepointer && uintptr_t(item.ptr) % sizeof(void *) == 0)
     {
-        auto ptr = validate_and_dereference<const void *>(item, true);
+        const void* ptr = validate_and_dereference<const void *>(item, true);
         QueueItem ptr_item(item, "?maybe_pointer?", ptr);
         if (ptr && is_valid_dereference(ptr_item, 1, true))
         {

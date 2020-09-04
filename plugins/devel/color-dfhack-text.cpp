@@ -20,7 +20,10 @@ struct {
 } config;
 
 bool color_text_tile(const Screen::Pen &pen, int x, int y, bool map);
-GUI_HOOK_CALLBACK(Screen::Hooks::set_tile, color_text_hook, color_text_tile);
+
+//GUI_HOOK_CALLBACK(Screen::Hooks::set_tile, color_text_hook, color_text_tile);
+DFHack::GuiHooks::Hook<bool(const DFHack::Screen::Pen&,int,int,bool)>::Callback
+    color_text_hook(&Screen::Hooks::set_tile, color_text_tile);
 bool color_text_tile(const Screen::Pen &pen, int x, int y, bool map)
 {
     Screen::Pen pen2 = pen;
@@ -41,7 +44,9 @@ bool color_text_tile(const Screen::Pen &pen, int x, int y, bool map)
 }
 
 bool aaaaa_set_tile(const Screen::Pen &pen, int x, int y, bool map);
-GUI_HOOK_CALLBACK(Screen::Hooks::set_tile, aaaaa_set_tile_hook, aaaaa_set_tile);
+//GUI_HOOK_CALLBACK(Screen::Hooks::set_tile, aaaaa_set_tile_hook, aaaaa_set_tile);
+DFHack::GuiHooks::Hook<bool(const DFHack::Screen::Pen&,int,int,bool)>::Callback
+    aaaaa_set_tile_hook(&Screen::Hooks::set_tile, aaaaa_set_tile);
 bool aaaaa_set_tile(const Screen::Pen &pen, int x, int y, bool map)
 {
     Screen::Pen pen2 = pen;
@@ -53,7 +58,9 @@ bool aaaaa_set_tile(const Screen::Pen &pen, int x, int y, bool map)
 }
 
 bool shift_set_tile(const Screen::Pen &pen, int x, int y, bool map);
-GUI_HOOK_CALLBACK(Screen::Hooks::set_tile, shift_set_tile_hook, shift_set_tile);
+//GUI_HOOK_CALLBACK(Screen::Hooks::set_tile, shift_set_tile_hook, shift_set_tile);
+DFHack::GuiHooks::Hook<bool(const DFHack::Screen::Pen&,int,int,bool)>::Callback
+    shift_set_tile_hook(&Screen::Hooks::set_tile, shift_set_tile);
 bool shift_set_tile(const Screen::Pen &pen, int x, int y, bool map)
 {
     x = (x + 1) % gps->dimx;
@@ -76,7 +83,7 @@ command_result color(color_ostream &out, std::vector12<std::string24> &params)
 {
     if (params.empty())
         return plugin_enable(out, true);
-    for (auto it = params.begin(); it != params.end(); ++it)
+    for (std::vector12<std::string24>::iterator it = params.begin(); it != params.end(); ++it)
     {
         std::string24 p = toLower(*it);
         if (!p.size())

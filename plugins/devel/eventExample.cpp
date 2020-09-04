@@ -53,7 +53,7 @@ struct my_contaminate : df::item_actual {
     typedef df::item_actual interpose_base;
     DEFINE_VMETHOD_INTERPOSE(void, contaminateWound, (df::unit* unit, df::unit_wound* wound, uint8_t unk1, int16_t unk2)) {
         INTERPOSE_NEXT(contaminateWound)(unit,wound,unk1,unk2);
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
         Core::getInstance().print("contaminateWound: item=%d, unit=%d, wound attacker = %d, unk1 = %d, unk2 = %d\n", this->id, unit->id, wound->unit_id, (int32_t)unk1, (int32_t)unk2);
     }
 };
@@ -143,7 +143,7 @@ void itemCreate(color_ostream& out, void* ptr) {
     df::item* item = df::global::world->items.all[item_index];
     df::item_type type = item->getType();
     df::coord pos = item->pos;
-    out.print("Item created: %zi, %s, at (%d,%d,%d)\n", (intptr_t)(ptr), ENUM_KEY_STR(item_type, type).c_str(), pos.x, pos.y, pos.z);
+    out.print("Item created: %zi, %s, at (%d,%d,%d)\n", (intptr_t)(ptr), ENUM_KEY_STR_SIMPLE(item_type, type).c_str(), pos.x, pos.y, pos.z);
 }
 
 void building(color_ostream& out, void* ptr) {
@@ -185,10 +185,11 @@ void unitAttack(color_ostream& out, void* ptr) {
         return;
     }
     std::set8<int32_t> parts;
-    for ( auto a = wound->parts.begin(); a != wound->parts.end(); a++ ) {
+    for (std::vector12<df::unit_wound::T_parts*>::const_iterator a = wound->parts.begin();
+        a != wound->parts.end(); a++ ) {
         parts.insert((*a)->body_part_id);
     }
-    for ( auto a = parts.begin(); a != parts.end(); a++ ) {
+    for (std::set8<int32_t>::const_iterator a = parts.begin(); a != parts.end(); a++ ) {
         int32_t body_part_id = (*a);
         df::body_part_raw* part = defender->body.body_plan->body_parts[body_part_id];
         out.print(" %s\n", part->name_singular[0]->c_str());

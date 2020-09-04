@@ -373,7 +373,7 @@ public:
         return (c >= 'a' && c <= 'z') || c == ' ';
     }
 
-    bool feed(set<df::interface_key> *input)
+    bool feed(std::set8<df::interface_key> *input)
     {
         feed_mouse_set_highlight = feed_changed_highlight = false;
         if  (input->count(interface_key::STANDARDSCROLL_UP))

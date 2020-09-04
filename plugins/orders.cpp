@@ -137,7 +137,7 @@ static void bitfield_to_json_array(Json::Value & out, B bits)
     //for (auto & it : names)
     for (std::vector12<std::string24>::const_iterator cit = names.begin(); cit != names.end(); ++cit)
     {
-        out.append(*cit);
+        out.append((*cit).c_str());
     }
 }
 
@@ -156,7 +156,7 @@ static void json_array_to_bitfield(B & bits, Json::Value & arr)
             continue;
         }
 
-        std::string24 str(arr[i - 1].asString());
+        std::string24 str(arr[i - 1].asCString());
 
         int current;
         if (get_bitfield_field(&current, bits, str))
@@ -190,6 +190,25 @@ static df::itemdef *get_itemdef(const std::string24 & subtype)
         //    return it;
         //}
         if ((*cit)->id == subtype)
+            return (*cit);
+    }
+    return NULL;
+}
+
+template<typename D>
+static df::itemdef *get_itemdef(const std::string & subtype)
+{
+    //for (auto it : D::get_vector())
+    //for (st)
+    //df::itemdef a = D::get_vector();
+    std::vector12<D*> const& dVec = D::get_vector();
+    for (std::vector12<D*>::const_iterator cit = dVec.begin(); cit != dVec.end(); ++cit)
+    {
+        //if (it->id == subtype)
+        //{
+        //    return it;
+        //}
+        if ((*cit)->id == subtype.c_str())
             return (*cit);
     }
     return NULL;
@@ -229,7 +248,7 @@ static df::itemdef *get_itemdef(color_ostream & out, df::item_type type, ST subt
     case item_type::WEAPON:
         return get_itemdef<df::itemdef_weaponst>(subtype);
     default:
-        out << COLOR_YELLOW << "Unhandled raw item type in manager order: " << enum_item_key_simple(type) << "! Please report this bug to DFHack." << std::endl;
+        out << COLOR_YELLOW << "Unhandled raw item type in manager order: " << enum_item_key_simple(type).c_str() << "! Please report this bug to DFHack." << std::endl;
         return NULL;
     }
 }
@@ -254,15 +273,15 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             Json::Value order(Json::objectValue);
 
             order["id"] = it->id;
-            order["job"] = enum_item_key_simple(it->job_type);
+            order["job"] = enum_item_key_simple(it->job_type).c_str();
             if (!it->reaction_name.empty())
             {
-                order["reaction"] = it->reaction_name;
+                order["reaction"] = it->reaction_name.c_str();
             }
 
             if (it->item_type != item_type::NONE)
             {
-                order["item_type"] = enum_item_key_simple(it->item_type);
+                order["item_type"] = enum_item_key_simple(it->item_type).c_str();
             }
             if (it->item_subtype != -1)
             {
@@ -270,7 +289,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
                 if (def)
                 {
-                    order["item_subtype"] = def->id;
+                    order["item_subtype"] = def->id.c_str();
                 }
             }
 
@@ -280,7 +299,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             }
             else if (it->mat_type != -1 || it->mat_index != -1)
             {
-                order["material"] = MaterialInfo(it).getToken();
+                order["material"] = MaterialInfo(it).getToken().c_str();
             }
 
             if (it->item_category.whole != 0)
@@ -302,7 +321,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             {
                 Json::Value art(Json::objectValue);
 
-                art["type"] = enum_item_key_simple(it->art_spec.type);
+                art["type"] = enum_item_key_simple(it->art_spec.type).c_str();
                 art["id"] = it->art_spec.id;
                 if (it->art_spec.subid != -1)
                 {
@@ -317,7 +336,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
             order["is_validated"] = bool(it->status.bits.validated);
             order["is_active"] = bool(it->status.bits.active);
 
-            order["frequency"] = enum_item_key_simple(it->frequency);
+            order["frequency"] = enum_item_key_simple(it->frequency).c_str();
 
             // TODO: finished_year, finished_year_tick
 
@@ -342,7 +361,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
                     df::manager_order_condition_item* it2 = *ci;
                     Json::Value condition(Json::objectValue);
 
-                    condition["condition"] = enum_item_key_simple(it2->compare_type);
+                    condition["condition"] = enum_item_key_simple(it2->compare_type).c_str();
                     condition["value"] = it2->compare_val;
 
                     if (it2->flags1.whole != 0 || it2->flags2.whole != 0 || it2->flags3.whole != 0)
@@ -355,7 +374,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
                     if (it2->item_type != item_type::NONE)
                     {
-                        condition["item_type"] = enum_item_key_simple(it2->item_type);
+                        condition["item_type"] = enum_item_key_simple(it2->item_type).c_str();
                     }
                     if (it2->item_subtype != -1)
                     {
@@ -363,33 +382,33 @@ static command_result orders_export_command(color_ostream & out, const std::stri
 
                         if (def)
                         {
-                            condition["item_subtype"] = def->id;
+                            condition["item_subtype"] = def->id.c_str();
                         }
                     }
 
                     if (it2->mat_type != -1 || it2->mat_index != -1)
                     {
-                        condition["material"] = MaterialInfo(it2).getToken();
+                        condition["material"] = MaterialInfo(it2).getToken().c_str();
                     }
 
                     if (it2->inorganic_bearing != -1)
                     {
-                        condition["bearing"] = df::inorganic_raw::find(it2->inorganic_bearing)->id;
+                        condition["bearing"] = df::inorganic_raw::find(it2->inorganic_bearing)->id.c_str();
                     }
 
                     if (!it2->reaction_class.empty())
                     {
-                        condition["reaction_class"] = it2->reaction_class;
+                        condition["reaction_class"] = it2->reaction_class.c_str();
                     }
 
                     if (!it2->has_material_reaction_product.empty())
                     {
-                        condition["reaction_product"] = it2->has_material_reaction_product;
+                        condition["reaction_product"] = it2->has_material_reaction_product.c_str();
                     }
 
                     if (it2->has_tool_use != tool_uses::NONE)
                     {
-                        condition["tool"] = enum_item_key_simple(it2->has_tool_use);
+                        condition["tool"] = enum_item_key_simple(it2->has_tool_use).c_str();
                     }
 
                     // TODO: anon_1, anon_2, anon_3
@@ -412,7 +431,7 @@ static command_result orders_export_command(color_ostream & out, const std::stri
                     Json::Value condition(Json::objectValue);
 
                     condition["order"] = it2->order_id;
-                    condition["condition"] = enum_item_key_simple(it2->condition);
+                    condition["condition"] = enum_item_key_simple(it2->condition).c_str();
 
                     // TODO: anon_1
 
@@ -509,7 +528,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
         //order->id = id_mapping.at(it["id"].asInt());
 
-        if (!find_enum_item(&order->job_type, it["job"].asString()))
+        if (!find_enum_item(&order->job_type, it["job"].asCString()))
         {
             delete order;
 
@@ -520,12 +539,12 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
         if (it.isMember("reaction"))
         {
-            order->reaction_name = it["reaction"].asString();
+            order->reaction_name = it["reaction"].asCString();
         }
 
         if (it.isMember("item_type"))
         {
-            if (!find_enum_item(&order->item_type, it["item_type"].asString()) || order->item_type == item_type::NONE)
+            if (!find_enum_item(&order->item_type, it["item_type"].asCString()) || order->item_type == item_type::NONE)
             {
                 delete order;
 
@@ -546,7 +565,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
             {
                 delete order;
 
-                out << COLOR_LIGHTRED << "Invalid item subtype for imported manager order: " << enum_item_key_simple(order->item_type) << ":" << it["item_subtype"].asString() << std::endl;
+                out << COLOR_LIGHTRED << "Invalid item subtype for imported manager order: " << enum_item_key_simple(order->item_type).c_str() << ":" << it["item_subtype"].asString() << std::endl;
 
                 return CR_FAILURE;
             }
@@ -560,7 +579,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
         else if (it.isMember("material"))
         {
             MaterialInfo mat;
-            if (!mat.find(it["material"].asString()))
+            if (!mat.find(it["material"].asCString()))
             {
                 delete order;
 
@@ -614,7 +633,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
         if (it.isMember("art"))
         {
-            if (!find_enum_item(&order->art_spec.type, it["art"]["type"].asString()))
+            if (!find_enum_item(&order->art_spec.type, it["art"]["type"].asCString()))
             {
                 delete order;
 
@@ -635,7 +654,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
         order->status.bits.validated = it["is_validated"].asBool();
         order->status.bits.active = it["is_active"].asBool();
 
-        if (!find_enum_item(&order->frequency, it["frequency"].asString()))
+        if (!find_enum_item(&order->frequency, it["frequency"].asCString()))
         {
             delete order;
 
@@ -674,7 +693,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
                 Json::Value& it2 = *cit;
                 df::manager_order_condition_item *condition = new df::manager_order_condition_item();
 
-                if (!find_enum_item(&condition->compare_type, it2["condition"].asString()))
+                if (!find_enum_item(&condition->compare_type, it2["condition"].asCString()))
                 {
                     delete condition;
 
@@ -704,7 +723,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
                 if (it2.isMember("item_type"))
                 {
-                    if (!find_enum_item(&condition->item_type, it2["item_type"].asString()) || condition->item_type == item_type::NONE)
+                    if (!find_enum_item(&condition->item_type, it2["item_type"].asCString()) || condition->item_type == item_type::NONE)
                     {
                         delete condition;
 
@@ -725,7 +744,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
                     {
                         delete condition;
 
-                        out << COLOR_YELLOW << "Invalid item condition item subtype for imported manager order: " << enum_item_key_simple(condition->item_type) << ":" << it2["item_subtype"].asString() << std::endl;
+                        out << COLOR_YELLOW << "Invalid item condition item subtype for imported manager order: " << enum_item_key_simple(condition->item_type).c_str() << ":" << it2["item_subtype"].asString() << std::endl;
 
                         continue;
                     }
@@ -734,7 +753,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
                 if (it2.isMember("material"))
                 {
                     MaterialInfo mat;
-                    if (!mat.find(it2["material"].asString()))
+                    if (!mat.find(it2["material"].asCString()))
                     {
                         delete condition;
 
@@ -748,7 +767,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
                 if (it2.isMember("bearing"))
                 {
-                    std::string24 bearing(it2["bearing"].asString());
+                    std::string24 bearing(it2["bearing"].asCString());
                     std::vector12<df::inorganic_raw*>::const_iterator found =
                         std::find_if(world->raws.inorganics.begin(), world->raws.inorganics.end(),
                         InorganicRawCompare(bearing));
@@ -765,17 +784,17 @@ static command_result orders_import_command(color_ostream & out, const std::stri
 
                 if (it2.isMember("reaction_class"))
                 {
-                    condition->reaction_class = it2["reaction_class"].asString();
+                    condition->reaction_class = it2["reaction_class"].asCString();
                 }
 
                 if (it2.isMember("reaction_product"))
                 {
-                    condition->has_material_reaction_product = it2["reaction_product"].asString();
+                    condition->has_material_reaction_product = it2["reaction_product"].asCString();
                 }
 
                 if (it2.isMember("tool"))
                 {
-                    if (!find_enum_item(&condition->has_tool_use, it2["tool"].asString()) || condition->has_tool_use == tool_uses::NONE)
+                    if (!find_enum_item(&condition->has_tool_use, it2["tool"].asCString()) || condition->has_tool_use == tool_uses::NONE)
                     {
                         delete condition;
 
@@ -813,7 +832,7 @@ static command_result orders_import_command(color_ostream & out, const std::stri
                 m_at = id_mapping.find(id);
                 condition->order_id = m_at != id_mapping.end() ? m_at->second : 0;
 
-                if (!find_enum_item(&condition->condition, it2["condition"].asString()))
+                if (!find_enum_item(&condition->condition, it2["condition"].asCString()))
                 {
                     delete condition;
 

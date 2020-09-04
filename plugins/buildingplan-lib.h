@@ -150,7 +150,7 @@ class ViewscreenChooseMaterial : public dfhack_viewscreen
 public:
     ViewscreenChooseMaterial(ItemFilter *filter);
 
-    void feed(set<df::interface_key> *input);
+    void feed(std::set8<df::interface_key> *input);
 
     void render();
 

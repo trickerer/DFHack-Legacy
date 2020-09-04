@@ -528,7 +528,7 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
         MaterialDefinition *mat_def = out->add_material_list();
         mat_def->mutable_mat_pair()->set_mat_type((int)it);
         mat_def->mutable_mat_pair()->set_mat_index(-1);
-        mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it));
+        mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it).c_str());
         switch (it)
         {
         case df::enums::item_type::GEM:
@@ -542,7 +542,7 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                 mat_def = out->add_material_list();
                 mat_def->mutable_mat_pair()->set_mat_type((int)it);
                 mat_def->mutable_mat_pair()->set_mat_index(i);
-                mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + shape->id);
+                mat_def->set_id((ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + shape->id).c_str());
             }
             break;
         }
@@ -554,7 +554,7 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                 mat_def = out->add_material_list();
                 mat_def->mutable_mat_pair()->set_mat_type((int)it);
                 mat_def->mutable_mat_pair()->set_mat_index(plantRaw->index);
-                mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + plantRaw->id);
+                mat_def->set_id((ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + plantRaw->id).c_str());
             }
             break;
         }
@@ -594,13 +594,13 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                 mat_def->mutable_mat_pair()->set_mat_type((int)it);
                 mat_def->mutable_mat_pair()->set_mat_index(i);
                 df::itemdef * item = Items::getSubtypeDef(it, i);
-                mat_def->set_id(ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + item->id);
+                mat_def->set_id((ENUM_KEY_STR_SIMPLE(item_type, it) + "/" + item->id).c_str());
                 switch (it)
                 {
                 case df::enums::item_type::INSTRUMENT:
                 {
                     VIRTUAL_CAST_VAR(instrument, df::itemdef_instrumentst, item);
-                    mat_def->set_name(DF2UTF(instrument->name));
+                    mat_def->set_name(DF2UTF(instrument->name).c_str());
                     ItemdefInstrument::InstrumentDef* send_instrument = mat_def->mutable_instrument();
                     ItemdefInstrument::InstrumentFlags* flags = send_instrument->mutable_flags();
                     flags->set_indefinite_pitch(instrument->flags.is_set(instrument_flags::INDEFINITE_PITCH));
@@ -618,10 +618,10 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                     for (size_t j = 0; j < instrument->pieces.size(); j++)
                     {
                         ItemdefInstrument::InstrumentPiece* piece = send_instrument->add_pieces();
-                        piece->set_type(instrument->pieces[j]->type);
-                        piece->set_id(instrument->pieces[j]->id);
-                        piece->set_name(DF2UTF(instrument->pieces[j]->name));
-                        piece->set_name_plural(DF2UTF(instrument->pieces[j]->name_plural));
+                        piece->set_type(instrument->pieces[j]->type.c_str());
+                        piece->set_id(instrument->pieces[j]->id.c_str());
+                        piece->set_name(DF2UTF(instrument->pieces[j]->name).c_str());
+                        piece->set_name_plural(DF2UTF(instrument->pieces[j]->name_plural).c_str());
                     }
                     send_instrument->set_pitch_range_min(instrument->pitch_range_min);
                     send_instrument->set_pitch_range_max(instrument->pitch_range_max);
@@ -631,11 +631,11 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                     }
                     for (size_t j = 0; j < instrument->sound_production_parm1.size(); j++)
                     {
-                        send_instrument->add_sound_production_parm1(*(instrument->sound_production_parm1[j]));
+                        send_instrument->add_sound_production_parm1((*(instrument->sound_production_parm1[j])).c_str());
                     }
                     for (size_t j = 0; j < instrument->sound_production_parm2.size(); j++)
                     {
-                        send_instrument->add_sound_production_parm2(*(instrument->sound_production_parm2[j]));
+                        send_instrument->add_sound_production_parm2((*(instrument->sound_production_parm2[j])).c_str());
                     }
                     for (size_t j = 0; j < instrument->pitch_choice.size(); j++)
                     {
@@ -643,11 +643,11 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                     }
                     for (size_t j = 0; j < instrument->pitch_choice_parm1.size(); j++)
                     {
-                        send_instrument->add_pitch_choice_parm1(*(instrument->pitch_choice_parm1[j]));
+                        send_instrument->add_pitch_choice_parm1((*(instrument->pitch_choice_parm1[j])).c_str());
                     }
                     for (size_t j = 0; j < instrument->pitch_choice_parm2.size(); j++)
                     {
-                        send_instrument->add_pitch_choice_parm2(*(instrument->pitch_choice_parm2[j]));
+                        send_instrument->add_pitch_choice_parm2((*(instrument->pitch_choice_parm2[j])).c_str());
                     }
                     for (size_t j = 0; j < instrument->tuning.size(); j++)
                     {
@@ -655,7 +655,7 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                     }
                     for (size_t j = 0; j < instrument->tuning_parm.size(); j++)
                     {
-                        send_instrument->add_tuning_parm(*(instrument->tuning_parm[j]));
+                        send_instrument->add_tuning_parm((*(instrument->tuning_parm[j])).c_str());
                     }
                     for (size_t j = 0; j < instrument->registers.size(); j++)
                     {
@@ -663,13 +663,13 @@ DFHack::command_result GetItemList(DFHack::color_ostream &stream, const DFHack::
                         reg->set_pitch_range_min(instrument->registers[j]->pitch_range_min);
                         reg->set_pitch_range_max(instrument->registers[j]->pitch_range_max);
                     }
-                    send_instrument->set_description(DF2UTF(instrument->description));
+                    send_instrument->set_description(DF2UTF(instrument->description).c_str());
                 }
                 break;
                 case df::enums::item_type::TOOL:
                 {
                     VIRTUAL_CAST_VAR(tool, df::itemdef_toolst, item);
-                    mat_def->set_name(DF2UTF(tool->name));
+                    mat_def->set_name(DF2UTF(tool->name).c_str());
                 }
                 break;
                 case df::enums::item_type::ARMOR:

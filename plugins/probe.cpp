@@ -260,9 +260,9 @@ command_result df_probe (color_ostream &out, std::vector12<std::string24> & para
     {
         out << "Layer material: " << dec << base_rock;
         if(hasmats)
-            out << " / " << inorganic[base_rock].id
+            out << " / " << inorganic[base_rock].id.c_str()
                 << " / "
-                << inorganic[base_rock].name
+                << inorganic[base_rock].name.c_str()
                 << endl;
         else
             out << endl;
@@ -272,11 +272,11 @@ command_result df_probe (color_ostream &out, std::vector12<std::string24> & para
     {
         out << "Vein material (final): " << dec << vein_rock;
         if(hasmats)
-            out << " / " << inorganic[vein_rock].id
+            out << " / " << inorganic[vein_rock].id.c_str()
                 << " / "
-                << inorganic[vein_rock].name
+                << inorganic[vein_rock].name.c_str()
                 << " ("
-                << ENUM_KEY_STR_SIMPLE(inclusion_type,b->veinTypeAt(cursor))
+                << ENUM_KEY_STR_SIMPLE(inclusion_type,b->veinTypeAt(cursor)).c_str()
                 << ")"
                 << endl;
         else
@@ -284,10 +284,10 @@ command_result df_probe (color_ostream &out, std::vector12<std::string24> & para
     }
     MaterialInfo minfo(mc.baseMaterialAt(cursor));
     if (minfo.isValid())
-        out << "Base material: " << minfo.getToken() << " / " << minfo.toString() << endl;
+        out << "Base material: " << minfo.getToken().c_str() << " / " << minfo.toString().c_str() << endl;
     minfo.decode(mc.staticMaterialAt(cursor));
     if (minfo.isValid())
-        out << "Static material: " << minfo.getToken() << " / " << minfo.toString() << endl;
+        out << "Static material: " << minfo.getToken().c_str() << " / " << minfo.toString().c_str() << endl;
     // liquids
     if(des.bits.flow_size)
     {

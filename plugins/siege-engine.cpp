@@ -1676,7 +1676,7 @@ struct projectile_hook : df::proj_itemst {
             return;
 
         lua_State* L = Lua::Core::State;
-        CoreSuspendClaimer suspend;
+        CoreSuspender suspend;
         color_ostream_proxy out(Core::getInstance().getConsole());
 
         df::unit *op_unit = getOperatorUnit(engine->bld, true);

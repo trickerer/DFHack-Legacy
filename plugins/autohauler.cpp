@@ -647,7 +647,7 @@ static void init_state()
         name << "autohauler/labors/" << i;
 
         // Add a new persistent data item as it is not currently in the save
-        labor_infos[i].set_config(World::AddPersistentData(name.str()));
+        labor_infos[i].set_config(World::AddPersistentData(name.str().c_str()));
 
         // Set the active counter to zero
         labor_infos[i].active_dwarfs = 0;
@@ -1025,7 +1025,7 @@ DFhackCExport command_result plugin_enable ( color_ostream &out, bool enable )
 void print_labor (df::unit_labor labor, color_ostream &out)
 {
     std::string24 labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
-    out << labor_name << ": ";
+    out << labor_name.c_str() << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
     if (labor_infos[labor].mode() == ALLOW) out << "allow" << endl;

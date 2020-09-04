@@ -41,7 +41,7 @@ void OrganicMatLookup::food_mat_by_idx ( std::ostream &out, organic_mat_category
     else
     {
         food_mat.material.decode ( type, main_idx );
-        out << " type(" << type << ") index("<< main_idx <<") token(" << food_mat.material.getToken() <<  ")" << endl;
+        out << " type(" << type << ") index("<< main_idx <<") token(" << food_mat.material.getToken().c_str() <<  ")" << endl;
     }
 }
 std::string24 OrganicMatLookup::food_token_by_idx ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, std::vector12<int16_t>::size_type idx )
@@ -98,14 +98,14 @@ int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_cat
         split_string ( &tokens, token, ":" );
         if ( tokens.size() != 2 )
         {
-            out << "creature " << "invalid CREATURE:CASTE token: " << token << endl;
+            out << "creature " << "invalid CREATURE:CASTE token: " << token.c_str() << endl;
         }
         else
         {
             int16_t creature_idx = find_creature ( tokens[0] );
             if ( creature_idx < 0 )
             {
-                out << " creature invalid token " << tokens[0];
+                out << " creature invalid token " << tokens[0].c_str();
             }
             else
             {
@@ -113,10 +113,10 @@ int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_cat
                 if ( tokens[1] ==  "MALE" )
                     food_idx +=  1;
                 if ( table.organic_types[mat_category][food_idx] ==  creature_idx )
-                    out << "creature " << token << " caste " <<  tokens[1] <<  " creature_idx(" << creature_idx << ") food_idx("<< food_idx << ")" << endl;
+                    out << "creature " << token.c_str() << " caste " <<  tokens[1].c_str() <<  " creature_idx(" << creature_idx << ") food_idx("<< food_idx << ")" << endl;
                 else
                 {
-                    out << "ERROR creature caste not found: " << token << " caste " <<  tokens[1] <<  " creature_idx(" << creature_idx << ") food_idx("<< food_idx << ")" << endl;
+                    out << "ERROR creature caste not found: " << token.c_str() << " caste " <<  tokens[1].c_str() <<  " creature_idx(" << creature_idx << ") food_idx("<< food_idx << ")" << endl;
                     food_idx = -1;
                 }
             }
@@ -133,12 +133,12 @@ int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_cat
         FoodMatMap::const_iterator it = food_index[mat_category].find ( std::make_pair ( type, index ) );
         if ( it != food_index[mat_category].end() )
         {
-            out << "matinfo: " << token << " type(" << mat_info.type << ") idx("  << mat_info.index << ") food_idx(" << it->second << ")" << endl;
+            out << "matinfo: " << token.c_str() << " type(" << mat_info.type << ") idx("  << mat_info.index << ") food_idx(" << it->second << ")" << endl;
             food_idx = it->second;
         }
         else
         {
-            out << "matinfo: " << token << " type(" << mat_info.type << ") idx("  << mat_info.index << ") food_idx not found :(" <<  endl;
+            out << "matinfo: " << token.c_str() << " type(" << mat_info.type << ") idx("  << mat_info.index << ") food_idx not found :(" <<  endl;
         }
     }
     return food_idx;

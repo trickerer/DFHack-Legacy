@@ -136,7 +136,7 @@ std::string24 get_tile_build(uint32_t x, uint32_t y, df::building* b)
         if(!at_nw_corner)
             return "`";
         out << "p(" << size.first << "x" << size.second << ")";
-        return out.str();
+        return out.str().c_str();
     case building_type::Weaponrack:
         return "r";
     case building_type::Statue:
@@ -147,12 +147,12 @@ std::string24 get_tile_build(uint32_t x, uint32_t y, df::building* b)
         if(! at_nw_corner)
             return "`";
         out << "o(" << size.first << "x" << size.second << ")";
-        return out.str();
+        return out.str().c_str();
     case building_type::RoadDirt:
         if(! at_nw_corner)
             return "`";
         out << "O(" << size.first << "x" << size.second << ")";
-        return out.str();
+        return out.str().c_str();
     case building_type::Bridge:
         if(! at_nw_corner)
             return "`";
@@ -175,7 +175,7 @@ std::string24 get_tile_build(uint32_t x, uint32_t y, df::building* b)
             break;
         }
         out << "(" << size.first << "x" << size.second << ")";
-        return out.str();
+        return out.str().c_str();
     case building_type::Well:
         return "l";
     case building_type::SiegeEngine:
@@ -403,7 +403,7 @@ std::string24 get_tile_build(uint32_t x, uint32_t y, df::building* b)
             case 10000:
                 out << "a";
             }
-            return out.str();
+            return out.str().c_str();
         }
     case building_type::ScrewPump:
         if (! at_se_corner) //screw pumps anchor at bottom/right
@@ -436,7 +436,7 @@ std::string24 get_tile_build(uint32_t x, uint32_t y, df::building* b)
         //same as water wheel but reversed
         out << "Mh" << (((df::building_axle_horizontalst*) b)->is_vertical ? "s" : "")
             << "(" << size.first << "x" << size.second << ")";
-        return out.str();
+        return out.str().c_str();
     case building_type::AxleVertical:
         return "Mv";
     case building_type::Rollers:
@@ -455,7 +455,7 @@ std::string24 get_tile_build(uint32_t x, uint32_t y, df::building* b)
             out << "s";
         }
         out << "(" << size.first << "x" << size.second << ")";
-        return out.str();
+        return out.str().c_str();
     case building_type::Support:
         return "S";
     case building_type::ArcheryTarget:
@@ -550,7 +550,7 @@ std::string24 get_tile_place(uint32_t x, uint32_t y, df::building* b)
         return "`";
     }
     out << "("<< size.first << "x" << size.second << ")";
-    return out.str();
+    return out.str().c_str();
 }
 
 std::string24 get_tile_query(df::building* b)
@@ -563,9 +563,9 @@ std::string24 get_tile_query(df::building* b)
 void init_stream(ofstream &out, std::string24 basename, std::string24 target)
 {
     std::ostringstream out_path;
-    out_path << basename << "-" << target << ".csv";
+    out_path << basename.c_str() << "-" << target.c_str() << ".csv";
     out.open(out_path.str().c_str(), ofstream::trunc);
-    out << "#" << target << endl;
+    out << "#" << target.c_str() << endl;
 }
 
 command_result do_transform(DFCoord start, DFCoord end, std::string24 name, uint32_t phases, std::ostringstream &err)
@@ -586,7 +586,7 @@ command_result do_transform(DFCoord start, DFCoord end, std::string24 name, uint
     //std::error_code ec;
     if (!Filesystem::mkdir_recursive(parent_path))
     {
-        err << "could not create output directory: '" << parent_path << "'";
+        err << "could not create output directory: '" << parent_path.c_str() << "'";
         return CR_FAILURE;
     }
 
@@ -638,11 +638,11 @@ command_result do_transform(DFCoord start, DFCoord end, std::string24 name, uint
             {
                 df::building* b = DFHack::Buildings::findAtTile(DFCoord(x, y, z));
                 if (phases & QUERY)
-                    query << get_tile_query(b) << ',';
+                    query << get_tile_query(b).c_str() << ',';
                 if (phases & PLACE)
-                    place << get_tile_place(x, y, b) << ',';
+                    place << get_tile_place(x, y, b).c_str() << ',';
                 if (phases & BUILD)
-                    build << get_tile_build(x, y, b) << ',';
+                    build << get_tile_build(x, y, b).c_str() << ',';
                 if (phases & DIG)
                     dig << get_tile_dig(mc, x, y, z) << ',';
             }

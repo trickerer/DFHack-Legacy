@@ -198,7 +198,7 @@ static command_result GetEmbarkInfo(color_ostream &stream, const MapRequest *in,
         return CR_OK;
     }
     if (in->has_save_folder()) { //If no save folder is given, it means we don't care.
-        if (!(in->save_folder() == world->cur_savegame.save_dir || in->save_folder() == "ANY")) { //isoworld has a different map loaded, don't bother trying to load tiles for it, we don't have them.
+        if (!(in->save_folder() == world->cur_savegame.save_dir.c_str() || in->save_folder() == "ANY")) { //isoworld has a different map loaded, don't bother trying to load tiles for it, we don't have them.
             out->set_available(false);
             return CR_OK;
         }
@@ -345,18 +345,18 @@ static command_result GetRawNames(color_ostream &stream, const MapRequest *in, R
         return CR_OK;
     }
     if (in->has_save_folder()) { //If no save folder is given, it means we don't care.
-        if (!(in->save_folder() == world->cur_savegame.save_dir || in->save_folder() == "ANY")) { //isoworld has a different map loaded, don't bother trying to load tiles for it, we don't have them.
+        if (!(in->save_folder() == world->cur_savegame.save_dir.c_str() || in->save_folder() == "ANY")) { //isoworld has a different map loaded, don't bother trying to load tiles for it, we don't have them.
             out->set_available(false);
             return CR_OK;
         }
     }
     out->set_available(true);
     for(size_t i = 0; i < world->raws.inorganics.size(); i++){
-        out->add_inorganic(world->raws.inorganics[i]->id);
+        out->add_inorganic(world->raws.inorganics[i]->id.c_str());
     }
 
     for(size_t i = 0; i < world->raws.plants.all.size(); i++){
-        out->add_organic(world->raws.plants.all[i]->id);
+        out->add_organic(world->raws.plants.all[i]->id.c_str());
     }
     return CR_OK;
 }

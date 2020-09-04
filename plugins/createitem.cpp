@@ -243,7 +243,7 @@ command_result df_createitem (color_ostream &out, std::vector12<std::string24> &
 
     if (parameters.size() == 3)
     {
-        stringstream ss(parameters[2]);
+        stringstream ss(parameters[2].c_str());
         ss >> count;
         if (count < 1)
         {

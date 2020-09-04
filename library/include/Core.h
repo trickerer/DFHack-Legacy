@@ -463,6 +463,6 @@ namespace DFHack
         ~CoreSuspendClaimMain();
     };
 
-    //using CoreSuspendClaimer = CoreSuspender;
-    //typedef CoreSuspender CoreSuspendClaimer;
+    //using CoreSuspenderClaimer = CoreSuspender;
+    //typedef CoreSuspender CoreSuspenderClaimer;
 }

@@ -226,7 +226,7 @@ public:
     FuncReadImport(dfstockpiles::StockpileSettings* _buf, IEDataType _cat) : buf(_buf), cat(_cat) {}
     FuncReadImport() : buf(NULL), cat(ITEM_C_MEAT) {} //validity checked in food_pair()
 
-    std::string24 operator()(const size_t& idx) const;
+    std::string operator()(const size_t& idx) const;
 
 private:
     dfstockpiles::StockpileSettings* buf;
@@ -238,7 +238,7 @@ public:
     FuncWriteExport(dfstockpiles::StockpileSettings* _buf, IEDataType _cat) : buf(_buf), cat(_cat) {}
     FuncWriteExport() : buf(NULL), cat(ITEM_C_MEAT) {} //validity checked in food_pair()
 
-    void operator()(const std::string24 &id);
+    void operator()(const std::string &id);
 
 private:
     dfstockpiles::StockpileSettings* buf;

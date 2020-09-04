@@ -815,8 +815,8 @@ static command_result GetMaterialList(color_ostream &stream, const EmptyMessage 
         MaterialDefinition *mat_def = out->add_material_list();
         mat_def->mutable_mat_pair()->set_mat_type(0);
         mat_def->mutable_mat_pair()->set_mat_index(i);
-        mat_def->set_id(mat.getToken());
-        mat_def->set_name(mat.toString()); //find the name at cave temperature;
+        mat_def->set_id(mat.getToken().c_str());
+        mat_def->set_name(mat.toString().c_str()); //find the name at cave temperature;
         if (size_t(raws->inorganics[i]->material.state_color[GetState(&raws->inorganics[i]->material)]) < raws->descriptors.colors.size())
         {
             ConvertDFColorDescriptor(raws->inorganics[i]->material.state_color[GetState(&raws->inorganics[i]->material)], mat_def->mutable_state_color());
@@ -833,8 +833,8 @@ static command_result GetMaterialList(color_ostream &stream, const EmptyMessage 
             MaterialDefinition *mat_def = out->add_material_list();
             mat_def->mutable_mat_pair()->set_mat_type(i);
             mat_def->mutable_mat_pair()->set_mat_index(j);
-            mat_def->set_id(mat.getToken());
-            mat_def->set_name(mat.toString()); //find the name at cave temperature;
+            mat_def->set_id(mat.getToken().c_str());
+            mat_def->set_name(mat.toString().c_str()); //find the name at cave temperature;
             if (size_t(raws->mat_table.builtin[i]->state_color[GetState(raws->mat_table.builtin[i])]) < raws->descriptors.colors.size())
             {
                 ConvertDFColorDescriptor(raws->mat_table.builtin[i]->state_color[GetState(raws->mat_table.builtin[i])], mat_def->mutable_state_color());
@@ -850,8 +850,8 @@ static command_result GetMaterialList(color_ostream &stream, const EmptyMessage 
             MaterialDefinition *mat_def = out->add_material_list();
             mat_def->mutable_mat_pair()->set_mat_type(j + 19);
             mat_def->mutable_mat_pair()->set_mat_index(i);
-            mat_def->set_id(mat.getToken());
-            mat_def->set_name(mat.toString()); //find the name at cave temperature;
+            mat_def->set_id(mat.getToken().c_str());
+            mat_def->set_name(mat.toString().c_str()); //find the name at cave temperature;
             if (size_t(creature->material[j]->state_color[GetState(creature->material[j])]) < raws->descriptors.colors.size())
             {
                 ConvertDFColorDescriptor(creature->material[j]->state_color[GetState(creature->material[j])], mat_def->mutable_state_color());
@@ -892,8 +892,8 @@ static command_result GetMaterialList(color_ostream &stream, const EmptyMessage 
             MaterialDefinition *mat_def = out->add_material_list();
             mat_def->mutable_mat_pair()->set_mat_type(j + 419);
             mat_def->mutable_mat_pair()->set_mat_index(i);
-            mat_def->set_id(mat.getToken());
-            mat_def->set_name(mat.toString()); //find the name at cave temperature;
+            mat_def->set_id(mat.getToken().c_str());
+            mat_def->set_name(mat.toString().c_str()); //find the name at cave temperature;
             if (size_t(plant->material[j]->state_color[GetState(plant->material[j])]) < raws->descriptors.colors.size())
             {
                 ConvertDFColorDescriptor(plant->material[j]->state_color[GetState(plant->material[j])], mat_def->mutable_state_color());
@@ -923,8 +923,8 @@ static command_result GetGrowthList(color_ostream &stream, const EmptyMessage *i
         if (!pp)
             continue;
         MaterialDefinition * basePlant = out->add_material_list();
-        basePlant->set_id(pp->id + ":BASE");
-        basePlant->set_name(pp->name);
+        basePlant->set_id((pp->id + ":BASE").c_str());
+        basePlant->set_name(pp->name.c_str());
         basePlant->mutable_mat_pair()->set_mat_type(-1);
         basePlant->mutable_mat_pair()->set_mat_index(i);
 #if DF_VERSION_INT > 40001
@@ -936,8 +936,8 @@ static command_result GetGrowthList(color_ostream &stream, const EmptyMessage *i
             for (int l = 0; l < GROWTH_LOCATIONS_SIZE; l++)
             {
                 MaterialDefinition * out_growth = out->add_material_list();
-                out_growth->set_id(pp->id + ":" + growth->id + +":" + growth_locations[l]);
-                out_growth->set_name(growth->name);
+                out_growth->set_id((pp->id + ":" + growth->id + ":" + growth_locations[l]).c_str());
+                out_growth->set_name(growth->name.c_str());
                 out_growth->mutable_mat_pair()->set_mat_type(g * 10 + l);
                 out_growth->mutable_mat_pair()->set_mat_index(i);
             }
@@ -1582,7 +1582,7 @@ static command_result GetTiletypeList(color_ostream &stream, const EmptyMessage 
     {
         Tiletype * type = out->add_tiletype_list();
         type->set_id(tt);
-        type->set_name(ENUM_KEY_STR_SIMPLE(tiletype, tt));
+        type->set_name(ENUM_KEY_STR_SIMPLE(tiletype, tt).c_str());
         const char * name = tileName(tt);
         if (name != NULL && name[0] != 0)
             type->set_caption(name);
@@ -1711,7 +1711,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
         size_info->set_length_base(unit->body.size_info.length_base);
         if (unit->name.has_name)
         {
-            send_unit->set_name(DF2UTF(Translation::TranslateName(Units::getVisibleName(unit))));
+            send_unit->set_name(DF2UTF(Translation::TranslateName(Units::getVisibleName(unit))).c_str());
         }
 
         RemoteFortressReader::UnitAppearance* appearance = send_unit->mutable_appearance();
@@ -1723,7 +1723,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
             appearance->add_colors(unit->appearance.colors[j]);
         appearance->set_size_modifier(unit->appearance.size_modifier);
 
-        appearance->set_physical_description(Units::getPhysicalDescription(unit));
+        appearance->set_physical_description(Units::getPhysicalDescription(unit).c_str());
 
         send_unit->set_profession_id(unit->profession);
 
@@ -1734,7 +1734,7 @@ static command_result GetUnitListInside(color_ostream &stream, const BlockReques
             for (size_t j = 0; j < pvec.size(); j++)
             {
                 Units::NoblePosition noble_positon = pvec[j];
-                send_unit->add_noble_positions(noble_positon.position->code);
+                send_unit->add_noble_positions(noble_positon.position->code.c_str());
             }
         }
 
@@ -1905,9 +1905,9 @@ static command_result GetMapInfo(color_ostream &stream, const EmptyMessage *in, 
     out->set_block_pos_x(pos_x);
     out->set_block_pos_y(pos_y);
     out->set_block_pos_z(pos_z);
-    out->set_world_name(DF2UTF(Translation::TranslateName(&df::global::world->world_data->name, false)));
-    out->set_world_name_english(DF2UTF(Translation::TranslateName(&df::global::world->world_data->name, true)));
-    out->set_save_name(df::global::world->cur_savegame.save_dir);
+    out->set_world_name(DF2UTF(Translation::TranslateName(&df::global::world->world_data->name, false)).c_str());
+    out->set_world_name_english(DF2UTF(Translation::TranslateName(&df::global::world->world_data->name, true)).c_str());
+    out->set_save_name(df::global::world->cur_savegame.save_dir.c_str());
     return CR_OK;
 }
 
@@ -1969,8 +1969,8 @@ static command_result GetWorldMapCenter(color_ostream &stream, const EmptyMessag
     out->set_center_x(pos.x);
     out->set_center_y(pos.y);
     out->set_center_z(pos.z);
-    out->set_name(Translation::TranslateName(&(data->name), false));
-    out->set_name_english(Translation::TranslateName(&(data->name), true));
+    out->set_name(Translation::TranslateName(&(data->name), false).c_str());
+    out->set_name_english(Translation::TranslateName(&(data->name), true).c_str());
     out->set_cur_year(World::ReadCurrentYear());
     out->set_cur_year_tick(World::ReadCurrentTick());
     return CR_OK;
@@ -1995,8 +1995,8 @@ static command_result GetWorldMap(color_ostream &stream, const EmptyMessage *in,
     int height = data->world_height;
     out->set_world_width(width);
     out->set_world_height(height);
-    out->set_name(Translation::TranslateName(&(data->name), false));
-    out->set_name_english(Translation::TranslateName(&(data->name), true));
+    out->set_name(Translation::TranslateName(&(data->name), false).c_str());
+    out->set_name_english(Translation::TranslateName(&(data->name), true).c_str());
     df::world_data::T_flip_latitude poles = data->flip_latitude;
 #if DF_VERSION_INT > 34011
     switch (poles)
@@ -2144,8 +2144,8 @@ static command_result GetWorldMapNew(color_ostream &stream, const EmptyMessage *
     int height = data->world_height;
     out->set_world_width(width);
     out->set_world_height(height);
-    out->set_name(Translation::TranslateName(&(data->name), false));
-    out->set_name_english(Translation::TranslateName(&(data->name), true));
+    out->set_name(Translation::TranslateName(&(data->name), false).c_str());
+    out->set_name_english(Translation::TranslateName(&(data->name), true).c_str());
 #if DF_VERSION_INT > 34011
     df::world_data::T_flip_latitude poles = data->flip_latitude;
     switch (poles)
@@ -2649,16 +2649,16 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
         RemoteFortressReader::CreatureRaw* send_creature = out->add_creature_raws();
 
         send_creature->set_index(i);
-        send_creature->set_creature_id(orig_creature->creature_id);
-        send_creature->add_name(orig_creature->name[0]);
-        send_creature->add_name(orig_creature->name[1]);
-        send_creature->add_name(orig_creature->name[2]);
+        send_creature->set_creature_id(orig_creature->creature_id.c_str());
+        send_creature->add_name(orig_creature->name[0].c_str());
+        send_creature->add_name(orig_creature->name[1].c_str());
+        send_creature->add_name(orig_creature->name[2].c_str());
 
-        send_creature->add_general_baby_name(orig_creature->general_baby_name[0]);
-        send_creature->add_general_baby_name(orig_creature->general_baby_name[1]);
+        send_creature->add_general_baby_name(orig_creature->general_baby_name[0].c_str());
+        send_creature->add_general_baby_name(orig_creature->general_baby_name[1].c_str());
 
-        send_creature->add_general_child_name(orig_creature->general_child_name[0]);
-        send_creature->add_general_child_name(orig_creature->general_child_name[1]);
+        send_creature->add_general_child_name(orig_creature->general_child_name[0].c_str());
+        send_creature->add_general_child_name(orig_creature->general_child_name[1].c_str());
 
         send_creature->set_creature_tile(orig_creature->creature_tile);
         send_creature->set_creature_soldier_tile(orig_creature->creature_soldier_tile);
@@ -2676,17 +2676,17 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
 
             send_caste->set_index(j);
 
-            send_caste->set_caste_id(orig_caste->caste_id);
+            send_caste->set_caste_id(orig_caste->caste_id.c_str());
 
-            send_caste->add_caste_name(orig_caste->caste_name[0]);
-            send_caste->add_caste_name(orig_caste->caste_name[1]);
-            send_caste->add_caste_name(orig_caste->caste_name[2]);
+            send_caste->add_caste_name(orig_caste->caste_name[0].c_str());
+            send_caste->add_caste_name(orig_caste->caste_name[1].c_str());
+            send_caste->add_caste_name(orig_caste->caste_name[2].c_str());
 
-            send_caste->add_baby_name(orig_caste->baby_name[0]);
-            send_caste->add_baby_name(orig_caste->baby_name[1]);
+            send_caste->add_baby_name(orig_caste->baby_name[0].c_str());
+            send_caste->add_baby_name(orig_caste->baby_name[1].c_str());
 
-            send_caste->add_child_name(orig_caste->child_name[0]);
-            send_caste->add_child_name(orig_caste->child_name[1]);
+            send_caste->add_child_name(orig_caste->child_name[0].c_str());
+            send_caste->add_child_name(orig_caste->child_name[1].c_str());
             send_caste->set_gender(orig_caste->sex);
 
             for (size_t partIndex = 0; partIndex < orig_caste->body_info.body_parts.size(); partIndex++)
@@ -2696,8 +2696,8 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
                     continue;
                 RemoteFortressReader::BodyPartRaw* send_part = send_caste->add_body_parts();
 
-                send_part->set_token(orig_part->token);
-                send_part->set_category(orig_part->category);
+                send_part->set_token(orig_part->token.c_str());
+                send_part->set_category(orig_part->category.c_str());
                 send_part->set_parent(orig_part->con_part_id);
 
                 for (int partFlagIndex = 0; partFlagIndex <= ENUM_LAST_ITEM(body_part_raw_flags); partFlagIndex++)
@@ -2712,7 +2712,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
                         continue;
                     RemoteFortressReader::BodyPartLayerRaw* send_layer = send_part->add_layers();
 
-                    send_layer->set_layer_name(orig_layer->layer_name);
+                    send_layer->set_layer_name(orig_layer->layer_name.c_str());
                     send_layer->set_tissue_id(orig_layer->tissue_id);
                     send_layer->set_layer_depth(orig_layer->layer_depth);
                     for (size_t layerModIndex = 0; layerModIndex < orig_layer->bp_modifiers.size(); layerModIndex++)
@@ -2730,7 +2730,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
             {
                 RemoteFortressReader::BpAppearanceModifier* send_mod = send_caste->add_modifiers();
                 df::bp_appearance_modifier* orig_mod = orig_caste->bp_appearance.modifiers[k];
-                send_mod->set_type(ENUM_KEY_STR_SIMPLE(appearance_modifier_type, orig_mod->type));
+                send_mod->set_type(ENUM_KEY_STR_SIMPLE(appearance_modifier_type, orig_mod->type).c_str());
 
 #if DF_VERSION_INT > 34011
                 if (orig_mod->growth_rate > 0)
@@ -2757,7 +2757,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
                 RemoteFortressReader::BpAppearanceModifier* send_mod = send_caste->add_body_appearance_modifiers();
                 df::body_appearance_modifier* orig_mod = orig_caste->body_appearance_modifiers[k];
 
-                send_mod->set_type(ENUM_KEY_STR_SIMPLE(appearance_modifier_type, orig_mod->type));
+                send_mod->set_type(ENUM_KEY_STR_SIMPLE(appearance_modifier_type, orig_mod->type).c_str());
 
 #if DF_VERSION_INT > 34011
                 if (orig_mod->growth_rate > 0)
@@ -2791,7 +2791,7 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
                         send_color->set_blue(orig_color->blue * 255.0);
                     }
 
-                    send_pattern->set_id(orig_pattern->id);
+                    send_pattern->set_id(orig_pattern->id.c_str());
                     send_pattern->set_pattern((PatternType)orig_pattern->pattern);
                 }
 
@@ -2801,11 +2801,11 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
                     send_mod->add_tissue_layer_id(orig_mod->tissue_layer_id[l]);
                     send_mod->set_start_date(orig_mod->start_date);
                     send_mod->set_end_date(orig_mod->end_date);
-                    send_mod->set_part(orig_mod->part);
+                    send_mod->set_part(orig_mod->part.c_str());
                 }
             }
 
-            send_caste->set_description(orig_caste->description);
+            send_caste->set_description(orig_caste->description.c_str());
             send_caste->set_adult_size(orig_caste->misc.adult_size);
         }
 
@@ -2814,9 +2814,9 @@ static command_result GetPartialCreatureRaws(color_ostream &stream, const ListRe
             df::tissue* orig_tissue = orig_creature->tissue[j];
             RemoteFortressReader::TissueRaw* send_tissue = send_creature->add_tissues();
 
-            send_tissue->set_id(orig_tissue->id);
-            send_tissue->set_name(orig_tissue->tissue_name_singular);
-            send_tissue->set_subordinate_to_tissue(orig_tissue->subordinate_to_tissue);
+            send_tissue->set_id(orig_tissue->id.c_str());
+            send_tissue->set_name(orig_tissue->tissue_name_singular.c_str());
+            send_tissue->set_subordinate_to_tissue(orig_tissue->subordinate_to_tissue.c_str());
 
             CopyMat(send_tissue->mutable_material(), orig_tissue->mat_type, orig_tissue->mat_index);
         }
@@ -2848,8 +2848,8 @@ static command_result GetPartialPlantRaws(color_ostream &stream, const ListReque
         PlantRaw* plant_remote = out->add_plant_raws();
 
         plant_remote->set_index(i);
-        plant_remote->set_id(plant_local->id);
-        plant_remote->set_name(plant_local->name);
+        plant_remote->set_id(plant_local->id.c_str());
+        plant_remote->set_name(plant_local->name.c_str());
         if (!plant_local->flags.is_set(df::plant_raw_flags::TREE))
             plant_remote->set_tile(plant_local->tiles.shrub_tile);
         else
@@ -2860,8 +2860,8 @@ static command_result GetPartialPlantRaws(color_ostream &stream, const ListReque
             df::plant_growth* growth_local = plant_local->growths[j];
             TreeGrowth * growth_remote = plant_remote->add_growths();
             growth_remote->set_index(j);
-            growth_remote->set_id(growth_local->id);
-            growth_remote->set_name(growth_local->name);
+            growth_remote->set_id(growth_local->id.c_str());
+            growth_remote->set_name(growth_local->name.c_str());
             for (size_t k = 0; k < growth_local->prints.size(); k++)
             {
                 df::plant_growth_print* print_local = growth_local->prints[k];
@@ -2981,7 +2981,7 @@ static command_result GetReports(color_ostream & stream, const EmptyMessage * in
             continue;
         RemoteFortressReader::Report* send_rep = out->add_reports();
         send_rep->set_type(local_rep->type);
-        send_rep->set_text(DF2UTF(local_rep->text));
+        send_rep->set_text(DF2UTF(local_rep->text).c_str());
         ConvertDfColor(local_rep->color | (local_rep->bright ? 8 : 0), send_rep->mutable_color());
         send_rep->set_duration(local_rep->duration);
         send_rep->set_continuation(local_rep->flags.bits.continuation);
@@ -3006,7 +3006,7 @@ static command_result GetLanguage(color_ostream & stream, const EmptyMessage * i
     {
         df::descriptor_shape* shape = world->raws.descriptors.shapes[i];
         RemoteFortressReader::ShapeDescriptior* netShape = out->add_shapes();
-        netShape->set_id(shape->id);
+        netShape->set_id(shape->id.c_str());
         netShape->set_tile(shape->tile);
     }
     return CR_OK;

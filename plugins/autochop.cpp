@@ -99,7 +99,7 @@ public:
             append_started = true;
         }
 
-        return burrow_ids.str();
+        return burrow_ids.str().c_str();
     }
 
     void clear()
@@ -118,7 +118,7 @@ public:
 
     void add(const std::string24 burrow_ids)
     {
-        istringstream iss(burrow_ids);
+        istringstream iss(burrow_ids.c_str());
         int id;
         while (iss >> id)
         {

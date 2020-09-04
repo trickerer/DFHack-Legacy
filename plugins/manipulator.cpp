@@ -332,7 +332,7 @@ std::string24 itos (int n)
 {
     stringstream ss;
     ss << n;
-    return ss.str();
+    return ss.str().c_str();
 }
 
 bool descending;
@@ -682,7 +682,7 @@ struct ProfessionTemplate
 
     bool load(std::string24 directory, std::string24 file)
     {
-        cerr << "Attempt to load " << file << endl;
+        cerr << "Attempt to load " << file.c_str() << endl;
         std::string24 fullPath = directory;
         fullPath += "/" + file;
         std::ifstream infile(fullPath.c_str());
@@ -690,14 +690,14 @@ struct ProfessionTemplate
             return false;
         }
 
-        std::string24 line;
+        std::string line;
         name = file; // If no name is given we default to the filename
         mask = false;
         while (std::getline(infile, line)) {
-            if (strcmp(line.substr(0,5).c_str(),"NAME ")==0)
+            if (strcmp(line.substr(0,5).c_str(),"NAME ") == 0)
             {
-                std::string24::size_type nextInd = line.find(' ');
-                name = line.substr(nextInd + 1);
+                std::string::size_type nextInd = line.find(' ');
+                name = line.substr(nextInd + 1).c_str();
                 continue;
             }
             if (line == "MASK")
@@ -708,7 +708,7 @@ struct ProfessionTemplate
 
             for (size_t i = 0; i < NUM_COLUMNS; i++)
             {
-                if (line == ENUM_KEY_STR_SIMPLE(unit_labor, columns[i].labor))
+                if (line.c_str() == ENUM_KEY_STR_SIMPLE(unit_labor, columns[i].labor))
                 {
                     labors.push_back(columns[i].labor);
                 }
@@ -725,7 +725,7 @@ struct ProfessionTemplate
         if (outfile.bad())
             return false;
 
-        outfile << "NAME " << name << std::endl;
+        outfile << "NAME " << name.c_str() << std::endl;
         if (mask)
             outfile << "MASK" << std::endl;
 
@@ -733,7 +733,7 @@ struct ProfessionTemplate
         {
             if (hasLabor(columns[i].labor))
             {
-                outfile << ENUM_KEY_STR_SIMPLE(unit_labor, columns[i].labor) << std::endl;
+                outfile << ENUM_KEY_STR_SIMPLE(unit_labor, columns[i].labor).c_str() << std::endl;
             }
         }
 
@@ -794,7 +794,7 @@ public:
         cerr << "Attempting to load professions: " << professions_folder.c_str() << endl;
         if (!Filesystem::isdir(professions_folder) && !Filesystem::mkdir(professions_folder))
         {
-            cerr << professions_folder << ": Does not exist and cannot be created" << endl;
+            cerr << professions_folder.c_str() << ": Does not exist and cannot be created" << endl;
             return;
         }
         Filesystem::listdir(professions_folder, files);

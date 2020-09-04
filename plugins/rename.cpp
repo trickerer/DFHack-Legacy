@@ -282,9 +282,9 @@ static command_result RenameSquad(color_ostream &stream, const RenameSquadIn *in
         return CR_NOT_FOUND;
 
     if (in->has_nickname())
-        Translation::setNickname(&squad->name, UTF2DF(in->nickname()));
+        Translation::setNickname(&squad->name, UTF2DF(in->nickname().c_str()));
     if (in->has_alias())
-        squad->alias = UTF2DF(in->alias());
+        squad->alias = UTF2DF(in->alias().c_str());
 
     return CR_OK;
 }
@@ -296,9 +296,9 @@ static command_result RenameUnit(color_ostream &stream, const RenameUnitIn *in)
         return CR_NOT_FOUND;
 
     if (in->has_nickname())
-        Units::setNickname(unit, UTF2DF(in->nickname()));
+        Units::setNickname(unit, UTF2DF(in->nickname().c_str()));
     if (in->has_profession())
-        unit->custom_profession = UTF2DF(in->profession());
+        unit->custom_profession = UTF2DF(in->profession().c_str());
 
     return CR_OK;
 }
@@ -311,7 +311,7 @@ static command_result RenameBuilding(color_ostream &stream, const RenameBuilding
 
     if (in->has_name())
     {
-        if (!renameBuilding(building, in->name()))
+        if (!renameBuilding(building, in->name().c_str()))
             return CR_FAILURE;
     }
 

@@ -97,58 +97,6 @@ using namespace df::enums;
 using df::global::init;
 using df::global::world;
 
-// FIXME:
-//#ifdef  __cplusplus
-//extern "C" {
-//_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
-//}
-//#else
-//_CRTIMP void __cdecl _wassert(_In_z_ const wchar_t * _Message, _In_z_ const wchar_t *_File, _In_ unsigned _Line);
-//#endif
-//
-//#undef Assert_Type
-//#define Assert_Type(_Expression) (void)( (!!(_Expression)) || (_wassert(_CRT_WIDE(#_Expression), _CRT_WIDE(__FILE__), __LINE__), 0) )
-//
-//void checkString24() {
-//    if (!(sizeof(std::string24) == 24)) {
-//        std::cerr << "\nType assertion fail: string24";
-//        Assert_Type(false);
-//    }
-//}
-//void checkVector12() {
-//    if (!(sizeof(std::vector12<int>) == 12)) {
-//        std::cerr << "\nType assertion fail: vector12<int>";
-//        Assert_Type(false);
-//    }
-//}
-//void checkVector12Bool() {
-//    if (!(sizeof(std::vector12<bool>) == 16)) {
-//        std::cerr << "\nType assertion fail: vector12<bool>";
-//        Assert_Type(false);
-//    }
-//}
-//void checkDeque20() {
-//    if (!(sizeof(std::deque20<int>) == 20)) {
-//        std::cerr << "\nType assertion fail: std::deque20<int>";
-//        Assert_Type(false);
-//    }
-//}
-//void checkFstream() {
-//    if (!(sizeof(fstream_empty) == 144)) {
-//        std::cerr << "\nType assertion fail: fstream_empty";
-//        Assert_Type(false);
-//    }
-//}
-//
-//void CheckCountedTypes()
-//{
-//    checkString24();
-//    checkVector12();
-//    checkVector12Bool();
-//    checkDeque20();
-//    checkFstream();
-//}
-
 // FIXME: A lot of code in one file, all doing different things... there's something fishy about it.
 
 static bool parseKeySpec(std::string24 keyspec, int *psym, int *pmod, std::string24 *pfocus = NULL);
@@ -167,8 +115,8 @@ public:
         tthread::lock_guard<tthread::mutex> suspender_creation_lock(suspender_creation_mutex);
         if (threadLockHolders[this_thread_id] == NULL)
         {
-            Core::getInstance().getConsole().
-                printerr("\nCoreSuspenderBase& suspend(): ctor for thread %u\n", this_thread_id);
+            Core::getInstance().getConsole().printerr
+                ("CoreSuspenderBase& suspend(): ctor for thread %u\n", this_thread_id);
             threadLockHolders[this_thread_id] = new CoreSuspenderBase(&Core::getInstance());
         }
         return *(threadLockHolders[this_thread_id]);
@@ -1482,7 +1430,7 @@ command_result Core::runCommand(color_ostream &con, const std::string24 &first_,
                             con.printerr("that is not loaded - try \"load %s\" or check stderr.log\n",
                                 first.c_str());
                         else if (p->size())
-                            con.printerr("that implements %zi commands - see \"ls %s\" for details\n",
+                            con.printerr("that implements %u commands - see \"ls %s\" for details\n",
                                 p->size(), first.c_str());
                         else
                             con.printerr("but does not implement any commands\n");
@@ -1730,8 +1678,12 @@ bool Core::Init()
         freopen("stderr.log", "w", stderr);
     #endif
 
-    cerr << "Core::Init() lock";
-    CoreSuspendClaimMain CoreInitLock;
+    //Need to explicitly lock main thread at Init
+    //and only release in the end of update cycle
+    //to wait for tools to finish updates
+    //cerr << "Core::Init() lock\n";
+    MainThread::suspend().lock();
+    //CoreSuspendClaimMain CoreInitLock;
 
     fprintf(stderr, "DFHack build: %s\n", Version::git_description());
 
@@ -1907,7 +1859,7 @@ bool Core::Init()
     // initialize common lua context
     if (!Lua::Core::Init(con))
     {
-        fatal("Lua failed to initialize");
+        fatal("Lua failed to initialize\n");
         return false;
     }
 
@@ -2222,14 +2174,17 @@ int Core::Update()
     //CoreWakeup.wait(MainThread::suspend(),
     //        [this]() -> bool {return this->toolCount.load() == 0;});
 
-    //keep this last
+    //
+    //Tools are only updated here
+    //temporarily unlock Core mutex
+    //to allow other threads to proceed
+    //
     //Core::getInstance().getConsole().printerr("\nCore::Update lock");
-    CoreSuspendClaimMain waitForToolsThreadsToFinish;
     while (this->toolCount.load() != 0)
     {
-        Core::getInstance().getConsole().printerr("\nCore::Update wait for %u tools", uint32(this->toolCount.load()));
+        //Core::getInstance().getConsole().printerr("\nCore::Update wait for %u tools", uint32(this->toolCount.load()));
         CoreWakeup.wait(Core::getInstance().CoreSuspendMutex);
-        Core::getInstance().getConsole().printerr("\nCore::Update: notified!");
+        //Core::getInstance().getConsole().printerr("\nCore::Update: notified!");
     }
 
     return 0;
@@ -2415,7 +2370,7 @@ void Core::onStateChange(color_ostream &out, state_change_event event)
                 char timebuf[30];
                 time_t rawtime = time(NULL);
                 struct tm * timeinfo = localtime(&rawtime);
-                strftime(timebuf, sizeof(timebuf), "[%Y-%m-%dT%H:%M:%S%z] ", timeinfo);
+                strftime(timebuf, sizeof(timebuf), "[%Y-%m-%d %H:%M:%S] ", timeinfo);
                 evtlog << timebuf;
                 evtlog << "DFHack " << Version::git_description() << " on " << ostype << "; ";
                 evtlog << "cwd md5: " << md5w.getHashFromString(getHackPath()).substr(0, 10).c_str() << "; ";

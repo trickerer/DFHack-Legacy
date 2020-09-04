@@ -77,7 +77,7 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
         bld->mutable_building_type()->set_building_type(bt);
         bld->mutable_building_type()->set_building_subtype(-1);
         bld->mutable_building_type()->set_building_custom(-1);
-        bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt));
+        bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt).c_str());
         bld->set_name(ENUM_ATTR_STR(building_type, name, bt));
         switch (bt)
         {
@@ -100,7 +100,7 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                 bld->mutable_building_type()->set_building_type(bt);
                 bld->mutable_building_type()->set_building_subtype(st);
                 bld->mutable_building_type()->set_building_custom(-1);
-                bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(furnace_type, st));
+                bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(furnace_type, st)).c_str());
                 bld->set_name(ENUM_ATTR_STR(furnace_type, name, st));
 
                 if (st == furnace_type::Custom)
@@ -113,8 +113,8 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                         bld->mutable_building_type()->set_building_type(bt);
                         bld->mutable_building_type()->set_building_subtype(st);
                         bld->mutable_building_type()->set_building_custom(cust->id);
-                        bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + cust->code);
-                        bld->set_name(cust->name);
+                        bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + cust->code).c_str());
+                        bld->set_name(cust->name.c_str());
                     }
                 }
             }
@@ -128,8 +128,8 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                 bld->mutable_building_type()->set_building_type(bt);
                 bld->mutable_building_type()->set_building_subtype(st);
                 bld->mutable_building_type()->set_building_custom(-1);
-                bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(shop_type, st));
-                bld->set_name(ENUM_KEY_STR_SIMPLE(shop_type, st));
+                bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(shop_type, st)).c_str());
+                bld->set_name(ENUM_KEY_STR_SIMPLE(shop_type, st).c_str());
             }
             break;
         case df::enums::building_type::Door:
@@ -149,7 +149,7 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                 bld->mutable_building_type()->set_building_type(bt);
                 bld->mutable_building_type()->set_building_subtype(st);
                 bld->mutable_building_type()->set_building_custom(-1);
-                bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(workshop_type, st));
+                bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(workshop_type, st)).c_str());
                 bld->set_name(ENUM_ATTR_STR(workshop_type, name, st));
 
                 if (st == workshop_type::Custom)
@@ -162,8 +162,8 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                         bld->mutable_building_type()->set_building_type(bt);
                         bld->mutable_building_type()->set_building_subtype(st);
                         bld->mutable_building_type()->set_building_custom(cust->id);
-                        bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + cust->code);
-                        bld->set_name(cust->name);
+                        bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + cust->code).c_str());
+                        bld->set_name(cust->name.c_str());
                     }
                 }
             }
@@ -191,8 +191,8 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                 bld->mutable_building_type()->set_building_type(bt);
                 bld->mutable_building_type()->set_building_subtype(st);
                 bld->mutable_building_type()->set_building_custom(-1);
-                bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(siegeengine_type, st));
-                bld->set_name(ENUM_KEY_STR_SIMPLE(siegeengine_type, st));
+                bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(siegeengine_type, st)).c_str());
+                bld->set_name(ENUM_KEY_STR_SIMPLE(siegeengine_type, st).c_str());
             }
             break;
         case df::enums::building_type::Trap:
@@ -202,8 +202,8 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                 bld->mutable_building_type()->set_building_type(bt);
                 bld->mutable_building_type()->set_building_subtype(st);
                 bld->mutable_building_type()->set_building_custom(-1);
-                bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(trap_type, st));
-                bld->set_name(ENUM_KEY_STR_SIMPLE(trap_type, st));
+                bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(trap_type, st)).c_str());
+                bld->set_name(ENUM_KEY_STR_SIMPLE(trap_type, st).c_str());
             }
             break;
         case df::enums::building_type::AnimalTrap:
@@ -225,8 +225,8 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                 bld->mutable_building_type()->set_building_type(bt);
                 bld->mutable_building_type()->set_building_subtype(st);
                 bld->mutable_building_type()->set_building_custom(-1);
-                bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(civzone_type, st));
-                bld->set_name(ENUM_KEY_STR_SIMPLE(civzone_type, st));
+                bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(civzone_type, st)).c_str());
+                bld->set_name(ENUM_KEY_STR_SIMPLE(civzone_type, st).c_str());
             }
             break;
         case df::enums::building_type::Weapon:
@@ -242,8 +242,8 @@ DFHack::command_result GetBuildingDefList(DFHack::color_ostream &stream, const D
                 bld->mutable_building_type()->set_building_type(bt);
                 bld->mutable_building_type()->set_building_subtype(st);
                 bld->mutable_building_type()->set_building_custom(-1);
-                bld->set_id(ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(construction_type, st));
-                bld->set_name(ENUM_KEY_STR_SIMPLE(construction_type, st));
+                bld->set_id((ENUM_KEY_STR_SIMPLE(building_type, bt) + "/" + ENUM_KEY_STR_SIMPLE(construction_type, st)).c_str());
+                bld->set_name(ENUM_KEY_STR_SIMPLE(construction_type, st).c_str());
             }
             break;
         case df::enums::building_type::Hatch:

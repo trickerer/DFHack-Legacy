@@ -642,7 +642,7 @@ static void init_state()
         std::stringstream name;
         name << "labormanager/2.0/labors/" << i;
 
-        labor_infos[i].config = World::AddPersistentData(name.str());
+        labor_infos[i].config = World::AddPersistentData(name.str().c_str());
         labor_infos[i].mark_assigned();
         labor_infos[i].active_dwarfs = 0;
         reset_labor((df::unit_labor) i);
@@ -2232,7 +2232,7 @@ DFhackCExport command_result plugin_onupdate(color_ostream &out)
 void print_labor(df::unit_labor labor, color_ostream &out)
 {
     std::string24 labor_name = ENUM_KEY_STR_SIMPLE(unit_labor, labor);
-    out << labor_name << ": ";
+    out << labor_name.c_str() << ": ";
     for (int i = 0; i < 20 - (int)labor_name.length(); i++)
         out << ' ';
     labor_info& labor_info = labor_infos[labor];

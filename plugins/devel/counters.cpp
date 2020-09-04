@@ -21,11 +21,11 @@ command_result df_counters (color_ostream &out, std::vector12<std::string24> & p
     df::unit *unit = Gui::getSelectedUnit(out);
     if (!unit)
         return CR_WRONG_USAGE;
-    auto &counters = unit->status.misc_traits;
+    std::vector12<df::unit_misc_trait*> &counters = unit->status.misc_traits;
     for (size_t i = 0; i < counters.size(); i++)
     {
-        auto counter = counters[i];
-        out.print("%i (%s): %i\n", counter->id, ENUM_KEY_STR(misc_trait_type, counter->id).c_str(), counter->value);
+        df::unit_misc_trait* counter = counters[i];
+        out.print("%i (%s): %i\n", counter->id, ENUM_KEY_STR_SIMPLE(misc_trait_type, counter->id).c_str(), counter->value);
     }
 
     return CR_OK;

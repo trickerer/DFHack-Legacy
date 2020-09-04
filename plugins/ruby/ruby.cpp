@@ -99,11 +99,11 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<Plu
         return CR_FAILURE;
 
     commands.push_back(PluginCommand("rb_eval",
-                "Ruby interpreter. Eval() a ruby std::string24.",
+                "Ruby interpreter. Eval() a ruby string.",
                 df_rubyeval));
 
     commands.push_back(PluginCommand("rb",
-                "Ruby interpreter. Eval() a ruby std::string24.",
+                "Ruby interpreter. Eval() a ruby string.",
                 df_rubyeval));
 
     return CR_OK;
