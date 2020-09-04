@@ -1120,7 +1120,7 @@ redistribute it freely, subject to the following restrictions:
 //static command_result commandDebugFilter(color_ostream& out,
 //        std::vector12<std::string24>& parameters)
 //{
-//    DEBUG(command,out).print("debugfilter %s, parameter count %zu\n",
+//    DEBUG(command,out).print("debugfilter %s, parameter count %u\n",
 //            parameters.size() > 0 ? parameters[0].c_str() : "",
 //            parameters.size());
 //    auto handler = printHelp;
@@ -1155,7 +1155,7 @@ redistribute it freely, subject to the following restrictions:
 //            filter.apply(*cat);
 //        }
 //    }
-//    INFO(init,out).print("plugin_init with %zu commands, %zu filters and %zu categories\n",
+//    INFO(init,out).print("plugin_init with %u commands, %u filters and %u categories\n",
 //            commands.size(), filMan.size(), catMan.size());
 //    filMan.connectTo(catMan.categorySignal);
 //    return rv;

@@ -1210,31 +1210,31 @@ void lightingEngineViewscreen::loadSettings()
                 lua_pushlightuserdata(s, this);
                 lua_pushvalue(s,env);
                 Lua::SafeCall(out,s,2,0);
-                out.print("%zu materials loaded\n",matDefs.size());
+                out.print("%u materials loaded\n",matDefs.size());
 
                 lua_pushcfunction(s, parseSpecial);
                 lua_pushlightuserdata(s, this);
                 lua_pushvalue(s,env);
                 Lua::SafeCall(out,s,2,0);
-                out.print("%zu day light colors loaded\n",dayColors.size());
+                out.print("%u day light colors loaded\n",dayColors.size());
 
                 lua_pushcfunction(s, parseBuildings);
                 lua_pushlightuserdata(s, this);
                 lua_pushvalue(s,env);
                 Lua::SafeCall(out,s,2,0);
-                out.print("%zu buildings loaded\n",buildingDefs.size());
+                out.print("%u buildings loaded\n",buildingDefs.size());
 
                 lua_pushcfunction(s, parseCreatures);
                 lua_pushlightuserdata(s, this);
                 lua_pushvalue(s,env);
                 Lua::SafeCall(out,s,2,0);
-                out.print("%zu creatures loaded\n",creatureDefs.size());
+                out.print("%u creatures loaded\n",creatureDefs.size());
 
                 lua_pushcfunction(s, parseItems);
                 lua_pushlightuserdata(s, this);
                 lua_pushvalue(s,env);
                 Lua::SafeCall(out,s,2,0);
-                out.print("%zu items loaded\n",itemDefs.size());
+                out.print("%u items loaded\n",itemDefs.size());
             }
 
         }

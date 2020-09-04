@@ -141,7 +141,7 @@ DebugCategory::ostream_proxy_prefix::ostream_proxy_prefix(
     time_t now_c;
     tm local;
     time(&now_c);
-    size_t sz = strftime(buffer, sizeof(buffer)/sizeof(buffer[0]), "%H:%M:%S.", localtime_r(&now_c, &local));
+    size_t sz = strftime(buffer, sizeof(buffer), "%H:%M:%S.", localtime_r(&now_c, &local));
     *this << (sz > 0 ? buffer : "HH:MM:SS.")
         << std::setfill('0') << std::setw(3) << uint32(ms)
         // Thread id is allocated in the thread creation order to a thread_local

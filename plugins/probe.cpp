@@ -461,7 +461,7 @@ command_result df_bprobe (color_ostream &out, std::vector12<std::string24> & par
         case building_type::NestBox:
             {
                 df::building_nest_boxst* nestbox = (df::building_nest_boxst*) building.origin;
-                out.print(", claimed:(%i), items:%zu", nestbox->claimed_by, nestbox->contained_items.size());
+                out.print(", claimed:(%i), items:%u", nestbox->claimed_by, nestbox->contained_items.size());
                 break;
             }
         default:

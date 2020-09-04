@@ -273,7 +273,7 @@ command_result fortplan(color_ostream &out, std::vector12<std::string24> & param
                                             checkCode = layout[checkY][checkX];
                                         }
 
-                                        con.print(" - Code at (%zu,%zu) is '%s': ",checkX,checkY,checkCode.c_str());
+                                        con.print(" - Code at (%u,%u) is '%s': ",checkX,checkY,checkCode.c_str());
                                         std::vector12<BuildingInfo>::const_iterator checkIndex =
                                             std::find_if(buildings.begin(), buildings.end(), MatchesCode(checkCode.c_str()));
                                         //if (checkIndex == buildings.end()) {
@@ -335,16 +335,16 @@ command_result fortplan(color_ostream &out, std::vector12<std::string24> & param
                                     offsetCursor.y -= yOffset;
                                     DFHack::Gui::setCursorCoords(offsetCursor.x, offsetCursor.y, offsetCursor.z);
                                     if (!buildingInfo.allocate()) {
-                                        con.print("*** There was an error placing building with code '%s' centered at (%zu,%zu).\n",curCode.c_str(),x,y);
+                                        con.print("*** There was an error placing building with code '%s' centered at (%u,%u).\n",curCode.c_str(),x,y);
                                     }
                                     DFHack::Gui::setCursorCoords(cursor.x, cursor.y, cursor.z);
                                 } else if (block) {
                                     //con.print("Placing a building with code '%s' with corner at (%d,%d) and default size %dx%d.\n",curCode.c_str(),x,y,buildingInfo.defaultWidth,buildingInfo.defaultHeight);
                                     if (!buildingInfo.allocate()) {
-                                        con.print("*** There was an error placing building with code '%s' with corner at (%zu,%zu).\n",curCode.c_str(),x,y);
+                                        con.print("*** There was an error placing building with code '%s' with corner at (%u,%u).\n",curCode.c_str(),x,y);
                                     }
                                 } else {
-                                    con.print("*** Found a code '%s' at (%zu,%zu) for a building with default size %dx%d with an invalid size designation.\n",curCode.c_str(),x,y,buildingInfo.defaultWidth,buildingInfo.defaultHeight);
+                                    con.print("*** Found a code '%s' at (%u,%u) for a building with default size %dx%d with an invalid size designation.\n",curCode.c_str(),x,y,buildingInfo.defaultWidth,buildingInfo.defaultHeight);
                                 }
                             } else {
                                 //buildingSize = findBuildingExtent(layout, x, y, -1, -1, out);
@@ -354,7 +354,7 @@ command_result fortplan(color_ostream &out, std::vector12<std::string24> & param
                         } else {
                             //con.print("Building a(n) %s.\n",buildingInfo.name.c_str());
                             if (!buildingInfo.allocate()) {
-                                con.print("*** There was an error placing the %s at (%zu,%zu).\n",buildingInfo.name.c_str(),x,y);
+                                con.print("*** There was an error placing the %s at (%u,%u).\n",buildingInfo.name.c_str(),x,y);
                             }
                         }
                     }

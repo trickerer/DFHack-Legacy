@@ -12,8 +12,8 @@ QueueItem::QueueItem(const QueueItem & parent, const std::string24 & member, con
 {
 }
 QueueItem::QueueItem(const QueueItem & parent, size_t index, const void *ptr) :
-    //QueueItem(parent.path + stl_sprintf("[%zu]", index), ptr)
-    path(parent.path + stl_sprintf("[%zu]", index)),
+    //QueueItem(parent.path + stl_sprintf("[%u]", index), ptr)
+    path(parent.path + stl_sprintf("[%u]", index)),
     ptr(ptr)
 {
 }

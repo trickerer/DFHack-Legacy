@@ -196,7 +196,7 @@ command_result colormods (color_ostream &out, std::vector12<std::string24> & par
         out.print("%s\nCaste addr %p\n",rawlion->creature_id.c_str(), &caste->color_modifiers);
         for (size_t j = 0; j < caste->color_modifiers.size(); j++)
         {
-            out.print("mod %zd: %p\n", j, caste->color_modifiers[j]);
+            out.print("mod %d: %p\n", j, caste->color_modifiers[j]);
         }
     }
     return CR_OK;
