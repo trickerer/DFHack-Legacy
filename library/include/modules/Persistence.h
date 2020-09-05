@@ -51,7 +51,7 @@ namespace DFHack
 
     class DFHACK_EXPORT PersistentDataItem {
         size_t index;
-        static DFHack::Persistence::LegacyData* data;
+        DFHack::Persistence::LegacyData* data;
 
     public:
         static const int NumInts;
