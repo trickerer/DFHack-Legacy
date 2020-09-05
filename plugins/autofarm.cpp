@@ -44,7 +44,7 @@ DFHACK_PLUGIN_IS_ENABLED(enabled);
 
 const char *tagline = "Automatically handle crop selection in farm plots based on current plant stocks.";
 const char *usage = (
-                "``enable autofarm``: Enables the plugin\n"
+                "``autofarm enable``: Enables the plugin\n"
                 "``autofarm runonce``: Updates farm plots (one-time only)\n"
                 "``autofarm status``: Prints status information\n"
                 "``autofarm default 30``: Sets the default threshold\n"

@@ -32,7 +32,7 @@ using namespace df::enums;
 
 
 // A plugin must be able to return its name and version.
-// The name std::string24 provided must correspond to the filename -
+// The name string provided must correspond to the filename -
 // skeleton.plug.so, skeleton.plug.dylib, or skeleton.plug.dll in this case
 DFHACK_PLUGIN("autoclothing");
 
@@ -361,6 +361,11 @@ static bool validateMaterialCategory(ClothingRequirement * requirement)
 // A command! It sits around and looks pretty. And it's nice and friendly.
 command_result autoclothing(color_ostream &out, std::vector12<std::string24> & parameters)
 {
+    if (!Core::getInstance().isWorldLoaded()) {
+        out.printerr("World is not loaded: please load a game first.\n");
+        return CR_FAILURE;
+    }
+
     // It's nice to print a help message you get invalid options
     // from the user instead of just acting strange.
     // This can be achieved by adding the extended help std::string24 to the
@@ -672,12 +677,12 @@ static void save_state(color_ostream &out)
     enabled.ival(0) = autoclothing_enabled;
 
     //for (auto& order : clothingOrders)
-    for (std::vector12<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
-    {
-        ClothingRequirement& order = *ci;
-        PersistentDataItem orderSave = World::AddPersistentData("autoclothing/clothingItems");
-        orderSave.val() = order.Serialize();
-    }
+    //for (std::vector12<ClothingRequirement>::iterator ci = clothingOrders.begin(); ci != clothingOrders.end(); ++ci)
+    //{
+    //    ClothingRequirement& order = *ci;
+    //    PersistentDataItem orderSave = World::AddPersistentData("autoclothing/clothingItems");
+    //    orderSave.val() = order.Serialize();
+    //}
 
 
     // Parse constraints

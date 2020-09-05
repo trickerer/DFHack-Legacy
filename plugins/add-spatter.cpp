@@ -410,7 +410,10 @@ DFhackCExport command_result plugin_onstatechange(color_ostream &out, state_chan
             enable_hooks(true);
         }
         else
+        {
+            out.print("Can't detect spatter add reactions - disabling plugin.\n");
             enable_hooks(false);
+        }
         break;
     case SC_WORLD_UNLOADED:
         enable_hooks(false);

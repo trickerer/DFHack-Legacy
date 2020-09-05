@@ -617,10 +617,10 @@ static void init_state()
     // For every persistent data item...
     for (std::vector12<PersistentDataItem>::const_iterator p = items.begin(); p != items.end(); p++)
     {
-        // Load as a std::string24 the key associated with the persistent data item
+        // Load as a string the key associated with the persistent data item
         std::string24 key = p->key();
 
-        // Translate the std::string24 into a labor defined by global dfhack constants
+        // Translate the string into a labor defined by global dfhack constants
         df::unit_labor labor = (df::unit_labor) atoi(key.substr(strlen("autohauler/labors/")).c_str());
 
         // Ensure that the labor is defined in the existing list
@@ -642,7 +642,7 @@ static void init_state()
             continue;
 
         // Not sure of the mechanics, but it seems to give an output stream
-        // giving a std::string24 for the new persistent data item
+        // giving a string for the new persistent data item
         std::stringstream name;
         name << "autohauler/labors/" << i;
 
@@ -701,7 +701,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector12<Plu
     commands.push_back(PluginCommand(
         "autohauler", "Automatically manage hauling labors.",
         autohauler, false, /* true means that the command can't be used from non-interactive user interface */
-        // Extended help std::string24. Used by CR_WRONG_USAGE and the help command:
+        // Extended help string. Used by CR_WRONG_USAGE and the help command:
         "  autohauler enable\n"
         "  autohauler disable\n"
         "    Enables or disables the plugin.\n"

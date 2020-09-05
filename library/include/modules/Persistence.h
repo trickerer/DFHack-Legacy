@@ -54,6 +54,9 @@ namespace DFHack
         DFHack::Persistence::LegacyData* data;
 
     public:
+        PersistentDataItem() : index(0), data(NULL) {}
+        PersistentDataItem(size_t index, DFHack::Persistence::LegacyData* dat) : index(index), data(dat) {}
+
         static const int NumInts;
 
         bool isValid() const;
@@ -165,14 +168,6 @@ namespace DFHack
         void set_int28(size_t off, int32_t val)
         {
             set_uint28(off, val);
-        }
-
-        PersistentDataItem() : index(0) {
-            data = NULL;
-        }
-        PersistentDataItem(size_t index, DFHack::Persistence::LegacyData* dat)
-            : index(index) {
-                data = dat;
         }
     };
     namespace Persistence

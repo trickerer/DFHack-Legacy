@@ -266,7 +266,8 @@ struct GeoBiome;
 struct GeoBlock
 {
     GeoLayer *layer;
-    GeoColumn *column;
+    //UNUSED?
+    //GeoColumn *column;
     df::coord pos;
 
     uint16_t arena_mask, arena_unmined;
@@ -308,7 +309,12 @@ struct VeinExtent
     int num_unmined, num_layer, min_z, max_z;
     std::vector12<GeoLayer*> layers;
 
-    VeinExtent(t_veinkey vein) : vein(vein) {
+    explicit VeinExtent(t_veinkey vein) : vein(vein)
+    {
+        //were not initialized. Hoped for default 0?
+        parent = NULL;
+        distribution = NULL;
+
         probability = num_tiles = placed_tiles = 0;
         num_unmined = num_layer = 0;
         min_z = max_z = 0;
@@ -395,7 +401,7 @@ struct GeoLayer
     std::map<t_veinkey,int> mineral_count;
     std::map<t_veinkey, VeinExtent*> veins;
 
-    GeoLayer(GeoBiome *parent, int index, df::world_geo_layer *info);
+    explicit GeoLayer(GeoBiome *parent, int index, df::world_geo_layer *info);
 
     ~GeoLayer() {
         for (size_t i = 0; i < block_list.size(); i++)
@@ -519,10 +525,14 @@ struct VeinGenerator
         uint32_t seeds[NUM_INCLUSIONS];
         NoiseFunction* funcs[NUM_INCLUSIONS];
 
-        VMats()
+        explicit VMats()
         {
             default_type = -2;
             memset(valid_type, -1, sizeof(valid_type));
+
+            //not initialized. why?
+            memset(seeds, 0, sizeof(seeds));
+            memset(funcs, 0, sizeof(NoiseFunction*)*NUM_INCLUSIONS);
         }
     };
     std::vector12<VMats> materials;
