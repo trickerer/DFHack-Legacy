@@ -53,10 +53,8 @@ void DebugManager::registerCategory(DebugCategory& cat)
     //DEBUG(debug) << "register DebugCategory '" << cat.category()
     //    << "' from '" << cat.plugin()
     //    << "' allowed " << int32(cat.allowed()) << "\n";
-    DebugCategory::ostream_proxy_prefix(DBG_NAME(debug), Core::getInstance().getConsole(), DebugCategory::level::LDEBUG)
-        << "register DebugCategory '" << cat.category()
-        << "' from '" << cat.plugin()
-        << "' allowed " << int32(cat.allowed()) << "\n";
+    OUT_DEBUG_DEFAULT(debug, "register DebugCategory '%s' from '%s' allowed '%i'\n",
+        cat.category(), cat.plugin(), int32(cat.allowed()));
     tthread::lock_guard<tthread::mutex> guard(access_mutex_);
     push_back(&cat);
     //categorySignal(CAT_ADD, cat);
@@ -67,10 +65,8 @@ void DebugManager::unregisterCategory(DebugCategory& cat)
     //DEBUG(debug) << "unregister DebugCategory '" << cat.category()
     //    << "' from '" << cat.plugin()
     //    << "' allowed " << int32(cat.allowed()) << "\n";
-    DebugCategory::ostream_proxy_prefix(DBG_NAME(debug), Core::getInstance().getConsole(), DebugCategory::level::LDEBUG)
-        << "unregister DebugCategory '" << cat.category()
-        << "' from '" << cat.plugin()
-        << "' allowed " << int32(cat.allowed()) << "\n";
+    OUT_DEBUG_DEFAULT(debug, "unregister DebugCategory '%s' from '%s' allowed '%i'\n",
+        cat.category(), cat.plugin(), int32(cat.allowed()));
     tthread::lock_guard<tthread::mutex> guard(access_mutex_);
     iterator iter = std::find(begin(), end(), &cat);
     //std::swap(*iter, back());
@@ -168,10 +164,8 @@ void DebugCategory::allowed(DebugCategory::level value)
     //TRACE(debug) << "modify DebugCategory '" << category()
     //    << "' from '" << plugin()
     //    << "' allowed " << int32(value) << "\n";
-    DebugCategory::ostream_proxy_prefix(DBG_NAME(debug), Core::getInstance().getConsole(), DebugCategory::level::LTRACE)
-        << "modify DebugCategory '" << category()
-        << "' from '" << plugin()
-        << "' allowed " << int32(value) << "\n";
+    OUT_TRACE_DEFAULT(debug, "modify DebugCategory '%s' from '%s' allowed '%i'\n",
+        category(), plugin(), int32(value));
     //DebugManager& manager = DebugManager::getInstance();
     //manager.categorySignal(DebugManager::CAT_MODIFIED, *this);
 }

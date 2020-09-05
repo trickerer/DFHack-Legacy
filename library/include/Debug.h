@@ -274,6 +274,54 @@ public:
     } }                                                                     \
     using debug::plugin::DBG_NAME(category)
 
+//LOGGING
+#define CAN_LOG(cat, level)                                                 \
+    DFHack::DBG_NAME(cat).isEnabled(level)
+#define STREAM(cat, target, level)                                          \
+    DFHack::DebugCategory::ostream_proxy_prefix(DBG_NAME(cat), target, level)
+//GENERIC
+#define OUT_PRINT(level, cat, target, ...)                                  \
+    using namespace DFHack;       /* if called outside (plugin commands) */ \
+    do {                                                                    \
+        if (CAN_LOG(cat, level)) {                                          \
+            STREAM(cat, target, level).print(__VA_ARGS__);                  \
+        }                                                                   \
+    } while (0);
+//DEBUG
+#define OUT_DEBUG(cat, target, ...)                                         \
+    OUT_PRINT(DFHack::DebugCategory::LDEBUG, cat, target, __VA_ARGS__)
+
+#define OUT_DEBUG_DEFAULT(cat, ...)                                         \
+    OUT_DEBUG(cat, Core::getInstance().getConsole(), __VA_ARGS__)
+
+//ERROR
+#define OUT_ERROR(cat, target, ...)                                         \
+    OUT_PRINT(DFHack::DebugCategory::LERROR, cat, target, __VA_ARGS__)
+
+#define OUT_ERROR_DEFAULT(cat, ...)                                         \
+    OUT_ERROR(cat, Core::getInstance().getConsole(), __VA_ARGS__)
+
+//WARN
+#define OUT_WARN(cat, target, ...)                                          \
+    OUT_PRINT(DFHack::DebugCategory::LWARNING, cat, target, __VA_ARGS__)
+
+#define OUT_WARN_DEFAULT(cat, ...)                                          \
+    OUT_WARN(cat, Core::getInstance().getConsole(), __VA_ARGS__)
+
+//INFO
+#define OUT_INFO(cat, target, ...)                                          \
+    OUT_PRINT(DFHack::DebugCategory::LINFO, cat, target, __VA_ARGS__)
+
+#define OUT_INFO_DEFAULT(cat, ...)                                          \
+    OUT_INFO(cat, Core::getInstance().getConsole(), __VA_ARGS__)
+
+//TRACE
+#define OUT_TRACE(cat, target, ...)                                         \
+    OUT_PRINT(DFHack::DebugCategory::LTRACE, cat, target, __VA_ARGS__)
+
+#define OUT_TRACE_DEFAULT(cat, ...)                                         \
+    OUT_TRACE(cat, Core::getInstance().getConsole(), __VA_ARGS__)
+
 /*!
  * Can be used to access a shared DBG_DECLARE category. But may not be used from
  * static initializer because translation unit order is undefined.
@@ -283,11 +331,11 @@ public:
  * \param plugin The plugin name that must match DBG_DECLARE
  * \param category The category name that must matnch DBG_DECLARE
  */
-//#define DBG_EXTERN(plugin,category)                                         \
-//    namespace debug { namespace plugin {                                    \
-//        extern DFHack::DebugCategory DBG_NAME(category);                    \
-//    } }                                                                     \
-//    using debug::plugin::DBG_NAME(category)
+#define DBG_EXTERN(plugin,category)                                         \
+    namespace debug { namespace plugin {                                    \
+        extern DFHack::DebugCategory DBG_NAME(category);                    \
+    } }                                                                     \
+    using debug::plugin::DBG_NAME(category)
 
 //#define DBG_PRINT(category,pred,level,...)                                  \
 //    if pred(!DFHack::DBG_NAME(category).isEnabled(level))                   \
