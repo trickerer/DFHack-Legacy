@@ -294,8 +294,7 @@ void Checker::dispatch_primitive(const QueueItem & item, const CheckedStructure 
     else if (cs.identity == df::identity_traits<bool>::get())
     {
         const uint8_t val = *reinterpret_cast<const uint8_t *>(item.ptr);
-        if (val > 1 && val != 0xd2 &&
-            val != 0xba && val != 0xad && val != 0xf0 && val != 0x0d && val != 0xfe && val != 0xee)
+        if (val > 1 && val != 0xd2)
         {
             std::ostringstream failmsg;
             failmsg << "invalid value for bool: " << int(val);
@@ -328,7 +327,7 @@ void Checker::dispatch_pointer(const QueueItem & item, const CheckedStructure & 
 #ifdef DFHACK64
     if (uintptr_t(target_ptr) == 0xd2d2d2d2d2d2d2d2)
 #else
-    if (uintptr_t(target_ptr) == 0xd2d2d2d2 || uintptr_t(target_ptr) == 0xbaadf00d || uintptr_t(target_ptr) == 0xfeeefeee)
+    if (uintptr_t(target_ptr) == 0xd2d2d2d2)
 #endif
     {
         return;

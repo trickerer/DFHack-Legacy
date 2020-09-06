@@ -38,13 +38,9 @@ bool Checker::is_valid_dereference(const QueueItem & item, const CheckedStructur
 #define FAIL_PTR(message) FAIL((stl_sprintf("0x%016zx: ", reinterpret_cast<uintptr_t>(base)) + message).c_str())
 #else
 #define UNINIT_PTR 0xd2d2d2d2
-#define UNINIT_PTR2 0xbaadf00d
-#define UNINIT_PTR3 0xfeeefeee
 #define FAIL_PTR(message) FAIL((stl_sprintf("0x%08zx: ", reinterpret_cast<uintptr_t>(base)) + message).c_str())
 #endif
-    if (uintptr_t(base) == UNINIT_PTR ||
-        uintptr_t(base) == UNINIT_PTR2 ||
-        uintptr_t(base) == UNINIT_PTR3)
+    if (uintptr_t(base) == UNINIT_PTR)
     {
         if (!quiet)
         {

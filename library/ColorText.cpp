@@ -93,20 +93,13 @@ color_ostream::~color_ostream()
     delete buf();
 }
 
+//TODO: extend print functions so they can accept long strings
 void color_ostream::print(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
     vprint(format, args);
     va_end(args);
-
-    //char str[1024];
-    //va_list args;
-    //va_start(args, format);
-    //vsnprintf(str, 1024, format, args);
-    //va_end(args);
-
-    //*this << str;
 }
 
 void color_ostream::vprint(const char *format, va_list args)

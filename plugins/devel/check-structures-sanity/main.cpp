@@ -39,7 +39,7 @@ bool check_malloc_perturb()
         uint32_t data[1024];
     };
     T_test* test = new T_test;
-    bool ret = (test->data[0] == 0xd2d2d2d2 || test->data[0] == 0xbaadf00d || test->data[0] == 0xfeeefeee);
+    bool ret = (test->data[0] == 0xd2d2d2d2);
     delete test;
     return ret;
 }
