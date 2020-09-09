@@ -115,7 +115,27 @@ namespace embark_assist {
         };
 
         //typedef std::array<std::array<mid_level_tile, 16>, 16> mid_level_tiles;
-        typedef std::vector12<std::vector12<mid_level_tile> > mid_level_tiles;
+
+        //wrapper for std::array
+        struct mid_level_tiles {
+            mid_level_tiles() {
+                tiles.resize(16);
+                for (uint8 i = 0; i < 16; ++i)
+                    tiles.at(i).resize(16);
+            }
+
+            std::vector12<std::vector12<mid_level_tile> > tiles;
+
+            std::vector12<mid_level_tile> &at(uint8 i)
+            {
+                return tiles.at(i);
+            }
+
+            std::vector12<mid_level_tile> const &at(uint8 i) const
+            {
+                return tiles.at(i);
+            }
+        };
 
         struct region_tile_datum {
             region_tile_datum() {
