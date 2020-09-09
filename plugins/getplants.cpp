@@ -82,8 +82,8 @@ enum PlantSelectability {
 //  is one of the issues in bug 6940 on the bug tracker (the others cases are detected and
 //  result in the plants not being usable for farming or even collectable at all).
 
-//PlantSelectability selectablePlant(color_ostream &out, const df::plant_raw *plant, bool farming)
-PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
+PlantSelectability selectablePlant(color_ostream &out, const df::plant_raw *plant, bool farming)
+//PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
 {
     const DFHack::MaterialInfo basic_mat = DFHack::MaterialInfo(plant->material_defs.type[plant_material_def::basic_mat], plant->material_defs.idx[plant_material_def::basic_mat]);
     bool outOfSeason = false;
@@ -91,7 +91,7 @@ PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
 
     if (plant->flags.is_set(plant_raw_flags::TREE))
     {
-//        out.print("%s is a selectable tree\n", plant->id.c_str());
+        //out.print("%s is a selectable tree\n", plant->id.c_str());
         if (farming)
         {
             return PLANT_NONSELECTABLE;
@@ -103,7 +103,7 @@ PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
     }
     else if (plant->flags.is_set(plant_raw_flags::GRASS))
     {
-//        out.print("%s is a non selectable Grass\n", plant->id.c_str());
+        //out.print("%s is a non selectable Grass\n", plant->id.c_str());
         return PLANT_GRASS;
     }
 
@@ -115,7 +115,7 @@ PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
     if (basic_mat.material->flags.is_set(material_flags::EDIBLE_RAW) ||
         basic_mat.material->flags.is_set(material_flags::EDIBLE_COOKED))
     {
-//        out.print("%s is edible\n", plant->id.c_str());
+        //out.print("%s is edible\n", plant->id.c_str());
         if (farming)
         {
             if (basic_mat.material->flags.is_set(material_flags::EDIBLE_RAW))
@@ -135,7 +135,7 @@ PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
         plant->flags.is_set(plant_raw_flags::EXTRACT_BARREL) ||
         plant->flags.is_set(plant_raw_flags::EXTRACT_STILL_VIAL))
     {
-//        out.print("%s is thread/mill/extract\n", plant->id.c_str());
+        //out.print("%s is thread/mill/extract\n", plant->id.c_str());
         if (farming)
         {
             result = PLANT_SELECTABLE;
@@ -149,7 +149,7 @@ PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
     if (basic_mat.material->reaction_product.id.size() > 0 ||
         basic_mat.material->reaction_class.size() > 0)
     {
-//        out.print("%s has a reaction\n", plant->id.c_str());
+        //out.print("%s has a reaction\n", plant->id.c_str());
         if (farming)
         {
             result = PLANT_SELECTABLE;
@@ -191,7 +191,7 @@ PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
                     (plant->growths[i]->timing_2 == -1 ||
                         *cur_year_tick <= plant->growths[i]->timing_2))
                 {
-//                     out.print("%s has an edible seed or a stockpile growth\n", plant->id.c_str());
+                    //out.print("%s has an edible seed or a stockpile growth\n", plant->id.c_str());
                     if (!farming || seedSource)
                     {
                         return PLANT_SELECTABLE;
@@ -229,12 +229,13 @@ PlantSelectability selectablePlant(const df::plant_raw *plant, bool farming)
 
     if (outOfSeason)
     {
-//        out.print("%s has an out of season growth\n", plant->id.c_str());
+        //out.print("%s has an out of season growth\n", plant->id.c_str());
         return PLANT_OUTOFSEASON;
     }
     else
     {
-//        out.printerr("%s cannot be gathered\n", plant->id.c_str());
+        //if (result != PLANT_SELECTABLE)
+        //    out.printerr("%s cannot be gathered\n", plant->id.c_str());
         return result;
     }
 }
@@ -253,8 +254,14 @@ bool picked(const df::plant *plant, int32_t growth_subtype) {
     df::world_site *site = df::world_site::find(ui->site_id);
     int32_t pos_x = site->global_min_x + plant->pos.x / 48;
     int32_t pos_y = site->global_min_y + plant->pos.y / 48;
-    size_t id = pos_x + pos_y * 16 * world_data->world_width;
+    int32_t id = pos_x + pos_y * 16 * world_data->world_width;
     df::world_object_data *object_data = df::world_object_data::find(id);
+
+    //even though the formula seems to be absolutely correct
+    //obect_data is NULL is some occasions
+    if (!object_data)
+        return false;
+
     df::map_block_column *column = world->map.map_block_columns[(plant->pos.x / 16) * world->map.x_count_block + (plant->pos.y / 16)];
 
     for (size_t i = 0; i < object_data->picked_growths.x.size(); i++) {
@@ -270,7 +277,8 @@ bool picked(const df::plant *plant, int32_t growth_subtype) {
     return false;
 }
 
-bool designate(const df::plant *plant, bool farming) {
+bool designate(const df::plant *plant, bool farming)
+{
     df::plant_raw *plant_raw = world->raws.plants.all[plant->material];
     const DFHack::MaterialInfo basic_mat = DFHack::MaterialInfo(plant_raw->material_defs.type[plant_material_def::basic_mat], plant_raw->material_defs.idx[plant_material_def::basic_mat]);
 
@@ -286,7 +294,8 @@ bool designate(const df::plant *plant, bool farming) {
         plant_raw->flags.is_set(plant_raw_flags::EXTRACT_BARREL) ||
         plant_raw->flags.is_set(plant_raw_flags::EXTRACT_STILL_VIAL))
     {
-        if (!farming) {
+        if (!farming)
+        {
             return Designations::markPlant(plant);
         }
     }
@@ -430,14 +439,14 @@ command_result df_getplants (color_ostream &out, std::vector12<std::string24> & 
         df::plant_raw *plant = world->raws.plants.all[i];
         if (all)
         {
-//            plantSelections[i] = selectablePlant(out, plant, farming);
-            plantSelections[i] = selectablePlant(plant, farming);
+            plantSelections[i] = selectablePlant(out, plant, farming);
+            //plantSelections[i] = selectablePlant(plant, farming);
         }
-         else if (plantNames.find(plant->id) != plantNames.end())
+        else if (plantNames.find(plant->id) != plantNames.end())
         {
             plantNames.erase(plant->id);
-//            plantSelections[i] = selectablePlant(out, plant, farming);
-            plantSelections[i] = selectablePlant(plant, farming);
+            plantSelections[i] = selectablePlant(out, plant, farming);
+            //plantSelections[i] = selectablePlant(plant, farming);
             switch (plantSelections[i])
             {
             case PLANT_GRASS:
@@ -471,8 +480,7 @@ command_result df_getplants (color_ostream &out, std::vector12<std::string24> & 
     {
         out.printerr("Invalid plant ID(s):");
         for (std::set8<std::string24>::const_iterator it = plantNames.begin(); it != plantNames.end(); it++)
-            out.printerr(" %s", it->c_str());
-        out.printerr("\n");
+            out.printerr(" %s\n", it->c_str());
         return CR_FAILURE;
     }
 
@@ -492,9 +500,9 @@ command_result df_getplants (color_ostream &out, std::vector12<std::string24> & 
         for (size_t i = 0; i < world->raws.plants.all.size(); i++)
         {
             df::plant_raw *plant = world->raws.plants.all[i];
-//            switch (selectablePlant(out, plant, farming))
-            switch (selectablePlant(plant, farming))
-                {
+            switch (selectablePlant(out, plant, farming))
+            //switch (selectablePlant(plant, farming))
+            {
             case PLANT_GRASS:
             case PLANT_NONSELECTABLE:
                 continue;
@@ -565,7 +573,7 @@ command_result df_getplants (color_ostream &out, std::vector12<std::string24> & 
         }
         if (!deselect && designate(plant, farming))
         {
-//            out.print("Designated %s at (%i, %i, %i), %d\n", world->raws.plants.all[plant->material]->id.c_str(), plant->pos.x, plant->pos.y, plant->pos.z, (int)i);
+            out.print("Designated %s at (%i, %i, %i), %d\n", world->raws.plants.all[plant->material]->id.c_str(), plant->pos.x, plant->pos.y, plant->pos.z, (int)i);
             collectionCount[plant->material]++;
             ++count;
         }
