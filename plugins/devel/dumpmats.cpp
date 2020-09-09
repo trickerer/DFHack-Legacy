@@ -140,6 +140,12 @@ command_result df_dumpmats (color_ostream &out, std::vector12<std::string24> &pa
 
         FOR_ENUM_ITEMS_SIMPLE(matter_state, state)
         {
+            if (int32(state) < 0)
+            {
+                out.print("\tSkipping state %i\n", int32(state));
+                continue;
+            }
+
             if (mat->state_color[state] != -1 && mat->state_color[state] != def_color[state])
                 out.print("\t[STATE_COLOR:%s:%s]\n", state_names[state], world->raws.descriptors.colors[mat->state_color[state]]->id.c_str());
             if (mat->state_name[state] == mat->state_adj[state])
