@@ -845,6 +845,7 @@ public:
         else if (input->count(interface_key::CUSTOM_SHIFT_D))
         {
             df::item_flags flags;
+            flags.whole = 0;
             flags.bits.dump = true;
             toggleFlag(flags);
             populateItems();
@@ -852,6 +853,7 @@ public:
         else if (input->count(interface_key::CUSTOM_SHIFT_F))
         {
             df::item_flags flags;
+            flags.whole = 0;
             flags.bits.forbid = true;
             toggleFlag(flags);
             populateItems();
