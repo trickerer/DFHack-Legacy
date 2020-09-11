@@ -102,25 +102,18 @@ public:
     JobKey() : type(df::job_type::NONE), subtype(0), size(0) {}
     explicit JobKey(df::job_type _type, int _subtype, int _size) : type(_type), subtype(_subtype), size(_size) {}
 
+	bool operator<(const JobKey& key2) const
+	{
+        if ((*this).type < key2.type ||
+            ((*this).type == key2.type && (*this).subtype < key2.subtype) ||
+            ((*this).type == key2.type && (*this).subtype == key2.subtype) && (*this).size < key2.size)
+            return true;
+        return false;
+	}
+
     df::job_type type;
     int subtype;
     int size;
-};
-struct JobKeyHash
-{
-   size_t operator()(const JobKey& key) const
-   {
-       return key.subtype + (key.type*244)^0xBADFEEDA;
-   }
-	bool operator()(const JobKey& key1, const JobKey& key2) const
-	{
-	    return &key1 == &key2;
-	}
-	enum
-	{
-	    bucket_size = 4,
-	    min_buckets = 8
-   };
 };
 
 void do_scan(color_ostream& out)
@@ -133,7 +126,8 @@ void do_scan(color_ostream& out)
     map<int, int> sizes; // this maps body size to races
 
     //map<tuple<df::job_type, int, int>, int> orders;  // key is item type, item subtype, size
-    map<JobKey, int, JobKeyHash> orders;
+    typedef map<JobKey, int> JobMap;
+    JobMap orders;
 
     df::item_flags bad_flags;
     bad_flags.whole = 0;
@@ -299,7 +293,7 @@ void do_scan(color_ostream& out)
     //for (auto a : needed)
     for (OrdersMap::const_iterator ci = needed.begin(); ci != needed.end(); ++ci)
     {
-        pair<pair<df::item_type, int>, int> const& a = *ci;
+        OrdersMap::value_type const& a = *ci;
         df::item_type ty = a.first.first;
         int size = a.first.second;
         int count = a.second;
@@ -362,7 +356,7 @@ void do_scan(color_ostream& out)
     // place orders
 
     //for (auto o : orders)
-    for (std::map<JobKey,int,JobKeyHash>::const_iterator ci = orders.begin(); ci != orders.end(); ++ci)
+    for (JobMap::const_iterator ci = orders.begin(); ci != orders.end(); ++ci)
     {
         std::pair<JobKey, int> const& o = *ci;
         //df::job_type ty;
