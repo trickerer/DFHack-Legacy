@@ -19,7 +19,7 @@ using namespace df::enums;
 command_result stepBetween (color_ostream &out, std::vector12<std::string24> & parameters);
 
 // A plugin must be able to return its name and version.
-// The name std::string24 provided must correspond to the filename - skeleton.plug.so or skeleton.plug.dll in this case
+// The name string provided must correspond to the filename - skeleton.plug.so or skeleton.plug.dll in this case
 DFHACK_PLUGIN("stepBetween");
 
 // Mandatory init function. If you have some global state, create it here.
