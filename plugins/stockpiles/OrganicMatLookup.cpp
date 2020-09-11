@@ -26,8 +26,8 @@ using std::endl;
 void OrganicMatLookup::food_mat_by_idx ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, std::vector12<int16_t>::size_type food_idx, FoodMat & food_mat )
 {
     out << "food_lookup: food_idx(" << food_idx << ") ";
-    df::world_raws &raws = world->raws;
-    df::special_mat_table table = raws.mat_table;
+    df::world_raws const &raws = world->raws;
+    df::special_mat_table const& table = raws.mat_table;
     int32_t main_idx = table.organic_indexes[mat_category][food_idx];
     int16_t type = table.organic_types[mat_category][food_idx];
     if ( mat_category == organic_mat_category::Fish ||
@@ -68,8 +68,8 @@ void OrganicMatLookup::food_build_map ( std::ostream &out )
 {
     if ( index_built )
         return;
-    df::world_raws &raws = world->raws;
-    df::special_mat_table table = raws.mat_table;
+    df::world_raws const &raws = world->raws;
+    df::special_mat_table const& table = raws.mat_table;
     using df::enums::organic_mat_category::organic_mat_category;
     typedef df::enum_traits<organic_mat_category> traits;
     for ( int32_t mat_category = traits::first_item_value; mat_category <= traits::last_item_value; ++mat_category )
@@ -87,8 +87,8 @@ void OrganicMatLookup::food_build_map ( std::ostream &out )
 int16_t OrganicMatLookup::food_idx_by_token ( std::ostream &out, organic_mat_category::organic_mat_category mat_category, const std::string24 & token )
 {
     int16_t food_idx = -1;
-    df::world_raws &raws = world->raws;
-    df::special_mat_table table = raws.mat_table;
+    df::world_raws const &raws = world->raws;
+    df::special_mat_table const& table = raws.mat_table;
     out << "food_idx_by_token: ";
     if ( mat_category == organic_mat_category::Fish ||
             mat_category == organic_mat_category::UnpreparedFish ||
@@ -152,4 +152,7 @@ MaterialInfo OrganicMatLookup::food_mat_by_token ( std::ostream &out, const std:
 }
 
 bool OrganicMatLookup::index_built = false;
-std::vector12<OrganicMatLookup::FoodMatMap> OrganicMatLookup::food_index = std::vector12<OrganicMatLookup::FoodMatMap> ( 37 );
+//std::vector12<OrganicMatLookup::FoodMatMap> OrganicMatLookup::food_index = std::vector12<OrganicMatLookup::FoodMatMap> ( 37 );
+std::vector12<OrganicMatLookup::FoodMatMap> OrganicMatLookup::food_index =
+    std::vector12<OrganicMatLookup::FoodMatMap> ( df::enum_traits<df::organic_mat_category>::last_item_value + 1 );
+
