@@ -1323,7 +1323,7 @@ df::building* getAssignableBuildingAtCursor(color_ostream& out)
 // ZONE FILTERS (as in, filters used by 'zone')
 
 // Extra annotations / descriptions for parameter names.
-stdext::hash_map<std::string24, std::string24, String24Hash> zone_filter_notes;
+std::map<std::string24, std::string24> zone_filter_notes;
 static struct zone_filter_notes_init { zone_filter_notes_init() {
     zone_filter_notes["caged"] = "caged (ignores built cages)";
     zone_filter_notes["hunting"] = "trained hunting creature";
@@ -1366,12 +1366,6 @@ bool isOwnRaceAndCiv(df::unit *unit)
 {
     return isOwnRace(unit) && isOwnCiv(unit);
 }
-
-//active_filters.push_back([](df::unit *unit)
-//    {
-//        return !isOwnRace(unit) || !isOwnCiv(unit);
-//    }
-//);
 
 enum FilterFunctionType
 {
@@ -1437,12 +1431,6 @@ private:
         bool res;
         switch (_ft)
         {
-            case IS_RACE:
-            {
-                bool res = getRaceName(unit) == std::string24(strval);
-                if (_eq == NOT_EQUAL) res = !res;
-                break;
-            }
             case COMP_AGE:
             {
                 res = (_eq == EQUAL) ? (getAge(unit, true) == intval) :
@@ -1450,8 +1438,10 @@ private:
                     (_eq == EQ_LESS) ? (getAge(unit, true) <= intval) :
                     (_eq == EQ_GREA) ? (getAge(unit, true) >= intval) :
                     false;
-                break;
+                return !_inv ? res : !res;
             }
+            case IS_RACE:       res = (getRaceName(unit) == strval); break;
+
             case IS_CAGED:      res = isContainedInItem(unit); break;
             case IS_EGGLAYER:   res = isEggLayer(unit); break;
             case IS_FEMALE:     res = isFemale(unit); break;
@@ -1476,7 +1466,10 @@ private:
                 return false;
         }
 
-        return !_inv ? res : !res;
+        if (_eq == NOT_EQUAL)
+            res = !res;
+        return
+            !_inv ? res : !res;
     }
 
     FilterFunctionType _ft;
@@ -1492,7 +1485,7 @@ private:
 
 // Maps parameter names to filters.
 //typedef bool(*filter_function)(df::unit*);
-UNORDERED_MAP<const char*, UnitFilter> zone_filters;
+std::map<std::string24, UnitFilter> zone_filters;
 static struct zone_filters_init
 {
     zone_filters_init()
@@ -1628,7 +1621,7 @@ pair<std::string24, UnitFilter> createMaxAgeFilter(std::vector12<std::string24> 
 typedef std::pair<std::string24, UnitFilter>(*filter_function_ctor)(std::vector12<std::string24>&);
 typedef std::pair<int, filter_function_ctor> filter_ctor;
 
-UNORDERED_MAP<const char*, filter_ctor> zone_param_filters;
+std::map<std::string24, filter_ctor> zone_param_filters;
 
 static struct zone_param_filters_init { zone_param_filters_init() {
     zone_param_filters["race"] = make_pair(1, createRaceFilter);
@@ -1644,13 +1637,6 @@ static struct zone_param_filters_init { zone_param_filters_init() {
 //                                      >
 //                         >
 //             > zone_param_filters;
-
-//static struct zone_param_filters_init { zone_param_filters_init() {
-//    zone_param_filters["race"] = make_pair(1, createRaceFilter);
-//    zone_param_filters["age"] = make_pair(1, createAgeFilter);
-//    zone_param_filters["minage"] = make_pair(1, createMinAgeFilter);
-//    zone_param_filters["maxage"] = make_pair(1, createMaxAgeFilter);
-//}} zone_param_filters_init_;
 
 command_result df_zone (color_ostream &out, std::vector12<std::string24> & parameters)
 {
@@ -1988,24 +1974,20 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
 
             target_count = INT_MAX;
         }
-        else if (zone_filters.count(p.c_str()) == 1) {
+        else if (zone_filters.count(p) == 1) {
             std::string24& desc = zone_filter_notes.count(p) == 1 ?
                 zone_filter_notes[p] : p;
 
             if (invert_filter) {
-                //filter_function &filter = zone_filters[p.c_str()];
+                //filter_function &filter = zone_filters[p];
 
                 //auto z = not1(filter);
 
                 // we have to invert the filter, so we use a closure
                 //active_filters.push_back(not1(filter));
 
-                UnitFilter &filter = zone_filters[p.c_str()];
-
-                //auto z = not1(filter);
+                UnitFilter &filter = zone_filters[p];
                 filter.InvertResult();
-
-                // we have to invert the filter, so we use a closure
                 active_filters.push_back(filter);
 
                 out.color(COLOR_GREEN);
@@ -2013,7 +1995,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
                     << endl;
                 out.reset_color();
             } else {
-                active_filters.push_back(zone_filters[p.c_str()]);
+                active_filters.push_back(zone_filters[p]);
                 out.color(COLOR_GREEN);
                 out << "Filter: '" << desc.c_str() << "'"
                     << endl;
@@ -2022,9 +2004,9 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
             }
 
             invert_filter = false;
-        } else if (zone_param_filters.count(p.c_str()) == 1) {
+        } else if (zone_param_filters.count(p) == 1) {
             // get the constructor
-            filter_ctor &filter_pair = zone_param_filters[p.c_str()];
+            filter_ctor &filter_pair = zone_param_filters[p];
             int arg_count = filter_pair.first;
             filter_function_ctor &filter_constructor = filter_pair.second;
             std::vector12<std::string24> args;
@@ -2137,10 +2119,11 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
         }
     }
 
+    UNORDERED_SET<int32_t>* assigned_unit_ids = NULL;
     if (building_unassign)
     {
+        assigned_unit_ids = new UNORDERED_SET<int32_t>();
         // filter for units in the building
-        UNORDERED_SET<int32_t> assigned_unit_ids;
         if(isActivityZone(target_building))
         {
             df::building_civzonest *civz = (df::building_civzonest *) target_building;
@@ -2148,7 +2131,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
 
             copy(assigned_units_vec.begin(),
                    assigned_units_vec.end(),
-                   std::inserter(assigned_unit_ids, assigned_unit_ids.end()));
+                   std::inserter(*assigned_unit_ids, assigned_unit_ids->end()));
 
         }
         else if(isCage(target_building))
@@ -2158,7 +2141,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
 
             copy(assigned_units_vec.begin(),
                    assigned_units_vec.end(),
-                   std::inserter(assigned_unit_ids, assigned_unit_ids.end()));
+                   std::inserter(*assigned_unit_ids, assigned_unit_ids->end()));
 
         }
         else if(isChain(target_building))
@@ -2185,7 +2168,7 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
         //        return assigned_unit_ids.count(unit->id) == 1;
         //    }
         //);
-        active_filters.push_back(UnitFilter(IS_ASSIGNED_TO_BUILDING_OR_ZONE, EQUAL, &assigned_unit_ids));
+        active_filters.push_back(UnitFilter(IS_ASSIGNED_TO_BUILDING_OR_ZONE, EQUAL, assigned_unit_ids));
     }
 
     if (target_count == 0)
@@ -2412,6 +2395,10 @@ command_result df_zone (color_ostream &out, std::vector12<std::string24> & param
             return CR_OK;
         }
     }
+
+    //cleanup
+    if (assigned_unit_ids)
+        delete assigned_unit_ids;
 
     return CR_OK;
 }
