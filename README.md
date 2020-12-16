@@ -1,17 +1,15 @@
-# DFHack Readme
+# DFHack Legacy
 
-[![Build Status](https://github.com/DFHack/dfhack/workflows/Build/badge.svg?event=push)](https://github.com/DFHack/dfhack/actions?query=workflow%3ABuild)
-[![Documentation Status](https://readthedocs.org/projects/dfhack/badge)](https://dfhack.readthedocs.org)
-[![License](https://img.shields.io/badge/license-ZLib-blue.svg)](https://en.wikipedia.org/wiki/Zlib_License)
+For DFHack manual refer to the [original one](https://github.com/DFHack/dfhack/)
 
-DFHack is a Dwarf Fortress memory access library, distributed with scripts
-and plugins implementing a wide variety of useful functions and tools.
+**This repository here is for archival purposes only**
 
-The full documentation [is available online here](https://dfhack.readthedocs.org),
-from the README.html page in the DFHack distribution, or as raw text in the `./docs` folder.
-If you're an end-user, modder, or interested in contributing to DFHack -
-go read those docs.
+DFHack was never supposed to support older systems.
+DFHack Legacy was a challenge to fully backport DFHack v0.47.04r2 to Windows XP 32bit with
+compiler all the way down to version 15 (Visual Studio 2008), while retaining playability
+and memory alignment, which was **completed** in 30 days (10 Aug to 09 Sep 2020).
 
-If that's unclear or you need more help, try
-[the Bay12 forums thread](http://www.bay12forums.com/smf/index.php?topic=164123)
-or the #dfhack IRC channel on freenode.
+Remaining problems:
+    Untested plugins: dev, purely adventurer mode or networking plugins (22/113)
+    Broken plugins: debug, testing and couple other dev plugins
+    Legacy Data minor memory leaks
